@@ -1,0 +1,46 @@
+from mymodule import something as hello, nothing as blah // comment ok here
+
+<li class=item.type id="id-%" % item.id>
+
+def funcName (
+
+arg1,
+
+
+
+
+arg2
+
+)
+  <tag hello=yep>
+end
+
+def funcName(arg1): <no_1_args>
+def funcName: <no_args/>
+
+for x in myCol  // comment is ok here
+  <tag id=name>
+    """
+    multi line string
+
+    """
+  </tag>
+end
+
+""" This % is an % interpolation """ % hello
+
+for x in other: <tag id=howdy/>  // comment ok here
+
+'''
+multi line string
+   '''
+
+'''multi line string'''
+
+"simple string"  // comment
+
+'simple string'
+
+call(a, "function")
+
+// comment
