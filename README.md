@@ -2,7 +2,7 @@
 
 ## Introduction
 
-At this moment, you might be asking yourself a simple, and well-deserved question:
+At this moment, you might be asking a simple, and well-deserved question:
 
     Why the fuck another templating system?
 
@@ -10,7 +10,7 @@ Admittedly, there are a lot of them out there and they're all very similar.  In 
 
     It favors producing dynamic content
 
-This is important because more often than not the templates we're creating are pretty much devoid of static content, so why is it that we need to 'escape' into a dynamic content mode using braces or processing instructions?  Why don't we just start in that mode and stay there?
+This is important because, more often than not, the templates we're creating are pretty much devoid of static content.  So why is it that we need to 'escape' into a dynamic content mode using braces or processing instructions?  Why don't we just start in that mode and stay there?
 
 ```html
 <html>
