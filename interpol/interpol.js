@@ -65,12 +65,32 @@
 
     return compiledTemplate;
 
-    function compiledTemplate(ctx) {
-      var content = [];
-      evaluator(ctx, output);
-      return content.join('');
+    function compiledTemplate(ctx, writeCallback, errCallback) {
+      var write, content;
+      if ( typeof writeCallback === 'function' ) {
+        write = writeCallback;
+        content = null;
+      }
+      else {
+        write = writeContent;
+        content = [];
+      }
 
-      function output() {
+      try {
+        evaluator(ctx, write);
+      }
+      catch ( err ) {
+        if ( errCallback ) {
+          errCallback(err, null);
+          return;
+        }
+        // Re-raise if no callback
+        throw err;
+      }
+
+      return content ? content.join('') : null;
+
+      function writeContent() {
         push.apply(content, arguments);
       }
     }
@@ -118,10 +138,10 @@
 
       return statementsEvaluator;
 
-      function statementsEvaluator(ctx, output) {
+      function statementsEvaluator(ctx, write) {
         var result = null;
         for ( var i = slen; i--; ) {
-          result = statements[i](ctx, output);
+          result = statements[i](ctx, write);
         }
         return result;
       }
@@ -134,7 +154,7 @@
 
       return closureEvaluator;
 
-      function closureEvaluator(ctx, output) {
+      function closureEvaluator(ctx, write) {
         ctx[name] = bodyEvaluator;
         bodyEvaluator._isInterpolFunction = true;
 
@@ -143,7 +163,7 @@
           for ( var i = 0; i < plen; i++ ) {
             newCtx[params[i]] = arguments[i];
           }
-          return statements(newCtx, output);
+          return statements(newCtx, write);
         }
       }
     }
@@ -154,14 +174,14 @@
 
       return callEvaluator;
 
-      function callEvaluator(ctx, output) {
+      function callEvaluator(ctx, write) {
         var func = ctx[name];
         if ( typeof func !== 'function' || !func._isInterpolFunction ) {
           throw new Error("'" + name + "' is not a function");
         }
         var appliedArgs = [];
         for ( var i = 0; i < alen; i++ ) {
-          appliedArgs[i] = args[i](ctx, output);
+          appliedArgs[i] = args[i](ctx, write);
         }
         func.apply(null, appliedArgs);
       }
@@ -178,11 +198,11 @@
 
       return $1_func ? outputEvaluator : outputLiteral;
 
-      function outputEvaluator(ctx, output) {
-        output($1(ctx, output));
+      function outputEvaluator(ctx, write) {
+        output($1(ctx, write));
       }
 
-      function outputLiteral(ctx, output) {
+      function outputLiteral(ctx, write) {
         output($1);
       }
     }
@@ -205,13 +225,13 @@
 
       return formatEvaluator;
 
-      function formatEvaluator(ctx, output) {
+      function formatEvaluator(ctx, write) {
         if ( template ) {
-          return template($2_func ? $2(ctx, output) : $2);
+          return template($2_func ? $2(ctx, write) : $2);
         }
 
-        var formatStr = $1_func ? $1(ctx, output) : $1
-          , data = $2_func ? $2(ctx, output) : $2;
+        var formatStr = $1_func ? $1(ctx, write) : $1
+          , data = $2_func ? $2(ctx, write) : $2;
 
         return buildTemplate(formatStr)(data);
       }
@@ -227,10 +247,10 @@
 
       return tupleEvaluator;
 
-      function tupleEvaluator(ctx, output) {
+      function tupleEvaluator(ctx, write) {
         var result = [];
         for ( var i = 0; i < elen; i++ ) {
-          result[i] = elems[i](ctx, output);
+          result[i] = elems[i](ctx, write);
         }
         return result;
       }
