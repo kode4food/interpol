@@ -18,7 +18,7 @@
     "url": "https://github.com/kode4food/interpol.git"
   },
   "scripts": {
-    "build": "pegjs interpol/parser.pegjs"
+    "build": "pegjs -e \"(typeof module==='object'?module:this.\\$interpol=this.\\$interpol||{})[typeof module==='object'?'exports':'parser']\" interpol/parser.pegjs"
   },
   "dependencies": {
   },

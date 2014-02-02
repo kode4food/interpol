@@ -21,8 +21,11 @@ If     = "if"     !IdentCont
 Else   = "else"   !IdentCont
 Case   = "case"   !IdentCont
 End    = "end"    !IdentCont
+True   = "true"   !IdentCont
+False  = "false"  !IdentCont
 
-ReservedWord = ( Def / From / Import / As / For / In / If / Else / Case / End )
+ReservedWord = ( Def / From / Import / As / For / In / If / Else / Case / End /
+                 True / False )
 
 Identifier
   = !ReservedWord id:IdentifierName  {
@@ -100,45 +103,56 @@ __
 /** Parser *******************************************************************/
 
 module
-  = statements
+  = s:statements
 
 statements
-  = ( __ s:statement __ { return s; } )*
+  = ( __ s:statement __ { return s; } )*  {
+    return ['statements'].concat(s);
+  }
 
 statement
   = openTag
   / selfCloseTag
   / closeTag
+  / htmlComment
   / defStatement
   / fromStatement
   / forStatement
   / exprStatement
 
 openTag
-  = "<" id:identifier __ attrs:( a:attribute  __ { return a; } )* ">"  {
+  = "<" id:Identifier __ attrs:( a:attribute  __ { return a; } )* ">"  {
     return ['open', id, attrs];
   }
 
 selfCloseTag
-  = "<" id:identifier __ attrs:( a:attribute  __ { return a; } )* "/>"  {
-    return ['self_close', id, attrs];
+  = "<" id:Identifier __ attrs:( a:attribute  __ { return a; } )* "/>"  {
+    return ['sclose', id, attrs];
   }
 
 attribute
-  = id:identifier __ "=" __ expr:expr  {
+  = id:Identifier __ "=" __ expr:expr  {
     return ['attr', id, expr];
+  }
+  / id:Identifier  {
+    return ['attr', id, true];
   }
 
 closeTag
-  = "</" id:identifier __ ">"  {
+  = "</" id:Identifier __ ">"  {
     return ['close', id];
   }
 
+htmlComment
+  = "<!--" comment:( !("-->") c:Char { return c; } )* "-->"  {
+    return ['comment', comment.join('')];
+  }
+
 defStatement
-  = Def _ id:identifier _ params:params? _ ":" _ stmt:statement EOL  {
+  = Def _ id:Identifier _ params:params? _ ":" _ stmt:statement EOL  {
     return ['def', id, params, [stmt]]
   }
-  / Def _ id:identifier _ params:params? EOL stmts:statements End  {
+  / Def _ id:Identifier _ params:params? EOL stmts:statements End  {
     return ['def', id, params, stmts]
   }
 
@@ -151,12 +165,12 @@ params
   }
 
 paramList
-  = start:identifier cont:( _ "," __ id:identifier  { return id; } )*  {
+  = start:Identifier cont:( _ "," __ id:Identifier  { return id; } )*  {
     return [start].concat(cont);
   }
 
 fromStatement
-  = From _ id:identifier __ Import _ imports:importList EOL {
+  = From _ id:Identifier __ Import _ imports:importList EOL {
     return ['from', id, imports];
   }
 
@@ -166,7 +180,7 @@ importList
   }
 
 importItem
-  = name:identifier alias:( _ As _ id:identifier { return id; } )?  {
+  = name:Identifier alias:( _ As _ id:Identifier { return id; } )?  {
     return [name, alias];
   }
 
@@ -184,12 +198,12 @@ ranges
   }
 
 range
-  = id:identifier _ In _ col:expr  {
+  = id:Identifier _ In _ col:expr  {
     return ['range', id, col];
   }
 
 exprStatement
-  = e:expr EOL  { return e; }
+  = e:expr  { return ['output', e]; }
 
 expr
   = interpolation
@@ -215,13 +229,8 @@ atomic
   / literal
 
 call
-  = id:identifier _ args:tuple  {
+  = id:Identifier _ args:tuple  {
     return ['call', id, args];
-  }
-
-identifier
-  = id:Identifier {
-    return ['id', id];
   }
 
 tuple
@@ -236,12 +245,22 @@ elemList
 
 literal
   = string
+  / boolean
   / identifier
 
 string
-  = str:SimpleString {
-    return ['str', str];
+  = str:SimpleString  {
+    return str;
   }
-  / str: MultiLineString {
-    return ['str', str];
+  / str: MultiLineString  {
+    return str;
+  }
+
+boolean
+  = True   { return true; }
+  / False  { return false; }
+
+identifier
+  = id:Identifier {
+    return ['id', id];
   }
