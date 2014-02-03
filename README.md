@@ -105,7 +105,7 @@ from my_funcs import renderItem, renderList
 ```
 
 ## Current Status
-The project was just started, so there's still quite a bit to do.  Check [the TODO document](doc/TODO) for an idea.
+The project was just started, so there's still quite a bit to do.  Check [the TODO document](doc/TODO.md) for an idea.
 
 ### Installation
 A pre-built version of the parser is already included, but if you'd like to build it yourself then you can do so by issuing the following command from the package's top-level directory:

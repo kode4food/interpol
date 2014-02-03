@@ -13,15 +13,14 @@
 
   // Utilities ****************************************************************
 
-  var toString = Object.prototype.toString
-    , push = Array.prototype.push;
+  var toString = Object.prototype.toString;
 
   var extendContext = Object.create;
   if ( !extendContext ) {
     extendContext = (function () {
       function FakeConstructor() {}
 
-      return function __extendContext(obj) {
+      return function _extendContext(obj) {
         FakeConstructor.prototype = obj;
         return new FakeConstructor()
       }
@@ -30,16 +29,20 @@
 
   var isArray = Array.isArray;
   if ( !isArray ) {
-    isArray = function _isArray(obj) {
-      return obj && obj.length && toString.call(obj) === '[object Array]';
-    };
+    isArray = (function () {
+      return function _isArray(obj) {
+        return obj && obj.length && toString.call(obj) === '[object Array]';
+      };
+    })();
   }
 
   var freezeObject = Object.freeze;
   if ( !freezeObject ) {
-    freezeObject = function _freezeObject(obj) {
-      return obj;
-    };
+    freezeObject = (function () {
+      return function _freezeObject(obj) {
+        return obj;
+      };
+    })();
   }
 
   function createArrayWriter(arr) {
