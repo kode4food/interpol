@@ -6,6 +6,20 @@
  * @author Thom Bradford (github/kode4food)
  */
 
+{
+  function buildBinaryChain(head, tail) {
+    if ( !tail || !tail.length ) {
+      return head;
+    }
+
+    for ( var i = 0, len = tail.length; i < len; i++ ) {
+      var item = tail[i];
+      head = [ item[0], head, item[1] ];
+    }
+    return head;
+  }
+}
+
 start
   = module
 
@@ -21,16 +35,22 @@ If     = "if"     !IdentCont
 Else   = "else"   !IdentCont
 Case   = "case"   !IdentCont
 End    = "end"    !IdentCont
-True   = "true"   !IdentCont
-False  = "false"  !IdentCont
+True   = "true"   !IdentCont  { return true; }
+False  = "false"  !IdentCont  { return false; }
+EQ     = "eq"     !IdentCont
+NEQ    = "neq"    !IdentCont
+LT     = "lt"     !IdentCont
+GT     = "gt"     !IdentCont
+LTE    = "lte"    !IdentCont
+GTE    = "gte"    !IdentCont
 
 ReservedWord = ( Def / From / Import / As / For / In / If / Else / Case / End /
-                 True / False )
+                 True / False / EQ / NEQ / LT / GT / LTE / GTE )
 
 Identifier
   = !ReservedWord id:IdentifierName  {
-    return id;
-  }
+      return id;
+    }
 
 IdentifierName
   = start:IdentStart cont:IdentCont*  {
@@ -43,6 +63,30 @@ IdentStart
 IdentCont
   = IdentStart
   / [$__a-zA-Z0-9]
+
+Digit
+  = [0-9]
+
+Card
+  = h:[1-9] t:Digit+  {
+      return h + t.join('');
+    }
+  / Digit
+
+Exp
+  = [eE] s:[-+]? d:Digit+  {
+      return 'e' + (s ? s : '') + d.join('');
+    }
+
+Frac
+  = "." d:Digit+  {
+      return '.' + d.join('');
+    }
+
+Number
+  = c:Card f:Frac? e:Exp?  {
+      return parseFloat(c + (f ? f : '') + (e ? e : ''));
+    }
 
 Char
   = .
@@ -61,7 +105,7 @@ EOL
   / WS* NLOrEOF
 
 Comment
-  = "//" (!NLOrEOF Char)* NLOrEOF
+  = "#" (!NLOrEOF Char)* NLOrEOF
 
 MultiLineString
   = MLString1
@@ -70,12 +114,12 @@ MultiLineString
 MLString1
   = '"""' MLTrim? chars:( !MLTail1 c:Char { return c; } )* MLTail1  {
       return chars.join('');
-  }
+    }
 
 MLString2
   = "'''" MLTrim? chars:( !MLTail2 c:Char { return c; } )* MLTail2  {
-      return chars.join('');
-  }
+        return chars.join('');
+    }
 
 MLTrim
   = WS* NL
@@ -94,6 +138,20 @@ SimpleString
       return chars.join('');
     }
 
+
+Add = "+"  { return 'add'; }
+Sub = "-"  { return 'sub'; }
+Mul = "*"  { return 'mul'; }
+Div = "/"  { return 'div'; }
+Neg = "-"  { return 'neg'; }
+Not = "!"  { return 'not'; }
+
+Equality = NEQ / EQ
+Relational = GTE / LTE / LT / GT
+Additive = Add / Sub
+Multiplicative = Mul / Div
+Unary = Neg / Not
+
 _
   = WS*
 
@@ -106,161 +164,204 @@ module
   = s:statements
 
 statements
-  = ( __ s:statement __ { return s; } )*  {
-    return ['statements'].concat(s);
-  }
+  = statements:( __ s:statement __ { return s; } )*  {
+      return ['stmts', statements];
+    }
 
 statement
-  = openTag
-  / selfCloseTag
+  = htmlComment
   / closeTag
-  / htmlComment
+  / openTag
   / defStatement
   / fromStatement
   / forStatement
   / exprStatement
 
 openTag
-  = "<" id:Identifier __ attrs:( a:attribute  __ { return a; } )* ">"  {
-    return ['open', id, attrs];
-  }
+  = "<" id:Identifier _ attrs:( a:attribute  __ { return a; } )* t:tagTail  {
+      return ['open', id, attrs, t];
+    }
 
-selfCloseTag
-  = "<" id:Identifier __ attrs:( a:attribute  __ { return a; } )* "/>"  {
-    return ['sclose', id, attrs];
-  }
+tagTail
+  = "/>"  { return true; }
+  / ">"   { return false; }
 
 attribute
-  = id:Identifier __ "=" __ expr:expr  {
-    return ['attr', id, expr];
-  }
+  = id:Identifier _ "=" __ expr:expr  {
+      return [id, expr];
+    }
   / id:Identifier  {
-    return ['attr', id, true];
-  }
+      return [id, true];
+    }
 
 closeTag
   = "</" id:Identifier __ ">"  {
-    return ['close', id];
-  }
+      return ['close', id];
+    }
 
 htmlComment
   = "<!--" comment:( !("-->") c:Char { return c; } )* "-->"  {
-    return ['comment', comment.join('')];
-  }
+      return ['comment', comment.join('')];
+    }
 
 defStatement
   = Def _ id:Identifier _ params:params? _ ":" _ stmt:statement EOL  {
-    return ['def', id, params, [stmt]]
-  }
+      return ['def', id, params, ['stmts', [stmt]]]
+    }
   / Def _ id:Identifier _ params:params? EOL stmts:statements End  {
-    return ['def', id, params, stmts]
-  }
+      return ['def', id, params, stmts]
+    }
 
 params
   = "(" __ params:paramList __ ")"  {
-    return params;
-  }
+      return params;
+    }
   / "(" __ ")"  {
-    return [];
-  }
+      return [];
+    }
 
 paramList
   = start:Identifier cont:( _ "," __ id:Identifier  { return id; } )*  {
-    return [start].concat(cont);
-  }
+      return [start].concat(cont);
+    }
 
 fromStatement
-  = From _ id:Identifier __ Import _ imports:importList EOL {
-    return ['from', id, imports];
-  }
+  = From _ id:Identifier __ Import _ imports:importList EOL  {
+      return ['from', id, imports];
+    }
 
 importList
   = start:importItem cont:( _ "," __ item:importItem { return item; } )*  {
-    return [start].concat(cont);
-  }
+      return [start].concat(cont);
+    }
 
 importItem
   = name:Identifier alias:( _ As _ id:Identifier { return id; } )?  {
-    return [name, alias];
-  }
+      return [name, alias];
+    }
 
 forStatement
   = For _ ranges:ranges _ ":" _ stmt:statement EOL  {
-    return ['for', ranges, [stmt]]
-  }
+      return ['for', ranges, ['stmts', [stmt]]]
+    }
   / For _ ranges:ranges EOL stmts:statements End  {
-    return ['for', ranges, stmts]
-  }
+      return ['for', ranges, stmts]
+    }
 
 ranges
   = start:range cont:( _ "," __ range )*  {
-    return [start].concat(cont);
-  }
+      return [start].concat(cont);
+    }
 
 range
   = id:Identifier _ In _ col:expr  {
-    return ['range', id, col];
-  }
+      return [id, col];
+    }
 
 exprStatement
   = e:expr  { return ['output', e]; }
 
 expr
-  = interpolation
+  = conditional
+
+conditional
+  = cond:or _ "?" __ tval:conditional _ ":" __ fval:conditional  {
+      return ['cond', cond, tval, fval];
+    }
+  / or
+
+or
+  = head:and
+    tail:( _ "||" __ r:and  { return ['or', r]; } )*  {
+      return buildBinaryChain(head, tail);
+    }
+
+and
+  = head:equality
+    tail:( _ "&&" __ r:equality { return ['and', r]; } )*  {
+      return buildBinaryChain(head, tail);
+    }
+
+equality
+  = head:relational
+    tail:( _ op:Equality __ r:relational { return [op, r]; } )*  {
+      return buildBinaryChain(head, tail);
+    }
+
+relational
+  = head:additive
+    tail:( _ op:Relational __ r:additive { return [op, r]; } )*  {
+      return buildBinaryChain(head, tail);
+    }
+
+additive
+  = head:multiplicative
+    tail:( _ op:Additive __ r:multiplicative { return [op, r]; } )*  {
+      return buildBinaryChain(head, tail);
+    }
+
+multiplicative
+  = head:interpolation
+    tail:( _ op:Multiplicative __ r:interpolation { return [op, r]; } )*  {
+      return buildBinaryChain(head, tail);
+    }
 
 interpolation
-  = fmt:path _ "%" __ expr:expr  {
-    return ['fmt', fmt, expr];
-  }
-  / path
+  = head:unary
+    tail:( _ "%" __ r:unary { return ['fmt', r]; } )*  {
+      return buildBinaryChain(head, tail);
+    }
 
-path
-  = expr:atomic _ "." __ elem:identifier  {
-    return ['path', expr, elem];
-  }
-  / expr:atomic _ "[" __ elem:expr __ "]"  {
-    return ['path', expr, elem];
-  }
-  / atomic
-
-atomic
-  = call
-  / tuple
-  / literal
+unary
+  = op:Unary _ expr:call  {
+      return [op, expr];
+    }
+  / call
 
 call
   = id:Identifier _ args:tuple  {
-    return ['call', id, args];
-  }
+      return ['call', id, args];
+    }
+  / member
+
+member
+  = expr:tuple _ "." __ elem:Identifier  {
+      return ['member', expr, elem];
+    }
+  / expr:tuple _ "[" __ elem:expr __ "]"  {
+      return ['member', expr, elem];
+    }
+  / tuple
 
 tuple
   = "(" __ elems:elemList __ ")"  {
-    return ['tuple'].concat(elems);
-  }
+      return ['tuple', elems];
+    }
+  / literal
 
 elemList
   = start:expr cont:( _ "," __ e:expr  { return e; } )*  {
-    return [start].concat(cont);
-  }
+      return [start].concat(cont);
+    }
 
 literal
-  = string
+  = number
+  / string
   / boolean
   / identifier
 
+number
+  = Number
+
 string
-  = str:SimpleString  {
-    return str;
-  }
-  / str: MultiLineString  {
-    return str;
-  }
+  = SimpleString
+  / MultiLineString
 
 boolean
-  = True   { return true; }
-  / False  { return false; }
+  = True
+  / False
 
 identifier
   = id:Identifier {
-    return ['id', id];
-  }
+      return ['id', id];
+    }

@@ -32,7 +32,7 @@ This is important because, more often than not, the templates we're creating are
 
 The only static element on this page was its title, and usually even that isn't static.  So what did we do to 'escape' it for static rendering?  We wrapped it in quotes.  The rest of the page mixed html-ish elements and dynamic content rather seemlessly.
 
-I say 'html-ish' because it's not pure html.  The value of attributes are also dynamically evaluated.  For example:
+I say 'html-ish' because it's not pure HTML.  The value of attributes are also dynamically evaluated.  For example:
 
 ```html
 <li class=item.type id="id-%" % item.id>
@@ -103,3 +103,51 @@ from my_funcs import renderItem, renderList
   </body>
 </html>
 ```
+
+## Current Status
+The project was just started, so there's still quite a bit to do.  Check [the TODO document](doc/TODO) for an idea.
+
+### Installation
+A pre-built version of the parser is already included, but if you'd like to build it yourself then you can do so by issuing the following command from the package's top-level directory:
+
+```bash
+npm install && npm run-script build
+```
+
+This will also install any development dependencies and run the nodeunit test suite.
+
+### Inclusion in Node.js
+Assuming you have installed the Interpol package into your project with npm, you can include it in a Node.js module with the following:
+
+```javascript
+var interpol = require('interpol');
+
+var compiledTemplate = interpol(someTemplateString);
+
+console.log(compiledTemplate(someData));
+```
+
+
+## License (MIT License)
+Copyright (c) 2014 Thomas S. Bradford
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or
+sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.

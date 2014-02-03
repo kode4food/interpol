@@ -1,14 +1,13 @@
 def renderItem(item)
-  <li class=item.type id="id-%" % item.id selected>
+  <li class=item.type || 'none'
+      id="id-%" % item.id || 'no-id'>
     item.name
   </li>
 end
 
 def renderList(list)
   <ul>
-  for item in list
-    renderItem(item)
-  end
+  for item in list: renderItem(item)
   </ul>
 end
 

@@ -13,6 +13,21 @@
 
   // Utilities ****************************************************************
 
+  var toString = Object.prototype.toString
+    , push = Array.prototype.push;
+
+  var extendContext = Object.create;
+  if ( !extendContext ) {
+    extendContext = (function () {
+      function FakeConstructor() {}
+
+      return function __extendContext(obj) {
+        FakeConstructor.prototype = obj;
+        return new FakeConstructor()
+      }
+    })();
+  }
+
   var isArray = Array.isArray;
   if ( !isArray ) {
     isArray = function _isArray(obj) {
@@ -20,14 +35,53 @@
     };
   }
 
-  var extendContext = Object.create
-    , toString = Object.prototype.toString
-    , slice = Array.prototype.slice
-    , splice = Array.prototype.splice
-    , push = Array.prototype.push;
+  var freezeObject = Object.freeze;
+  if ( !freezeObject ) {
+    freezeObject = function _freezeObject(obj) {
+      return obj;
+    };
+  }
 
-  function makeArray(arr) {
-    return slice.call(arr, 0);
+  function createArrayWriter(arr) {
+    return freezeObject({
+      startElement: startElement,
+      selfCloseElement: selfCloseElement,
+      endElement: endElement,
+      comment: comment,
+      content: content
+    });
+
+    function writeAttributes(attributes) {
+      // TODO: Properly Escape This
+      for ( var key in attributes ) {
+        arr.push(" ", key, "=\"", attributes[key], "\"");
+      }
+    }
+
+    function startElement(tagName, attributes) {
+      arr.push("<", tagName);
+      writeAttributes(attributes);
+      arr.push(">");
+    }
+
+    function selfCloseElement(tagName, attributes) {
+      arr.push("<", tagName);
+      writeAttributes(attributes);
+      arr.push(" />");
+    }
+
+    function endElement(tagName) {
+      arr.push("</", tagName, ">");
+    }
+
+    function comment(content) {
+      arr.push("<!--", content, "-->");
+    }
+
+    function content() {
+      // TODO: Properly Escape This
+      arr.push.apply(arr, arguments);
+    }
   }
 
   // Implementation ***********************************************************
@@ -47,32 +101,64 @@
   }
 
   function compile(parseTree) {
-    var Evaluators = {
+    var Evaluators = freezeObject({
       'stmts':   createStatementsEvaluator,
       'def':     createFunctionEvaluator,
       'call':    createCallEvaluator,
       'open':    createOpenTagEvaluator,
       'close':   createCloseTagEvaluator,
-      'sclose':  createSelfClosingTagEvaluator,
       'comment': createCommentTagEvaluator,
       'output':  createOutputEvaluator,
       'for':     createForEvaluator,
+      'cond':    createConditionalEvaluator,
+      'or':      createOrEvaluator,
+      'and':     createAndEvaluator,
+      'eq':      createEqEvaluator,
+      'neq':     createNeqEvaluator,
+      'gt':      createGtEvaluator,
+      'lt':      createLtEvaluator,
+      'gte':     createGteEvaluator,
+      'lte':     createLteEvaluator,
+      'add':     createAddEvaluator,
+      'sub':     createSubEvaluator,
+      'mul':     createMulEvaluator,
+      'div':     createDivEvaluator,
+      'mod':     createModEvaluator,
       'fmt':     createFormatEvaluator,
-      'tuple':   createTupleEvaluator
-    };
+      'not':     createNotEvaluator,
+      'neg':     createNegEvaluator,
+      'member':  createMemberEvaluator,
+      'tuple':   createTupleEvaluator,
+      'id':      createIdEvaluator
+    });
 
     var evaluator = wrapEvaluator(parseTree);
 
     return compiledTemplate;
 
-    function compiledTemplate(ctx) {
-      var content = [];
-      evaluator(ctx, output);
-      return content.join('');
+    function compiledTemplate(ctx, options) {
+      options = options || { writer: null, errorCallback: null};
+      var writer = options.writer
+        , content = null;
 
-      function output() {
-        push.apply(content, arguments);
+      if ( !writer ) {
+        content = [];
+        writer = createArrayWriter(content);
       }
+
+      try {
+        evaluator(ctx, writer);
+      }
+      catch ( err ) {
+        if ( typeof options.errorCallback === 'function' ) {
+          options.errorCallback(err, null);
+          return;
+        }
+        // Re-raise if no callback
+        throw err;
+      }
+
+      return content ? content.join('') : null;
     }
 
     function wrapEvaluator(node) {
@@ -87,12 +173,21 @@
       }
     }
 
-    function wrapEvaluatorArray(arr) {
+    function wrapArrayEvaluators(arrayNodes) {
       var result = [];
-      for ( var i = arr.length; i--; ) {
-        result[i] = wrapEvaluator(arr[i]);
+      for ( var i = arrayNodes.length; i--; ) {
+        result[i] = wrapEvaluator(arrayNodes[i]);
       }
       return result;
+    }
+
+    function wrapKeyValueEvaluators(keyValueNodes) {
+      var pairs = [];
+      for ( var i = 0, len = keyValueNodes.length; i < len; i++ ) {
+        var keyValueNode = keyValueNodes[i];
+        pairs.push([keyValueNode[0], wrapEvaluator(keyValueNode[1])]);
+      }
+      return pairs;
     }
 
     function createEvaluator(node) {
@@ -113,28 +208,27 @@
     // Evaluators *************************************************************
 
     function createStatementsEvaluator(statementNodes) {
-      var statements = wrapEvaluatorArray(statementNodes).reverse()
+      var statements = wrapArrayEvaluators(statementNodes).reverse()
         , slen = statements.length;
 
       return statementsEvaluator;
 
-      function statementsEvaluator(ctx, output) {
+      function statementsEvaluator(ctx, writer) {
         var result = null;
         for ( var i = slen; i--; ) {
-          result = statements[i](ctx, output);
+          result = statements[i](ctx, writer);
         }
         return result;
       }
     }
 
-    function createFunctionEvaluator(name, paramNodes, statementNodes) {
-      var params = wrapEvaluatorArray(paramNodes)
-        , plen = params.length
-        , statements = createEvaluator(statementNodes);
+    function createFunctionEvaluator(name, params, statementsNode) {
+      var plen = params.length
+        , statements = createEvaluator(statementsNode);
 
       return closureEvaluator;
 
-      function closureEvaluator(ctx, output) {
+      function closureEvaluator(ctx, writer) {
         ctx[name] = bodyEvaluator;
         bodyEvaluator._isInterpolFunction = true;
 
@@ -143,34 +237,64 @@
           for ( var i = 0; i < plen; i++ ) {
             newCtx[params[i]] = arguments[i];
           }
-          return statements(newCtx, output);
+          return statements(newCtx, writer);
         }
       }
     }
 
     function createCallEvaluator(name, argNodes) {
-      var args = wrapEvaluatorArray(argNodes)
-        , alen = args.length;
+      var args = createEvaluator(argNodes);
 
       return callEvaluator;
 
-      function callEvaluator(ctx, output) {
+      function callEvaluator(ctx, writer) {
         var func = ctx[name];
         if ( typeof func !== 'function' || !func._isInterpolFunction ) {
           throw new Error("'" + name + "' is not a function");
         }
-        var appliedArgs = [];
-        for ( var i = 0; i < alen; i++ ) {
-          appliedArgs[i] = args[i](ctx, output);
-        }
-        func.apply(null, appliedArgs);
+        return func.apply(null, args(ctx, writer));
       }
     }
 
-    // TODO: createOpenTagEvaluator
-    // TODO: createCloseTagEvaluator
-    // TODO: createSelfClosingTagEvaluator
-    // TODO: createCommentTagEvaluator
+    function createOpenTagEvaluator(name, attributeNodes, selfClose) {
+      var attributes = wrapKeyValueEvaluators(attributeNodes).reverse()
+        , alen = attributes.length;
+
+      return selfClose ? selfCloseTagEvaluator : openTagEvaluator;
+
+      function selfCloseTagEvaluator(ctx, writer) {
+        writer.selfCloseElement(name, getAttributes(ctx, writer));
+      }
+
+      function openTagEvaluator(ctx, writer) {
+        writer.startElement(name, getAttributes(ctx, writer));
+      }
+
+      function getAttributes(ctx, writer) {
+        var result = {};
+        for ( var i = alen; i--; ) {
+          var attribute = attributes[i];
+          result[attribute[0]] = attribute[1](ctx, writer);
+        }
+        return freezeObject(result);
+      }
+    }
+
+    function createCloseTagEvaluator(name) {
+      return closeTagEvaluator;
+
+      function closeTagEvaluator(ctx, writer) {
+        writer.endElement(name);
+      }
+    }
+
+    function createCommentTagEvaluator(content) {
+      return commentTagEvaluator;
+
+      function commentTagEvaluator(ctx, writer) {
+        writer.comment(content);
+      }
+    }
 
     function createOutputEvaluator(exprNode) {
       var $1 = createEvaluator(exprNode)
@@ -178,16 +302,262 @@
 
       return $1_func ? outputEvaluator : outputLiteral;
 
-      function outputEvaluator(ctx, output) {
-        output($1(ctx, output));
+      function outputEvaluator(ctx, writer) {
+        writer.content($1(ctx, writer));
       }
 
-      function outputLiteral(ctx, output) {
-        output($1);
+      function outputLiteral(ctx, writer) {
+        writer.content($1);
       }
     }
 
-    // TODO: createForEvaluator
+    function createForEvaluator(rangeNodes, statementsNode) {
+      var ranges = wrapKeyValueEvaluators(rangeNodes).reverse()
+        , rlen = ranges.length
+        , statements = createEvaluator(statementsNode);
+
+      return forEvaluator;
+
+      function forEvaluator(ctx, writer) {
+        processRange(ctx, rlen - 1);
+        return null;
+
+        function processRange(parentCtx, idx) {
+          var range = ranges[idx]
+            , name = range[0]
+            , collection = range[1](parentCtx, writer)
+            , newCtx = extendContext(parentCtx);
+
+          for ( var i = 0, len = collection.length; i < len; i++ ) {
+            newCtx[name] = collection[i];
+            if ( idx ) {
+              processRange(newCtx, idx - 1);
+            }
+            else {
+              statements(newCtx, writer);
+            }
+          }
+        }
+      }
+    }
+
+    function createConditionalEvaluator(conditionNode, trueNode, falseNode) {
+      var $1 = createEvaluator(conditionNode)
+        , $2 = createEvaluator(trueNode)
+        , $3 = createEvaluator(falseNode)
+        , $1_func = typeof $1 === 'function'
+        , $2_func = typeof $2 === 'function'
+        , $3_func = typeof $3 === 'function';
+
+      return $1_func || $2_func || $3_func ? ternEvaluator : ternEvaluator();
+
+      function ternEvaluator(ctx, writer) {
+        var cval = $1_func ? $1(ctx, writer) : $1;
+        if ( cval ) {
+          return $2_func ? $2(ctx, writer) : $2;
+        }
+        return $3_func ? $3(ctx, writer) : $3;
+      }
+    }
+
+    function createOrEvaluator(leftNode, rightNode) {
+      var $1 = createEvaluator(leftNode)
+        , $2 = createEvaluator(rightNode)
+        , $1_func = typeof $1 === 'function'
+        , $2_func = typeof $2 === 'function';
+
+      return $1_func || $2_func ? orEvaluator : orEvaluator();
+
+      function orEvaluator(ctx, writer) {
+        var lval = $1_func ? $1(ctx, writer) : $1;
+        if ( lval ) {
+          return lval;
+        }
+        return $2_func ? $2(ctx, writer) : $2;
+      }
+    }
+
+    function createAndEvaluator(leftNode, rightNode) {
+      var $1 = createEvaluator(leftNode)
+        , $2 = createEvaluator(rightNode)
+        , $1_func = typeof $1 === 'function'
+        , $2_func = typeof $2 === 'function';
+
+      return $1_func || $2_func ? andEvaluator : andEvaluator();
+
+      function andEvaluator(ctx, writer) {
+        var lval = $1_func ? $1(ctx, writer) : $1;
+        if ( !lval ) {
+          return lval;
+        }
+        return $2_func ? $2(ctx, writer) : $2;
+      }
+    }
+
+    function createEqEvaluator(leftNode, rightNode) {
+      var $1 = createEvaluator(leftNode)
+        , $2 = createEvaluator(rightNode)
+        , $1_func = typeof $1 === 'function'
+        , $2_func = typeof $2 === 'function';
+
+      return $1_func || $2_func ? eqEvaluator : eqEvaluator();
+
+      function eqEvaluator(ctx, writer) {
+        var lval = $1_func ? $1(ctx, writer) : $1
+          , rval = $2_func ? $2(ctx, writer) : $2;
+        return lval == rval;
+      }
+    }
+
+    function createNeqEvaluator(leftNode, rightNode) {
+      var $1 = createEvaluator(leftNode)
+        , $2 = createEvaluator(rightNode)
+        , $1_func = typeof $1 === 'function'
+        , $2_func = typeof $2 === 'function';
+
+      return $1_func || $2_func ? neqEvaluator : neqEvaluator();
+
+      function neqEvaluator(ctx, writer) {
+        var lval = $1_func ? $1(ctx, writer) : $1
+          , rval = $2_func ? $2(ctx, writer) : $2;
+        return lval != rval;
+      }
+    }
+
+    function createGtEvaluator(leftNode, rightNode) {
+      var $1 = createEvaluator(leftNode)
+        , $2 = createEvaluator(rightNode)
+        , $1_func = typeof $1 === 'function'
+        , $2_func = typeof $2 === 'function';
+
+      return $1_func || $2_func ? gtEvaluator : gtEvaluator();
+
+      function gtEvaluator(ctx, writer) {
+        var lval = $1_func ? $1(ctx, writer) : $1
+          , rval = $2_func ? $2(ctx, writer) : $2;
+        return lval > rval;
+      }
+    }
+
+    function createGteEvaluator(leftNode, rightNode) {
+      var $1 = createEvaluator(leftNode)
+        , $2 = createEvaluator(rightNode)
+        , $1_func = typeof $1 === 'function'
+        , $2_func = typeof $2 === 'function';
+
+      return $1_func || $2_func ? gteEvaluator : gteEvaluator();
+
+      function gteEvaluator(ctx, writer) {
+        var lval = $1_func ? $1(ctx, writer) : $1
+          , rval = $2_func ? $2(ctx, writer) : $2;
+        return lval >= rval;
+      }
+    }
+
+    function createLtEvaluator(leftNode, rightNode) {
+      var $1 = createEvaluator(leftNode)
+        , $2 = createEvaluator(rightNode)
+        , $1_func = typeof $1 === 'function'
+        , $2_func = typeof $2 === 'function';
+
+      return $1_func || $2_func ? ltEvaluator : ltEvaluator();
+
+      function ltEvaluator(ctx, writer) {
+        var lval = $1_func ? $1(ctx, writer) : $1
+          , rval = $2_func ? $2(ctx, writer) : $2;
+        return lval < rval;
+      }
+    }
+
+    function createLteEvaluator(leftNode, rightNode) {
+      var $1 = createEvaluator(leftNode)
+        , $2 = createEvaluator(rightNode)
+        , $1_func = typeof $1 === 'function'
+        , $2_func = typeof $2 === 'function';
+
+      return $1_func || $2_func ? lteEvaluator : lteEvaluator();
+
+      function lteEvaluator(ctx, writer) {
+        var lval = $1_func ? $1(ctx, writer) : $1
+          , rval = $2_func ? $2(ctx, writer) : $2;
+        return lval <= rval;
+      }
+    }
+
+    function createAddEvaluator(leftNode, rightNode) {
+      var $1 = createEvaluator(leftNode)
+        , $2 = createEvaluator(rightNode)
+        , $1_func = typeof $1 === 'function'
+        , $2_func = typeof $2 === 'function';
+
+      return $1_func || $2_func ? addEvaluator : addEvaluator();
+
+      function addEvaluator(ctx, writer) {
+        var lval = $1_func ? $1(ctx, writer) : $1
+          , rval = $2_func ? $2(ctx, writer) : $2;
+        return lval + rval;
+      }
+    }
+
+    function createSubEvaluator(leftNode, rightNode) {
+      var $1 = createEvaluator(leftNode)
+        , $2 = createEvaluator(rightNode)
+        , $1_func = typeof $1 === 'function'
+        , $2_func = typeof $2 === 'function';
+
+      return $1_func || $2_func ? subEvaluator : subEvaluator();
+
+      function subEvaluator(ctx, writer) {
+        var lval = $1_func ? $1(ctx, writer) : $1
+          , rval = $2_func ? $2(ctx, writer) : $2;
+        return lval - rval;
+      }
+    }
+
+    function createMulEvaluator(leftNode, rightNode) {
+      var $1 = createEvaluator(leftNode)
+        , $2 = createEvaluator(rightNode)
+        , $1_func = typeof $1 === 'function'
+        , $2_func = typeof $2 === 'function';
+
+      return $1_func || $2_func ? mulEvaluator : mulEvaluator();
+
+      function mulEvaluator(ctx, writer) {
+        var lval = $1_func ? $1(ctx, writer) : $1
+          , rval = $2_func ? $2(ctx, writer) : $2;
+        return lval * rval;
+      }
+    }
+
+    function createDivEvaluator(leftNode, rightNode) {
+      var $1 = createEvaluator(leftNode)
+        , $2 = createEvaluator(rightNode)
+        , $1_func = typeof $1 === 'function'
+        , $2_func = typeof $2 === 'function';
+
+      return $1_func || $2_func ? divEvaluator : divEvaluator();
+
+      function divEvaluator(ctx, writer) {
+        var lval = $1_func ? $1(ctx, writer) : $1
+          , rval = $2_func ? $2(ctx, writer) : $2;
+        return lval / rval;
+      }
+    }
+
+    function createModEvaluator(leftNode, rightNode) {
+      var $1 = createEvaluator(leftNode)
+        , $2 = createEvaluator(rightNode)
+        , $1_func = typeof $1 === 'function'
+        , $2_func = typeof $2 === 'function';
+
+      return $1_func || $2_func ? modEvaluator : modEvaluator();
+
+      function modEvaluator(ctx, writer) {
+        var lval = $1_func ? $1(ctx, writer) : $1
+          , rval = $2_func ? $2(ctx, writer) : $2;
+        return lval % rval;
+      }
+    }
 
     function createFormatEvaluator(formatNode, exprNode) {
       var $1 = createEvaluator(formatNode)
@@ -205,34 +575,132 @@
 
       return formatEvaluator;
 
-      function formatEvaluator(ctx, output) {
+      function formatEvaluator(ctx, writer) {
         if ( template ) {
-          return template($2_func ? $2(ctx, output) : $2);
+          return template($2_func ? $2(ctx, writer) : $2);
         }
 
-        var formatStr = $1_func ? $1(ctx, output) : $1
-          , data = $2_func ? $2(ctx, output) : $2;
+        var formatStr = $1_func ? $1(ctx, writer) : $1
+          , data = $2_func ? $2(ctx, writer) : $2;
 
         return buildTemplate(formatStr)(data);
       }
 
       function buildTemplate(formatStr) {
-        // TODO: This
+        var funcs = []
+          , flen = 0
+          , idx = 0
+          , tmp = [];
+
+        for ( var i = 0, len = formatStr.length; i < len; i++ ) {
+          var c = formatStr.charAt(i);
+          if ( c === '%' ) {
+            if ( tmp.length ) {
+              funcs.push(createLiteralFunction(tmp.join('')));
+              tmp.length = 0;
+            }
+            funcs.push(createIndexedFunction(idx++));
+          }
+          else {
+            tmp.push(c);
+          }
+        }
+        if ( tmp.length ) {
+          funcs.push(createLiteralFunction(tmp.join('')));
+        }
+        flen = funcs.length;
+
+        return templateFunction;
+
+        function templateFunction(data) {
+          if ( !isArray(data) ) {
+            data = [data];
+          }
+
+          var output = [];
+          for ( var i = 0; i < flen; i++ ) {
+            output[i] = funcs[i](data);
+          }
+
+          return output.join('');
+        }
+
+        function createLiteralFunction(literal) {
+          return literalFunction;
+
+          function literalFunction() {
+            return literal;
+          }
+        }
+
+        function createIndexedFunction(idx) {
+          return indexedFunction;
+
+          function indexedFunction(data) {
+            return data[idx];
+          }
+        }
+      }
+    }
+
+    function createNotEvaluator(node) {
+      var $1 = createEvaluator(node);
+      return typeof $1 === 'function' ? notEvaluator : !$1;
+
+      function notEvaluator(ctx, writer) {
+        return !$1(ctx, writer);
+      }
+    }
+
+    function createNegEvaluator(node) {
+      var $1 = createEvaluator(node);
+      return typeof $1 === 'function' ? negEvaluator : -$1;
+
+      function negEvaluator(ctx, writer) {
+        return -$1(ctx, writer);
+      }
+    }
+
+    function createMemberEvaluator(parentNode, elemNode) {
+      var $1 = createEvaluator(parentNode)
+        , $1_func = typeof $1 === 'function'
+        , $2 = createEvaluator(elemNode)
+        , $2_func = typeof $2 === 'function';
+
+      return pathEvaluator;
+
+      function pathEvaluator(ctx, writer) {
+        var parent = $1_func ? $1(ctx, writer) : $1;
+
+        if ( !parent ) {
+          return null;
+        }
+
+        var expr = $2_func ? $2(ctx, writer) : $2;
+        return parent[expr];
       }
     }
 
     function createTupleEvaluator(elemNodes) {
-      var elems = wrapEvaluatorArray(elemNodes)
+      var elems = wrapArrayEvaluators(elemNodes)
         , elen = elems.length;
 
       return tupleEvaluator;
 
-      function tupleEvaluator(ctx, output) {
+      function tupleEvaluator(ctx, writer) {
         var result = [];
         for ( var i = 0; i < elen; i++ ) {
-          result[i] = elems[i](ctx, output);
+          result[i] = elems[i](ctx, writer);
         }
         return result;
+      }
+    }
+
+    function createIdEvaluator(name) {
+      return idEvaluator;
+
+      function idEvaluator(ctx, writer) {
+        return ctx[name];
       }
     }
   }
@@ -247,6 +715,8 @@
     }
     exportTarget[exportName] = interpol;
   }
+
+  interpol.VERSION = CURRENT_VERSION;
   interpol.parser = parser;
   interpol.parse = parse;
   interpol.compile = compile;
