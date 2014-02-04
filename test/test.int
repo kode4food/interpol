@@ -1,6 +1,6 @@
 def renderItem(item)
   <li class=item.type || 'none'
-      id="id-%" % item.id || 'no-id'>
+      id="id-%" % (item.id || 'no-id')>
     item.name
   </li>
 end

@@ -6,9 +6,6 @@ console.log("Input File");
 console.log("==========");
 console.log(f);
 
-console.log("Parse Output");
-console.log("============");
-
 var data = {
   list: [
     { type: 'task', id: 1, name: 'This is my first task' },
@@ -18,15 +15,37 @@ var data = {
 };
 
 var ps = new Date()
-  , tree = interpol.parse(f)
+  , parseResult = interpol.parse(f)
   , cs = new Date()
-  , comp = interpol.compile(tree)
+  , closure = interpol.compile(parseResult)
   , es = new Date()
-  , result = comp(data)
+  , closureResult = closure(data)
   , ee = new Date();
 
-console.log("Parse: " + (cs-ps) +
+console.log("Template Parse: " + (cs-ps) +
             "ms / Compile: " + (es-cs) +
             "ms / Execute: " + (ee-es) + "ms");
+console.log('');
 
-console.log(result);
+var str = JSON.stringify(parseResult)
+  , c1 = new Date()
+  , json = JSON.parse(str)
+  , c2 = new Date()
+  , cl = interpol.compile(json)
+  , c3 = new Date()
+  , nr = cl(data)
+  , c4 = new Date();
+
+console.log("JSON Parse: " + (c2-c1) +
+  "ms / Compile: " + (c3-c2) +
+  "ms / Execute: " + (c4-c3) + "ms");
+console.log('');
+
+console.log("Parser Output");
+console.log("============");
+console.log(str);
+console.log('');
+
+console.log("Template Output");
+console.log("===============");
+console.log(closureResult);
