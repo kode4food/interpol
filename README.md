@@ -6,7 +6,7 @@ At this moment, you might be asking a simple, and well-deserved question:
 
     Why the fuck another templating system?
 
-Admittedly, there are a lot of them out there and they're all very similar.  In truth, Interpol isn't very different, except that it does one thing that most templating systems don't do:
+Admittedly, there are a lot of them out there and they're all very similar.  In truth, Interpol isn't very different, except that it does one thing that many templating systems don't do:
 
     It favors producing dynamic content
 
@@ -30,7 +30,7 @@ This is important because, more often than not, the templates we're creating are
 </html>
 ```
 
-The only static element on this page was its title, and usually even that isn't static.  So what did we do to 'escape' it for static rendering?  We wrapped it in quotes.  The rest of the page mixed html-ish elements and dynamic content rather seemlessly.
+The only static element on this page was its title, and usually even that isn't static.  So what did we do to escape *it* for static rendering?  We wrapped it in quotes.  The rest of the page mixed html-ish elements and dynamic content rather seemlessly.
 
 I say 'html-ish' because it's not pure HTML.  The value of attributes are also dynamically evaluated.  For example:
 
@@ -40,7 +40,7 @@ I say 'html-ish' because it's not pure HTML.  The value of attributes are also d
 
 `class=item.type` outputs a class attribute whose value is taken directly from the item.type property.  `id="id-%" % item.id` outputs an id attribute whose value is interpolated from the item.id property.
 
-That's all well and good, but what about the ability to reuse templates?
+That's all well and good, but what about the ability to reuse templates?  Well, to do that you define procedures:
 
 ```html
 def renderItem(item)
@@ -68,65 +68,68 @@ end
 </html>
 ```
 
-Or you can move them elsewhere:
-
-```html
-my_funcs.ipl
-============
-// render an item
-def renderItem(item)
-  <li class=item.type id="id-%" % item.id>
-    item.name
-  </li>
-end
-// render a list
-def renderList(list)
-  <ul>
-  for item in list
-    renderItem(item)
-  end
-  </ul>
-end
-```
-
-And then your main template is cleaner
-
-```html
-from my_funcs import renderItem, renderList
-<html>
-  <head>
-    <title>"a static title"</title>
-  </head>
-  <body>
-    "this is a list with % items" % list.length
-    renderList(list)
-  </body>
-</html>
-```
+Eventually, you'll also be able to move them elsewhere and import them.
 
 ## Current Status
-The project was just started, so there's still quite a bit to do.  Check [the TODO document](doc/TODO.md) for an idea.
+The project was just started, so there's still quite a bit to do.  Check [the TODO document](doc/TODO.md) for an idea of what's to come.
 
-### Installation
+## Installation
 A pre-built version of the parser is already included, but if you'd like to build it yourself then you can do so by issuing the following command from the package's top-level directory:
 
 ```bash
 npm install && npm run-script build
 ```
 
-This will also install any development dependencies and run the nodeunit test suite.
+This will also install any development dependencies and maybe run the nodeunit test suite.
 
-### Inclusion in Node.js
+## Inclusion in Node.js
 Assuming you have installed the Interpol package into your project with npm, you can include it in a Node.js module with the following:
 
 ```javascript
-var interpol = require('interpol');
-
-var compiledTemplate = interpol(someTemplateString);
-
-console.log(compiledTemplate(someData));
+var $interpol = require('interpol');
 ```
 
+## Inclusion in a Browser
+There are two ways to include Interpol templates in a browser-based application.  The first is to parse/compile raw templates using the PEG.js parser, and the second is to The compile templates from pre-parsed JSON output.  The PEG.js parser is *massive* and parsing using it is considerably slower than parsing JSON, but it may be necessary if you want to compile ad-hoc templates.
+
+### Including the PEG.js Parser
+If you *must* parse raw templates in the browser, you will need to load the Interpol PEG.js parser.  The order in which the parser is loaded doesn't matter, so long as it's loaded before you attempt to compile a raw template.
+
+```html
+<script src="/js/interpol/parser.js" type="text/javascript"></script>
+<script src="/js/interpol/interpol.js" type="text/javascript"></script>
+```
+
+### Compiling Pre-Parsed JSON
+The `$interpol()` function will accept a pre-parsed JSON object instead of a JavaScript string.  This will allow you to bypass the loading of the PEG.js parser and to store pre-parsed templates on your server for faster compilation.
+
+You can also invoke the compiler explicitly by calling the `$interpol.compile(Object)` function.
+
+```html
+<script src="/js/interpol/interpol.js" type="text/javascript"></script>
+```
+
+*Note:* In the future, there will be a command-line tool for Interpol to produce pre-parsed JSON, but in the mean time, it can be done using the `$interpol.parse(String)` method.
+
+## Using the Library
+To compile a raw template into a closure, you can simply invoke `$interpol(String)` as a function, providing to it a string containing your template:
+
+```javascript
+var compiledTemplate = $interpol(someTemplateString);
+```
+
+This will generate a closure that takes up to two parameters, both of which are optional.  The first is the data that will be used in rendering your template.  The second is an options object that, among other things, allows you to override the content writer interface Interpol uses to render your template.  By default, the library renders to a JavaScript string.
+
+```javascript
+console.log(
+  compiledTemplate({
+    list: [
+      { type: 'task', id: 1, name: 'This is my first task' },
+      { type: 'story', id: 2, name: 'This is my first story' }
+    ]
+  })
+);
+```
 
 ## License (MIT License)
 Copyright (c) 2014 Thomas S. Bradford

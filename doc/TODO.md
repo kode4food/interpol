@@ -1,5 +1,6 @@
 # TODO
 
+* API and Grammar Documentation
 * Handling of escape sequences in strings
 * Proper escaping for HTML output
 * From/Import implementation, both for Node and browsers
