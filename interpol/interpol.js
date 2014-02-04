@@ -90,7 +90,17 @@
   // Implementation ***********************************************************
 
   function interpol(template) {
-    return compile(parse(template));
+    var parseOutput = null;
+    if ( typeof template === 'object' && template.l == 'interpol' ) {
+      if ( !template.n || !template.s ) {
+        throw new Error("Syntax elements missing from parse output");
+      }
+      parseOutput = template;
+    }
+    else {
+      parseOutput = parse(template);
+    }
+    return compile(parseOutput);
   }
 
   function parse(template) {
@@ -100,46 +110,50 @@
       }
       parser = interpol.parser;
     }
-    return parser.parse(template);
+    var result = parser.parse(template);
+    result.v = CURRENT_VERSION;
+    return result;
   }
 
-  function compile(parseTree) {
+  function compile(parseOutput) {
     var Evaluators = freezeObject({
-      'stmts':   createStatementsEvaluator,
-      'def':     createFunctionEvaluator,
-      'call':    createCallEvaluator,
-      'open':    createOpenTagEvaluator,
-      'close':   createCloseTagEvaluator,
-      'comment': createCommentTagEvaluator,
-      'output':  createOutputEvaluator,
-      'for':     createForEvaluator,
-      'cond':    createConditionalEvaluator,
-      'or':      createOrEvaluator,
-      'and':     createAndEvaluator,
-      'eq':      createEqEvaluator,
-      'neq':     createNeqEvaluator,
-      'gt':      createGtEvaluator,
-      'lt':      createLtEvaluator,
-      'gte':     createGteEvaluator,
-      'lte':     createLteEvaluator,
-      'add':     createAddEvaluator,
-      'sub':     createSubEvaluator,
-      'mul':     createMulEvaluator,
-      'div':     createDivEvaluator,
-      'mod':     createModEvaluator,
-      'fmt':     createFormatEvaluator,
-      'not':     createNotEvaluator,
-      'neg':     createNegEvaluator,
-      'member':  createMemberEvaluator,
-      'tuple':   createTupleEvaluator,
-      'id':      createIdEvaluator
+      st: createStatementsEvaluator,
+      de: createFunctionEvaluator,
+      ca: createCallEvaluator,
+      op: createOpenTagEvaluator,
+      cl: createCloseTagEvaluator,
+      ct: createCommentTagEvaluator,
+      ou: createOutputEvaluator,
+      fr: createForEvaluator,
+      cn: createConditionalEvaluator,
+      or: createOrEvaluator,
+      an: createAndEvaluator,
+      eq: createEqEvaluator,
+      nq: createNeqEvaluator,
+      gt: createGtEvaluator,
+      lt: createLtEvaluator,
+      ge: createGteEvaluator,
+      le: createLteEvaluator,
+      ad: createAddEvaluator,
+      su: createSubEvaluator,
+      mu: createMulEvaluator,
+      di: createDivEvaluator,
+      mo: createModEvaluator,
+      fm: createFormatEvaluator,
+      no: createNotEvaluator,
+      ne: createNegEvaluator,
+      mb: createMemberEvaluator,
+      tu: createTupleEvaluator,
+      id: createIdEvaluator
     });
 
-    var evaluator = wrapEvaluator(parseTree);
+    var symbols = parseOutput.s
+      , evaluator = wrapEvaluator(parseOutput.n);
 
+    compiledTemplate._isInterpolFunction = true;
     return compiledTemplate;
 
-    function compiledTemplate(ctx, options) {
+    function compiledTemplate(obj, options) {
       options = options || { writer: null, errorCallback: null};
       var writer = options.writer
         , content = null;
@@ -150,7 +164,7 @@
       }
 
       try {
-        evaluator(ctx, writer);
+        evaluator(obj, writer);
       }
       catch ( err ) {
         if ( typeof options.errorCallback === 'function' ) {
@@ -184,21 +198,29 @@
       return result;
     }
 
+    function expandSymbols(symbolArray) {
+      var result = [];
+      for ( var i = symbolArray.length; i--; ) {
+        result[i] = symbols[symbolArray[i]];
+      }
+      return result;
+    }
+
     function wrapKeyValueEvaluators(keyValueNodes) {
       var pairs = [];
       for ( var i = 0, len = keyValueNodes.length; i < len; i++ ) {
         var keyValueNode = keyValueNodes[i];
-        pairs.push([keyValueNode[0], wrapEvaluator(keyValueNode[1])]);
+        pairs.push([symbols[keyValueNode[0]], wrapEvaluator(keyValueNode[1])]);
       }
       return pairs;
     }
 
     function createEvaluator(node) {
       if ( !isArray(node) ) {
-        return node;
+        return symbols[node];
       }
 
-      var nodeType = node[0]
+      var nodeType = symbols[node[0]]
         , createFunction = Evaluators[nodeType];
 
       if ( !createFunction ) {
@@ -225,8 +247,10 @@
       }
     }
 
-    function createFunctionEvaluator(name, params, statementsNode) {
-      var plen = params.length
+    function createFunctionEvaluator(nameSymbol, paramDefs, statementsNode) {
+      var name = symbols[nameSymbol]
+        , params = expandSymbols(paramDefs)
+        , plen = params.length
         , statements = createEvaluator(statementsNode);
 
       return closureEvaluator;
@@ -245,8 +269,9 @@
       }
     }
 
-    function createCallEvaluator(name, argNodes) {
-      var args = createEvaluator(argNodes);
+    function createCallEvaluator(nameSymbol, argNodes) {
+      var name = symbols[nameSymbol]
+        , args = createEvaluator(argNodes);
 
       return callEvaluator;
 
@@ -259,8 +284,9 @@
       }
     }
 
-    function createOpenTagEvaluator(name, attributeNodes, selfClose) {
-      var attributes = wrapKeyValueEvaluators(attributeNodes).reverse()
+    function createOpenTagEvaluator(nameSymbol, attributeDefs, selfClose) {
+      var name = symbols[nameSymbol]
+        , attributes = wrapKeyValueEvaluators(attributeDefs).reverse()
         , alen = attributes.length;
 
       return selfClose ? selfCloseTagEvaluator : openTagEvaluator;
@@ -283,7 +309,9 @@
       }
     }
 
-    function createCloseTagEvaluator(name) {
+    function createCloseTagEvaluator(nameSymbol) {
+      var name = symbols[nameSymbol];
+
       return closeTagEvaluator;
 
       function closeTagEvaluator(ctx, writer) {
@@ -291,7 +319,9 @@
       }
     }
 
-    function createCommentTagEvaluator(content) {
+    function createCommentTagEvaluator(contentSymbol) {
+      var content = symbols[contentSymbol];
+
       return commentTagEvaluator;
 
       function commentTagEvaluator(ctx, writer) {
@@ -699,7 +729,8 @@
       }
     }
 
-    function createIdEvaluator(name) {
+    function createIdEvaluator(nameSymbol) {
+      var name = symbols[nameSymbol];
       return idEvaluator;
 
       function idEvaluator(ctx, writer) {
@@ -712,13 +743,13 @@
 
   var exported = exportTarget[exportName];
   // if it's an object, then it was probably created by a browser parser load
-  if ( typeof exported === 'object' ) {
-    if ( !parser && typeof exported.parser === 'function' ) {
+  if ( !parser && typeof exported === 'object' ) {
+    if ( typeof exported.parser === 'object' ) {
       parser = exported.parser;
     }
-    exportTarget[exportName] = interpol;
   }
 
+  exportTarget[exportName] = interpol;
   interpol.VERSION = CURRENT_VERSION;
   interpol.parser = parser;
   interpol.parse = parse;
