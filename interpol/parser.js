@@ -33,7 +33,7 @@
         peg$startRuleFunction  = peg$parsestart,
 
         peg$c0 = function(m) {
-              return { l: 'interpol', v: -1, s: syms, n: m };
+              return { i: 'interpol', v: -1, l: lits, n: m };
             },
         peg$c1 = peg$FAILED,
         peg$c2 = "def",
@@ -76,7 +76,7 @@
         peg$c39 = "not",
         peg$c40 = { type: "literal", value: "not", description: "\"not\"" },
         peg$c41 = function(id) {
-              return sym(id);
+              return lit(id);
             },
         peg$c42 = [],
         peg$c43 = function(start, cont) {
@@ -107,7 +107,7 @@
               return '.' + d.join('');
             },
         peg$c62 = function(c, f, e) {
-              return sym(parseFloat(c + (f ? f : '') + (e ? e : '')));
+              return lit(parseFloat(c + (f ? f : '') + (e ? e : '')));
             },
         peg$c63 = { type: "any", description: "any character" },
         peg$c64 = /^[\t\x0B\f ]/,
@@ -120,7 +120,7 @@
         peg$c71 = { type: "literal", value: "\"\"\"", description: "\"\\\"\\\"\\\"\"" },
         peg$c72 = function(c) { return c; },
         peg$c73 = function(chars) {
-              return sym(chars.join(''));
+              return lit(chars.join(''));
             },
         peg$c74 = "'''",
         peg$c75 = { type: "literal", value: "'''", description: "\"'''\"" },
@@ -170,13 +170,13 @@
         peg$c119 = function() { return 'no'; },
         peg$c120 = function(s) { return s; },
         peg$c121 = function(statements) {
-              return [sym('st'), statements];
+              return [lit('st'), statements];
             },
         peg$c122 = "<",
         peg$c123 = { type: "literal", value: "<", description: "\"<\"" },
         peg$c124 = function(a) { return a; },
         peg$c125 = function(id, attrs, t) {
-              return [sym('op'), id, attrs, t];
+              return [lit('op'), id, attrs, t];
             },
         peg$c126 = "/>",
         peg$c127 = { type: "literal", value: "/>", description: "\"/>\"" },
@@ -188,27 +188,27 @@
         peg$c133 = { type: "literal", value: "=", description: "\"=\"" },
         peg$c134 = function(e) { return e; },
         peg$c135 = function(id, value) {
-              return [id, value === null ? sym(null) : value];
+              return [id, value === null ? lit(null) : value];
             },
         peg$c136 = "</",
         peg$c137 = { type: "literal", value: "</", description: "\"</\"" },
         peg$c138 = function(id) {
-              return [sym('cl'), id];
+              return [lit('cl'), id];
             },
         peg$c139 = "<!--",
         peg$c140 = { type: "literal", value: "<!--", description: "\"<!--\"" },
         peg$c141 = "-->",
         peg$c142 = { type: "literal", value: "-->", description: "\"-->\"" },
         peg$c143 = function(comment) {
-              return [sym('ct'), sym(comment.join(''))];
+              return [lit('ct'), lit(comment.join(''))];
             },
         peg$c144 = ":",
         peg$c145 = { type: "literal", value: ":", description: "\":\"" },
         peg$c146 = function(id, params, stmt) {
-              return [sym('de'), id, params, [sym('st'), [stmt]]]
+              return [lit('de'), id, params, [lit('st'), [stmt]]]
             },
         peg$c147 = function(id, params, stmts) {
-              return [sym('de'), id, params, stmts]
+              return [lit('de'), id, params, stmts]
             },
         peg$c148 = "(",
         peg$c149 = { type: "literal", value: "(", description: "\"(\"" },
@@ -227,54 +227,54 @@
               return [start].concat(cont);
             },
         peg$c158 = function(id, imports) {
-              return [sym('im'), id, imports];
+              return [lit('im'), id, imports];
             },
         peg$c159 = function(item) { return item; },
         peg$c160 = function(name, alias) {
               return [name, alias];
             },
         peg$c161 = function(ranges, stmt) {
-              return [sym('fr'), ranges, [sym('st'), [stmt]]]
+              return [lit('fr'), ranges, [lit('st'), [stmt]]]
             },
         peg$c162 = function(ranges, stmts) {
-              return [sym('fr'), ranges, stmts]
+              return [lit('fr'), ranges, stmts]
             },
         peg$c163 = function(id, col) {
               return [id, col];
             },
-        peg$c164 = function(e) { return [sym('ou'), e]; },
+        peg$c164 = function(e) { return [lit('ou'), e]; },
         peg$c165 = "?",
         peg$c166 = { type: "literal", value: "?", description: "\"?\"" },
         peg$c167 = function(cond, tval, fval) {
-              return [sym('cn'), cond, tval, fval];
+              return [lit('cn'), cond, tval, fval];
             },
-        peg$c168 = function(op, r) { return [sym(op), r]; },
+        peg$c168 = function(op, r) { return [lit(op), r]; },
         peg$c169 = function(head, tail) {
               return buildBinaryChain(head, tail);
             },
         peg$c170 = "%",
         peg$c171 = { type: "literal", value: "%", description: "\"%\"" },
-        peg$c172 = function(r) { return [sym('fm'), r]; },
+        peg$c172 = function(r) { return [lit('fm'), r]; },
         peg$c173 = function(op, expr) {
-              return [sym(op), expr];
+              return [lit(op), expr];
             },
         peg$c174 = function(id, args) {
-              return [sym('ca'), id, args];
+              return [lit('ca'), id, args];
             },
         peg$c175 = function(expr, elem) {
-              return [sym('mb'), expr, elem];
+              return [lit('mb'), expr, elem];
             },
         peg$c176 = "[",
         peg$c177 = { type: "literal", value: "[", description: "\"[\"" },
         peg$c178 = "]",
         peg$c179 = { type: "literal", value: "]", description: "\"]\"" },
         peg$c180 = function(elems) {
-              return [sym('tu'), elems];
+              return [lit('tu'), elems];
             },
-        peg$c181 = function() { return sym(true); },
-        peg$c182 = function() { return sym(false); },
+        peg$c181 = function() { return lit(true); },
+        peg$c182 = function() { return lit(false); },
         peg$c183 = function(id) {
-              return [sym('id'), id];
+              return [lit('id'), id];
             },
 
         peg$currPos          = 0,
@@ -4767,15 +4767,16 @@
     }
 
 
-      var syms = [], reverseSyms = {};
+      // Literal Handling
+      var lits = [], reverseLits = {};
 
-      function sym(value) {
-        var idx = reverseSyms[value];
+      function lit(value) {
+        var idx = reverseLits[value];
         if ( typeof idx === 'number' ) {
           return idx;
         }
-        idx = syms.push(value) - 1;
-        reverseSyms[value] = idx;
+        idx = lits.push(value) - 1;
+        reverseLits[value] = idx;
         return idx;
       }
 

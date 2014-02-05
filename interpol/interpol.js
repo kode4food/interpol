@@ -9,7 +9,8 @@
 (function (parser, exportTarget, exportName) {
   "use strict";
 
-  var CURRENT_VERSION = "0.0.1";
+  var CURRENT_VERSION = "0.1.0"
+    , TemplateCacheMax = 256;
 
   // Utilities ****************************************************************
 
@@ -91,8 +92,8 @@
 
   function interpol(template) {
     var parseOutput = null;
-    if ( typeof template === 'object' && template.l == 'interpol' ) {
-      if ( !template.n || !template.s ) {
+    if ( typeof template === 'object' && template.i == 'interpol' ) {
+      if ( !template.n || !template.l ) {
         throw new Error("Syntax elements missing from parse output");
       }
       parseOutput = template;
@@ -147,14 +148,16 @@
       id: createIdEvaluator
     });
 
-    var symbols = parseOutput.s
+    var lits = parseOutput.l
       , evaluator = wrapEvaluator(parseOutput.n);
 
     compiledTemplate._isInterpolFunction = true;
     return compiledTemplate;
 
     function compiledTemplate(obj, options) {
+      obj = obj || {};
       options = options || { writer: null, errorCallback: null};
+
       var writer = options.writer
         , content = null;
 
@@ -198,10 +201,10 @@
       return result;
     }
 
-    function expandSymbols(symbolArray) {
+    function expandLiterals(literalArray) {
       var result = [];
-      for ( var i = symbolArray.length; i--; ) {
-        result[i] = symbols[symbolArray[i]];
+      for ( var i = literalArray.length; i--; ) {
+        result[i] = lits[literalArray[i]];
       }
       return result;
     }
@@ -210,17 +213,17 @@
       var pairs = [];
       for ( var i = 0, len = keyValueNodes.length; i < len; i++ ) {
         var keyValueNode = keyValueNodes[i];
-        pairs.push([symbols[keyValueNode[0]], wrapEvaluator(keyValueNode[1])]);
+        pairs.push([lits[keyValueNode[0]], wrapEvaluator(keyValueNode[1])]);
       }
       return pairs;
     }
 
     function createEvaluator(node) {
       if ( !isArray(node) ) {
-        return symbols[node];
+        return lits[node];
       }
 
-      var nodeType = symbols[node[0]]
+      var nodeType = lits[node[0]]
         , createFunction = Evaluators[nodeType];
 
       if ( !createFunction ) {
@@ -247,9 +250,9 @@
       }
     }
 
-    function createFunctionEvaluator(nameSymbol, paramDefs, statementsNode) {
-      var name = symbols[nameSymbol]
-        , params = expandSymbols(paramDefs)
+    function createFunctionEvaluator(nameLiteral, paramDefs, statementsNode) {
+      var name = lits[nameLiteral]
+        , params = expandLiterals(paramDefs)
         , plen = params.length
         , statements = createEvaluator(statementsNode);
 
@@ -269,8 +272,8 @@
       }
     }
 
-    function createCallEvaluator(nameSymbol, argNodes) {
-      var name = symbols[nameSymbol]
+    function createCallEvaluator(nameLiteral, argNodes) {
+      var name = lits[nameLiteral]
         , args = createEvaluator(argNodes);
 
       return callEvaluator;
@@ -284,8 +287,8 @@
       }
     }
 
-    function createOpenTagEvaluator(nameSymbol, attributeDefs, selfClose) {
-      var name = symbols[nameSymbol]
+    function createOpenTagEvaluator(nameLiteral, attributeDefs, selfClose) {
+      var name = lits[nameLiteral]
         , attributes = wrapKeyValueEvaluators(attributeDefs).reverse()
         , alen = attributes.length;
 
@@ -309,8 +312,8 @@
       }
     }
 
-    function createCloseTagEvaluator(nameSymbol) {
-      var name = symbols[nameSymbol];
+    function createCloseTagEvaluator(nameLiteral) {
+      var name = lits[nameLiteral];
 
       return closeTagEvaluator;
 
@@ -319,8 +322,8 @@
       }
     }
 
-    function createCommentTagEvaluator(contentSymbol) {
-      var content = symbols[contentSymbol];
+    function createCommentTagEvaluator(contentLiteral) {
+      var content = lits[contentLiteral];
 
       return commentTagEvaluator;
 
@@ -360,6 +363,10 @@
           var range = ranges[idx]
             , name = range[0]
             , collection = range[1](newCtx, writer);
+
+          if ( !isArray(collection) ) {
+            collection = [collection];
+          }
 
           for ( var i = 0, len = collection.length; i < len; i++ ) {
             newCtx[name] = collection[i];
@@ -604,19 +611,36 @@
         if ( !$2_func ) {
           return template($2);
         }
+        return builtFormatEvaluator;
       }
 
-      return formatEvaluator;
+      var cache = {}
+        , cacheCount = 0;
 
-      function formatEvaluator(ctx, writer) {
-        if ( template ) {
-          return template($2_func ? $2(ctx, writer) : $2);
+      return dynamicFormatEvaluator;
+
+      function builtFormatEvaluator(ctx, writer) {
+        return template($2(ctx, writer));
+      }
+
+      function dynamicFormatEvaluator(ctx, writer) {
+        var formatStr = $1(ctx, writer)
+          , data = $2_func ? $2(ctx, writer) : $2
+          , dynamicTemplate = cache[formatStr];
+
+        if ( !dynamicTemplate ) {
+          if ( cacheCount >= TemplateCacheMax ) {
+            // Something is clearly wrong here and we're not using this for
+            // localized strings.  If we keep caching, we're going to start
+            // leaking memory.  So blow away the cache and start over
+            cache = {};
+            cacheCount = 0;
+          }
+          dynamicTemplate = cache[formatStr] = buildTemplate(formatStr);
+          cacheCount++;
         }
 
-        var formatStr = $1_func ? $1(ctx, writer) : $1
-          , data = $2_func ? $2(ctx, writer) : $2;
-
-        return buildTemplate(formatStr)(data);
+        return dynamicTemplate(data);
       }
 
       function buildTemplate(formatStr) {
@@ -729,8 +753,8 @@
       }
     }
 
-    function createIdEvaluator(nameSymbol) {
-      var name = symbols[nameSymbol];
+    function createIdEvaluator(nameLiteral) {
+      var name = lits[nameLiteral];
       return idEvaluator;
 
       function idEvaluator(ctx, writer) {

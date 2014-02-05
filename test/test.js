@@ -27,7 +27,7 @@ console.log("Template Parse: " + (cs-ps) +
             "ms / Execute: " + (ee-es) + "ms");
 console.log('');
 
-var str = fs.readFileSync('./test.json').toString();
+var str = fs.readFileSync('./test.int.json').toString();
 
 var c1 = new Date()
   , json = JSON.parse(str)

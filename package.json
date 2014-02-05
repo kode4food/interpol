@@ -2,14 +2,14 @@
   "name": "interpol",
   "description": "Templates Sans Facial Hair",
   "author": "Thomas S. Bradford",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "license": "MIT",
   "homepage": "https://github.com/kode4food/interpol/wiki",
   "main": "index.js",
   "bin": {
     "interpol": "interpol/cli.js"
   },
-  "keywords": ["javascript", "html", "nodejs", "templates"],
+  "keywords": ["javascript", "html", "nodejs", "browser", "templates"],
   "contributors": [
     { "name": "Thom Bradford", "email": "thom@kode4food.it" }
   ],
@@ -21,10 +21,13 @@
     "build": "pegjs -e \"(typeof module==='object'?module:this.\\$interpol=this.\\$interpol||{})[typeof module==='object'?'exports':'parser']\" interpol/parser.pegjs"
   },
   "dependencies": {
+    "mkdirp": "*",
+    "glob": "*"
   },
   "devDependencies": {
     "pegjs": "*",
-    "nodeunit": "*"
+    "nodeunit": "*",
+    "uglify-js": "*"
   },
   "engines": {
     "node": "*"

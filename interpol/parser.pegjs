@@ -7,15 +7,16 @@
  */
 
 {
-  var syms = [], reverseSyms = {};
+  // Literal Handling
+  var lits = [], reverseLits = {};
 
-  function sym(value) {
-    var idx = reverseSyms[value];
+  function lit(value) {
+    var idx = reverseLits[value];
     if ( typeof idx === 'number' ) {
       return idx;
     }
-    idx = syms.push(value) - 1;
-    reverseSyms[value] = idx;
+    idx = lits.push(value) - 1;
+    reverseLits[value] = idx;
     return idx;
   }
 
@@ -34,7 +35,7 @@
 
 start
   = m:module  {
-      return { l: 'interpol', v: -1, s: syms, n: m };
+      return { i: 'interpol', v: -1, l: lits, n: m };
     }
 
 /* Lexer *********************************************************************/
@@ -65,7 +66,7 @@ ReservedWord = ( Def / From / Import / As / For / In / If / Else / Case /
 
 Identifier
   = !ReservedWord id:IdentifierName  {
-      return sym(id);
+      return lit(id);
     }
 
 IdentifierName
@@ -101,7 +102,7 @@ Frac
 
 Number
   = c:Card f:Frac? e:Exp?  {
-      return sym(parseFloat(c + (f ? f : '') + (e ? e : '')));
+      return lit(parseFloat(c + (f ? f : '') + (e ? e : '')));
     }
 
 Char
@@ -129,12 +130,12 @@ MultiLineString
 
 MLString1
   = '"""' MLTrim? chars:( !MLTail1 c:Char { return c; } )* MLTail1  {
-      return sym(chars.join(''));
+      return lit(chars.join(''));
     }
 
 MLString2
   = "'''" MLTrim? chars:( !MLTail2 c:Char { return c; } )* MLTail2  {
-      return sym(chars.join(''));
+      return lit(chars.join(''));
     }
 
 MLTrim
@@ -148,10 +149,10 @@ MLTail2
 
 SimpleString
   = '"' !('""') chars:[^"\n\r\u2028\u2029]* '"'  {
-      return sym(chars.join(''));
+      return lit(chars.join(''));
     }
   / "'" !("''") chars:[^'\n\r\u2028\u2029]* "'"  {
-      return sym(chars.join(''));
+      return lit(chars.join(''));
     }
 
 Or  = (OrKwd / "||")   { return 'or'; }
@@ -193,7 +194,7 @@ module
 
 statements
   = statements:( __ s:statement __ { return s; } )*  {
-      return [sym('st'), statements];
+      return [lit('st'), statements];
     }
 
 statement
@@ -207,7 +208,7 @@ statement
 
 openTag
   = "<" id:Identifier _ attrs:( a:attribute  __ { return a; } )* t:tagTail  {
-      return [sym('op'), id, attrs, t];
+      return [lit('op'), id, attrs, t];
     }
 
 tagTail
@@ -216,25 +217,25 @@ tagTail
 
 attribute
   = id:Identifier value:(_ "=" __ e:expr { return e; })?  {
-      return [id, value === null ? sym(null) : value];
+      return [id, value === null ? lit(null) : value];
     }
 
 closeTag
   = "</" id:Identifier __ ">"  {
-      return [sym('cl'), id];
+      return [lit('cl'), id];
     }
 
 htmlComment
   = "<!--" comment:( !("-->") c:Char { return c; } )* "-->"  {
-      return [sym('ct'), sym(comment.join(''))];
+      return [lit('ct'), lit(comment.join(''))];
     }
 
 defStatement
   = Def _ id:Identifier _ params:params? _ ":" _ stmt:statement EOL  {
-      return [sym('de'), id, params, [sym('st'), [stmt]]]
+      return [lit('de'), id, params, [lit('st'), [stmt]]]
     }
   / Def _ id:Identifier _ params:params? EOL stmts:statements End  {
-      return [sym('de'), id, params, stmts]
+      return [lit('de'), id, params, stmts]
     }
 
 params
@@ -252,7 +253,7 @@ paramList
 
 fromStatement
   = From _ id:Identifier __ Import _ imports:importList EOL  {
-      return [sym('im'), id, imports];
+      return [lit('im'), id, imports];
     }
 
 importList
@@ -267,10 +268,10 @@ importItem
 
 forStatement
   = For _ ranges:ranges _ ":" _ stmt:statement EOL  {
-      return [sym('fr'), ranges, [sym('st'), [stmt]]]
+      return [lit('fr'), ranges, [lit('st'), [stmt]]]
     }
   / For _ ranges:ranges EOL stmts:statements End  {
-      return [sym('fr'), ranges, stmts]
+      return [lit('fr'), ranges, stmts]
     }
 
 ranges
@@ -284,83 +285,83 @@ range
     }
 
 exprStatement
-  = e:expr  { return [sym('ou'), e]; }
+  = e:expr  { return [lit('ou'), e]; }
 
 expr
   = conditional
 
 conditional
   = cond:or _ "?" __ tval:conditional _ ":" __ fval:conditional  {
-      return [sym('cn'), cond, tval, fval];
+      return [lit('cn'), cond, tval, fval];
     }
   / or
 
 or
   = head:and
-    tail:( _ op:Or __ r:and  { return [sym(op), r]; } )*  {
+    tail:( _ op:Or __ r:and  { return [lit(op), r]; } )*  {
       return buildBinaryChain(head, tail);
     }
 
 and
   = head:equality
-    tail:( _ op:And __ r:equality { return [sym(op), r]; } )*  {
+    tail:( _ op:And __ r:equality { return [lit(op), r]; } )*  {
       return buildBinaryChain(head, tail);
     }
 
 equality
   = head:relational
-    tail:( _ op:Equality __ r:relational { return [sym(op), r]; } )*  {
+    tail:( _ op:Equality __ r:relational { return [lit(op), r]; } )*  {
       return buildBinaryChain(head, tail);
     }
 
 relational
   = head:interpolation
-    tail:( _ op:Relational __ r:interpolation { return [sym(op), r]; } )*  {
+    tail:( _ op:Relational __ r:interpolation { return [lit(op), r]; } )*  {
       return buildBinaryChain(head, tail);
     }
 
 interpolation
   = head:additive
-    tail:( _ "%" __ r:additive { return [sym('fm'), r]; } )*  {
+    tail:( _ "%" __ r:additive { return [lit('fm'), r]; } )*  {
       return buildBinaryChain(head, tail);
     }
 
 additive
   = head:multiplicative
-    tail:( _ op:Additive __ r:multiplicative { return [sym(op), r]; } )*  {
+    tail:( _ op:Additive __ r:multiplicative { return [lit(op), r]; } )*  {
       return buildBinaryChain(head, tail);
     }
 
 multiplicative
   = head:unary
-    tail:( _ op:Multiplicative __ r:unary { return [sym(op), r]; } )*  {
+    tail:( _ op:Multiplicative __ r:unary { return [lit(op), r]; } )*  {
       return buildBinaryChain(head, tail);
     }
 
 unary
   = op:Unary _ expr:call  {
-      return [sym(op), expr];
+      return [lit(op), expr];
     }
   / call
 
 call
   = id:Identifier _ args:tuple  {
-      return [sym('ca'), id, args];
+      return [lit('ca'), id, args];
     }
   / member
 
 member
   = expr:tuple _ "." __ elem:Identifier  {
-      return [sym('mb'), expr, elem];
+      return [lit('mb'), expr, elem];
     }
   / expr:tuple _ "[" __ elem:expr __ "]"  {
-      return [sym('mb'), expr, elem];
+      return [lit('mb'), expr, elem];
     }
   / tuple
 
 tuple
   = "(" __ elems:elemList __ ")"  {
-      return [sym('tu'), elems];
+      return [lit('tu'), elems];
     }
   / literal
 
@@ -383,10 +384,10 @@ string
   / MultiLineString
 
 boolean
-  = True   { return sym(true); }
-  / False  { return sym(false); }
+  = True   { return lit(true); }
+  / False  { return lit(false); }
 
 identifier
   = id:Identifier {
-      return [sym('id'), id];
+      return [lit('id'), id];
     }
