@@ -90,7 +90,7 @@ var $interpol = require('interpol');
 ```
 
 ## Inclusion in a Browser
-There are two ways to include Interpol templates in a browser-based application.  The first is to parse/compile raw templates using the PEG.js parser, and the second is to The compile templates from pre-parsed JSON output.  The PEG.js parser is *massive* and parsing using it is considerably slower than parsing JSON, but it may be necessary if you want to compile ad-hoc templates.
+There are two ways to include Interpol templates in a browser-based application.  The first is to parse/compile raw templates using the PEG.js parser, and the second is to compile the templates from pre-parsed JSON output.  The PEG.js parser is *massive* and parsing using it is considerably slower than parsing JSON, but it may be necessary if you want to compile ad-hoc templates.
 
 ### Including the PEG.js Parser
 If you *must* parse raw templates in the browser, you will need to load the Interpol PEG.js parser.  The order in which the parser is loaded doesn't matter, so long as it's loaded before you attempt to compile a raw template.

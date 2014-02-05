@@ -352,19 +352,19 @@
       return forEvaluator;
 
       function forEvaluator(ctx, writer) {
-        processRange(ctx, rlen - 1);
+        var newCtx = extendContext(ctx);
+        processRange(rlen - 1);
         return null;
 
-        function processRange(parentCtx, idx) {
+        function processRange(idx) {
           var range = ranges[idx]
             , name = range[0]
-            , collection = range[1](parentCtx, writer)
-            , newCtx = extendContext(parentCtx);
+            , collection = range[1](newCtx, writer);
 
           for ( var i = 0, len = collection.length; i < len; i++ ) {
             newCtx[name] = collection[i];
             if ( idx ) {
-              processRange(newCtx, idx - 1);
+              processRange(idx - 1);
             }
             else {
               statements(newCtx, writer);

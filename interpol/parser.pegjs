@@ -7,17 +7,15 @@
  */
 
 {
-  //var syms = [ false, true ]
-  //  , rsym = { false: 0, true: 1 };
-  var syms = [], rsym = {};
+  var syms = [], reverseSyms = {};
 
   function sym(value) {
-    var idx = rsym[value];
+    var idx = reverseSyms[value];
     if ( typeof idx === 'number' ) {
       return idx;
     }
     idx = syms.push(value) - 1;
-    rsym[value] = idx;
+    reverseSyms[value] = idx;
     return idx;
   }
 
@@ -51,15 +49,15 @@ If     = "if"     !IdentCont
 Else   = "else"   !IdentCont
 Case   = "case"   !IdentCont
 End    = "end"    !IdentCont
-True   = "true"   !IdentCont  { return 1; }
-False  = "false"  !IdentCont  { return 0; }
+True   = "true"   !IdentCont
+False  = "false"  !IdentCont
 OrKwd  = "or"     !IdentCont
-AndKwd = "and"    !IdentCont  { return 'an'; }
+AndKwd = "and"    !IdentCont
 LTKwd  = "lt"     !IdentCont
 GTKwd  = "gt"     !IdentCont
 LTEKwd = "le"     !IdentCont
 GTEKwd = "ge"     !IdentCont
-NotKwd = "not"    !IdentCont  { return 'no'; }
+NotKwd = "not"    !IdentCont
 
 ReservedWord = ( Def / From / Import / As / For / In / If / Else / Case /
                  End / True / False / OrKwd / AndKwd / LTKwd / GTKwd /
@@ -156,16 +154,16 @@ SimpleString
       return sym(chars.join(''));
     }
 
-Or  = OrKwd  / "||"  { return 'or'; }
-And = AndKwd / "&&"  { return 'an'; }
+Or  = (OrKwd / "||")   { return 'or'; }
+And = (AndKwd / "&&")  { return 'an'; }
 
 EQ  = "=="  { return 'eq'; }
 NEQ = "!="  { return 'nq'; }
 
-LT  = LTKwd
-GT  = GTKwd
-LTE = LTEKwd
-GTE = GTEKwd
+LT  = LTKwd   { return 'lt'; }
+GT  = GTKwd   { return 'gt'; }
+LTE = LTEKwd  { return 'le'; }
+GTE = GTEKwd  { return 'ge'; }
 
 Add = "+"  { return 'ad'; }
 Sub = "-"  { return 'su'; }
@@ -173,8 +171,8 @@ Sub = "-"  { return 'su'; }
 Mul = "*"  { return 'mu'; }
 Div = "/"  { return 'di'; }
 
-Neg = "-"           { return 'ne'; }
-Not = NotKwd / "!"  { return 'no'; }
+Neg = "-"             { return 'ne'; }
+Not = (NotKwd / "!")  { return 'no'; }
 
 Equality = NEQ / EQ
 Relational = GTE / LTE / LT / GT
@@ -385,8 +383,8 @@ string
   / MultiLineString
 
 boolean
-  = True
-  / False
+  = True   { return sym(true); }
+  / False  { return sym(false); }
 
 identifier
   = id:Identifier {
