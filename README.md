@@ -109,7 +109,7 @@ You can also invoke the compiler explicitly by calling the `$interpol.compile(Ob
 <script src="/js/interpol/interpol.js" type="text/javascript"></script>
 ```
 
-*Note:* In the future, there will be a command-line tool for Interpol to produce pre-parsed JSON, but in the mean time, it can be done using the `$interpol.parse(String)` method.
+*Note:* In the future, there will be a command-line tool for Interpol to produce pre-parsed JSON, but in the mean time, it can be done using the `$interpol.parse(String)` function.
 
 ## Using the Library
 To compile a raw template into a closure, you can simply invoke `$interpol(String)` as a function, providing to it a string containing your template:
