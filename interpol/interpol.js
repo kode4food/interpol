@@ -23,8 +23,8 @@
 
       return function _extendContext(obj) {
         FakeConstructor.prototype = obj;
-        return new FakeConstructor()
-      }
+        return new FakeConstructor();
+      };
     })();
   }
 
