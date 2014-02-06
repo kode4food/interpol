@@ -187,8 +187,12 @@ _
     }
 
 __
-  = ( WS / NL / Comment )*  {
-      return lit('\n');
+  = s:( WS / n:NL { return '\n'; } / c:Comment { return '\n'; })*  {
+      var res = s.join('');
+      if ( !res.length ) {
+        return null;
+      }
+      return res.indexOf('\n') !== -1 ? lit('\n') : lit(' ');
     }
 
 /** Parser *******************************************************************/
