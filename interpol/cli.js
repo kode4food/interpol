@@ -76,17 +76,18 @@ function commandLine() {
 
   if ( errors.length ) {
     console.warn("Parsing Errors");
-    console.warn("");
+    console.warn("==============");
     for ( i = 0, len = errors.length; i < len; i++ ) {
-      console.warn("  " + errors[i][0] + ":");
-      var err = errors[i][1];
+      var err = errors[i][1]
+        , filePath = errors[i][0]
+        , errString = err.toString()
+        , lineInfo = " ";
+
       if ( err.name === 'SyntaxError' ) {
-        console.warn("  line " + err.line +", col " + err.col);
-        console.warn("  " + errors[i][1].toString());
+        lineInfo = ":" + err.line + ":" + err.column;
       }
-      else {
-        console.warn("  " + err.toString());
-      }
+
+      console.warn(filePath + lineInfo + ": " + errString);
       console.warn("");
     }
   }
