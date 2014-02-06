@@ -187,7 +187,7 @@ _
     }
 
 __
-  = s:( WS / n:NL { return '\n'; } / c:Comment { return '\n'; })*  {
+  = s:( WS { return ' '; } / (NL / Comment) { return '\n'; } )*  {
       var res = s.join('');
       if ( !res.length ) {
         return null;

@@ -171,8 +171,8 @@
         peg$c120 = function() {
               return lit(' ');
             },
-        peg$c121 = function(n) { return '\n'; },
-        peg$c122 = function(c) { return '\n'; },
+        peg$c121 = function() { return ' '; },
+        peg$c122 = function() { return '\n'; },
         peg$c123 = function(s) {
               var res = s.join('');
               if ( !res.length ) {
@@ -2512,45 +2512,45 @@
 
       s0 = peg$currPos;
       s1 = [];
-      s2 = peg$parseWS();
+      s2 = peg$currPos;
+      s3 = peg$parseWS();
+      if (s3 !== peg$FAILED) {
+        peg$reportedPos = s2;
+        s3 = peg$c121();
+      }
+      s2 = s3;
       if (s2 === peg$FAILED) {
         s2 = peg$currPos;
         s3 = peg$parseNL();
+        if (s3 === peg$FAILED) {
+          s3 = peg$parseComment();
+        }
         if (s3 !== peg$FAILED) {
           peg$reportedPos = s2;
-          s3 = peg$c121(s3);
+          s3 = peg$c122();
+        }
+        s2 = s3;
+      }
+      while (s2 !== peg$FAILED) {
+        s1.push(s2);
+        s2 = peg$currPos;
+        s3 = peg$parseWS();
+        if (s3 !== peg$FAILED) {
+          peg$reportedPos = s2;
+          s3 = peg$c121();
         }
         s2 = s3;
         if (s2 === peg$FAILED) {
           s2 = peg$currPos;
-          s3 = peg$parseComment();
-          if (s3 !== peg$FAILED) {
-            peg$reportedPos = s2;
-            s3 = peg$c122(s3);
-          }
-          s2 = s3;
-        }
-      }
-      while (s2 !== peg$FAILED) {
-        s1.push(s2);
-        s2 = peg$parseWS();
-        if (s2 === peg$FAILED) {
-          s2 = peg$currPos;
           s3 = peg$parseNL();
+          if (s3 === peg$FAILED) {
+            s3 = peg$parseComment();
+          }
           if (s3 !== peg$FAILED) {
             peg$reportedPos = s2;
-            s3 = peg$c121(s3);
+            s3 = peg$c122();
           }
           s2 = s3;
-          if (s2 === peg$FAILED) {
-            s2 = peg$currPos;
-            s3 = peg$parseComment();
-            if (s3 !== peg$FAILED) {
-              peg$reportedPos = s2;
-              s3 = peg$c122(s3);
-            }
-            s2 = s3;
-          }
         }
       }
       if (s1 !== peg$FAILED) {
