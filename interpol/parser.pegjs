@@ -182,10 +182,14 @@ Multiplicative = Mul / Div
 Unary = Neg / Not
 
 _
-  = WS*
+  = WS*  {
+      return lit(' ');
+    }
 
 __
-  = ( WS / NL / Comment )*
+  = ( WS / NL / Comment )*  {
+      return lit('\n');
+    }
 
 /** Parser *******************************************************************/
 
@@ -193,8 +197,15 @@ module
   = s:statements
 
 statements
-  = statements:( __ s:statement __ { return s; } )*  {
-      return [lit('st'), statements];
+  = statements:( __ s:statement ws:__ { return [s, ws]; } )*  {
+      var results = [];
+      for ( var i = 0, len = statements.length; i < len; i++ ) {
+        results.push(statements[i][0]);
+        if ( statements[i][1] !== null ) {
+          results.push([lit('ou'), statements[i][1]]);
+        }
+      }
+      return [lit('st'), results];
     }
 
 statement
