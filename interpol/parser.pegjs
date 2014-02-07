@@ -201,7 +201,7 @@ module
   = s:statements
 
 statements
-  = statements:( __ s:statement ws:__ { return [s, ws]; } )*  {
+  = statements:blockStatement*  {
       var results = [];
       for ( var i = 0, len = statements.length; i < len; i++ ) {
         results.push(statements[i][0]);
@@ -212,14 +212,32 @@ statements
       return [lit('st'), results];
     }
 
-statement
+blockStatement
+  = __ s:statementWhitespace ws:__ {
+      return [s, ws];
+    }
+  / __ s:statementNoWhitespace __ {
+      return [s, null];
+    }
+
+eolStatement
+  = s:statementWhitespace EOL  {
+      return s;
+    }
+  / s:statementNoWhitespace EOL  {
+      return s;
+    }
+    
+statementWhitespace
   = htmlComment
   / closeTag
   / openTag
-  / defStatement
+  / exprStatement
+
+statementNoWhitespace
+  = defStatement
   / fromStatement
   / forStatement
-  / exprStatement
 
 openTag
   = "<" id:Identifier _ attrs:( a:attribute  __ { return a; } )* t:tagTail  {
@@ -246,7 +264,7 @@ htmlComment
     }
 
 defStatement
-  = Def _ id:Identifier _ params:params? _ ":" _ stmt:statement EOL  {
+  = Def _ id:Identifier _ params:params? _ ":" _ stmt:eolStatement  {
       return [lit('de'), id, params, [lit('st'), [stmt]]]
     }
   / Def _ id:Identifier _ params:params? EOL stmts:statements End  {
@@ -282,7 +300,7 @@ importItem
     }
 
 forStatement
-  = For _ ranges:ranges _ ":" _ stmt:statement EOL  {
+  = For _ ranges:ranges _ ":" _ stmt:eolStatement  {
       return [lit('fr'), ranges, [lit('st'), [stmt]]]
     }
   / For _ ranges:ranges EOL stmts:statements End  {
