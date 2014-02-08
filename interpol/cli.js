@@ -84,6 +84,8 @@ function commandLine() {
         , lineInfo = " ";
 
       if ( err.name === 'SyntaxError' ) {
+        var unexpected = err.found ? "'" + err.found + "'" : "end of file";
+        errString = "Unexpected " + unexpected;
         lineInfo = ":" + err.line + ":" + err.column;
       }
 

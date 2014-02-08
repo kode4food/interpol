@@ -7,10 +7,11 @@ console.log("==========");
 console.log(f);
 
 var data = {
-  list: [
-    { type: 'task', id: 1, name: 'This is my first task' },
-    { type: 'story', id: 2, name: 'This is my first story' },
-    { name: 'This item has no type' }
+  "title": "Famous People",
+  "people" : [
+    { "name": "Larry", "brothers": [] },
+    { "name": "Curly", "brothers": ["Moe", "Shemp"]},
+    { "name": "Moe", "brothers": ["Curly", "Shemp"]}
   ]
 };
 

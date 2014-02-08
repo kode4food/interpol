@@ -1,23 +1,22 @@
-def renderItem(item)
-  <li class=item.type || 'none'
-      id="id-%" % (item.id || 'no-id')>
-    item.name
-  </li>
+def renderItem(person, brother)
+  <li>"% is the brother of %" % (brother, person.name)</li>
 end
 
-def renderList(list)
+def renderList(people)
   <ul>
-  for item in list: renderItem(item)
+  for person in people, brother in person.brothers
+    renderItem(person, brother)
+  end
   </ul>
 end
 
 <html>
   <head>
-    <title>"a static title"</title>
+    <title>title</title>
     <!-- this is a comment -->
   </head>
   <body>
-    "this is a list with % items" % list.length
-    renderList(list)
+    "this is a list with % people" % people.length
+    renderList(people)
   </body>
 </html>

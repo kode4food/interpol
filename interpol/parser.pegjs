@@ -48,7 +48,6 @@ For    = "for"    !IdentCont
 In     = "in"     !IdentCont
 If     = "if"     !IdentCont
 Else   = "else"   !IdentCont
-Case   = "case"   !IdentCont
 End    = "end"    !IdentCont
 True   = "true"   !IdentCont
 False  = "false"  !IdentCont
@@ -60,7 +59,7 @@ LTEKwd = "le"     !IdentCont
 GTEKwd = "ge"     !IdentCont
 NotKwd = "not"    !IdentCont
 
-ReservedWord = ( Def / From / Import / As / For / In / If / Else / Case /
+ReservedWord = ( Def / From / Import / As / For / In / If / Else /
                  End / True / False / OrKwd / AndKwd / LTKwd / GTKwd /
                  LTEKwd / GTEKwd / NotKwd )
 
@@ -221,13 +220,10 @@ blockStatement
     }
 
 eolStatement
-  = s:statementWhitespace EOL  {
+  = s:(statementWhitespace / statementNoWhitespace) EOL  {
       return s;
     }
-  / s:statementNoWhitespace EOL  {
-      return s;
-    }
-    
+
 statementWhitespace
   = htmlComment
   / closeTag
@@ -238,6 +234,7 @@ statementNoWhitespace
   = defStatement
   / fromStatement
   / forStatement
+  / ifStatement
 
 openTag
   = "<" id:Identifier _ attrs:( a:attribute  __ { return a; } )* t:tagTail  {
@@ -265,10 +262,10 @@ htmlComment
 
 defStatement
   = Def _ id:Identifier _ params:params? _ ":" _ stmt:eolStatement  {
-      return [lit('de'), id, params, [lit('st'), [stmt]]]
+      return [lit('de'), id, params, stmt];
     }
   / Def _ id:Identifier _ params:params? EOL stmts:statements End  {
-      return [lit('de'), id, params, stmts]
+      return [lit('de'), id, params, stmts];
     }
 
 params
@@ -301,14 +298,14 @@ importItem
 
 forStatement
   = For _ ranges:ranges _ ":" _ stmt:eolStatement  {
-      return [lit('fr'), ranges, [lit('st'), [stmt]]]
+      return [lit('fr'), ranges, stmt];
     }
   / For _ ranges:ranges EOL stmts:statements End  {
-      return [lit('fr'), ranges, stmts]
+      return [lit('fr'), ranges, stmts];
     }
 
 ranges
-  = start:range cont:( _ "," __ range )*  {
+  = start:range cont:( _ "," __ r:range { return r; } )*  {
       return [start].concat(cont);
     }
 
@@ -317,11 +314,39 @@ range
       return [id, col];
     }
 
+ifStatement
+  = If _ expr:expr _ ":" _ stmt:eolStatement  {
+      return [lit('cn'), expr, stmt, lit(null)];
+    }
+  / If _ expr:expr EOL stmts:statements tail:ifTail  {
+      return [lit('cn'), expr, stmts, tail];
+    }
+
+ifTail
+  = Else _ ":" _ s:eolStatement  {
+      return s;
+    }
+  / Else _ i:ifStatement  {
+      return i;
+    }
+  / Else EOL stmts:statements End  {
+      return stmts;
+    }
+  / End  {
+      return lit(null);
+    }
+
 exprStatement
   = e:expr  { return [lit('ou'), e]; }
 
 expr
-  = conditional
+  = interpolation
+
+interpolation
+  = head:conditional
+    tail:( _ "%" __ r:conditional { return [lit('fm'), r]; } )*  {
+      return buildBinaryChain(head, tail);
+    }
 
 conditional
   = cond:or _ "?" __ tval:conditional _ ":" __ fval:conditional  {
@@ -348,14 +373,8 @@ equality
     }
 
 relational
-  = head:interpolation
-    tail:( _ op:Relational __ r:interpolation { return [lit(op), r]; } )*  {
-      return buildBinaryChain(head, tail);
-    }
-
-interpolation
   = head:additive
-    tail:( _ "%" __ r:additive { return [lit('fm'), r]; } )*  {
+    tail:( _ op:Relational __ r:additive { return [lit(op), r]; } )*  {
       return buildBinaryChain(head, tail);
     }
 
@@ -378,10 +397,15 @@ unary
   / call
 
 call
-  = id:Identifier _ args:tuple  {
+  = id:Identifier _ args:callArgs  {
       return [lit('ca'), id, args];
     }
   / member
+
+callArgs
+  = "(" __ elems:elemList __ ")"  {
+      return [lit('tu'), elems];
+    }
 
 member
   = expr:tuple _ "." __ elem:Identifier  {

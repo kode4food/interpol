@@ -1,10 +1,7 @@
 # TODO
 
 * API and Grammar Documentation
-* Handling of escape sequences in strings
-* Proper escaping for HTML output
+* Handling of escape sequences in strings (\n and so on)
 * From/Import implementation, both for Node and browsers
-* If/Case statements for logical branching
 * DOM Writer for better in-browser integration
-* "Fallback" mode that allows importing of raw HTML
 * Various optimizations
