@@ -46,6 +46,20 @@
     })();
   }
 
+  // TODO: Need to handle complex types like Dates
+  function stringify(obj) {
+    var type = typeof obj;
+    switch ( type ) {
+      case 'string':    return obj;
+      case 'number':    return obj.toString();
+      case 'boolean':   return obj ? 'true' : 'false'
+      case 'undefined': return '';
+      case 'object':    return obj !== null ? obj.toString() : '';
+      case 'xml':       return obj.toXMLString();
+      default:          return '';
+    }
+  }
+
   var EscapeChars = freezeObject({
     '&': '&amp;',
     '<': '&lt;',
@@ -326,7 +340,7 @@
         var result = {};
         for ( var i = alen; i--; ) {
           var attribute = attributes[i];
-          result[attribute[0]] = attribute[1](ctx, writer);
+          result[attribute[0]] = stringify(attribute[1](ctx, writer));
         }
         return freezeObject(result);
       }
@@ -353,16 +367,16 @@
     }
 
     function createOutputEvaluator(exprNode) {
-      var $1 = createEvaluator(exprNode)
-        , $1_func = typeof $1 === 'function';
+      var $1 = createEvaluator(exprNode);
 
-      return $1_func ? outputEvaluator : outputLiteral;
+      if ( typeof $1 !== 'function' ) {
+        $1 = stringify($1);
+        return outputLiteral;
+      }
+      return outputEvaluator;
 
       function outputEvaluator(ctx, writer) {
-        var result = $1(ctx, writer);
-        if ( typeof result !== 'undefined' ) {
-          writer.content(result);
-        }
+        writer.content(stringify($1(ctx, writer)));
       }
 
       function outputLiteral(ctx, writer) {
