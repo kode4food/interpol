@@ -83,7 +83,7 @@ for person in people, brother in person.brothers: renderItem(person, brother)
 
 In both cases, the outer loop iterates over all elements in `people`, assigning the identifier `person` to each element.  For each `person` item, an inner loop is executed that iterates over the person's `brothers` property, assigning the identifier `brother` to each element.  You'll notice that `person` is available in the inner loop's scope and that both identifiers are available in the statement block.
 
-### If/Else Branching
+### If / Else Branching
 Like in most programming languages, Interpol supports conditional branching in the form of If/Else statements.  In its simplest form, it wouldn't include an `else` block and might look like this:
 
 ```
@@ -150,6 +150,23 @@ end
 ```
 
 ### Expression Statements
+Any expression that is not evaluated in the context of another statement, such as in a For loop or If / Else statement, is consided to be an Expression Statement.  It will be evaluated and its result will be streamed to the template's output.  For example:
+
+```
+"% out of % doctors agree: smoking causes smoke" % (9, 10)
+```
+
+Sequential Expression Statements require no special delimiting:
+
+```
+18/2 "out of" 5*2 "doctors agree:" "smoking causes smoke"
+```
+
+These five expressions, like the one before, will display:
+
+```
+9 out of 10 doctors agree: smoking causes smoke
+```
 
 ## Expressions
 

@@ -16,7 +16,7 @@ end
     <!-- this is a comment -->
   </head>
   <body>
-    "this is a list with % people" % people.length
+    "There are % stooges" % people.length
     renderList(people)
   </body>
 </html>
