@@ -4,7 +4,7 @@
 Interpol is case-sensitive, meaning any of the keywords and identifiers must appear in the same case by which they're represented either in this document or in the JavaScript data being passed to Interpol.  All Interpol keywords are lower-case, while JavaScript identifiers may be supplied in mixed case.
 
 ## New Lines
-Interpol templates are partially NewLine sensitive.  Specifically, newlines are used to delimit certain grammatical constructs, particularly the statement blocks of Function Definitions, For Loops, and If/Else Branching (though each of these statements also allows a single-line syntax using a colon ':').  For example:
+Interpol templates are partially NewLine sensitive.  Specifically, new lines are used to delimit certain grammatical constructs, particularly the statement blocks of Partial Definitions, For Loops, and If/Else Branching (though each of these statements also allows a single-line syntax using a colon ':').  For example:
 
 ```
 for item in list
@@ -55,20 +55,33 @@ One thing worth mentioning is that the `5 - 2` expressions won't raise a parsing
 
 ## Statements
 
-### Function Definitions
+### Partial Definitions
+Partials are reusable procedures that can be applied in a variety of contexts, such as in loops and conditionals.  For example, one might write a partial to render a single item in a list:
 
 ```
-def MyFunction(argument1, argument2)
-
+def renderItem(person, brother)
+  <li>
+    "% is the brother of %" % (brother, person.name)
+  </li>
 end
 ```
 
 ### For Loops
+For loops allow one to recursively iterate over sets of items.  For example:
 
 ```
-for id2 in collection, id2 in collection2
+for person in people, brother in person.brothers
+  renderItem(person, brother)
 end
 ```
+
+Since there is only one statement in the block, this could have also been written:
+
+```
+for person in people, brother in person.brothers: renderItem(person, brother)
+```
+
+In both cases, the outer loop iterates over all elements in `people`, assigning the identifier `person` to each element.  For each `person` item, an inner loop is executed that iterates over the person's `brothers` property, assigning the identifier `brother` to each element.  You'll notice that `person` is available in the inner loop's scope and that both identifiers are available in the statement block.
 
 ### If/Else Branching
 
@@ -89,7 +102,7 @@ end
 
 ### Membership
 
-### Function Calls
+### Partial Calls
 
 ### Unary Operators
 

@@ -40,7 +40,7 @@ I say 'html-ish' because it's not pure HTML.  The value of attributes are also d
 
 `class=item.type` outputs a class attribute whose value is taken directly from the item.type property.  `id="id-%" % item.id` outputs an id attribute whose value is interpolated from the item.id property.
 
-That's all well and good, but what about the ability to reuse templates?  Well, to do that you define procedures:
+That's all well and good, but what about the ability to reuse templates?  Well, to do that you define partials:
 
 ```html
 def renderItem(item)
