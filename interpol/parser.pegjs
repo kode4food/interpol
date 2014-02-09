@@ -418,7 +418,10 @@ member
 
 tuple
   = "(" __ elems:elemList __ ")"  {
-      return [lit('tu'), elems];
+      if ( elems.length > 1 ) {
+        return [lit('tu'), elems];
+      }
+      return elems[0];
     }
   / literal
 
