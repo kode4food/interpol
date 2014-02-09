@@ -197,7 +197,7 @@ __
 /** Parser *******************************************************************/
 
 module
-  = s:statements
+  = s:statements  { return [lit('im'), s]; }
 
 statements
   = statements:blockStatement*  {
@@ -208,7 +208,7 @@ statements
           results.push([lit('ou'), statements[i][1]]);
         }
       }
-      return [lit('st'), results];
+      return results;
     }
 
 blockStatement
@@ -262,7 +262,7 @@ htmlComment
 
 defStatement
   = Def _ id:Identifier _ params:params? _ ":" _ stmt:eolStatement  {
-      return [lit('de'), id, params, stmt];
+      return [lit('de'), id, params, [stmt]];
     }
   / Def _ id:Identifier _ params:params? EOL stmts:statements End  {
       return [lit('de'), id, params, stmts];
@@ -298,7 +298,7 @@ importItem
 
 forStatement
   = For _ ranges:ranges _ ":" _ stmt:eolStatement  {
-      return [lit('fr'), ranges, stmt];
+      return [lit('fr'), ranges, [stmt]];
     }
   / For _ ranges:ranges EOL stmts:statements End  {
       return [lit('fr'), ranges, stmts];
@@ -316,7 +316,7 @@ range
 
 ifStatement
   = If _ expr:expr _ ":" _ stmt:eolStatement  {
-      return [lit('cn'), expr, stmt, lit(null)];
+      return [lit('cn'), expr, [stmt], [lit(null)]];
     }
   / If _ expr:expr EOL stmts:statements tail:ifTail  {
       return [lit('cn'), expr, stmts, tail];
@@ -324,16 +324,16 @@ ifStatement
 
 ifTail
   = Else _ ":" _ s:eolStatement  {
-      return s;
+      return [s];
     }
   / Else _ i:ifStatement  {
-      return i;
+      return [i];
     }
   / Else EOL stmts:statements End  {
       return stmts;
     }
   / End  {
-      return lit(null);
+      return [lit(null)];
     }
 
 exprStatement

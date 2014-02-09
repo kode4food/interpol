@@ -152,8 +152,8 @@
 
   function compile(parseOutput) {
     var Evaluators = freezeObject({
-      st: createStatementsEvaluator,
-      de: createFunctionEvaluator,
+      im: createModuleEvaluator,
+      de: createPartialEvaluator,
       ca: createCallEvaluator,
       op: createOpenTagEvaluator,
       cl: createCloseTagEvaluator,
@@ -267,9 +267,11 @@
       return createFunction.apply(node, node.slice(1));
     }
 
-    // Evaluators *************************************************************
-
     function createStatementsEvaluator(statementNodes) {
+      if ( statementNodes.length === 1 ) {
+        return createEvaluator(statementNodes[0]);
+      }
+
       var statements = wrapArrayEvaluators(statementNodes).reverse()
         , slen = statements.length;
 
@@ -284,11 +286,17 @@
       }
     }
 
-    function createFunctionEvaluator(nameLiteral, paramDefs, statementsNode) {
+    // Evaluators *************************************************************
+
+    function createModuleEvaluator(statementNodes) {
+      return createStatementsEvaluator(statementNodes);
+    }
+
+    function createPartialEvaluator(nameLiteral, paramDefs, statementNodes) {
       var name = lits[nameLiteral]
         , params = expandLiterals(paramDefs)
         , plen = params.length
-        , statements = createEvaluator(statementsNode);
+        , statements = createStatementsEvaluator(statementNodes);
 
       return closureEvaluator;
 
@@ -384,10 +392,10 @@
       }
     }
 
-    function createForEvaluator(rangeNodes, statementsNode) {
+    function createForEvaluator(rangeNodes, statementNodes) {
       var ranges = wrapKeyValueEvaluators(rangeNodes).reverse()
         , rlen = ranges.length
-        , statements = createEvaluator(statementsNode);
+        , statements = createStatementsEvaluator(statementNodes);
 
       return forEvaluator;
 
@@ -417,10 +425,10 @@
       }
     }
 
-    function createConditionalEvaluator(conditionNode, trueNode, falseNode) {
+    function createConditionalEvaluator(conditionNode, trueNodes, falseNodes) {
       var $1 = createEvaluator(conditionNode)
-        , $2 = createEvaluator(trueNode)
-        , $3 = createEvaluator(falseNode)
+        , $2 = createStatementsEvaluator(trueNodes)
+        , $3 = createStatementsEvaluator(falseNodes)
         , $2_func = typeof $2 === 'function'
         , $3_func = typeof $3 === 'function';
 
