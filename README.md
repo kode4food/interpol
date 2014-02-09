@@ -30,9 +30,9 @@ This is important because, more often than not, the templates we're creating are
 </html>
 ```
 
-The only static element on this page was its title, and usually even that isn't static.  So what did we do to escape *it* for static rendering?  We wrapped it in quotes.  The rest of the page mixed html-ish elements and dynamic content rather seemlessly.
+The only static element on this page was its title, and usually even that isn't static.  So what did we do to escape *it* for static rendering?  We wrapped it in quotes.  The rest of the page mixed HTMLish elements and dynamic content rather seemlessly.
 
-I say 'html-ish' because it's not pure HTML.  The value of attributes are also dynamically evaluated.  For example:
+I say 'HTMLish' because it's not pure HTML.  The value of attributes are also dynamically evaluated.  For example:
 
 ```html
 <li class=item.type id="id-%" % item.id>

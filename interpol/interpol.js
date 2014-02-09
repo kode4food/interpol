@@ -351,11 +351,13 @@
       return selfClose ? selfCloseLiteralEvaluator : openTagLiteralEvaluator;
 
       function selfCloseFuncEvaluator(ctx, writer) {
-        writer.selfCloseElement(name(ctx, writer), getAttributes(ctx, writer));
+        var tagName = stringify(name(ctx, writer));
+        writer.selfCloseElement(tagName, getAttributes(ctx, writer));
       }
 
       function openTagFuncEvaluator(ctx, writer) {
-        writer.startElement(name(ctx, writer), getAttributes(ctx, writer));
+        var tagName = stringify(name(ctx, writer));
+        writer.startElement(tagName, getAttributes(ctx, writer));
       }
 
       function selfCloseLiteralEvaluator(ctx, writer) {
@@ -370,11 +372,20 @@
         var result = {};
         for ( var i = alen; i--; ) {
           var attribute = attributes[i]
-            , $key = attribute[0]
-            , $val = attribute[1]
-            , key = typeof $key === 'function' ? $key(ctx, writer) : $key
-            , val = typeof $val === 'function' ? $val(ctx, writer) : $val;
+            , key = attribute[0];
 
+          if ( typeof key === 'function' ) {
+            key = key(ctx, writer);
+            if ( typeof key === 'undefined' || key === null ) {
+              continue;
+            }
+            key = stringify(key);
+          }
+
+          var val = attribute[1];
+          if ( typeof val === 'function' ) {
+            val = val(ctx, writer);
+          }
           result[key] = stringify(val);
         }
         return freezeObject(result);
@@ -388,7 +399,7 @@
       return name_func ? closeFuncEvaluator : closeLiteralEvaluator;
 
       function closeFuncEvaluator(ctx, writer) {
-        writer.endElement(name(ctx, writer));
+        writer.endElement(stringify(name(ctx, writer)));
       }
 
       function closeLiteralEvaluator(ctx, writer) {
