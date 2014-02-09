@@ -84,6 +84,36 @@ for person in people, brother in person.brothers: renderItem(person, brother)
 In both cases, the outer loop iterates over all elements in `people`, assigning the identifier `person` to each element.  For each `person` item, an inner loop is executed that iterates over the person's `brothers` property, assigning the identifier `brother` to each element.  You'll notice that `person` is available in the inner loop's scope and that both identifiers are available in the statement block.
 
 ### If/Else Branching
+Like in most programming languages, Interpol supports conditional branching in the form of If/Else statements.  In its simplest form, it wouldn't include an `else` block and might look like this:
+
+```
+if person.name == 'Curly'
+  "Curly was awesome!"
+end
+```
+
+If the condition is not met, you can also branch to an `else` block:
+
+```
+if person.name == 'Curly'
+  "Curly was awesome!"
+else
+  "This stooge was not so great"
+end
+```
+
+`else` immediately followed by `if` is treated specially in that it doesn't require a nested `end` keyword.
+
+
+```
+if person.name == 'Curly'
+  "Curly was awesome!"
+else if person.name == 'Shemp'
+  "Ok, Shemp was alright"
+else
+  "This stooge was not so great"
+end
+```
 
 ### HTML Elements
 
