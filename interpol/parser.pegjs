@@ -237,8 +237,14 @@ statementNoWhitespace
   / ifStatement
 
 openTag
-  = "<" id:Identifier _ attrs:( a:attribute  __ { return a; } )* t:tagTail  {
-      return [lit('op'), id, attrs, t];
+  = "<" __ tag:htmlId __ attrs:( a:attribute  __ { return a; } )* t:tagTail  {
+      return [lit('op'), tag, attrs, t];
+    }
+
+htmlId
+  = Identifier
+  / "(" __ e:expr __ ")"  {
+      return e;
     }
 
 tagTail
@@ -246,13 +252,13 @@ tagTail
   / ">"   { return 0; }
 
 attribute
-  = id:Identifier value:(_ "=" __ e:expr { return e; })?  {
-      return [id, value === null ? lit(null) : value];
+  = name:htmlId value:(_ "=" __ e:expr { return e; })?  {
+      return [name, value === null ? lit(null) : value];
     }
 
 closeTag
-  = "</" id:Identifier __ ">"  {
-      return [lit('cl'), id];
+  = "</" __ tag:htmlId __ ">"  {
+      return [lit('cl'), tag];
     }
 
 htmlComment

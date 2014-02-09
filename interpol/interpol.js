@@ -243,11 +243,22 @@
       return result;
     }
 
-    function wrapKeyValueEvaluators(keyValueNodes) {
+    function wrapAttributeEvaluators(keyValueNodes) {
       var pairs = [];
       for ( var i = 0, len = keyValueNodes.length; i < len; i++ ) {
         var keyValueNode = keyValueNodes[i];
-        pairs.push([lits[keyValueNode[0]], wrapEvaluator(keyValueNode[1])]);
+        pairs.push([createEvaluator(keyValueNode[0]),
+                    createEvaluator(keyValueNode[1])]);
+      }
+      return pairs;
+    }
+
+    function wrapRangeEvaluators(rangeNodes) {
+      var pairs = [];
+      for ( var i = 0, len = rangeNodes.length; i < len; i++ ) {
+        var keyValueNode = rangeNodes[i];
+        pairs.push([lits[keyValueNode[0]],
+                   wrapEvaluator(keyValueNode[1])]);
       }
       return pairs;
     }
@@ -329,37 +340,58 @@
       }
     }
 
-    function createOpenTagEvaluator(nameLiteral, attributeDefs, selfClose) {
-      var name = lits[nameLiteral]
-        , attributes = wrapKeyValueEvaluators(attributeDefs).reverse()
+    function createOpenTagEvaluator(nameNode, attributeDefs, selfClose) {
+      var name = createEvaluator(nameNode)
+        , attributes = wrapAttributeEvaluators(attributeDefs).reverse()
         , alen = attributes.length;
 
-      return selfClose ? selfCloseTagEvaluator : openTagEvaluator;
+      if ( typeof name === 'function' ) {
+        return selfClose ? selfCloseFuncEvaluator : openTagFuncEvaluator;
+      }
+      return selfClose ? selfCloseLiteralEvaluator : openTagLiteralEvaluator;
 
-      function selfCloseTagEvaluator(ctx, writer) {
+      function selfCloseFuncEvaluator(ctx, writer) {
+        writer.selfCloseElement(name(ctx, writer), getAttributes(ctx, writer));
+      }
+
+      function openTagFuncEvaluator(ctx, writer) {
+        writer.startElement(name(ctx, writer), getAttributes(ctx, writer));
+      }
+
+      function selfCloseLiteralEvaluator(ctx, writer) {
         writer.selfCloseElement(name, getAttributes(ctx, writer));
       }
 
-      function openTagEvaluator(ctx, writer) {
+      function openTagLiteralEvaluator(ctx, writer) {
         writer.startElement(name, getAttributes(ctx, writer));
       }
 
       function getAttributes(ctx, writer) {
         var result = {};
         for ( var i = alen; i--; ) {
-          var attribute = attributes[i];
-          result[attribute[0]] = stringify(attribute[1](ctx, writer));
+          var attribute = attributes[i]
+            , $key = attribute[0]
+            , $val = attribute[1]
+            , key = typeof $key === 'function' ? $key(ctx, writer) : $key
+            , val = typeof $val === 'function' ? $val(ctx, writer) : $val;
+
+          result[key] = stringify(val);
         }
         return freezeObject(result);
       }
     }
 
-    function createCloseTagEvaluator(nameLiteral) {
-      var name = lits[nameLiteral];
+    function createCloseTagEvaluator(nameNode) {
+      var name = createEvaluator(nameNode)
+        , name_func = typeof name === 'function';
 
-      return closeTagEvaluator;
+      return name_func ? closeFuncEvaluator : closeLiteralEvaluator;
 
-      function closeTagEvaluator(ctx, writer) {
+      function closeFuncEvaluator(ctx, writer) {
+        writer.endElement(name(ctx, writer));
+      }
+
+      function closeLiteralEvaluator(ctx, writer) {
         writer.endElement(name);
       }
     }
@@ -393,7 +425,7 @@
     }
 
     function createForEvaluator(rangeNodes, statementNodes) {
-      var ranges = wrapKeyValueEvaluators(rangeNodes).reverse()
+      var ranges = wrapRangeEvaluators(rangeNodes).reverse()
         , rlen = ranges.length
         , statements = createStatementsEvaluator(statementNodes);
 

@@ -104,7 +104,6 @@ end
 
 `else` immediately followed by `if` is treated specially in that it doesn't require a nested `end` keyword.
 
-
 ```
 if person.name == 'Curly'
   "Curly was awesome!"
@@ -115,7 +114,26 @@ else
 end
 ```
 
-### HTML Elements
+### HTMLish Elements
+HTMLish elements allow HTML tags to be constructed using inlined expressions.  The nicest thing about this is that in many cases, these expressions end up looking *exactly* like normal HTML.  For example:
+
+```
+<div id="parent" class="listItem">
+```
+
+This seems like raw HTML, but in fact both id and class are evaluating expressions for their values.  It just so happens that double and single-quoted strings are valid expressions in Interpol, so everything works out great.  But what if you want to augment the class attribute dynamically?
+
+```
+<div id="parent" class="listItem " + otherClasses>
+```
+
+In this case, the value of the class attribute will be computed dynamically from the expression `"listItem " + otherClasses`.
+
+You can also compute the name of a tag or attribute dynamically by enclosing the expression in a single-element tuple).  For example:
+
+```
+<(theTagName) id="parent" (theAttrName || "class")="listItem " + otherClasses>
+```
 
 ### Expression Statements
 
