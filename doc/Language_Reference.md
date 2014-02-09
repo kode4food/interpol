@@ -156,7 +156,7 @@ Any expression that is not evaluated in the context of another statement, such a
 "% out of % doctors agree: smoking causes smoke" % (9, 10)
 ```
 
-Sequential Expression Statements require no special delimiting:
+Is a single expression that performs an interpolation.  Additionally, sequential Expression Statements require no special delimiting:
 
 ```
 18/2 "out of" 5*2 "doctors agree:" "smoking causes smoke"

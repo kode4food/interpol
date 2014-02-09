@@ -1,5 +1,5 @@
 def renderItem(person, brother)
-  <li>"% is the brother of %" % (brother, person.name)</li>
+  <li>"%2 is the brother of %1" % (brother, person.name)</li>
 end
 
 def renderList(people)

@@ -10,7 +10,8 @@
   "use strict";
 
   var CURRENT_VERSION = "0.1.0"
-    , TemplateCacheMax = 256;
+    , TemplateCacheMax = 256
+    , TemplateParamRegex = /%([1-9][0-9]*)?/;
 
   // Utilities ****************************************************************
 
@@ -762,24 +763,30 @@
       function buildTemplate(formatStr) {
         var funcs = []
           , flen = 0
-          , idx = 0
-          , tmp = [];
+          , autoIdx = 0;
 
-        for ( var i = 0, len = formatStr.length; i < len; i++ ) {
-          var c = formatStr.charAt(i);
-          if ( c === '%' ) {
-            if ( tmp.length ) {
-              funcs.push(createLiteralFunction(tmp.join('')));
-              tmp.length = 0;
+        while ( formatStr && formatStr.length ) {
+          var paramMatch = TemplateParamRegex.exec(formatStr);
+          if ( paramMatch ) {
+            var loc = paramMatch.index
+              , match = paramMatch[0];
+
+            if ( loc ) {
+              funcs.push(createLiteralFunction(formatStr.substring(0, loc)));
             }
-            funcs.push(createIndexedFunction(idx++));
+
+            var idx = autoIdx++;
+            if ( match.length > 1 ) {
+              idx = parseInt(match.substring(1)) - 1;
+            }
+
+            funcs.push(createIndexedFunction(idx));
+            formatStr = formatStr.substring(loc + match.length);
           }
           else {
-            tmp.push(c);
+            funcs.push(createLiteralFunction(formatStr));
+            formatStr = null;
           }
-        }
-        if ( tmp.length ) {
-          funcs.push(createLiteralFunction(tmp.join('')));
         }
         flen = funcs.length;
 
