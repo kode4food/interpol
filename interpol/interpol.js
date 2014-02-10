@@ -11,7 +11,8 @@
 
   var CURRENT_VERSION = "0.1.0"
     , TemplateCacheMax = 256
-    , TemplateParamRegex = /%([1-9][0-9]*)?/;
+    , TemplateParamRegex = /%([1-9][0-9]*)?/
+    , globalContext = {};
 
   // Utilities ****************************************************************
 
@@ -47,6 +48,21 @@
     })();
   }
 
+  function mixin(target) {
+    for ( var i = 1, len = arguments.length; i < len; i++ ) {
+      var src = arguments[i];
+      for ( var key in src ) {
+        if ( !src.hasOwnProperty(key) ) {
+          continue;
+        }
+        target[key] = src[key];
+      }
+    }
+    return target;
+  }
+
+  // String Handling **********************************************************
+
   // TODO: Need to handle complex types like Dates
   function stringify(obj) {
     var type = typeof obj;
@@ -80,6 +96,72 @@
       return EscapeChars[ch];
     });
   }
+
+  // Interpolation Template Builder *******************************************
+
+  function buildTemplate(formatStr) {
+    var funcs = []
+      , flen = 0
+      , autoIdx = 0;
+
+    while ( formatStr && formatStr.length ) {
+      var paramMatch = TemplateParamRegex.exec(formatStr);
+      if ( !paramMatch ) {
+        funcs.push(createLiteralFunction(formatStr));
+        break;
+      }
+
+      var matchIdx = paramMatch.index
+        , match = paramMatch[0]
+        , matchLen = match.length;
+
+      if ( matchIdx ) {
+        funcs.push(createLiteralFunction(formatStr.substring(0, matchIdx)));
+      }
+
+      var idx = autoIdx++;
+      if ( matchLen > 1 ) {
+        idx = parseInt(match.substring(1), 10) - 1;
+      }
+
+      funcs.push(createIndexedFunction(idx));
+      formatStr = formatStr.substring(matchIdx + matchLen);
+    }
+    flen = funcs.length;
+
+    return templateFunction;
+
+    function templateFunction(data) {
+      if ( !isArray(data) ) {
+        data = [data];
+      }
+
+      var output = [];
+      for ( var i = 0; i < flen; i++ ) {
+        output[i] = funcs[i](data);
+      }
+
+      return output.join('');
+    }
+
+    function createLiteralFunction(literal) {
+      return literalFunction;
+
+      function literalFunction() {
+        return literal;
+      }
+    }
+
+    function createIndexedFunction(idx) {
+      return indexedFunction;
+
+      function indexedFunction(data) {
+        return data[idx];
+      }
+    }
+  }
+
+  // Default Writer Implementation ********************************************
 
   function createArrayWriter(arr) {
     return freezeObject({
@@ -123,7 +205,12 @@
     }
   }
 
-  // Implementation ***********************************************************
+  // Core Interpol Implementation *********************************************
+
+  var DefaultOptions = freezeObject({
+    writer: null,
+    errorCallback: null
+  });
 
   function interpol(template) {
     var parseOutput = null;
@@ -189,9 +276,14 @@
     compiledTemplate._isInterpolFunction = true;
     return compiledTemplate;
 
-    function compiledTemplate(obj, options) {
-      obj = obj || {};
-      options = options || { writer: null, errorCallback: null};
+    function compiledTemplate() {
+      var ctx = mixin({}, globalContext)
+        , options = mixin({}, DefaultOptions);
+
+      for ( var i = 0, len = arguments.length; i < len; i++ ) {
+        var target = i && i === len - 1 ? options : ctx;
+        mixin(target, arguments[i]);
+      }
 
       var writer = options.writer
         , content = null;
@@ -202,7 +294,7 @@
       }
 
       try {
-        evaluator(obj, writer);
+        evaluator(ctx, writer);
       }
       catch ( err ) {
         if ( typeof options.errorCallback === 'function' ) {
@@ -215,6 +307,8 @@
 
       return content ? content.join('') : null;
     }
+
+    // Evaluator Generation Utilities *****************************************
 
     function wrapEvaluator(node) {
       var result = createEvaluator(node);
@@ -298,7 +392,7 @@
       }
     }
 
-    // Evaluators *************************************************************
+    // Evaluator Generation ***************************************************
 
     function createModuleEvaluator(statementNodes) {
       return createStatementsEvaluator(statementNodes);
@@ -758,68 +852,6 @@
         }
 
         return dynamicTemplate(data);
-      }
-
-      function buildTemplate(formatStr) {
-        var funcs = []
-          , flen = 0
-          , autoIdx = 0;
-
-        while ( formatStr && formatStr.length ) {
-          var paramMatch = TemplateParamRegex.exec(formatStr);
-          if ( paramMatch ) {
-            var loc = paramMatch.index
-              , match = paramMatch[0];
-
-            if ( loc ) {
-              funcs.push(createLiteralFunction(formatStr.substring(0, loc)));
-            }
-
-            var idx = autoIdx++;
-            if ( match.length > 1 ) {
-              idx = parseInt(match.substring(1)) - 1;
-            }
-
-            funcs.push(createIndexedFunction(idx));
-            formatStr = formatStr.substring(loc + match.length);
-          }
-          else {
-            funcs.push(createLiteralFunction(formatStr));
-            formatStr = null;
-          }
-        }
-        flen = funcs.length;
-
-        return templateFunction;
-
-        function templateFunction(data) {
-          if ( !isArray(data) ) {
-            data = [data];
-          }
-
-          var output = [];
-          for ( var i = 0; i < flen; i++ ) {
-            output[i] = funcs[i](data);
-          }
-
-          return output.join('');
-        }
-
-        function createLiteralFunction(literal) {
-          return literalFunction;
-
-          function literalFunction() {
-            return literal;
-          }
-        }
-
-        function createIndexedFunction(idx) {
-          return indexedFunction;
-
-          function indexedFunction(data) {
-            return data[idx];
-          }
-        }
       }
     }
 
