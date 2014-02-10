@@ -51,17 +51,14 @@ Else   = "else"   !IdentCont
 End    = "end"    !IdentCont
 True   = "true"   !IdentCont
 False  = "false"  !IdentCont
-OrKwd  = "or"     !IdentCont
-AndKwd = "and"    !IdentCont
 LTKwd  = "lt"     !IdentCont
 GTKwd  = "gt"     !IdentCont
 LTEKwd = "le"     !IdentCont
 GTEKwd = "ge"     !IdentCont
-NotKwd = "not"    !IdentCont
+ModKwd = "mod"    !IdentCont
 
-ReservedWord = ( Def / From / Import / As / For / In / If / Else /
-                 End / True / False / OrKwd / AndKwd / LTKwd / GTKwd /
-                 LTEKwd / GTEKwd / NotKwd )
+ReservedWord = ( Def / From / Import / As / For / In / If / Else / End /
+                 True / False / LTKwd / GTKwd / LTEKwd / GTEKwd / ModKwd )
 
 Identifier
   = !ReservedWord id:IdentifierName  {
@@ -154,8 +151,8 @@ SimpleString
       return lit(chars.join(''));
     }
 
-Or  = (OrKwd / "||")   { return 'or'; }
-And = (AndKwd / "&&")  { return 'an'; }
+Or  = "||"  { return 'or'; }
+And = "&&"  { return 'an'; }
 
 EQ  = "=="  { return 'eq'; }
 NEQ = "!="  { return 'nq'; }
@@ -168,16 +165,17 @@ GTE = GTEKwd  { return 'ge'; }
 Add = "+"  { return 'ad'; }
 Sub = "-"  { return 'su'; }
 
-Mul = "*"  { return 'mu'; }
-Div = "/"  { return 'di'; }
+Mul = "*"     { return 'mu'; }
+Div = "/"     { return 'di'; }
+Mod = ModKwd  { return 'mo'; }
 
-Neg = "-"             { return 'ne'; }
-Not = (NotKwd / "!")  { return 'no'; }
+Neg = "-"  { return 'ne'; }
+Not = "!"  { return 'no'; }
 
 Equality = NEQ / EQ
 Relational = GTE / LTE / LT / GT
 Additive = Add / Sub
-Multiplicative = Mul / Div
+Multiplicative = Mul / Div / Mod
 Unary = Neg / Not
 
 _
