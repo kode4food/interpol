@@ -276,14 +276,9 @@
     compiledTemplate._isInterpolFunction = true;
     return compiledTemplate;
 
-    function compiledTemplate() {
-      var ctx = mixin({}, globalContext)
-        , options = mixin({}, DefaultOptions);
-
-      for ( var i = 0, len = arguments.length; i < len; i++ ) {
-        var target = i && i === len - 1 ? options : ctx;
-        mixin(target, arguments[i]);
-      }
+    function compiledTemplate(obj, options) {
+      var ctx = mixin({}, globalContext, obj || {})
+        , options = mixin({}, DefaultOptions, options || {});
 
       var writer = options.writer
         , content = null;
