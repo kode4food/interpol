@@ -144,12 +144,28 @@ MLTail2
   = NL? "'''"
 
 SimpleString
-  = '"' !('""') chars:[^"\n\r\u2028\u2029]* '"'  {
-      return lit(chars.join(''));
-    }
-  / "'" !("''") chars:[^'\n\r\u2028\u2029]* "'"  {
-      return lit(chars.join(''));
-    }
+  = '"' '"'                { return lit(''); }
+  / "'" "'"                { return lit(''); }
+  / '"' c:DoubleChar+ '"'  { return lit(c.join('')); }
+  / "'" c:SingleChar+ "'"  { return lit(c.join('')); }
+
+DoubleChar
+  = [^"\\]
+  / CommonChar
+
+SingleChar
+  = [^'\\]
+  / CommonChar
+
+CommonChar
+  = "\\\\"  { return "\\"; }
+  / '\\"'   { return '"'; }
+  / "\\'"   { return "'"; }
+  / "\\b"   { return "\b"; }
+  / "\\f"   { return "\f"; }
+  / "\\n"   { return "\n"; }
+  / "\\r"   { return "\r"; }
+  / "\\t"   { return "\t"; }
 
 Or  = "||"  { return 'or'; }
 And = "&&"  { return 'an'; }
