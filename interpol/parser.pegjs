@@ -428,13 +428,18 @@ callArgs
     }
 
 member
-  = expr:tuple _ "." __ elem:Identifier  {
-      return [lit('mb'), expr, elem];
+  = head:tuple
+    tail:( sel:memberSelector { return [lit('mb'), sel]; } )*  {
+      return buildBinaryChain(head, tail);
     }
-  / expr:tuple _ "[" __ elem:expr __ "]"  {
-      return [lit('mb'), expr, elem];
+
+memberSelector
+  = _ "." __ elem:Identifier  {
+      return elem;
     }
-  / tuple
+  / _ "[" __ elem:expr __ "]"  {
+      return elem;
+    }
 
 tuple
   = "(" __ elems:elemList __ ")"  {

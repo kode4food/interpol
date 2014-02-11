@@ -9,7 +9,7 @@
 (function (parser, exportTarget, exportName) {
   "use strict";
 
-  var CURRENT_VERSION = "0.1.0"
+  var CURRENT_VERSION = "0.1.1"
     , TemplateCacheMax = 256
     , TemplateParamRegex = /%([1-9][0-9]*)?/
     , globalContext = {};
@@ -348,7 +348,7 @@
       for ( var i = 0, len = rangeNodes.length; i < len; i++ ) {
         var keyValueNode = rangeNodes[i];
         pairs.push([lits[keyValueNode[0]],
-                   wrapEvaluator(keyValueNode[1])]);
+                    wrapEvaluator(keyValueNode[1])]);
       }
       return pairs;
     }
@@ -385,6 +385,12 @@
         }
         return result;
       }
+    }
+
+    function getBinaryType(left, right) {
+      var l = typeof left === 'function' ? 1 : 0
+        , r = typeof right === 'function' ? 2 : 0;
+      return l | r;
     }
 
     // Evaluator Generation ***************************************************
@@ -561,41 +567,19 @@
     function createConditionalEvaluator(conditionNode, trueNodes, falseNodes) {
       var $1 = createEvaluator(conditionNode)
         , $2 = createStatementsEvaluator(trueNodes)
-        , $3 = createStatementsEvaluator(falseNodes)
-        , $2_func = typeof $2 === 'function'
-        , $3_func = typeof $3 === 'function';
+        , $3 = createStatementsEvaluator(falseNodes);
 
       if ( typeof $1 !== 'function' ) {
         return $1 ? $2 : $3;
       }
-      else if ( $2_func && $3_func ) {
-        return condBothEvaluator;
-      }
-      else if ( $2_func ) {
-        return condTrueEvaluator;
-      }
-      else if ( $3_func ) {
-        return condFalseEvaluator;
-      }
-      else {
-        return condLiteralEvaluator;
-      }
 
-      function condBothEvaluator(ctx, writer) {
-        return $1(ctx, writer) ? $2(ctx, writer) : $3(ctx, writer);
-      }
+      var type = getBinaryType($2, $3);
+      return [condLiteral, condTrue, condFalse, condBoth][type];
 
-      function condTrueEvaluator(ctx, writer) {
-        return $1(ctx, writer) ? $2(ctx, writer) : $3;
-      }
-
-      function condFalseEvaluator(ctx, writer) {
-        return $1(ctx, writer) ? $2 : $3(ctx, writer);
-      }
-
-      function condLiteralEvaluator(ctx, writer) {
-        return $1(ctx, writer) ? $2 : $3;
-      }
+      function condLiteral(c, w) { return $1(c, w) ? $2 : $3; }
+      function condTrue(c, w) { return $1(c, w) ? $2(c, w) : $3; }
+      function condFalse(c, w) { return $1(c, w) ? $2 : $3(c, w); }
+      function condBoth(c, w) { return $1(c, w) ? $2(c, w) : $3(c, w); }
     }
 
     function createOrEvaluator(leftNode, rightNode) {
@@ -623,11 +607,11 @@
       var $1 = createEvaluator(leftNode)
         , $2 = createEvaluator(rightNode);
 
-      if ( $1 !== 'function' ) {
+      if ( typeof $1 !== 'function' ) {
         return $1 && $2;
       }
 
-      return $2 === 'function' ? andFuncEvaluator : andLiteralEvaluator;
+      return typeof $2 === 'function' ? andFuncEvaluator : andLiteralEvaluator;
 
       function andFuncEvaluator(ctx, writer) {
         var lval = $1(ctx, writer);
@@ -643,168 +627,135 @@
     function createEqEvaluator(leftNode, rightNode) {
       var $1 = createEvaluator(leftNode)
         , $2 = createEvaluator(rightNode)
-        , $1_func = typeof $1 === 'function'
-        , $2_func = typeof $2 === 'function';
+        , type = getBinaryType($1, $2);
 
-      return $1_func || $2_func ? eqEvaluator : eqEvaluator();
+      return [null, eqLeft, eqRight, eqBoth][type] || ($1 == $2);
 
-      function eqEvaluator(ctx, writer) {
-        var lval = $1_func ? $1(ctx, writer) : $1
-          , rval = $2_func ? $2(ctx, writer) : $2;
-        return lval == rval;
-      }
+      function eqLeft(c, w) { return $1(c, w) == $2; }
+      function eqRight(c, w) { return $1 == $2(c, w); }
+      function eqBoth(c, w) { return $1(c, w) == $2(c, w); }
     }
 
     function createNeqEvaluator(leftNode, rightNode) {
       var $1 = createEvaluator(leftNode)
         , $2 = createEvaluator(rightNode)
-        , $1_func = typeof $1 === 'function'
-        , $2_func = typeof $2 === 'function';
+        , type = getBinaryType($1, $2);
 
-      return $1_func || $2_func ? neqEvaluator : neqEvaluator();
+      return [null, neqLeft, neqRight, neqBoth][type] || ($1 != $2);
 
-      function neqEvaluator(ctx, writer) {
-        var lval = $1_func ? $1(ctx, writer) : $1
-          , rval = $2_func ? $2(ctx, writer) : $2;
-        return lval != rval;
-      }
+      function neqLeft(c, w) { return $1(c, w) != $2; }
+      function neqRight(c, w) { return $1 != $2(c, w); }
+      function neqBoth(c, w) { return $1(c, w) != $2(c, w); }
     }
 
     function createGtEvaluator(leftNode, rightNode) {
       var $1 = createEvaluator(leftNode)
         , $2 = createEvaluator(rightNode)
-        , $1_func = typeof $1 === 'function'
-        , $2_func = typeof $2 === 'function';
+        , type = getBinaryType($1, $2);
 
-      return $1_func || $2_func ? gtEvaluator : gtEvaluator();
+      return [null, gtLeft, gtRight, gtBoth][type] || ($1 > $2);
 
-      function gtEvaluator(ctx, writer) {
-        var lval = $1_func ? $1(ctx, writer) : $1
-          , rval = $2_func ? $2(ctx, writer) : $2;
-        return lval > rval;
-      }
+      function gtLeft(c, w) { return $1(c, w) > $2; }
+      function gtRight(c, w) { return $1 > $2(c, w); }
+      function gtBoth(c, w) { return $1(c, w) > $2(c, w); }
     }
 
     function createGteEvaluator(leftNode, rightNode) {
       var $1 = createEvaluator(leftNode)
         , $2 = createEvaluator(rightNode)
-        , $1_func = typeof $1 === 'function'
-        , $2_func = typeof $2 === 'function';
+        , type = getBinaryType($1, $2);
 
-      return $1_func || $2_func ? gteEvaluator : gteEvaluator();
+      return [null, gteLeft, gteRight, gteBoth][type] || ($1 >= $2);
 
-      function gteEvaluator(ctx, writer) {
-        var lval = $1_func ? $1(ctx, writer) : $1
-          , rval = $2_func ? $2(ctx, writer) : $2;
-        return lval >= rval;
-      }
+      function gteLeft(c, w) { return $1(c, w) >= $2; }
+      function gteRight(c, w) { return $1 >= $2(c, w); }
+      function gteBoth(c, w) { return $1(c, w) >= $2(c, w); }
     }
 
     function createLtEvaluator(leftNode, rightNode) {
       var $1 = createEvaluator(leftNode)
         , $2 = createEvaluator(rightNode)
-        , $1_func = typeof $1 === 'function'
-        , $2_func = typeof $2 === 'function';
+        , type = getBinaryType($1, $2);
 
-      return $1_func || $2_func ? ltEvaluator : ltEvaluator();
+      return [null, ltLeft, ltRight, ltBoth][type] || ($1 < $2);
 
-      function ltEvaluator(ctx, writer) {
-        var lval = $1_func ? $1(ctx, writer) : $1
-          , rval = $2_func ? $2(ctx, writer) : $2;
-        return lval < rval;
-      }
+      function ltLeft(c, w) { return $1(c, w) < $2; }
+      function ltRight(c, w) { return $1 < $2(c, w); }
+      function ltBoth(c, w) { return $1(c, w) < $2(c, w); }
     }
 
     function createLteEvaluator(leftNode, rightNode) {
       var $1 = createEvaluator(leftNode)
         , $2 = createEvaluator(rightNode)
-        , $1_func = typeof $1 === 'function'
-        , $2_func = typeof $2 === 'function';
+        , type = getBinaryType($1, $2);
 
-      return $1_func || $2_func ? lteEvaluator : lteEvaluator();
+      return [null, lteLeft, lteRight, lteBoth][type] || ($1 <= $2);
 
-      function lteEvaluator(ctx, writer) {
-        var lval = $1_func ? $1(ctx, writer) : $1
-          , rval = $2_func ? $2(ctx, writer) : $2;
-        return lval <= rval;
-      }
+      function lteLeft(c, w) { return $1(c, w) <= $2; }
+      function lteRight(c, w) { return $1 <= $2(c, w); }
+      function lteBoth(c, w) { return $1(c, w) <= $2(c, w); }
     }
 
     function createAddEvaluator(leftNode, rightNode) {
       var $1 = createEvaluator(leftNode)
         , $2 = createEvaluator(rightNode)
-        , $1_func = typeof $1 === 'function'
-        , $2_func = typeof $2 === 'function';
+        , type = getBinaryType($1, $2);
 
-      return $1_func || $2_func ? addEvaluator : addEvaluator();
+      return [null, addLeft, addRight, addBoth][type] || ($1 + $2);
 
-      function addEvaluator(ctx, writer) {
-        var lval = $1_func ? $1(ctx, writer) : $1
-          , rval = $2_func ? $2(ctx, writer) : $2;
-        return lval + rval;
-      }
+      function addLeft(c, w) { return $1(c, w) + $2; }
+      function addRight(c, w) { return $1 + $2(c, w); }
+      function addBoth(c, w) { return $1(c, w) + $2(c, w); }
     }
 
     function createSubEvaluator(leftNode, rightNode) {
       var $1 = createEvaluator(leftNode)
         , $2 = createEvaluator(rightNode)
-        , $1_func = typeof $1 === 'function'
-        , $2_func = typeof $2 === 'function';
+        , type = getBinaryType($1, $2);
 
-      return $1_func || $2_func ? subEvaluator : subEvaluator();
+      return [null, subLeft, subRight, subBoth][type] || ($1 - $2);
 
-      function subEvaluator(ctx, writer) {
-        var lval = $1_func ? $1(ctx, writer) : $1
-          , rval = $2_func ? $2(ctx, writer) : $2;
-        return lval - rval;
-      }
+      function subLeft(c, w) { return $1(c, w) - $2; }
+      function subRight(c, w) { return $1 - $2(c, w); }
+      function subBoth(c, w) { return $1(c, w) - $2(c, w); }
     }
 
     function createMulEvaluator(leftNode, rightNode) {
       var $1 = createEvaluator(leftNode)
         , $2 = createEvaluator(rightNode)
-        , $1_func = typeof $1 === 'function'
-        , $2_func = typeof $2 === 'function';
+        , type = getBinaryType($1, $2);
 
-      return $1_func || $2_func ? mulEvaluator : mulEvaluator();
+      return [null, mulLeft, mulRight, mulBoth][type] || ($1 * $2);
 
-      function mulEvaluator(ctx, writer) {
-        var lval = $1_func ? $1(ctx, writer) : $1
-          , rval = $2_func ? $2(ctx, writer) : $2;
-        return lval * rval;
-      }
+      function mulLeft(c, w) { return $1(c, w) * $2; }
+      function mulRight(c, w) { return $1 * $2(c, w); }
+      function mulBoth(c, w) { return $1(c, w) * $2(c, w); }
     }
 
     function createDivEvaluator(leftNode, rightNode) {
       var $1 = createEvaluator(leftNode)
         , $2 = createEvaluator(rightNode)
-        , $1_func = typeof $1 === 'function'
-        , $2_func = typeof $2 === 'function';
+        , type = getBinaryType($1, $2);
 
-      return $1_func || $2_func ? divEvaluator : divEvaluator();
+      return [null, divLeft, divRight, divBoth][type] || ($1 / $2);
 
-      function divEvaluator(ctx, writer) {
-        var lval = $1_func ? $1(ctx, writer) : $1
-          , rval = $2_func ? $2(ctx, writer) : $2;
-        return lval / rval;
-      }
+      function divLeft(c, w) { return $1(c, w) / $2; }
+      function divRight(c, w) { return $1 / $2(c, w); }
+      function divBoth(c, w) { return $1(c, w) / $2(c, w); }
     }
 
     function createModEvaluator(leftNode, rightNode) {
       var $1 = createEvaluator(leftNode)
         , $2 = createEvaluator(rightNode)
-        , $1_func = typeof $1 === 'function'
-        , $2_func = typeof $2 === 'function';
+        , type = getBinaryType($1, $2);
 
-      return $1_func || $2_func ? modEvaluator : modEvaluator();
+      return [null, modLeft, modRight, modBoth][type] || ($1 % $2);
 
-      function modEvaluator(ctx, writer) {
-        var lval = $1_func ? $1(ctx, writer) : $1
-          , rval = $2_func ? $2(ctx, writer) : $2;
-        return lval % rval;
-      }
+      function modLeft(c, w) { return $1(c, w) % $2; }
+      function modRight(c, w) { return $1 % $2(c, w); }
+      function modBoth(c, w) { return $1(c, w) % $2(c, w); }
     }
-
+    
     function createFormatEvaluator(formatNode, exprNode) {
       var $1 = createEvaluator(formatNode)
         , $1_func = typeof $1 === 'function'
@@ -870,21 +821,27 @@
 
     function createMemberEvaluator(parentNode, elemNode) {
       var $1 = createEvaluator(parentNode)
-        , $1_func = typeof $1 === 'function'
         , $2 = createEvaluator(elemNode)
-        , $2_func = typeof $2 === 'function';
+        , type = getBinaryType($1, $2);
 
-      return pathEvaluator;
+      if ( (type === 0 || type === 2) && typeof $1 !== 'object' ) {
+        return null;
+      }
 
-      function pathEvaluator(ctx, writer) {
-        var parent = $1_func ? $1(ctx, writer) : $1;
+      return [null, memLeft, memRight, memBoth][type] || ($1[$2]);
 
-        if ( !parent ) {
-          return null;
-        }
+      function memLeft(c, w) {
+        var parent = $1(c, w);
+        return typeof parent === 'object' ? parent[$2] : null;
+      }
 
-        var expr = $2_func ? $2(ctx, writer) : $2;
-        return parent[expr];
+      function memRight(c, w) {
+        return $1[$2(c, w)];
+      }
+
+      function memBoth(c, w) {
+        var parent = $1(c, w);
+        return typeof parent === 'object' ? parent[$2(c, w)] : null;
       }
     }
 
