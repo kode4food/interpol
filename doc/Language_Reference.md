@@ -168,7 +168,7 @@ end
 ```
 
 ### Expression Statements
-Any expression that is not evaluated in the context of another statement, such as in a For loop or If / Else statement, is consided to be an Expression Statement.  It will be evaluated and its result will be streamed to the template's output.  For example:
+Any expression that is not evaluated in the context of another statement, such as in a For loop or If / Else statement, is considered to be an Expression Statement.  It will be evaluated and its result will be streamed to the template's output.  For example:
 
 ```python
 "% out of % doctors agree: smoking causes smoke" % (9, 10)
@@ -187,7 +187,7 @@ These five expressions, like the one before, will display:
 ```
 
 ## Expressions
-Expressions are the building blocks of Interpol statements.  This section outlines the available expression operators, listing them from highest (literals) to lowest (interpolation) precendence.
+Expressions are the building blocks of Interpol statements.  This section outlines the available expression operators, listing them from highest (literals) to lowest (interpolation) precedence.
 
 ### Literals
 
