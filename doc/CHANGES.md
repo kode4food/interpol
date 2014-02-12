@@ -1,5 +1,8 @@
 # Change History
 
+## Version 0.1.2 - Bug Fixes and Test
+Fixed some bugs in the PEG.js parser, including its inability to right-recurse unary and membership productions.  Also increased test coverage.
+
 ## Version 0.1.1 - Initial Optimizations
 Starting to branch around literals as much as possible so that the runtime processor only executes code paths that are absolutely necessary.
 
