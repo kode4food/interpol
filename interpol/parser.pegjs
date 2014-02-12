@@ -411,7 +411,7 @@ multiplicative
     }
 
 unary
-  = op:Unary _ expr:call  {
+  = op:Unary _ expr:unary  {
       return [lit(op), expr];
     }
   / call
