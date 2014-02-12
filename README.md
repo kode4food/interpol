@@ -2,15 +2,19 @@
 
 ## Introduction
 
-At this moment, you might be asking a simple, and well-deserved question:
+There are a lot of templating systems out there and they're all similar.  In truth, Interpol isn't so different, which might beg the question:
 
     Why the hell another templating system?
 
-Admittedly, there are a lot of them out there and they're all very similar.  In truth, Interpol isn't very different, except that it does one thing that many templating systems don't do:
+The answer is simple.  I'm sick of looking at a template and feeling as though coding takes a back-seat to presentation.  The two roles seem to have blurred completely in recent years, so why the distinction?  I'm also sick of looking at a template and being unable to read the thing, even if it's one that I wrote yesterday.  That's why I developed Interpol.
 
-    It favors producing dynamic content
+That said, Interpol's goals are modest:
 
-This is important because, more often than not, the templates we're creating are pretty much devoid of static content.  So why is it that we need to 'escape' into a dynamic content mode using braces or processing instructions?  Why don't we just start in that mode and stay there?
+  * Provide easy to read/write templates that operate against JSON data
+  * Work well in both Node.js and the Browser
+  * Focus on an experience that favors dynamic content creation
+
+This last goal is important because the templates we're creating are often devoid of static content.  So why must we 'escape' into a dynamic content mode using braces or processing instructions?  Why don't we just start in that mode and stay there?
 
 ```html
 <html>
@@ -30,15 +34,15 @@ This is important because, more often than not, the templates we're creating are
 </html>
 ```
 
-The only static element on this page was its title, and usually even that isn't static.  So what did we do to escape *it* for static rendering?  We wrapped it in quotes.  The rest of the page mixed HTMLish elements and dynamic content rather seemlessly.
+The only static element on this page was its title, and usually even that isn't static.  So what did we do to escape *it* for static rendering?  We wrapped it in quotes.  The rest of the page was a clean mixture of HTMLish elements and dynamic content.
 
-I say 'HTMLish' because it's not pure HTML.  The value of attributes are also dynamically evaluated.  For example:
+I say 'HTMLish' because it's not pure HTML.  The values of attributes are also evaluated.  For example:
 
 ```html
 <li class=item.type id="id-%" % item.id>
 ```
 
-`class=item.type` outputs a class attribute whose value is taken directly from the item.type property.  `id="id-%" % item.id` outputs an id attribute whose value is interpolated from the item.id property.
+`class=item.type` outputs a class attribute whose value is taken from the item.type property.  `id="id-%" % item.id` outputs an id attribute whose value is interpolated from the item.id property.
 
 That's all well and good, but what about the ability to reuse templates?  Well, to do that you define partials:
 
@@ -68,13 +72,13 @@ end
 </html>
 ```
 
-Eventually, you'll also be able to move them elsewhere and import them.
+Some day you'll also be able to move them elsewhere and import them.
 
 ## Current Status
 The project was just started, so there's still quite a bit to do.  Check [the TODO document](doc/TODO.md) for an idea of what's to come.
 
 ## Installation
-A pre-built version of the parser is already included, but if you'd like to build it yourself then you can do so by issuing the following command from the package's top-level directory:
+A pre-built version of the parser is already included.  If you'd like to build it yourself then you can do so by issuing the following command from the package's top-level directory:
 
 ```bash
 npm install && npm run-script build
@@ -83,17 +87,21 @@ npm install && npm run-script build
 This will also install any development dependencies and maybe run the nodeunit test suite.
 
 ## Inclusion in Node.js
-Assuming you have installed the Interpol package into your project with npm, you can include it in a Node.js module with the following:
+Assuming you have installed the Interpol package with npm, you can include it in your Node code with the following:
 
 ```javascript
 var $interpol = require('interpol');
 ```
 
+*Note:* In Node you can name the returned function anything you'd like.  For these examples it will be `$interpol()`.  I leave out the dollar sign `$`.
+
 ## Inclusion in a Browser
-There are two ways to include Interpol templates in a browser-based application.  The first is to parse/compile raw templates using the PEG.js parser, and the second is to compile the templates from pre-parsed JSON output.  The PEG.js parser is *massive* and parsing using it is considerably slower than parsing JSON, but it may be necessary if you want to compile ad-hoc templates.
+There are two ways to include Interpol templates in a browser-based application.  The first is to parse/compile raw templates using the PEG.js parser.  The second is to compile the templates from pre-parsed JSON output.  The PEG.js parser is *massive* and slower than parsing JSON, but it may be necessary if you want to compile ad-hoc templates.
+
+*Note:* The entry point function for Interpol in the browser is *always* named `$interpol()`.
 
 ### Including the PEG.js Parser
-If you *must* parse raw templates in the browser, you will need to load the Interpol PEG.js parser.  The order in which the parser is loaded doesn't matter, so long as it's loaded before you attempt to compile a raw template.
+If you *must* parse raw templates in the browser, you will need to load the Interpol PEG.js parser.  The order in which you load the parser doesn't matter, so long as it's loaded before you attempt to compile a raw template.
 
 ```html
 <script src="/js/interpol/parser.js" type="text/javascript"></script>
@@ -101,24 +109,24 @@ If you *must* parse raw templates in the browser, you will need to load the Inte
 ```
 
 ### Compiling Pre-Parsed JSON
-The `$interpol()` function will accept a pre-parsed JSON object instead of a JavaScript string.  This will allow you to bypass the loading of the PEG.js parser and to store pre-parsed templates on your server for faster compilation.
+The `$interpol()` function will accept a pre-parsed JSON object instead of a JavaScript string.  This will allow you to bypass the loading of the PEG.js parser.  Instead, you can load pre-parsed templates from your server for faster compilation.
 
-You can also invoke the compiler explicitly by calling the `$interpol.compile(Object)` function.
+You can also invoke the compiler by calling the `$interpol.compile(Object)` function.
 
 ```html
 <script src="/js/interpol/interpol.js" type="text/javascript"></script>
 ```
 
-*Note:* The Interpol command-line interface can be used to generate pre-parsed JSON.  You can install this globally using `npm -g install` and can then invoke the tools at your terminal by typing `interpol`.
+*Note:* The Interpol command-line interface generates pre-parsed JSON.  You can install this globally using `npm -g install` and can then invoke the tools at your terminal by typing `interpol`.
 
 ## Using the Library
-To compile a raw template into a closure, you can simply invoke `$interpol(String)` as a function, providing to it a string containing your template:
+To compile a raw template into a closure, invoke `$interpol(String)` as a function.  Provide to it a string containing your template:
 
 ```javascript
 var compiledTemplate = $interpol(someTemplateString);
 ```
 
-This will generate a closure that takes up to two parameters, both of which are optional.  The first is the data that will be used in rendering your template.  The second is an options object that, among other things, allows you to override the content writer interface Interpol uses to render your template.  By default, the library renders to a JavaScript string.
+This will generate a closure that takes up to two parameters, both of which are optional.  The first is the data that your template renders.  The second is an options object used to override the content writer interface.  By default, the library writes to a JavaScript string.
 
 ```javascript
 console.log(
