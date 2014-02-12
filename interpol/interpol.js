@@ -9,7 +9,7 @@
 (function (parser, exportTarget, exportName) {
   "use strict";
 
-  var CURRENT_VERSION = "0.1.1"
+  var CURRENT_VERSION = "0.1.2"
     , TemplateCacheMax = 256
     , TemplateParamRegex = /%([1-9][0-9]*)?/
     , globalContext = {};
@@ -883,6 +883,7 @@
   exportTarget[exportName] = interpol;
   interpol.VERSION = CURRENT_VERSION;
   interpol.parser = parser;
+  interpol.globals = globalContext;
   interpol.parse = parse;
   interpol.compile = compile;
 
