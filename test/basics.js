@@ -10,6 +10,7 @@ exports.basics = nodeunit.testCase({
   setUp: function (callback) {
     this.data = {
       "title": "Famous People",
+      "dogs_lbl": "Furthermore, %3 are the new %",
       "people" : [
         { "name": "Larry", "age": 50, "brothers": [] },
         { "name": "Curly", "age": 45, "brothers": ["Moe", "Shemp"]},
@@ -39,6 +40,62 @@ exports.basics = nodeunit.testCase({
     test.equal(eval("100 / people[0].age", this.data), "2");
     test.equal(eval("3 * people[0].age", this.data), "150");
     test.equal(eval("(33 * 6 - (people[0].age + 1)) mod 6", this.data), "3");
+    test.done();
+  },
+
+  "Relational Evaluation": function (test) {
+    test.equal(eval("10 * 99 gt 900"), "true");
+    test.equal(eval("100 / 5 ge 30"), "false");
+    test.equal(eval("99 mod 6 ge 3"), "true");
+    test.equal(eval("33 * 3 mod 6 le 2"), "false");
+    test.equal(eval("people[0].age * 2 gt 99", this.data), "true");
+    test.equal(eval("people[0].age / 2 lt 24", this.data), "false");
+    test.equal(eval("100 / people[0].age ge 2", this.data), "true");
+    test.equal(eval("3 * people[0].age le 149", this.data), "false");
+    test.done();
+  },
+
+  "Equality Evaluation": function (test) {
+    test.equal(eval("10 * 99 == 990"), "true");
+    test.equal(eval("100 / 5 != 19"), "true");
+    test.equal(eval("99 mod 6 == 3"), "true");
+    test.equal(eval("33 * 3 mod 6 != 2"), "true");
+    test.equal(eval("people[0].age * 2 == 99", this.data), "false");
+    test.equal(eval("people[0].age / 2 != 25", this.data), "false");
+    test.equal(eval("100 / people[0].age == 2", this.data), "true");
+    test.equal(eval("3 * people[0].age != 149", this.data), "true");
+    test.done();
+  },
+
+  "Interpolation Evaluation": function (test) {
+    test.equal(eval("'% is the new %' % ('red', 'black')"),
+               "red is the new black");
+    test.equal(eval("'%2 is the new %1' % ('red', 'black')"),
+               "black is the new red");
+    test.equal(eval("dogs_lbl % ('red', 'cats', 'dogs')", this.data),
+               "Furthermore, dogs are the new cats");
+    test.done();
+  },
+
+  "Boolean Or/And Evaluation": function (test) {
+    test.equal(eval("true && false"), "false");
+    test.equal(eval("true || false"), "true");
+    test.equal(eval("people[0].age * 2 == 100 && 'yep'", this.data), "yep");
+    test.equal(eval("people[0].age * 2 == 99 || 'nope'", this.data), "nope");
+    test.equal(eval("'yep' && people[0].age * 2", this.data), "100");
+    test.equal(eval("'yep' || people[0].age * 2", this.data), "yep");
+    test.equal(eval("false || people[0].age * 2", this.data), "100");
+    test.done();
+  },
+
+  "Unary Evaluation": function (test) {
+    test.equal(eval("-1"), "-1");
+    test.equal(eval("!false"), "true");
+    test.equal(eval("!true"), "false");
+    test.equal(eval("!(----10 - 10)"), "true");
+    test.equal(eval("-people[0].age", this.data), "-50");
+    test.equal(eval("-people[0].age + 10", this.data), "-40");
+    test.equal(eval("!(people[0].age == 25)", this.data), "true");
     test.done();
   }
 });
