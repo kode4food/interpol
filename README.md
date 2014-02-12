@@ -4,7 +4,7 @@
 
 At this moment, you might be asking a simple, and well-deserved question:
 
-    Why the fuck another templating system?
+    Why the hell another templating system?
 
 Admittedly, there are a lot of them out there and they're all very similar.  In truth, Interpol isn't very different, except that it does one thing that many templating systems don't do:
 
