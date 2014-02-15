@@ -233,10 +233,9 @@ blockStatement
       return [s, null];
     }
 
-eolStatement
-  = s:(statementWhitespace / statementNoWhitespace) EOL  {
-      return s;
-    }
+statement
+  = statementWhitespace
+  / statementNoWhitespace
 
 statementWhitespace
   = htmlComment
@@ -266,7 +265,7 @@ tagTail
   / ">"   { return 0; }
 
 attribute
-  = name:htmlId value:(_ "=" __ e:expr { return e; })?  {
+  = name:htmlId value:( _ "=" __ e:expr { return e; } )?  {
       return [name, value === null ? lit(null) : value];
     }
 
@@ -281,10 +280,10 @@ htmlComment
     }
 
 defStatement
-  = Def _ id:Identifier _ params:params? _ ":" _ stmt:eolStatement  {
+  = Def _ id:Identifier _ params:params? _ ":" __ stmt:statement  {
       return [lit('de'), id, params, [stmt]];
     }
-  / Def _ id:Identifier _ params:params? EOL stmts:statements End  {
+  / Def _ id:Identifier _ params:params? __ stmts:statements End  {
       return [lit('de'), id, params, stmts];
     }
 
@@ -302,7 +301,7 @@ paramList
     }
 
 fromStatement
-  = From _ id:Identifier __ Import _ imports:importList EOL  {
+  = From _ id:Identifier __ Import _ imports:importList  {
       return [lit('im'), id, imports];
     }
 
@@ -317,10 +316,10 @@ importItem
     }
 
 forStatement
-  = For _ ranges:ranges _ ":" _ stmt:eolStatement  {
+  = For _ ranges:ranges _ ":" __ stmt:statement  {
       return [lit('fr'), ranges, [stmt]];
     }
-  / For _ ranges:ranges EOL stmts:statements End  {
+  / For _ ranges:ranges __ stmts:statements End  {
       return [lit('fr'), ranges, stmts];
     }
 
@@ -335,21 +334,21 @@ range
     }
 
 ifStatement
-  = If _ expr:expr _ ":" _ stmt:eolStatement  {
+  = If _ expr:expr _ ":" __ stmt:statement  {
       return [lit('cn'), expr, [stmt], [lit(null)]];
     }
-  / If _ expr:expr EOL stmts:statements tail:ifTail  {
+  / If _ expr:expr __ stmts:statements tail:ifTail  {
       return [lit('cn'), expr, stmts, tail];
     }
 
 ifTail
-  = Else _ ":" _ s:eolStatement  {
+  = Else _ ":" __ s:statement  {
       return [s];
     }
   / Else _ i:ifStatement  {
       return [i];
     }
-  / Else EOL stmts:statements End  {
+  / Else __ stmts:statements End  {
       return stmts;
     }
   / End  {
@@ -369,7 +368,7 @@ interpolation
     }
 
 conditional
-  = cond:or _ "?" __ tval:conditional _ ":" __ fval:conditional  {
+  = cond:or _ "?" __ tval:conditional __ ":" __ fval:conditional  {
       return [lit('cn'), cond, tval, fval];
     }
   / or

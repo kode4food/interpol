@@ -12,6 +12,7 @@
   var CURRENT_VERSION = "0.1.2"
     , TemplateCacheMax = 256
     , TemplateParamRegex = /%([1-9][0-9]*)?/
+    , globalOptions = { writer: null, errorCallback: null }
     , globalContext = {};
 
   // Utilities ****************************************************************
@@ -207,11 +208,6 @@
 
   // Core Interpol Implementation *********************************************
 
-  var DefaultOptions = freezeObject({
-    writer: null,
-    errorCallback: null
-  });
-
   function interpol(template) {
     var parseOutput = null;
     if ( typeof template === 'object' && template.i == 'interpol' ) {
@@ -278,7 +274,7 @@
 
     function compiledTemplate(obj, options) {
       var ctx = mixin({}, globalContext, obj || {})
-        , options = mixin({}, DefaultOptions, options || {});
+        , options = mixin({}, globalOptions, options || {});
 
       var writer = options.writer
         , content = null;
@@ -430,7 +426,7 @@
       function callEvaluator(ctx, writer) {
         var func = ctx[name];
         if ( typeof func !== 'function' || !func._isInterpolFunction ) {
-          throw new Error("'" + name + "' is not a function");
+          throw new Error("'" + name + "' is not a valid function");
         }
         return func.apply(null, args(ctx, writer));
       }
@@ -629,7 +625,7 @@
         , $2 = createEvaluator(rightNode)
         , type = getBinaryType($1, $2);
 
-      return [null, eqLeft, eqRight, eqBoth][type] || ($1 == $2);
+       return [null, eqLeft, eqRight, eqBoth][type] || ($1 == $2);
 
       function eqLeft(c, w) { return $1(c, w) == $2; }
       function eqRight(c, w) { return $1 == $2(c, w); }
@@ -883,9 +879,11 @@
   exportTarget[exportName] = interpol;
   interpol.VERSION = CURRENT_VERSION;
   interpol.parser = parser;
+  interpol.options = globalOptions;
   interpol.globals = globalContext;
   interpol.parse = parse;
   interpol.compile = compile;
+  return freezeObject(interpol);
 
 })(typeof require === 'function' ? require('./parser') : null,
    typeof module === 'object' ? module : this,
