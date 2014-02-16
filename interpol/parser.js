@@ -258,10 +258,10 @@
         peg$c176 = ":",
         peg$c177 = { type: "literal", value: ":", description: "\":\"" },
         peg$c178 = function(id, params, stmt) {
-              return [lit('de'), id, params, [stmt]];
+              return [lit('de'), id, params || [], [stmt]];
             },
         peg$c179 = function(id, params, stmts) {
-              return [lit('de'), id, params, stmts];
+              return [lit('de'), id, params || [], stmts];
             },
         peg$c180 = function(params) {
               return params;

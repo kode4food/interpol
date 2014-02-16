@@ -287,10 +287,10 @@ htmlComment
 
 defStatement
   = Def _ id:Identifier _ params:params? _ ":" __ stmt:statement  {
-      return [lit('de'), id, params, [stmt]];
+      return [lit('de'), id, params || [], [stmt]];
     }
   / Def _ id:Identifier _ params:params? __ stmts:statements End  {
-      return [lit('de'), id, params, stmts];
+      return [lit('de'), id, params || [], stmts];
     }
 
 params
