@@ -431,7 +431,7 @@ call
 
 callArgs
   = "(" __ elems:elemList __ ")"  {
-      return [lit('tu'), elems];
+      return elems || [];
     }
 
 member

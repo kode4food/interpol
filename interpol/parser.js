@@ -332,7 +332,7 @@
               return [lit('ca'), id, args];
             },
         peg$c210 = function(elems) {
-              return [lit('tu'), elems];
+              return elems || [];
             },
         peg$c211 = function(sel) { return [lit('mb'), sel]; },
         peg$c212 = function(elem) {

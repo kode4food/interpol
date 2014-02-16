@@ -280,7 +280,6 @@
       , evaluator = wrapEvaluator(parseOutput.n)
       , exportedContext = null;
 
-    compiledTemplate._isInterpolFunction = true;
     compiledTemplate.exports = exports;
     return freezeObject(compiledTemplate);
 
@@ -418,7 +417,7 @@
 
     function createPartialEvaluator(nameLiteral, paramDefs, statementNodes) {
       var name = lits[nameLiteral]
-        , params = expandLiterals(paramDefs)
+        , params = [null].concat(expandLiterals(paramDefs))
         , plen = params.length
         , statements = createStatementsEvaluator(statementNodes);
 
@@ -430,7 +429,7 @@
 
         function bodyEvaluator(writer) {
           var newCtx = extendContext(ctx);
-          for ( var i = 0; i < plen; i++ ) {
+          for ( var i = 1; i < plen; i++ ) {
             newCtx[params[i]] = arguments[i];
           }
           return statements(newCtx, writer);
@@ -440,7 +439,8 @@
 
     function createCallEvaluator(nameLiteral, argNodes) {
       var name = lits[nameLiteral]
-        , args = createEvaluator(argNodes);
+        , args = [null].concat(wrapArrayEvaluators(argNodes))
+        , alen = args.length;
 
       return callEvaluator;
 
@@ -449,7 +449,13 @@
         if ( typeof func !== 'function' || !func._isInterpolFunction ) {
           throw new Error("'" + name + "' is not a valid function");
         }
-        return func.apply(null, [writer].concat(args(ctx, writer)));
+
+        var callArgs = [writer];
+        for ( var i = 1; i < alen; i++ ) {
+          callArgs[i] = args[i](ctx, writer);
+        }
+
+        return func.apply(null, callArgs);
       }
     }
 
