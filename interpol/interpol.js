@@ -62,6 +62,8 @@
     return target;
   }
 
+  function noOp() {}
+
   // String Handling **********************************************************
 
   // TODO: Need to handle complex types like Dates
@@ -70,7 +72,7 @@
     switch ( type ) {
       case 'string':    return obj;
       case 'number':    return obj.toString();
-      case 'boolean':   return obj ? 'true' : 'false'
+      case 'boolean':   return obj ? 'true' : 'false';
       case 'undefined': return '';
       case 'object':    return obj !== null ? obj.toString() : '';
       case 'xml':       return obj.toXMLString();
@@ -162,7 +164,15 @@
     }
   }
 
-  // Default Writer Implementation ********************************************
+  // Default Writer Implementations *******************************************
+
+  var NullWriter = freezeObject({
+    startElement: noOp,
+    selfCloseElement: noOp,
+    endElement: noOp,
+    comment: noOp,
+    content: noOp
+  });
 
   function createArrayWriter(arr) {
     return freezeObject({
@@ -267,14 +277,16 @@
     });
 
     var lits = parseOutput.l
-      , evaluator = wrapEvaluator(parseOutput.n);
+      , evaluator = wrapEvaluator(parseOutput.n)
+      , exportedContext = null;
 
     compiledTemplate._isInterpolFunction = true;
-    return compiledTemplate;
+    compiledTemplate.exports = exports;
+    return freezeObject(compiledTemplate);
 
-    function compiledTemplate(obj, options) {
+    function compiledTemplate(obj, localOptions) {
       var ctx = mixin({}, globalContext, obj || {})
-        , options = mixin({}, globalOptions, options || {});
+        , options = mixin({}, globalOptions, localOptions || {});
 
       var writer = options.writer
         , content = null;
@@ -299,6 +311,15 @@
       return content ? content.join('') : null;
     }
 
+    function exports() {
+      if ( exportedContext ) {
+        return exportedContext;
+      }
+      exportedContext = mixin({}, globalContext);
+      evaluator(exportedContext, NullWriter);
+      return freezeObject(exportedContext);
+    }
+    
     // Evaluator Generation Utilities *****************************************
 
     function wrapEvaluator(node) {
@@ -403,11 +424,11 @@
 
       return closureEvaluator;
 
-      function closureEvaluator(ctx, writer) {
-        ctx[name] = bodyEvaluator;
+      function closureEvaluator(ctx /*, writer */) {
         bodyEvaluator._isInterpolFunction = true;
+        ctx[name] = bodyEvaluator;
 
-        function bodyEvaluator() {
+        function bodyEvaluator(writer) {
           var newCtx = extendContext(ctx);
           for ( var i = 0; i < plen; i++ ) {
             newCtx[params[i]] = arguments[i];
@@ -428,7 +449,7 @@
         if ( typeof func !== 'function' || !func._isInterpolFunction ) {
           throw new Error("'" + name + "' is not a valid function");
         }
-        return func.apply(null, args(ctx, writer));
+        return func.apply(null, [writer].concat(args(ctx, writer)));
       }
     }
 
@@ -544,6 +565,11 @@
             , collection = range[1](newCtx, writer);
 
           if ( !isArray(collection) ) {
+            // TODO: Since we have conditionals, should we be bothering to
+            // coerce the value to display it once?
+            if ( typeof collection === 'undefined' || collection === null ) {
+              return;
+            }
             collection = [collection];
           }
 
