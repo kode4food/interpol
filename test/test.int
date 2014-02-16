@@ -1,13 +1,13 @@
-def renderItem(person, brother)
-  <li>"%2 is the brother of %1" % (brother, person.name)</li>
-end
-
 def renderList(people)
   <ul>
   for person in people, brother in person.brothers
     renderItem(person, brother)
   end
   </ul>
+end
+
+def renderItem(person, brother)
+  <li>"%2 is the brother of %1" % (brother, person.name)</li>
 end
 
 <html>

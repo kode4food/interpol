@@ -47,6 +47,7 @@ As     = "as"     !IdentCont
 For    = "for"    !IdentCont
 In     = "in"     !IdentCont
 If     = "if"     !IdentCont
+Unless = "unless" !IdentCont
 Else   = "else"   !IdentCont
 End    = "end"    !IdentCont
 True   = "true"   !IdentCont
@@ -57,8 +58,9 @@ LTEKwd = "le"     !IdentCont
 GTEKwd = "ge"     !IdentCont
 ModKwd = "mod"    !IdentCont
 
-ReservedWord = ( Def / From / Import / As / For / In / If / Else / End /
-                 True / False / LTKwd / GTKwd / LTEKwd / GTEKwd / ModKwd )
+ReservedWord = ( Def / From / Import / As / For / In / If / Unless / Else / 
+                 End / True / False / LTKwd / GTKwd / LTEKwd / GTEKwd / 
+                 ModKwd )
 
 Identifier
   = !ReservedWord id:IdentifierName  {
@@ -166,6 +168,10 @@ CommonChar
   / "\\n"   { return "\n"; }
   / "\\r"   { return "\r"; }
   / "\\t"   { return "\t"; }
+
+IfUnless
+  = If      { return 'if'; }
+  / Unless  { return 'unless'; }
 
 Or  = "||"  { return 'or'; }
 And = "&&"  { return 'an'; }
@@ -334,10 +340,12 @@ range
     }
 
 ifStatement
-  = If _ expr:expr _ ":" __ stmt:statement  {
+  = op:IfUnless _ expr:expr _ ":" __ stmt:statement  {
+      if ( op === 'unless' ) { expr = [lit('no'), expr]; }
       return [lit('cn'), expr, [stmt], [lit(null)]];
     }
-  / If _ expr:expr __ stmts:statements tail:ifTail  {
+  / op:IfUnless _ expr:expr __ stmts:statements tail:ifTail  {
+      if ( op === 'unless' ) { expr = [lit('no'), expr]; }
       return [lit('cn'), expr, stmts, tail];
     }
 
