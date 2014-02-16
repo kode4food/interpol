@@ -571,12 +571,7 @@
             , collection = range[1](newCtx, writer);
 
           if ( !isArray(collection) ) {
-            // TODO: Since we have conditionals, should we be bothering to
-            // coerce the value to display it once?
-            if ( typeof collection === 'undefined' || collection === null ) {
-              return;
-            }
-            collection = [collection];
+            return;
           }
 
           for ( var i = 0, len = collection.length; i < len; i++ ) {
