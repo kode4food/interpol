@@ -132,6 +132,8 @@ else
 end
 ```
 
+*Note:* The `unless` keyword is syntactic sugar that can be used in place of `if !`.  Its purpose is to implicitly negate the condition.  So `if !happy` becomes `unless happy`.
+
 ### HTMLish Elements
 HTMLish elements allow HTML tags to be constructed using inlined expressions.  The nicest thing about this is that in many cases, these expressions end up looking *exactly* like normal HTML.  For example:
 
