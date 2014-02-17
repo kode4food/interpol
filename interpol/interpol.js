@@ -913,7 +913,7 @@
   interpol.globals = globalContext;
   interpol.parse = parse;
   interpol.compile = compile;
-  return freezeObject(interpol);
+  return interpol;
 
 })(typeof require === 'function' ? require('./parser') : null,
    typeof module === 'object' ? module : this,
