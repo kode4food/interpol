@@ -50,6 +50,7 @@ If     = "if"     !IdentCont
 Unless = "unless" !IdentCont
 Else   = "else"   !IdentCont
 End    = "end"    !IdentCont
+Let    = "let"    !IdentCont
 True   = "true"   !IdentCont
 False  = "false"  !IdentCont
 LTKwd  = "lt"     !IdentCont
@@ -59,7 +60,7 @@ GTEKwd = "ge"     !IdentCont
 ModKwd = "mod"    !IdentCont
 
 ReservedWord = ( Def / From / Import / As / For / In / If / Unless / Else / 
-                 End / True / False / LTKwd / GTKwd / LTEKwd / GTEKwd / 
+                 End / Let / True / False / LTKwd / GTKwd / LTEKwd / GTEKwd /
                  ModKwd )
 
 Identifier
@@ -200,12 +201,10 @@ Additive = Add / Sub
 Multiplicative = Mul / Div / Mod
 Unary = Neg / Not
 
-_
-  = WS*  {
-      return lit(' ');
-    }
+_  = WS*
+__ = ( WS / NL / Comment )*
 
-__
+___
   = s:( WS { return ' '; } / (NL / Comment) { return '\n'; } )*  {
       var res = s.join('');
       if ( !res.length ) {
@@ -232,7 +231,7 @@ statements
     }
 
 blockStatement
-  = __ s:statementWhitespace ws:__ {
+  = __ s:statementWhitespace ws:___ {
       return [s, ws];
     }
   / __ s:statementNoWhitespace __ {
@@ -254,6 +253,7 @@ statementNoWhitespace
   / fromStatement
   / forStatement
   / ifStatement
+  / letStatement
 
 openTag
   = "<" __ tag:htmlId __ attrs:( a:attribute  __ { return a; } )* t:tagTail  {
@@ -307,8 +307,11 @@ paramList
     }
 
 fromStatement
-  = From _ id:Identifier __ Import _ imports:importList  {
-      return [lit('im'), id, imports];
+  = From _ module:Identifier __ Import _ imports:importList  {
+      return [lit('im'), [module, imports]];
+    }
+  / Import _ modules:moduleList  {
+      return [lit('im'), modules];
     }
 
 importList
@@ -318,7 +321,16 @@ importList
 
 importItem
   = name:Identifier alias:( _ As _ id:Identifier { return id; } )?  {
-      return [name, alias];
+      if ( alias ) {
+        return [name, alias];
+      }
+      return [name];
+    }
+
+moduleList
+  = start:Identifier
+    cont:( _ "," __ id:Identifier { return [id, []]; } )*  {
+      return [[start, []]].concat(cont);
     }
 
 forStatement
@@ -335,7 +347,7 @@ ranges
     }
 
 range
-  = id:Identifier _ In _ col:expr  {
+  = id:Identifier _ In __ col:expr  {
       return [id, col];
     }
 
@@ -361,6 +373,21 @@ ifTail
     }
   / End  {
       return [lit(null)];
+    }
+
+letStatement
+  = Let _ a:assignments  {
+    return [lit('as'), a];
+  }
+
+assignments
+  = start:assignment cont:( _ "," __ a:assignment { return a; } )*  {
+      return [start].concat(cont);
+    }
+
+assignment
+  = id:Identifier _ "=" __ expr:expr  {
+      return [id, expr];
     }
 
 exprStatement
@@ -431,7 +458,10 @@ call
 
 callArgs
   = "(" __ elems:elemList __ ")"  {
-      return elems || [];
+      return elems;
+    }
+  / "(" __ ")"  {
+      return [];
     }
 
 member
