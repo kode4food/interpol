@@ -52,6 +52,9 @@
   function mixin(target) {
     for ( var i = 1, len = arguments.length; i < len; i++ ) {
       var src = arguments[i];
+      if ( !src ) {
+        continue;
+      }
       for ( var key in src ) {
         if ( !src.hasOwnProperty(key) ) {
           continue;
@@ -284,8 +287,8 @@
     return freezeObject(compiledTemplate);
 
     function compiledTemplate(obj, localOptions) {
-      var ctx = mixin({}, globalContext, obj || {})
-        , options = mixin({}, globalOptions, localOptions || {});
+      var ctx = mixin(extendContext(globalContext), obj)
+        , options = mixin({}, globalOptions, localOptions);
 
       var writer = options.writer
         , content = null;
@@ -314,7 +317,7 @@
       if ( exportedContext ) {
         return exportedContext;
       }
-      exportedContext = mixin({}, globalContext);
+      exportedContext = extendContext(globalContext);
       evaluator(exportedContext, NullWriter);
       return freezeObject(exportedContext);
     }
