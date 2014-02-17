@@ -909,8 +909,8 @@
   exportTarget[exportName] = interpol;
   interpol.VERSION = CURRENT_VERSION;
   interpol.parser = parser;
-  interpol.options = globalOptions;
-  interpol.globals = globalContext;
+  interpol.options = function options() { return globalOptions; };
+  interpol.globals = function globals() { return globalContext; };
   interpol.parse = parse;
   interpol.compile = compile;
   return interpol;
