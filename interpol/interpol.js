@@ -9,7 +9,7 @@
 (function (parser, exportTarget, exportName) {
   "use strict";
 
-  var CURRENT_VERSION = "0.1.2"
+  var CURRENT_VERSION = "0.1.3"
     , TemplateCacheMax = 256
     , TemplateParamRegex = /%([1-9][0-9]*)?/
     , globalOptions = { writer: null, errorCallback: null }
@@ -252,6 +252,7 @@
       im: createModuleEvaluator,
       de: createPartialEvaluator,
       ca: createCallEvaluator,
+      as: createAssignEvaluator,
       op: createOpenTagEvaluator,
       cl: createCloseTagEvaluator,
       ct: createCommentTagEvaluator,
@@ -356,18 +357,17 @@
       var pairs = [];
       for ( var i = 0, len = keyValueNodes.length; i < len; i++ ) {
         var keyValueNode = keyValueNodes[i];
-        pairs.push([createEvaluator(keyValueNode[0]),
-                    createEvaluator(keyValueNode[1])]);
+        pairs[i] = [createEvaluator(keyValueNode[0]),
+                    createEvaluator(keyValueNode[1])];
       }
       return pairs;
     }
 
-    function wrapRangeEvaluators(rangeNodes) {
+    function wrapAssignmentEvaluators(rangeNodes) {
       var pairs = [];
       for ( var i = 0, len = rangeNodes.length; i < len; i++ ) {
         var keyValueNode = rangeNodes[i];
-        pairs.push([lits[keyValueNode[0]],
-                    wrapEvaluator(keyValueNode[1])]);
+        pairs[i] = [lits[keyValueNode[0]], wrapEvaluator(keyValueNode[1])];
       }
       return pairs;
     }
@@ -427,7 +427,7 @@
       return closureEvaluator;
 
       function closureEvaluator(ctx /*, writer */) {
-        bodyEvaluator._isInterpolFunction = true;
+        bodyEvaluator._interpolPartial = true;
         ctx[name] = bodyEvaluator;
 
         function bodyEvaluator(writer) {
@@ -449,7 +449,7 @@
 
       function callEvaluator(ctx, writer) {
         var func = ctx[name];
-        if ( typeof func !== 'function' || !func._isInterpolFunction ) {
+        if ( typeof func !== 'function' || !func._interpolPartial ) {
           throw new Error("'" + name + "' is not a valid function");
         }
 
@@ -459,6 +459,20 @@
         }
 
         return func.apply(null, callArgs);
+      }
+    }
+
+    function createAssignEvaluator(assignmentDefs) {
+      var assigns = wrapAssignmentEvaluators(assignmentDefs).reverse()
+        , alen = assigns.length;
+
+      return assignEvaluator;
+
+      function assignEvaluator(ctx, writer) {
+        for ( var i = alen; i--; ) {
+          var assign = assigns[i];
+          ctx[assign[0]] = assign[1](ctx, writer);
+        }
       }
     }
 
@@ -558,7 +572,7 @@
     }
 
     function createForEvaluator(rangeNodes, statementNodes) {
-      var ranges = wrapRangeEvaluators(rangeNodes).reverse()
+      var ranges = wrapAssignmentEvaluators(rangeNodes).reverse()
         , rlen = ranges.length
         , statements = createStatementsEvaluator(statementNodes);
 

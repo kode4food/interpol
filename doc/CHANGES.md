@@ -1,5 +1,10 @@
 # Change History
 
+## Version 0.1.3 - Let, Unless and Exports
+* `let` allows you to define variables in the local scope, meaning it will shadow any variables in a parent scope, rather than allowing you to overwrite them.
+* `unless` is syntactic sugar for `if !(...)`
+* Compiled templates now have an `exports()` function that returns functions and variables defined in their root context.  The results are evaluated against the global context *only*.
+
 ## Version 0.1.2 - Bug Fixes and Test
 Fixed some bugs in the PEG.js parser, including its inability to right-recurse unary and membership productions.  Also increased test coverage.
 
