@@ -222,7 +222,7 @@
 
   // Core Interpol Implementation *********************************************
 
-  function interpol(template) {
+  function interpol(template, options) {
     var parseOutput = null;
     if ( typeof template === 'object' && template.i == 'interpol' ) {
       if ( !template.n || !template.l ) {
@@ -233,7 +233,7 @@
     else {
       parseOutput = parse(template);
     }
-    return compile(parseOutput);
+    return compile(parseOutput, options);
   }
 
   function parse(template) {
@@ -248,7 +248,7 @@
     return result;
   }
 
-  function compile(parseOutput) {
+  function compile(parseOutput, localOptions) {
     var Evaluators = freezeObject({
       im: createModuleEvaluator,
       mi: createImportEvaluator,
@@ -283,6 +283,8 @@
     });
 
     var lits = parseOutput.l
+      , options = mixin({}, globalOptions, localOptions)
+      , resolvers = options.resolvers || globalResolvers
       , evaluator = wrapEvaluator(parseOutput.n)
       , exportedContext = null;
 
@@ -474,8 +476,8 @@
 
       function resolveModule(moduleName) {
         var module = modules[moduleName];
-        for ( var i = globalResolvers.length; !module && i--; ) {
-          module = globalResolvers[i].resolveModule(moduleName);
+        for ( var i = resolvers.length; !module && i--; ) {
+          module = resolvers[i].resolveModule(moduleName);
         }
         if ( module ) {
           modules[moduleName] = module;
