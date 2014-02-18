@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-/*!
+/**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
  * see doc/LICENSE.md

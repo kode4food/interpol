@@ -1,4 +1,4 @@
-/*!
+/**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
  * see doc/LICENSE.md
@@ -308,10 +308,10 @@ paramList
 
 fromStatement
   = From _ module:Identifier __ Import _ imports:importList  {
-      return [lit('im'), [module, imports]];
+      return [lit('mi'), [[module, imports]]];
     }
   / Import _ modules:moduleList  {
-      return [lit('im'), modules];
+      return [lit('mi'), modules];
     }
 
 importList

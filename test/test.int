@@ -10,6 +10,10 @@ def renderItem(person, brother)
   <li>"%2 is the brother of %1" % (brother, person.name)</li>
 end
 
+def renderTest(name)
+"Hello %" % name
+end
+
 <html>
   <head>
     <title>title</title>

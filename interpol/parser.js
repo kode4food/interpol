@@ -275,10 +275,10 @@
               return [start].concat(cont);
             },
         peg$c187 = function(module, imports) {
-              return [lit('im'), [module, imports]];
+              return [lit('mi'), [[module, imports]]];
             },
         peg$c188 = function(modules) {
-              return [lit('im'), modules];
+              return [lit('mi'), modules];
             },
         peg$c189 = function(item) { return item; },
         peg$c190 = function(name, alias) {

@@ -4,7 +4,7 @@
 Interpol is case-sensitive, meaning any of the keywords and identifiers must appear in the same case by which they're represented either in this document or in the JavaScript data being passed to Interpol.  All Interpol keywords are lower-case, while JavaScript identifiers may be supplied in mixed case.
 
 ## New Lines
-Interpol templates are partially NewLine sensitive.  Specifically, new lines are used to delimit certain grammatical constructs, particularly the statement blocks of Partial Definitions, For Loops, and If/Else Branching (though each of these statements also allows a single-line syntax using a colon ':').  For example:
+Interpol templates are partially NewLine sensitive.  Specifically, new lines are used to delimit certain grammatical constructs, particularly the statement blocks of Partial Definitions, For Loops, and If/Else Branching (though each of these statements also allows lia single-line syntax using a colon ':').  For example:
 
 ```python
 for item in list

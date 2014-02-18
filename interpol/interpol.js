@@ -1,4 +1,4 @@
-/*!
+/**!
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
  * see doc/LICENSE.md
@@ -13,7 +13,8 @@
     , TemplateCacheMax = 256
     , TemplateParamRegex = /%([1-9][0-9]*)?/
     , globalOptions = { writer: null, errorCallback: null }
-    , globalContext = {};
+    , globalContext = {}
+    , resolvers = [];
 
   // Utilities ****************************************************************
 
@@ -235,6 +236,20 @@
     return compile(parseOutput);
   }
 
+  function registerResolver(resolver) {
+    var idx = resolvers.indexOf(resolver);
+    if ( idx === -1 ) {
+      resolvers.push(resolver);
+    }
+  }
+
+  function unregisterResolver(resolver) {
+    var idx = resolvers.indexOf(resolver);
+    if ( idx !== -1 ) {
+      resolvers.splice(idx, 1);
+    }
+  }
+
   function parse(template) {
     if ( !parser ) {
       if ( typeof interpol.parser !== 'function' ) {
@@ -250,6 +265,7 @@
   function compile(parseOutput) {
     var Evaluators = freezeObject({
       im: createModuleEvaluator,
+      mi: createImportEvaluator,
       de: createPartialEvaluator,
       ca: createCallEvaluator,
       as: createAssignEvaluator,
@@ -416,6 +432,70 @@
 
     function createModuleEvaluator(statementNodes) {
       return createStatementsEvaluator(statementNodes);
+    }
+
+    function createImportEvaluator(fromNodes) {
+      var importList = []
+        , ilen = fromNodes.length
+        , modules = {};
+
+      for ( var i = ilen; i--; ) {
+        var fromNode = fromNodes[i]
+          , moduleName = lits[fromNode[0]]
+          , aliases = fromNode[1]
+          , toResolve = null;
+
+        // Try it, may silently fail
+        resolveModule(moduleName);
+
+        if ( aliases && aliases.length ) {
+          toResolve = [];
+          for ( var j = aliases.length; j--; ) {
+            var importInfo = aliases[j]
+              , name = lits[importInfo[0]]
+              , alias = importInfo[1] ? lits[importInfo[1]] : name;
+            toResolve.push([alias, name]);
+          }
+        }
+
+        importList.push([moduleName, toResolve]);
+      }
+
+      return importEvaluator;
+
+      function importEvaluator(ctx, writer) {
+        for ( var i = ilen; i--; ) {
+          var importItem = importList[i]
+            , moduleName = importItem[0];
+
+          var module = resolveModule(moduleName);
+          if ( !module ) {
+            throw new Error("Module '" + moduleName +"' not resolved");
+          }
+
+          var toResolve = importItem[1];
+          if ( toResolve ) {
+            for ( var j = toResolve.length; j--; ) {
+              var aliasMap = toResolve[j];
+              ctx[aliasMap[0]] = module[aliasMap[1]]
+            }
+          }
+          else {
+            mixin(ctx, module);
+          }
+        }
+      }
+
+      function resolveModule(moduleName) {
+        var module = modules[moduleName];
+        for ( var i = resolvers.length; !module && i--; ) {
+          module = resolvers[i].resolveModule(moduleName);
+        }
+        if ( module ) {
+          modules[moduleName] = module;
+        }
+        return module;
+      }
     }
 
     function createPartialEvaluator(nameLiteral, paramDefs, statementNodes) {
@@ -927,6 +1007,8 @@
   interpol.globals = function globals() { return globalContext; };
   interpol.parse = parse;
   interpol.compile = compile;
+  interpol.registerResolver = registerResolver;
+  interpol.unregisterResolver = unregisterResolver;
   return interpol;
 
 })(typeof require === 'function' ? require('./parser') : null,
