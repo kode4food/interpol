@@ -1,24 +1,22 @@
 var nodeunit = require('nodeunit')
-  , interpol = require('../interpol');
-
-require('../interpol/resolvers/helpers');
-require('../interpol/resolvers/file');
+  , interpol = require('../interpol')
+  , resolvers = require('../interpol/resolvers');
 
 function eval(str, ctx) {
   var template = interpol(str);
   return template(ctx);
 }
 
-exports.scope = nodeunit.testCase({
+exports.imports = nodeunit.testCase({
   setUp: function (callback) {
-    var helperResolver = interpol.createHelperResolver()
-      , fileResolver = interpol.createFileResolver({ path: "./test" });
+    var helperResolver = resolvers.helperResolver;
 
-    interpol.registerResolver(fileResolver);
-    interpol.registerResolver(helperResolver);
     helperResolver.registerHelper(function testHelper(writer, arg1, arg2) {
       writer.content("arg1=" + arg1 + ":arg2=" + arg2);
     });
+
+    var globalResolvers = resolvers.globalResolvers;
+    globalResolvers.push(interpol.createFileResolver({ path: "./test" }));
 
     callback();
   },

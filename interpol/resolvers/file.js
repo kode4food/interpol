@@ -36,7 +36,6 @@
 
       for ( var i = searchPath.length; i--; ) {
         var jsonName = path.resolve(searchPath[i], name + '.int.json')
-          , intName = path.resolve(searchPath[i], name + '.int')
           , content;
 
         if ( fs.existsSync(jsonName) ) {
@@ -48,6 +47,8 @@
             // How to handle this, maybe not at all
           }
         }
+
+        var intName = path.resolve(searchPath[i], name + '.int');
 
         if ( performCompilation && fs.existsSync(intName) ) {
           content = fs.readFileSync(intName);

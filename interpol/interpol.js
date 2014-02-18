@@ -14,7 +14,7 @@
     , TemplateParamRegex = /%([1-9][0-9]*)?/
     , globalOptions = { writer: null, errorCallback: null }
     , globalContext = {}
-    , resolvers = [];
+    , globalResolvers = [];
 
   // Utilities ****************************************************************
 
@@ -234,20 +234,6 @@
       parseOutput = parse(template);
     }
     return compile(parseOutput);
-  }
-
-  function registerResolver(resolver) {
-    var idx = resolvers.indexOf(resolver);
-    if ( idx === -1 ) {
-      resolvers.push(resolver);
-    }
-  }
-
-  function unregisterResolver(resolver) {
-    var idx = resolvers.indexOf(resolver);
-    if ( idx !== -1 ) {
-      resolvers.splice(idx, 1);
-    }
   }
 
   function parse(template) {
@@ -488,8 +474,8 @@
 
       function resolveModule(moduleName) {
         var module = modules[moduleName];
-        for ( var i = resolvers.length; !module && i--; ) {
-          module = resolvers[i].resolveModule(moduleName);
+        for ( var i = globalResolvers.length; !module && i--; ) {
+          module = globalResolvers[i].resolveModule(moduleName);
         }
         if ( module ) {
           modules[moduleName] = module;
@@ -1005,10 +991,9 @@
   interpol.parser = parser;
   interpol.options = function options() { return globalOptions; };
   interpol.globals = function globals() { return globalContext; };
+  interpol.resolvers = function resolvers() { return globalResolvers; };
   interpol.parse = parse;
   interpol.compile = compile;
-  interpol.registerResolver = registerResolver;
-  interpol.unregisterResolver = unregisterResolver;
   return interpol;
 
 })(typeof require === 'function' ? require('./parser') : null,

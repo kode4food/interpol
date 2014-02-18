@@ -7,3 +7,4 @@
  */
 
 module.exports = require('./interpol');
+require('./resolvers');
