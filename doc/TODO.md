@@ -1,5 +1,5 @@
 # TODO
 
-* From/Import implementation, both for Node and browsers
+* URL Import Resolver
 * DOM Writer for better in-browser integration
 * Various optimizations

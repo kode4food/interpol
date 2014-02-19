@@ -8,7 +8,7 @@
 
 var interpol = require('../interpol');
 
-require('./helpers');
+require('./helper');
 require('./memory');
 require('./file');
 

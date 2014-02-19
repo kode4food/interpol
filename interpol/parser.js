@@ -337,14 +337,17 @@
         peg$c210 = "?",
         peg$c211 = { type: "literal", value: "?", description: "\"?\"" },
         peg$c212 = function(cond, tval, fval) {
-              return [lit('cn'), cond, tval, fval];
+              return [lit('cn'), cond, [tval], [fval]];
             },
         peg$c213 = function(op, r) { return [lit(op), r]; },
         peg$c214 = function(op, expr) {
               return [lit(op), expr];
             },
-        peg$c215 = function(id, args) {
-              return [lit('ca'), id, args];
+        peg$c215 = function(member, args) {
+              if ( args ) {
+                return [lit('ca'), member, args];
+              }
+              return member;
             },
         peg$c216 = function(elems) {
               return elems;
@@ -5299,22 +5302,34 @@
     }
 
     function peg$parsecall() {
-      var s0, s1, s2, s3;
+      var s0, s1, s2, s3, s4;
 
       s0 = peg$currPos;
-      s1 = peg$parseIdentifier();
+      s1 = peg$parsemember();
       if (s1 !== peg$FAILED) {
-        s2 = peg$parse_();
-        if (s2 !== peg$FAILED) {
-          s3 = peg$parsecallArgs();
-          if (s3 !== peg$FAILED) {
-            peg$reportedPos = s0;
-            s1 = peg$c215(s1, s3);
-            s0 = s1;
+        s2 = peg$currPos;
+        s3 = peg$parse_();
+        if (s3 !== peg$FAILED) {
+          s4 = peg$parsecallArgs();
+          if (s4 !== peg$FAILED) {
+            peg$reportedPos = s2;
+            s3 = peg$c152(s4);
+            s2 = s3;
           } else {
-            peg$currPos = s0;
-            s0 = peg$c1;
+            peg$currPos = s2;
+            s2 = peg$c1;
           }
+        } else {
+          peg$currPos = s2;
+          s2 = peg$c1;
+        }
+        if (s2 === peg$FAILED) {
+          s2 = peg$c53;
+        }
+        if (s2 !== peg$FAILED) {
+          peg$reportedPos = s0;
+          s1 = peg$c215(s1, s2);
+          s0 = s1;
         } else {
           peg$currPos = s0;
           s0 = peg$c1;
@@ -5322,9 +5337,6 @@
       } else {
         peg$currPos = s0;
         s0 = peg$c1;
-      }
-      if (s0 === peg$FAILED) {
-        s0 = peg$parsemember();
       }
 
       return s0;

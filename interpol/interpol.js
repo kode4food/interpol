@@ -283,8 +283,8 @@
     });
 
     var lits = parseOutput.l
-      , options = mixin({}, globalOptions, localOptions)
-      , resolvers = options.resolvers || globalResolvers
+      , compilerOptions = mixin({}, globalOptions, localOptions)
+      , resolvers = compilerOptions.resolvers || globalResolvers
       , evaluator = wrapEvaluator(parseOutput.n)
       , exportedContext = null;
 
@@ -293,9 +293,9 @@
 
     function compiledTemplate(obj, localOptions) {
       var ctx = mixin(extendContext(globalContext), obj)
-        , options = mixin({}, globalOptions, localOptions);
+        , processingOptions = mixin({}, globalOptions, localOptions);
 
-      var writer = options.writer
+      var writer = processingOptions.writer
         , content = null;
 
       if ( !writer ) {
@@ -307,8 +307,8 @@
         evaluator(ctx, writer);
       }
       catch ( err ) {
-        if ( typeof options.errorCallback === 'function' ) {
-          options.errorCallback(err, null);
+        if ( typeof processingOptions.errorCallback === 'function' ) {
+          processingOptions.errorCallback(err, null);
           return;
         }
         // Re-raise if no callback
@@ -358,22 +358,22 @@
     }
 
     function wrapAttributeEvaluators(keyValueNodes) {
-      var pairs = [];
+      var result = [];
       for ( var i = 0, len = keyValueNodes.length; i < len; i++ ) {
         var keyValueNode = keyValueNodes[i];
-        pairs[i] = [createEvaluator(keyValueNode[0]),
+        result[i] = [createEvaluator(keyValueNode[0]),
                     createEvaluator(keyValueNode[1])];
       }
-      return pairs;
+      return result;
     }
 
-    function wrapAssignmentEvaluators(rangeNodes) {
-      var pairs = [];
-      for ( var i = 0, len = rangeNodes.length; i < len; i++ ) {
-        var keyValueNode = rangeNodes[i];
-        pairs[i] = [lits[keyValueNode[0]], wrapEvaluator(keyValueNode[1])];
+    function wrapAssignmentEvaluators(assignNodes) {
+      var result = [];
+      for ( var i = 0, len = assignNodes.length; i < len; i++ ) {
+        var assignNode = assignNodes[i];
+        result[i] = [lits[assignNode[0]], wrapEvaluator(assignNode[1])];
       }
-      return pairs;
+      return result;
     }
 
     function createEvaluator(node) {
@@ -433,8 +433,7 @@
           , aliases = fromNode[1]
           , toResolve = null;
 
-        // Try it, may silently fail
-        resolveModule(moduleName);
+        resolveModule(moduleName); // Try it, though it may silently fail
 
         if ( aliases && aliases.length ) {
           toResolve = [];
@@ -454,14 +453,11 @@
       function importEvaluator(ctx, writer) {
         for ( var i = ilen; i--; ) {
           var importItem = importList[i]
-            , moduleName = importItem[0];
+            , moduleName = importItem[0]
+            , toResolve = importItem[1];
 
-          var module = resolveModule(moduleName);
-          if ( !module ) {
-            throw new Error("Module '" + moduleName +"' not resolved");
-          }
+          var module = modules[moduleName] || resolveModule(moduleName, true);
 
-          var toResolve = importItem[1];
           if ( toResolve ) {
             for ( var j = toResolve.length; j--; ) {
               var aliasMap = toResolve[j];
@@ -474,15 +470,15 @@
         }
       }
 
-      function resolveModule(moduleName) {
-        var module = modules[moduleName];
+      function resolveModule(moduleName, raiseError) {
+        var module = null;
         for ( var i = resolvers.length; !module && i--; ) {
-          module = resolvers[i].resolveModule(moduleName);
+          module = resolvers[i].resolveModule(moduleName, compilerOptions);
         }
-        if ( module ) {
-          modules[moduleName] = module;
+        if ( !module && raiseError ) {
+          throw new Error("Module '" + moduleName +"' not resolved");
         }
-        return module;
+        return modules[moduleName] = module;
       }
     }
 
@@ -508,17 +504,17 @@
       }
     }
 
-    function createCallEvaluator(nameLiteral, argNodes) {
-      var name = lits[nameLiteral]
+    function createCallEvaluator(memberNode, argNodes) {
+      var member = createEvaluator(memberNode)
         , args = [null].concat(wrapArrayEvaluators(argNodes))
         , alen = args.length;
 
       return callEvaluator;
 
       function callEvaluator(ctx, writer) {
-        var func = ctx[name];
+        var func = member(ctx, writer);
         if ( typeof func !== 'function' || !func._interpolPartial ) {
-          throw new Error("'" + name + "' is not a valid function");
+          throw new Error("Attempting to call a non-partial");
         }
 
         var callArgs = [writer];

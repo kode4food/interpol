@@ -72,7 +72,43 @@ end
 </html>
 ```
 
-Some day you'll also be able to move them elsewhere and import them.
+What if you use these partials in multiple templates?  Then you can move them out into their own module called `mystuff.int`
+
+```html
+# this is mystuff.int
+
+def renderItem(item)
+  <li class=item.type id="id-%" % item.id>
+    item.name
+  </li>
+end
+
+def renderList(list)
+  <ul>
+  for item in list
+    renderItem(item)
+  end
+  </ul>
+end
+```
+
+And import them like so:
+
+```html
+from mystuff import renderItem, renderList
+
+<html>
+  <head>
+    <title>"a static title"</title>
+  </head>
+  <body>
+    "this is a list with % items" % list.length
+    renderList(list)
+  </body>
+</html>
+```
+
+*Note:* Resolving imports is still under development.  It works well enough under Node.js but is not fully supported in the browser.
 
 ## Current Status
 The project was just started, so there's still quite a bit to do.  Check [the TODO document](doc/TODO.md) for an idea of what's to come.

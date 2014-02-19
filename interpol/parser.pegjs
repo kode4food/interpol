@@ -404,7 +404,7 @@ interpolation
 
 conditional
   = cond:or _ "?" __ tval:conditional __ ":" __ fval:conditional  {
-      return [lit('cn'), cond, tval, fval];
+      return [lit('cn'), cond, [tval], [fval]];
     }
   / or
 
@@ -451,10 +451,12 @@ unary
   / call
 
 call
-  = id:Identifier _ args:callArgs  {
-      return [lit('ca'), id, args];
+  = member:member args:( _ a:callArgs { return a; } )?  {
+      if ( args ) {
+        return [lit('ca'), member, args];
+      }
+      return member;
     }
-  / member
 
 callArgs
   = "(" __ elems:elemList __ ")"  {

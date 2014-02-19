@@ -16,12 +16,15 @@ exports.imports = nodeunit.testCase({
     });
 
     var globalResolvers = resolvers.globalResolvers;
-    globalResolvers.push(interpol.createFileResolver({ path: "./test" }));
+    var fileResolver = interpol.createFileResolver({
+      path: "./test", compile: true, monitor: false
+    });
+    globalResolvers.push(fileResolver);
 
     callback();
   },
 
-  "Test Helper Import": function (test) {
+  "Helper Import": function (test) {
     var script1 = "import helpers\n" +
                   "testHelper(1,2)";
 
@@ -33,7 +36,7 @@ exports.imports = nodeunit.testCase({
     test.done();
   },
 
-  "Test File Import": function (test) {
+  "File Import": function (test) {
     var script = "import test\n" +
                  "renderTest('Curly')";
 
