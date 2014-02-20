@@ -77,14 +77,15 @@
     }
 
     function cacheModule(name, module) {
-      var cached = cache[name];
+      var cached = cache[name]
+        , key;
+
       if ( !cached ) {
         cache[name] = cached = {};
       }
       else {
         // This logic is necessary because another module may already be
         // caching this result as a dependency.
-        var key;
         for ( key in cached ) {
           if ( cached.hasOwnProperty(key) ) {
             delete cached[key];

@@ -4,23 +4,7 @@
 Interpol is case-sensitive, meaning any of the keywords and identifiers must appear in the same case by which they're represented either in this document or in the JavaScript data being passed to Interpol.  All Interpol keywords are lower-case, while JavaScript identifiers may be supplied in mixed case.
 
 ## New Lines
-Interpol templates are partially NewLine sensitive.  Specifically, new lines are used to delimit certain grammatical constructs, particularly the statement blocks of Partial Definitions, For Loops, and If/Else Branching (though each of these statements also allows lia single-line syntax using a colon ':').  For example:
-
-```python
-for item in list
-  renderItem(item)
-end
-```
-
-In this case, the NewLine after `item in list` is required to identify the statements to be executed and `end` is required to mark the end of those statements.  So long as there is only one statement to execute, this could also be represented as a single-line:
-
-```python
-for item in list: renderItem(item)
-```
-
-In this case, the `end` keyword is not required.
-
-Additionally, certain constructs will allow newlines only after a grouping delimiter or operands, such as tuples, ranges, and basic expressions.  So for example, these are all legal statements:
+Interpol templates are partially NewLine sensitive.  Specifically, new lines are used to delimit certain grammatical constructs, particularly the conclusion of statements and expressions.  So for example, these are all legal statements:
 
 ```python
 (10,
@@ -83,6 +67,8 @@ def renderItem(person, brother)
   </li>
 end
 ```
+
+Partials are first-class elements of Interpol, meaning they can be passed around and assigned to variables.
 
 ### For Loops
 For loops allow one to recursively iterate over sets of items.  For example:

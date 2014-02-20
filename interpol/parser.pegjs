@@ -451,7 +451,7 @@ unary
   / call
 
 call
-  = member:member args:( _ a:callArgs { return a; } )?  {
+  = member:member _ args:callArgs?  {
       if ( args ) {
         return [lit('ca'), member, args];
       }
