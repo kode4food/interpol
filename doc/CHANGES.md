@@ -1,8 +1,14 @@
 # Change History
 
-## Version 0.1.3 - Let, Unless and Exports
+## Version 0.1.3 - Let, Unless and Imports
+Getting close to a usable system
+
 * `let` allows you to define variables in the local scope, meaning it will shadow any variables in a parent scope, rather than allowing you to overwrite them.
+
 * `unless` is syntactic sugar for `if !(...)`
+
+* Importing now works against the three available resolvers: file (Node.js only), helpers, and memory.  See [the API Reference](API_Reference.md) for more information.
+
 * Compiled templates now have an `exports()` function that returns functions and variables defined in their root context.  The results are evaluated against the global context *only*.
 
 ## Version 0.1.2 - Bug Fixes and Test
