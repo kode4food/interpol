@@ -413,7 +413,7 @@ interpolation
       if ( ( !tail || !tail.length ) && !isArray(head) ) {
         var val = lits[head];
         if ( typeof val === 'string' && ParamContextCheck.test(val) ) {
-          return [lit('fm'), head, lit(false)];
+          return [lit('fm'), head];
         }
       }
       return buildBinaryChain(head, tail);

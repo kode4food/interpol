@@ -81,6 +81,7 @@ exports.basics = nodeunit.testCase({
   "Automatic Interpolation": function (test) {
     test.equal(eval("'%% %% % %% %% %'"), "%% %% % %% %% %");
     test.equal(eval("'Hello, %name!'", { name: 'World'}), "Hello, World!");
+    test.equal(eval("'Hello, %name! %'", { name: 'World'}), "Hello, World! ");
     test.equal(eval("'%% %name'", { name: 'World'}), "% World");
     test.equal(eval("'This % should not interpolate'"),
                "This % should not interpolate");

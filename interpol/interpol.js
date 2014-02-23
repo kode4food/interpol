@@ -366,6 +366,10 @@
     }
 
     function wrapArrayEvaluators(arrayNodes) {
+      if ( !arrayNodes ) {
+        return [];
+      }
+
       var result = [];
       for ( var i = arrayNodes.length; i--; ) {
         result[i] = wrapEvaluator(arrayNodes[i]);
@@ -374,6 +378,10 @@
     }
 
     function expandLiterals(literalArray) {
+      if ( !literalArray ) {
+        return [];
+      }
+
       var result = [];
       for ( var i = literalArray.length; i--; ) {
         result[i] = lits[literalArray[i]];
@@ -382,6 +390,10 @@
     }
 
     function wrapAttributeEvaluators(keyValueNodes) {
+      if ( !keyValueNodes ) {
+        return [];
+      }
+
       var result = [];
       for ( var i = 0, len = keyValueNodes.length; i < len; i++ ) {
         var keyValueNode = keyValueNodes[i];
@@ -392,6 +404,10 @@
     }
 
     function wrapAssignmentEvaluators(assignNodes) {
+      if ( !assignNodes ) {
+        return [];
+      }
+
       var result = [];
       for ( var i = 0, len = assignNodes.length; i < len; i++ ) {
         var assignNode = assignNodes[i];
@@ -402,6 +418,9 @@
 
     function createEvaluator(node) {
       if ( !isArray(node) ) {
+        if ( typeof node === 'undefined' || node === null ) {
+          return null;
+        }
         return lits[node];
       }
 
@@ -416,6 +435,10 @@
     }
 
     function createStatementsEvaluator(statementNodes) {
+      if ( !statementNodes ) {
+        return [];
+      }
+
       if ( statementNodes.length === 1 ) {
         return createEvaluator(statementNodes[0]);
       }
