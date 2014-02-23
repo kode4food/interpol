@@ -1,6 +1,5 @@
 var nodeunit = require('nodeunit')
-  , interpol = require('../interpol')
-  , resolvers = require('../interpol/resolvers');
+  , interpol = require('../interpol');
 
 function eval(str, ctx) {
   var template = interpol(str);
@@ -9,13 +8,13 @@ function eval(str, ctx) {
 
 exports.imports = nodeunit.testCase({
   setUp: function (callback) {
-    var helperResolver = resolvers.helperResolver;
+    var helperResolver = interpol.helperResolver;
 
     helperResolver.registerHelper(function testHelper(writer, arg1, arg2) {
       writer.content("arg1=" + arg1 + ":arg2=" + arg2);
     });
 
-    var globalResolvers = resolvers.globalResolvers;
+    var globalResolvers = interpol.resolvers();
     var fileResolver = interpol.createFileResolver({
       path: "./test", compile: true, monitor: false
     });

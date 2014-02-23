@@ -332,6 +332,12 @@
         peg$c207 = { type: "literal", value: "%", description: "\"%\"" },
         peg$c208 = function(r) { return [lit('fm'), r]; },
         peg$c209 = function(head, tail) {
+              if ( ( !tail || !tail.length ) && !isArray(head) ) {
+                var val = lits[head];
+                if ( typeof val === 'string' && ParamContextCheck.test(val) ) {
+                  return [lit('fm'), head, lit(false)];
+                }
+              }
               return buildBinaryChain(head, tail);
             },
         peg$c210 = "?",
@@ -340,35 +346,38 @@
               return [lit('cn'), cond, [tval], [fval]];
             },
         peg$c213 = function(op, r) { return [lit(op), r]; },
-        peg$c214 = function(op, expr) {
+        peg$c214 = function(head, tail) {
+              return buildBinaryChain(head, tail);
+            },
+        peg$c215 = function(op, expr) {
               return [lit(op), expr];
             },
-        peg$c215 = function(member, args) {
+        peg$c216 = function(member, args) {
               if ( args ) {
                 return [lit('ca'), member, args];
               }
               return member;
             },
-        peg$c216 = function(elems) {
+        peg$c217 = function(elems) {
               return elems;
             },
-        peg$c217 = function(sel) { return [lit('mb'), sel]; },
-        peg$c218 = function(elem) {
+        peg$c218 = function(sel) { return [lit('mb'), sel]; },
+        peg$c219 = function(elem) {
               return elem;
             },
-        peg$c219 = "[",
-        peg$c220 = { type: "literal", value: "[", description: "\"[\"" },
-        peg$c221 = "]",
-        peg$c222 = { type: "literal", value: "]", description: "\"]\"" },
-        peg$c223 = function(elems) {
+        peg$c220 = "[",
+        peg$c221 = { type: "literal", value: "[", description: "\"[\"" },
+        peg$c222 = "]",
+        peg$c223 = { type: "literal", value: "]", description: "\"]\"" },
+        peg$c224 = function(elems) {
               if ( elems.length > 1 ) {
                 return [lit('tu'), elems];
               }
               return elems[0];
             },
-        peg$c224 = function() { return lit(true); },
-        peg$c225 = function() { return lit(false); },
-        peg$c226 = function(id) {
+        peg$c225 = function() { return lit(true); },
+        peg$c226 = function() { return lit(false); },
+        peg$c227 = function(id) {
               return [lit('id'), id];
             },
 
@@ -4845,7 +4854,7 @@
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c209(s1, s2);
+          s1 = peg$c214(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -4927,7 +4936,7 @@
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c209(s1, s2);
+          s1 = peg$c214(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -5009,7 +5018,7 @@
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c209(s1, s2);
+          s1 = peg$c214(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -5091,7 +5100,7 @@
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c209(s1, s2);
+          s1 = peg$c214(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -5173,7 +5182,7 @@
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c209(s1, s2);
+          s1 = peg$c214(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -5255,7 +5264,7 @@
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c209(s1, s2);
+          s1 = peg$c214(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -5280,7 +5289,7 @@
           s3 = peg$parseunary();
           if (s3 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c214(s1, s3);
+            s1 = peg$c215(s1, s3);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -5315,7 +5324,7 @@
           }
           if (s3 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c215(s1, s3);
+            s1 = peg$c216(s1, s3);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -5360,7 +5369,7 @@
               }
               if (s5 !== peg$FAILED) {
                 peg$reportedPos = s0;
-                s1 = peg$c216(s3);
+                s1 = peg$c217(s3);
                 s0 = s1;
               } else {
                 peg$currPos = s0;
@@ -5433,7 +5442,7 @@
         s4 = peg$parsememberSelector();
         if (s4 !== peg$FAILED) {
           peg$reportedPos = s3;
-          s4 = peg$c217(s4);
+          s4 = peg$c218(s4);
         }
         s3 = s4;
         while (s3 !== peg$FAILED) {
@@ -5442,13 +5451,13 @@
           s4 = peg$parsememberSelector();
           if (s4 !== peg$FAILED) {
             peg$reportedPos = s3;
-            s4 = peg$c217(s4);
+            s4 = peg$c218(s4);
           }
           s3 = s4;
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c209(s1, s2);
+          s1 = peg$c214(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -5481,7 +5490,7 @@
             s4 = peg$parseIdentifier();
             if (s4 !== peg$FAILED) {
               peg$reportedPos = s0;
-              s1 = peg$c218(s4);
+              s1 = peg$c219(s4);
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -5504,11 +5513,11 @@
         s1 = peg$parse_();
         if (s1 !== peg$FAILED) {
           if (input.charCodeAt(peg$currPos) === 91) {
-            s2 = peg$c219;
+            s2 = peg$c220;
             peg$currPos++;
           } else {
             s2 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c220); }
+            if (peg$silentFails === 0) { peg$fail(peg$c221); }
           }
           if (s2 !== peg$FAILED) {
             s3 = peg$parse__();
@@ -5518,15 +5527,15 @@
                 s5 = peg$parse__();
                 if (s5 !== peg$FAILED) {
                   if (input.charCodeAt(peg$currPos) === 93) {
-                    s6 = peg$c221;
+                    s6 = peg$c222;
                     peg$currPos++;
                   } else {
                     s6 = peg$FAILED;
-                    if (peg$silentFails === 0) { peg$fail(peg$c222); }
+                    if (peg$silentFails === 0) { peg$fail(peg$c223); }
                   }
                   if (s6 !== peg$FAILED) {
                     peg$reportedPos = s0;
-                    s1 = peg$c218(s4);
+                    s1 = peg$c219(s4);
                     s0 = s1;
                   } else {
                     peg$currPos = s0;
@@ -5584,7 +5593,7 @@
               }
               if (s5 !== peg$FAILED) {
                 peg$reportedPos = s0;
-                s1 = peg$c223(s3);
+                s1 = peg$c224(s3);
                 s0 = s1;
               } else {
                 peg$currPos = s0;
@@ -5742,7 +5751,7 @@
       s1 = peg$parseTrue();
       if (s1 !== peg$FAILED) {
         peg$reportedPos = s0;
-        s1 = peg$c224();
+        s1 = peg$c225();
       }
       s0 = s1;
       if (s0 === peg$FAILED) {
@@ -5750,7 +5759,7 @@
         s1 = peg$parseFalse();
         if (s1 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c225();
+          s1 = peg$c226();
         }
         s0 = s1;
       }
@@ -5765,13 +5774,24 @@
       s1 = peg$parseIdentifier();
       if (s1 !== peg$FAILED) {
         peg$reportedPos = s0;
-        s1 = peg$c226(s1);
+        s1 = peg$c227(s1);
       }
       s0 = s1;
 
       return s0;
     }
 
+
+      var ParamContextCheck = /(^|[^%])%[$__a-zA-Z][$__a-zA-Z0-9]*/;
+
+      var isArray = Array.isArray;
+      if ( !isArray ) {
+        isArray = (function () {
+          return function _isArray(obj) {
+            return obj && obj.length && toString.call(obj) === '[object Array]';
+          };
+        })();
+      }
 
       // Literal Handling
       var lits = [], reverseLits = {};

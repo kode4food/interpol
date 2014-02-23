@@ -11,7 +11,6 @@
 
   var CURRENT_VERSION = "0.1.3"
     , TemplateCacheMax = 256
-    , TemplateParamRegex = /%([1-9][0-9]*)?/
     , globalOptions = { writer: null, errorCallback: null }
     , globalContext = {}
     , globalResolvers = [];
@@ -106,46 +105,63 @@
 
   // Interpolation Template Builder *******************************************
 
-  function buildTemplate(formatStr) {
-    var funcs = []
+  var ParamContextCheck = /(^|[^%])%[$__a-zA-Z][$__a-zA-Z0-9]*/
+    , ParamIndex = /(.?)%(([1-9][0-9]*))?/
+    , ParamContext = /(.?)%(([1-9][0-9]*)|([$__a-zA-Z][$__a-zA-Z0-9]*))?/;
+
+  function buildTemplate(formatStr, isLiteral) {
+    var useContext = isLiteral && ParamContextCheck.test(formatStr)
+      , re = useContext ? ParamContext : ParamIndex
+      , funcs = []
       , flen = 0
       , autoIdx = 0;
 
     while ( formatStr && formatStr.length ) {
-      var paramMatch = TemplateParamRegex.exec(formatStr);
+      var paramMatch = re.exec(formatStr);
       if ( !paramMatch ) {
         funcs.push(createLiteralFunction(formatStr));
         break;
       }
 
-      var matchIdx = paramMatch.index
-        , match = paramMatch[0]
-        , matchLen = match.length;
+      var match = paramMatch[0]
+        , matchIdx = paramMatch.index + paramMatch[1].length
+        , matchLen = match.length - paramMatch[1].length
+
+      if ( paramMatch[1] === '%' ) {
+        funcs.push(createLiteralFunction(formatStr.substring(0, matchIdx)));
+        formatStr = formatStr.substring(matchIdx + matchLen);
+        continue;
+      }
 
       if ( matchIdx ) {
         funcs.push(createLiteralFunction(formatStr.substring(0, matchIdx)));
       }
 
       var idx = autoIdx++;
-      if ( matchLen > 1 ) {
-        idx = parseInt(match.substring(1), 10) - 1;
+      if ( typeof paramMatch[4] !== 'undefined' ) {
+        funcs.push(createContextFunction(paramMatch[4]));
+      }
+      else {
+        if ( typeof paramMatch[3] !== 'undefined' ) {
+          idx = parseInt(paramMatch[3], 10) - 1;
+        }
+        funcs.push(createIndexedFunction(idx));
       }
 
-      funcs.push(createIndexedFunction(idx));
       formatStr = formatStr.substring(matchIdx + matchLen);
     }
     flen = funcs.length;
 
     return templateFunction;
 
-    function templateFunction(data) {
+    function templateFunction(ctx, data) {
       if ( !isArray(data) ) {
         data = [data];
       }
 
       var output = [];
       for ( var i = 0; i < flen; i++ ) {
-        output[i] = funcs[i](data);
+        output[i] = funcs[i](ctx, data);
       }
 
       return output.join('');
@@ -162,8 +178,16 @@
     function createIndexedFunction(idx) {
       return indexedFunction;
 
-      function indexedFunction(data) {
+      function indexedFunction(ctx, data) {
         return data[idx];
+      }
+    }
+
+    function createContextFunction(name) {
+      return contextFunction;
+
+      function contextFunction(ctx, data) {
+        return ctx[name];
       }
     }
   }
@@ -868,11 +892,11 @@
 
       var template = null;
       if ( !$1_func ) {
-        template = buildTemplate($1);
-        if ( !$2_func ) {
-          return template($2);
+        template = buildTemplate($1, true);
+        if ( !$2_func && !ParamContextCheck.test($1) ) {
+          return template(null, $2);
         }
-        return builtFormatEvaluator;
+        return $2_func ? builtExpressionEvaluator : builtLiteralEvaluator;
       }
 
       var cache = {}
@@ -880,8 +904,12 @@
 
       return dynamicFormatEvaluator;
 
-      function builtFormatEvaluator(ctx, writer) {
-        return template($2(ctx, writer));
+      function builtExpressionEvaluator(ctx, writer) {
+        return template(ctx, $2(ctx, writer));
+      }
+
+      function builtLiteralEvaluator(ctx, writer) {
+        return template(ctx, $2);
       }
 
       function dynamicFormatEvaluator(ctx, writer) {
@@ -901,7 +929,7 @@
           cacheCount++;
         }
 
-        return dynamicTemplate(data);
+        return dynamicTemplate(ctx, data);
       }
     }
 

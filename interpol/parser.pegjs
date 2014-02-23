@@ -7,6 +7,17 @@
  */
 
 {
+  var ParamContextCheck = /(^|[^%])%[$__a-zA-Z][$__a-zA-Z0-9]*/;
+
+  var isArray = Array.isArray;
+  if ( !isArray ) {
+    isArray = (function () {
+      return function _isArray(obj) {
+        return obj && obj.length && toString.call(obj) === '[object Array]';
+      };
+    })();
+  }
+
   // Literal Handling
   var lits = [], reverseLits = {};
 
@@ -399,6 +410,12 @@ expr
 interpolation
   = head:conditional
     tail:( _ "%" __ r:conditional { return [lit('fm'), r]; } )*  {
+      if ( ( !tail || !tail.length ) && !isArray(head) ) {
+        var val = lits[head];
+        if ( typeof val === 'string' && ParamContextCheck.test(val) ) {
+          return [lit('fm'), head, lit(false)];
+        }
+      }
       return buildBinaryChain(head, tail);
     }
 

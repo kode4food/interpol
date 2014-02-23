@@ -1,6 +1,6 @@
 # Change History
 
-## Version 0.1.3 - Let, Unless and Imports
+## Version 0.1.3 - Let, Unless, Imports and Stuff
 Getting close to a usable system
 
 * `let` allows you to define variables in the local scope, meaning it will shadow any variables in a parent scope, rather than allowing you to overwrite them.
@@ -10,6 +10,8 @@ Getting close to a usable system
 * Importing now works against the three available resolvers: file (Node.js only), helpers, and memory.  See [the API Reference](API_Reference.md) for more information.
 
 * Compiled templates now have an `exports()` function that returns functions and variables defined in their root context.  The results are evaluated against the global context *only*.
+
+* Automatic Interpolation is now supported for literal strings.  Any `%` followed by an identifier is expanded to the value of that variable in the current scope.  See [the Language Reference](Language_Reference.md) for more information.
 
 ## Version 0.1.2 - Bug Fixes and Test
 Fixed some bugs in the PEG.js parser, including its inability to right-recurse unary and membership productions.  Also increased test coverage.

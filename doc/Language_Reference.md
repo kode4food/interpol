@@ -287,7 +287,7 @@ happy ? "you are happy!" : "awwwwwww"
 ```
 
 ### Interpolation
-Quite simply, interpolation allows you to parameterize a string.  This is accomplished through the interpolation operator `%`.  In its most basic form, you'd be merging a single parameter into a string:
+Quite simply, interpolation allows you to parameterize a string.  This is accomplished in two ways.  One is through the interpolation operator `%`.  In its most basic form, you'd be merging a single parameter into a string:
 
 ```python
 "There are % stooges" % people.length
@@ -329,4 +329,11 @@ If your parameters always appear in the same order, then the simple `%` characte
     "stooge_summary": "Es gibt %1 Stooges und %2 ist die beste"
   }
 }
+```
+
+#### Automatic Interpolation
+In addition to the Interpolation Operator, Automatic Interpolation is supported, but only for literal Strings.  This is accomplished using an embedded `%` followed by an Identifier.  The value used in this interpolation is retrieved from the current scope.  So far example, if there is a variable called name in the current scope, you can expose it as follows:
+
+```html
+<title>"User Profile - %name"</title>
 ```
