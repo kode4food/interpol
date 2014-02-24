@@ -149,6 +149,10 @@
     return templateFunction;
 
     function templateFunction(data) {
+      if ( typeof data !== 'object' || data === null ) {
+        data = [data];
+      }
+
       var output = [];
       for ( var i = 0; i < flen; i++ ) {
         output[i] = funcs[i](data);
