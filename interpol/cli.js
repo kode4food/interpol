@@ -106,6 +106,7 @@ function commandLine() {
       , output = [];
 
     output.push("(function(i){");
+    output.push("if(!i)throw Error('Interpol not loaded');");
     output.push("var b={},j=" + bundleStr + ";");
     output.push("for(var k in j){");
     output.push("b[k]=i(j[k]);");
@@ -115,8 +116,7 @@ function commandLine() {
     output.push("function(n){return b[n].exports();}");
     output.push("});");
     output.push("})(typeof require==='function'");
-    output.push("?require('../interpol')");
-    output.push(":$interpol);");
+    output.push("?require('interpol'):$interpol);");
     fs.writeFileSync(appFile, output.join(''));
   }
 
