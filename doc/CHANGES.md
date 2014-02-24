@@ -11,6 +11,8 @@ Getting close to a usable system
 
 * Compiled templates now have an `exports()` function that returns functions and variables defined in their root context.  The results are evaluated against the global context *only*.
 
+* The Command-Line interface can now generate a self-contained bundle of pre-parsed templates that can easily be loaded into a web page or Node.js environment.
+
 * `self` refers to the variables of the current scope, and can be passed around.
 
 * Named Interpolation is now supported.  Any `%` followed by an identifier is expanded to the value of that property in the passed Object. `self` is assumed if nothing is passed.  See [the Language Reference](Language_Reference.md) for more information.
