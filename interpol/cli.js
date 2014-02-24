@@ -105,14 +105,14 @@ function commandLine() {
       , bundleStr = JSON.stringify(appModules)
       , output = [];
 
-    output.push("(function(interpol){");
-    output.push("var bundle={},json=" + bundleStr + ";");
-    output.push("for(var key in json){");
-    output.push("bundle[key]=interpol(json[key]);");
+    output.push("(function(i){");
+    output.push("var b={},j=" + bundleStr + ";");
+    output.push("for(var k in j){");
+    output.push("b[k]=i(j[k]);");
     output.push("}");
-    output.push("interpol." + bundleName + "=bundle;");
-    output.push("interpol.resolvers().push({resolveModule:");
-    output.push("function(name){return bundle[name].exports();}");
+    output.push("i." + bundleName + "=b;");
+    output.push("i.resolvers().push({resolveModule:");
+    output.push("function(n){return b[n].exports();}");
     output.push("});");
     output.push("})(typeof require==='function'");
     output.push("?require('../interpol')");
