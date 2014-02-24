@@ -69,10 +69,11 @@ GTKwd  = "gt"     !IdentCont
 LTEKwd = "le"     !IdentCont
 GTEKwd = "ge"     !IdentCont
 ModKwd = "mod"    !IdentCont
+Self   = "self"   !IdentCont
 
 ReservedWord = ( Def / From / Import / As / For / In / If / Unless / Else / 
                  End / Let / True / False / LTKwd / GTKwd / LTEKwd / GTEKwd /
-                 ModKwd )
+                 ModKwd / Self )
 
 Identifier
   = !ReservedWord id:IdentifierName  {
@@ -413,7 +414,7 @@ interpolation
       if ( ( !tail || !tail.length ) && !isArray(head) ) {
         var val = lits[head];
         if ( typeof val === 'string' && ParamContextCheck.test(val) ) {
-          return [lit('fm'), head];
+          return [lit('fm'), head, [lit('se')]];
         }
       }
       return buildBinaryChain(head, tail);
@@ -516,6 +517,7 @@ literal
   / string
   / boolean
   / identifier
+  / self
 
 number
   = Number
@@ -529,6 +531,11 @@ boolean
   / False  { return lit(false); }
 
 identifier
-  = id:Identifier {
+  = id:Identifier  {
       return [lit('id'), id];
+    }
+
+self
+  = Self  {
+      return [lit('se')];
     }

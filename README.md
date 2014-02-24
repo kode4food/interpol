@@ -22,10 +22,10 @@ This last goal is important because the templates we're creating are often devoi
     <title>"a static title"</title>
   </head>
   <body>
-    "this is a list with % items" % list.length
+    "this is a list with %length items" % list
     <ul>
     for item in list
-      <li class=item.type id="id-%" % item.id>
+      <li class=item.type id="id-%id" % item>
         item.name
       </li>
     end
@@ -39,7 +39,7 @@ The only static element on this page was its title, and usually even that isn't 
 I say 'HTMLish' because it's not pure HTML.  The values of attributes are also evaluated.  For example:
 
 ```html
-<li class=item.type id="id-%" % item.id>
+<li class=item.type id="id-%id" % item>
 ```
 
 `class=item.type` outputs a class attribute whose value is taken from the item.type property.  `id="id-%" % item.id` outputs an id attribute whose value is interpolated from the item.id property.
@@ -48,7 +48,7 @@ That's all well and good, but what about the ability to reuse templates?  Well, 
 
 ```html
 def renderItem(item)
-  <li class=item.type id="id-%" % item.id>
+  <li class=item.type id="id-%id" % item>
     item.name
   </li>
 end
@@ -66,7 +66,7 @@ end
     <title>"a static title"</title>
   </head>
   <body>
-    "this is a list with % items" % list.length
+    "this is a list with %length items" % list
     renderList(list)
   </body>
 </html>
@@ -78,7 +78,7 @@ What if you use these partials in multiple templates?  Then you can move them ou
 # this is mystuff.int
 
 def renderItem(item)
-  <li class=item.type id="id-%" % item.id>
+  <li class=item.type id="id-%id" % item>
     item.name
   </li>
 end
@@ -102,7 +102,7 @@ from mystuff import renderItem, renderList
     <title>"a static title"</title>
   </head>
   <body>
-    "this is a list with % items" % list.length
+    "this is a list with %length items" % list
     renderList(list)
   </body>
 </html>

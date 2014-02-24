@@ -13,16 +13,16 @@ exports.partials = nodeunit.testCase({
 
   "First-Class Partials": function (test) {
     var script1 = "def firstClass(arg1)\n" +
-                  "  'Hello %' % arg1\n" +
+                  "  'Hello %arg1'\n" +
                   "end\n" +
                   "let fc = firstClass\n" +
                   "fc('Interpol')";
 
     var script2 = "def v1(arg1)\n" +
-                  "  'Hello %' % arg1\n" +
+                  "  'Hello %arg1'\n" +
                   "end\n" +
                   "def v2(arg1)\n" +
-                  "  'Goodbye %' % arg1\n" +
+                  "  'Goodbye %arg1'\n" +
                   "end\n" +
                   "(coming ? v1 : v2)('Interpol')";
 

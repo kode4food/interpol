@@ -9,9 +9,10 @@ function eval(str, ctx) {
 exports.basics = nodeunit.testCase({
   setUp: function (callback) {
     this.data = {
+      "name": "World",
       "title": "Famous People",
-      "should_work": "Furthermore, %3 are the new %",
-      "should_not_work": "Hello, %name!",
+      "dogs_lbl": "Furthermore, %3 are the new %",
+      "hello_lbl": "Hello, %name!",
       "people" : [
         { "name": "Larry", "age": 50, "brothers": [] },
         { "name": "Curly", "age": 45, "brothers": ["Moe", "Shemp"]},
@@ -73,7 +74,7 @@ exports.basics = nodeunit.testCase({
                "red is the new black");
     test.equal(eval("'%2 is the new %1' % ('red', 'black')"),
                "black is the new red");
-    test.equal(eval("should_work % ('red', 'cats', 'dogs')", this.data),
+    test.equal(eval("dogs_lbl % ('red', 'cats', 'dogs')", this.data),
                "Furthermore, dogs are the new cats");
     test.done();
   },
@@ -85,8 +86,8 @@ exports.basics = nodeunit.testCase({
     test.equal(eval("'%% %name'", { name: 'World'}), "% World");
     test.equal(eval("'This % should not interpolate'"),
                "This % should not interpolate");
-    test.equal(eval("should_not_work % 'wrong '", this.data),
-               "Hello, wrong name!");
+    test.equal(eval("hello_lbl % 'wrong '", this.data), "Hello, !");
+    test.equal(eval("hello_lbl % self", this.data), "Hello, World!");
     test.done();
   },
 

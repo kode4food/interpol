@@ -226,6 +226,8 @@ $someIdentifier
 _my_id_
 ```
 
+A special identifier exists called `self` that returns the current evaluation context.
+
 ### Tuples
 Tuples are like Arrays, except that they're not.  A single element tuple is automatically exposed as an atomic Object, whereas a tuple with more than one element is exposed as an Array.  Fortunately, Interpolation (their primary use case) doesn't care about the difference.
 
@@ -287,6 +289,8 @@ happy ? "you are happy!" : "awwwwwww"
 ```
 
 ### Interpolation
+TODO: Needs to be re-written to cover named indexing
+
 Quite simply, interpolation allows you to parameterize a string.  This is accomplished in two ways.  One is through the interpolation operator `%`.  In its most basic form, you'd be merging a single parameter into a string:
 
 ```python
@@ -331,8 +335,9 @@ If your parameters always appear in the same order, then the simple `%` characte
 }
 ```
 
+
 #### Automatic Interpolation
-In addition to the Interpolation Operator, Automatic Interpolation is supported, but only for literal Strings.  This is accomplished using an embedded `%` followed by an Identifier.  The value used in this interpolation is retrieved from the current scope.  So far example, if there is a variable called name in the current scope, you can expose it as follows:
+In addition to the Interpolation Operator, Automatic Interpolation is supported for literal strings containing named indexing.  The value used in this interpolation is retrieved from the current scope.  So far example, if there is a variable called name in the current scope, you can expose it as follows:
 
 ```html
 <title>"User Profile - %name"</title>

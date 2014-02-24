@@ -7,11 +7,12 @@ def renderList(people)
 end
 
 def renderItem(person, brother)
+  let name = person.name
   <li>"%2 is the brother of %1" % (brother, person.name)</li>
 end
 
 def renderTest(name)
-"Hello %" % name
+  "Hello %name"
 end
 
 <html>
@@ -20,7 +21,7 @@ end
     <!-- this is a comment -->
   </head>
   <body>
-    "There are % stooges" % people.length
+    "There are %length stooges" % people
     renderList(people)
   </body>
 </html>

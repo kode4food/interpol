@@ -105,19 +105,15 @@
 
   // Interpolation Template Builder *******************************************
 
-  var ParamContextCheck = /(^|[^%])%[$__a-zA-Z][$__a-zA-Z0-9]*/
-    , ParamIndex = /(.?)%(([1-9][0-9]*))?/
-    , ParamContext = /(.?)%(([1-9][0-9]*)|([$__a-zA-Z][$__a-zA-Z0-9]*))?/;
+  var ParamRegex = /(.?)%(([1-9][0-9]*)|([$__a-zA-Z][$__a-zA-Z0-9]*))?/;
 
-  function buildTemplate(formatStr, isLiteral) {
-    var useContext = isLiteral && ParamContextCheck.test(formatStr)
-      , re = useContext ? ParamContext : ParamIndex
-      , funcs = []
+  function buildTemplate(formatStr) {
+    var funcs = []
       , flen = 0
       , autoIdx = 0;
 
     while ( formatStr && formatStr.length ) {
-      var paramMatch = re.exec(formatStr);
+      var paramMatch = ParamRegex.exec(formatStr);
       if ( !paramMatch ) {
         funcs.push(createLiteralFunction(formatStr));
         break;
@@ -139,29 +135,23 @@
 
       var idx = autoIdx++;
       if ( typeof paramMatch[4] !== 'undefined' ) {
-        funcs.push(createContextFunction(paramMatch[4]));
+        idx = paramMatch[4];
       }
-      else {
-        if ( typeof paramMatch[3] !== 'undefined' ) {
-          idx = parseInt(paramMatch[3], 10) - 1;
-        }
-        funcs.push(createIndexedFunction(idx));
+      else if ( typeof paramMatch[3] !== 'undefined' ) {
+        idx = parseInt(paramMatch[3], 10) - 1;
       }
 
+      funcs.push(createIndexedFunction(idx));
       formatStr = formatStr.substring(matchIdx + matchLen);
     }
     flen = funcs.length;
 
     return templateFunction;
 
-    function templateFunction(ctx, data) {
-      if ( !isArray(data) ) {
-        data = [data];
-      }
-
+    function templateFunction(data) {
       var output = [];
       for ( var i = 0; i < flen; i++ ) {
-        output[i] = funcs[i](ctx, data);
+        output[i] = funcs[i](data);
       }
 
       return output.join('');
@@ -178,16 +168,8 @@
     function createIndexedFunction(idx) {
       return indexedFunction;
 
-      function indexedFunction(ctx, data) {
+      function indexedFunction(data) {
         return data[idx];
-      }
-    }
-
-    function createContextFunction(name) {
-      return contextFunction;
-
-      function contextFunction(ctx, data) {
-        return ctx[name];
       }
     }
   }
@@ -303,7 +285,8 @@
       ne: createNegEvaluator,
       mb: createMemberEvaluator,
       tu: createTupleEvaluator,
-      id: createIdEvaluator
+      id: createIdEvaluator,
+      se: createSelfEvaluator
     });
 
     var lits = parseOutput.l
@@ -915,11 +898,11 @@
 
       var template = null;
       if ( !$1_func ) {
-        template = buildTemplate($1, true);
-        if ( !$2_func && !ParamContextCheck.test($1) ) {
-          return template(null, $2);
+        template = buildTemplate($1);
+        if ( !$2_func ) {
+          return template($2);
         }
-        return $2_func ? builtExpressionEvaluator : builtLiteralEvaluator;
+        return builtFormatEvaluator;
       }
 
       var cache = {}
@@ -927,12 +910,8 @@
 
       return dynamicFormatEvaluator;
 
-      function builtExpressionEvaluator(ctx, writer) {
-        return template(ctx, $2(ctx, writer));
-      }
-
-      function builtLiteralEvaluator(ctx, writer) {
-        return template(ctx, $2);
+      function builtFormatEvaluator(ctx, writer) {
+        return template($2(ctx, writer));
       }
 
       function dynamicFormatEvaluator(ctx, writer) {
@@ -948,11 +927,12 @@
             cache = {};
             cacheCount = 0;
           }
-          dynamicTemplate = cache[formatStr] = buildTemplate(formatStr);
+          dynamicTemplate = buildTemplate(formatStr);
+          cache[formatStr] = dynamicTemplate;
           cacheCount++;
         }
 
-        return dynamicTemplate(ctx, data);
+        return dynamicTemplate(data);
       }
     }
 
@@ -1021,6 +1001,14 @@
 
       function idEvaluator(ctx, writer) {
         return ctx[name];
+      }
+    }
+
+    function createSelfEvaluator() {
+      return selfEvaluator;
+
+      function selfEvaluator(ctx, writer) {
+        return ctx;
       }
     }
   }
