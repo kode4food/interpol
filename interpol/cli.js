@@ -105,18 +105,18 @@ function commandLine() {
       , bundleStr = JSON.stringify(appModules)
       , output = [];
 
-    output.push("(function (interpol) {");
-    output.push("var bundle = {}, json = " + bundleStr + ";");
-    output.push("for (var key in json) {");
-    output.push("  bundle[key] = interpol(json[key]);");
+    output.push("(function(interpol){");
+    output.push("var bundle={},json=" + bundleStr + ";");
+    output.push("for(var key in json){");
+    output.push("bundle[key]=interpol(json[key]);");
     output.push("}");
-    output.push("interpol." + bundleName + " = bundle;");
-    output.push("interpol.resolvers().push({ resolveModule:");
-    output.push("function (name) { return bundle[name].exports(); }");
+    output.push("interpol." + bundleName + "=bundle;");
+    output.push("interpol.resolvers().push({resolveModule:");
+    output.push("function(name){return bundle[name].exports();}");
     output.push("});");
-    output.push("})(typeof require === 'function'");
-    output.push("? require('../interpol')");
-    output.push(": $interpol);");
+    output.push("})(typeof require==='function'");
+    output.push("?require('../interpol')");
+    output.push(":$interpol);");
     fs.writeFileSync(appFile, output.join(''));
   }
 
