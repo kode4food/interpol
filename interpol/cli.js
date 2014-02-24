@@ -8,12 +8,17 @@
  * @author Thom Bradford (github/kode4food)
  */
 
+"use strict";
+
 // Imports
 var fs = require('fs')
   , path = require('path')
   , glob = require('glob')
   , mkdirp = require('mkdirp')
   , interpol = require('./interpol');
+
+var ModuleNameRegex = /^[$_a-zA-Z][$_a-zA-Z0-9]*/
+  , OptionRegex = /^-([_a-zA-Z][_a-zA-Z0-9]*)$/;
 
 var slice = Array.prototype.slice;
 
@@ -35,11 +40,11 @@ if ( require.main === module ) {
  * @param {...String} [arguments] usage info displayed if an error occurs
  */
 function commandLine() {
-  "use strict";
-
   var args = parseArguments(arguments)
     , inDir = args.in || process.cwd()
     , outDir = args.out || inDir
+    , appFile = args.app || null
+    , appModules = {}
     , pattern = args.files || '*.int'
     , ext = args.ext || '.json'
     , files = glob.sync(pattern, { cwd: inDir })
@@ -56,8 +61,10 @@ function commandLine() {
       , outputPath = path.join(outDir, files[i] + ext);
 
     try {
-      var info = processFile(inputPath, outputPath);
-      success.push([inputPath, info]);
+      var result = processFile(inputPath, outputPath)
+        , info = result[1];
+      success.push(result);
+      appModules[info.module] = info.json;
     }
     catch ( err ) {
       errors.push([inputPath, err]);
@@ -93,74 +100,104 @@ function commandLine() {
       console.warn("");
     }
   }
+  else if ( appFile ) {
+    var bundleName = getModuleName(appFile)
+      , bundleStr = JSON.stringify(appModules)
+      , output = [];
+
+    output.push("(function (interpol) {");
+    output.push("var bundle = " + bundleStr + ";");
+    output.push("interpol." + bundleName + " = bundle;");
+    output.push("interpol.resolvers().push({ resolveModule:");
+    output.push("function resolve(name) { return bundle[name]; }");
+    output.push("});");
+    output.push("})(typeof require === 'function'");
+    output.push("? require('../interpol')");
+    output.push(": $interpol);");
+    fs.writeFileSync(appFile, output.join(''));
+  }
 
   process.exit(errors.length ? 1 : 0);
+}
 
-  // Processing Functions *****************************************************
+// Processing Functions *****************************************************
 
-  function processFile(inputPath, outputPath) {
-    var start = new Date()
-      , rawTemplate = fs.readFileSync(inputPath).toString()
-      , json = interpol.parse(rawTemplate)
-      , output
-      , duration;
+function processFile(inputPath, outputPath) {
+  var start = new Date()
+    , rawTemplate = fs.readFileSync(inputPath).toString()
+    , json = interpol.parse(rawTemplate)
+    , output
+    , duration;
 
-    mkdirp.sync(path.dirname(outputPath));
-    output = JSON.stringify(json);
-    fs.writeFileSync(outputPath, output);
-    duration = new Date().getTime() - start.getTime();
+  mkdirp.sync(path.dirname(outputPath));
+  output = JSON.stringify(json);
+  fs.writeFileSync(outputPath, output);
+  duration = new Date().getTime() - start.getTime();
 
-    return [inputPath, { size: output.length, duration: duration }];
+  return [inputPath, {
+    size: output.length,
+    duration: duration,
+    module: getModuleName(inputPath),
+    json: json
+  }];
+}
+
+// Support Functions ********************************************************
+
+function getModuleName(filePath) {
+  var filename = path.basename(filePath)
+    , match = ModuleNameRegex.exec(filename);
+
+  if ( !match ) {
+    throw new Error("No module name to be extracted from " + filePath);
   }
+  return match[0];
+}
 
-  // Support Functions ********************************************************
-
-  function parseArguments(passedArguments) {
-    var optionRegex = /^-([a-zA-Z_][a-zA-Z_0-9]*)$/
-      , result = { };
-
-    for ( var i = 0, len = passedArguments.length; i < len; ) {
-      var arg = passedArguments[i++];
-      var match = optionRegex.exec(arg);
-      if ( match ) {
-        var argName = match[1]
-          , argValue = i < len ? passedArguments[i++] : null;
-        result[argName] = argValue;
-      }
+function parseArguments(passedArguments) {
+  var result = { };
+  for ( var i = 0, len = passedArguments.length; i < len; ) {
+    var arg = passedArguments[i++];
+    var match = OptionRegex.exec(arg);
+    if ( match ) {
+      var argName = match[1]
+        , argValue = i < len ? passedArguments[i++] : null;
+      result[argName] = argValue;
     }
-    return result;
   }
+  return result;
+}
 
-  function errorOut(message) {
-    displayUsage();
-    console.error("Error!");
-    console.error("");
-    console.error("  " + message);
-    console.error("");
-    process.exit(1);
-  }
+function errorOut(message) {
+  displayUsage();
+  console.error("Error!");
+  console.error("");
+  console.error("  " + message);
+  console.error("");
+  process.exit(1);
+}
 
-  function displayVersion() {
-    console.info("Interpol v" + interpol.VERSION);
-    console.info("");
-  }
+function displayVersion() {
+  console.info("Interpol v" + interpol.VERSION);
+  console.info("");
+}
 
-  function displayUsage() {
-    displayVersion();
-    console.info("Usage:");
-    console.info("");
-    console.info("  interpol (options)");
-    console.info("");
-    console.info("Where:");
-    console.info("");
-    console.info("  Options:");
-    console.info("");
-    console.info("  -in <dir> - Location of templates to parse (or $CWD)");
-    console.info("  -out <dir> - Location of parsed JSON output (or -in dir)");
-    console.info("  -files <glob> - Filename pattern to parse (or *.int)");
-    console.info("  -ext <ext> - Filename extension to use (or .json)");
-    console.info("");
-  }
+function displayUsage() {
+  displayVersion();
+  console.info("Usage:");
+  console.info("");
+  console.info("  interpol (options)");
+  console.info("");
+  console.info("Where:");
+  console.info("");
+  console.info("  Options:");
+  console.info("");
+  console.info("  -in <dir>     - Location of templates to parse (or $CWD)");
+  console.info("  -out <dir>    - Location of parsed JSON output (or -in dir)");
+  console.info("  -files <glob> - Filename pattern to parse (or *.int)");
+  console.info("  -ext <ext>    - Filename extension to use (or .json)");
+  console.info("  -app <file>   - Generate a single-file application bundle");
+  console.info("");
 }
 
 // Exports

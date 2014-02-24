@@ -82,10 +82,10 @@
         peg$c43 = function(start, cont) {
               return start + cont.join('');
             },
-        peg$c44 = /^[$__a-zA-Z]/,
-        peg$c45 = { type: "class", value: "[$__a-zA-Z]", description: "[$__a-zA-Z]" },
-        peg$c46 = /^[$__a-zA-Z0-9]/,
-        peg$c47 = { type: "class", value: "[$__a-zA-Z0-9]", description: "[$__a-zA-Z0-9]" },
+        peg$c44 = /^[$_a-zA-Z]/,
+        peg$c45 = { type: "class", value: "[$_a-zA-Z]", description: "[$_a-zA-Z]" },
+        peg$c46 = /^[$_a-zA-Z0-9]/,
+        peg$c47 = { type: "class", value: "[$_a-zA-Z0-9]", description: "[$_a-zA-Z0-9]" },
         peg$c48 = /^[0-9]/,
         peg$c49 = { type: "class", value: "[0-9]", description: "[0-9]" },
         peg$c50 = /^[1-9]/,
@@ -5844,7 +5844,7 @@
     }
 
 
-      var ParamContextCheck = /(^|[^%])%[$__a-zA-Z][$__a-zA-Z0-9]*/;
+      var ParamContextCheck = /(^|[^%])%[$_a-zA-Z][$_a-zA-Z0-9]*/;
 
       var isArray = Array.isArray;
       if ( !isArray ) {

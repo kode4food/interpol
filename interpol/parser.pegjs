@@ -7,7 +7,7 @@
  */
 
 {
-  var ParamContextCheck = /(^|[^%])%[$__a-zA-Z][$__a-zA-Z0-9]*/;
+  var ParamContextCheck = /(^|[^%])%[$_a-zA-Z][$_a-zA-Z0-9]*/;
 
   var isArray = Array.isArray;
   if ( !isArray ) {
@@ -86,11 +86,11 @@ IdentifierName
     }
 
 IdentStart
-  = [$__a-zA-Z]
+  = [$_a-zA-Z]
 
 IdentCont
   = IdentStart
-  / [$__a-zA-Z0-9]
+  / [$_a-zA-Z0-9]
 
 Digit
   = [0-9]

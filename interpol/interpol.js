@@ -105,7 +105,7 @@
 
   // Interpolation Template Builder *******************************************
 
-  var ParamRegex = /(.?)%(([1-9][0-9]*)|([$__a-zA-Z][$__a-zA-Z0-9]*))?/;
+  var ParamRegex = /(.?)%(([1-9][0-9]*)|([$_a-zA-Z][$_a-zA-Z0-9]*))?/;
 
   function buildTemplate(formatStr) {
     var funcs = []
@@ -335,7 +335,7 @@
       }
       exportedContext = extendContext(globalContext);
       evaluator(exportedContext, NullWriter);
-      return freezeObject(exportedContext);
+      return exportedContext;
     }
     
     // Evaluator Generation Utilities *****************************************
@@ -530,6 +530,7 @@
 
         function bodyEvaluator(writer) {
           var newCtx = extendContext(ctx);
+          newCtx[name] = bodyEvaluator;
           for ( var i = 1; i < plen; i++ ) {
             newCtx[params[i]] = arguments[i];
           }
