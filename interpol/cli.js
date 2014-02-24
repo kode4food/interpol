@@ -106,10 +106,13 @@ function commandLine() {
       , output = [];
 
     output.push("(function (interpol) {");
-    output.push("var bundle = " + bundleStr + ";");
+    output.push("var bundle = {}, json = " + bundleStr + ";");
+    output.push("for (var key in json) {");
+    output.push("  bundle[key] = interpol(json[key]);");
+    output.push("}");
     output.push("interpol." + bundleName + " = bundle;");
     output.push("interpol.resolvers().push({ resolveModule:");
-    output.push("function resolve(name) { return bundle[name]; }");
+    output.push("function (name) { return bundle[name].exports(); }");
     output.push("});");
     output.push("})(typeof require === 'function'");
     output.push("? require('../interpol')");
