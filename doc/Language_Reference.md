@@ -289,9 +289,10 @@ happy ? "you are happy!" : "awwwwwww"
 ```
 
 ### Interpolation
-TODO: Needs to be re-written to cover named indexing
+Quite simply, interpolation allows you to parameterize a string.  This is accomplished via the interpolation operator `%`.  Interpolation can be performed by index (both implicit and explicit) and by name.
 
-Quite simply, interpolation allows you to parameterize a string.  This is accomplished in two ways.  One is through the interpolation operator `%`.  In its most basic form, you'd be merging a single parameter into a string:
+#### Indexed Interpolation (Implicit)
+In its most basic form, you'd be merging a single parameter into a string.  This can be done using implicit indexing.
 
 ```python
 "There are % stooges" % people.length
@@ -303,7 +304,8 @@ If you have more than one parameter, you need to provide a tuple to the right si
 "There are % stooges, and % is the best" % (people.length, people.best)
 ```
 
-In truth, this approach is rather limited, particularly since you could accomplish the same thing with multiple Expression Statements.  Where interpolation becomes important is when you're trying to localize an application and you need to parameterize a string from an expression on the left side of the operator.  Let's say you have the following string table called `str`:
+#### Indexed Interpolation (Explicit)
+In truth, the implicit approach is rather limited, particularly since you could accomplish the same thing with multiple Expression Statements.  Where interpolation becomes important is when you're trying to localize an application and you need to parameterize a string from an expression on the left side of the operator.  Let's say you have the following string table called `str`:
 
 ```json
 {
@@ -335,10 +337,18 @@ If your parameters always appear in the same order, then the simple `%` characte
 }
 ```
 
+#### Named Interpolation
+Rather than simple values or tuples, an object can be passed to the right side of the interpolation operator.  This will allow you to interpolate its properties by name.  To do this, follow the embedded `%` by a valid Interpol identifier:
+
+```python
+"There are %length stooges" % people
+```
+
+Here, the `length` property of `people` will be interpolated into the resulting string.
 
 #### Automatic Interpolation
-In addition to the Interpolation Operator, Automatic Interpolation is supported for literal strings containing named indexing.  The value used in this interpolation is retrieved from the current scope.  So far example, if there is a variable called name in the current scope, you can expose it as follows:
+Automatic Interpolation is supported for literal strings containing named indexing.  The value used in this interpolation is retrieved from the current scope.  So far example, if there is a variable called `name` in the current scope, you can expose it as follows:
 
-```html
-<title>"User Profile - %name"</title>
+```python
+"User Profile - %name"
 ```
