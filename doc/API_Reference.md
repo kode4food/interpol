@@ -23,7 +23,7 @@ There are several support structures and functions attached to the `$interpol()`
 Each compiled closure also attaches a single function called `exports()`.  This function is used by resolvers to retrieve partials and variables when the compiled closure is loaded as a module.
 
 ## Resolvers (interpol/resolvers.js)
-A resolver is an interface used by Interpol to resolve an imported module.  There are three immediately available, and one on the way:
+A resolver is an interface used by Interpol to resolve an imported module.  There are three available for develop use, and one automatically registered for apps bundled by the command-line interface.
 
 ### Helpers
 The 'helpers' resolver allows the developer to register JavaScript functions by name.  This Function will then become available as part of the 'helpers' module.  If `resolvers.js` is loaded, an instance of this resolver is registered by default.  It can be retrieved like so:

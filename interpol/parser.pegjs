@@ -255,7 +255,8 @@ statement
   / statementNoWhitespace
 
 statementWhitespace
-  = htmlComment
+  = docType
+  / htmlComment
   / closeTag
   / openTag
   / exprStatement
@@ -266,6 +267,11 @@ statementNoWhitespace
   / forStatement
   / ifStatement
   / letStatement
+
+htmlComment
+  = "<!--" comment:( !("-->") c:Char { return c; } )* "-->"  {
+      return [lit('ct'), lit(comment.join(''))];
+    }
 
 openTag
   = "<" __ tag:htmlId __ attrs:( a:attribute  __ { return a; } )* t:tagTail  {
@@ -290,11 +296,6 @@ attribute
 closeTag
   = "</" __ tag:htmlId __ ">"  {
       return [lit('cl'), tag];
-    }
-
-htmlComment
-  = "<!--" comment:( !("-->") c:Char { return c; } )* "-->"  {
-      return [lit('ct'), lit(comment.join(''))];
     }
 
 defStatement

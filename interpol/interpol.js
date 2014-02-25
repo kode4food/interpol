@@ -9,7 +9,7 @@
 (function (parser, exportTarget, exportName) {
   "use strict";
 
-  var CURRENT_VERSION = "0.1.3"
+  var CURRENT_VERSION = "0.1.4"
     , TemplateCacheMax = 256
     , globalOptions = { writer: null, errorCallback: null }
     , globalContext = {}
@@ -185,7 +185,8 @@
     selfCloseElement: noOp,
     endElement: noOp,
     comment: noOp,
-    content: noOp
+    content: noOp,
+    rawContent: noOp
   });
 
   function createArrayWriter(arr) {
@@ -194,7 +195,8 @@
       selfCloseElement: selfCloseElement,
       endElement: endElement,
       comment: comment,
-      content: content
+      content: content,
+      rawContent: rawContent
     });
 
     function writeAttributes(attributes) {
@@ -227,6 +229,10 @@
       for ( var i = 0, len = arguments.length; i < len; i++ ) {
         arr.push(escapeContent(arguments[i]));
       }
+    }
+
+    function rawContent() {
+      arr.push.apply(arr, arguments);
     }
   }
 

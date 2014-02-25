@@ -44,6 +44,8 @@ function commandLine() {
     , inDir = args.in || process.cwd()
     , outDir = args.out || inDir
     , appFile = args.app || null
+    , appProperty = args.prop || null
+    , appSandbox = args.sandbox || false
     , appModules = {}
     , pattern = args.files || '*.int'
     , ext = args.ext || '.json'
@@ -101,22 +103,31 @@ function commandLine() {
     }
   }
   else if ( appFile ) {
-    var bundleName = getModuleName(appFile)
+    var bundleName = getBundleName(appProperty || appFile)
       , bundleStr = JSON.stringify(appModules)
       , output = [];
 
     output.push("(function(i){");
     output.push("if(!i)throw Error('Interpol not loaded');");
-    output.push("var b={},j=" + bundleStr + ";");
+    // Create the import resolver
+    output.push("var b={},c={},r=i.resolvers()");
+    output.push(appSandbox ? ".slice(0);" : ";");
+    output.push("r.push({resolveModule:");
+    output.push("function(n){");
+    output.push("var m=c[n];");
+    output.push("if(m){return m;}");
+    output.push("return c[n]=b[n].exports();}");
+    output.push("});");
+    // Compile the pre-parsed templates
+    output.push("var j=" + bundleStr + ";");
     output.push("for(var k in j){");
-    output.push("b[k]=i(j[k]);");
+    output.push("b[k]=i(j[k],{resolvers:r});");
     output.push("}");
     output.push("i." + bundleName + "=b;");
-    output.push("i.resolvers().push({resolveModule:");
-    output.push("function(n){return b[n].exports();}");
-    output.push("});");
+    output.push("j=null;");
     output.push("})(typeof require==='function'");
-    output.push("?require('interpol'):$interpol);");
+    output.push("?require('interpol'):this.$interpol);");
+
     fs.writeFileSync(appFile, output.join(''));
   }
 
@@ -140,14 +151,14 @@ function processFile(inputPath, outputPath) {
   return [inputPath, {
     size: output.length,
     duration: duration,
-    module: getModuleName(inputPath),
+    module: getBundleName(inputPath),
     json: json
   }];
 }
 
 // Support Functions ********************************************************
 
-function getModuleName(filePath) {
+function getBundleName(filePath) {
   var filename = path.basename(filePath)
     , match = ModuleNameRegex.exec(filename);
 
@@ -164,7 +175,10 @@ function parseArguments(passedArguments) {
     var match = OptionRegex.exec(arg);
     if ( match ) {
       var argName = match[1]
-        , argValue = i < len ? passedArguments[i++] : null;
+        , argValue = true;
+      if ( i < len && !OptionRegex.test(passedArguments[i]) ) {
+        argValue = passedArguments[i++];
+      }
       result[argName] = argValue;
     }
   }
@@ -195,11 +209,13 @@ function displayUsage() {
   console.info("");
   console.info("  Options:");
   console.info("");
-  console.info("  -in <dir>     - Location of templates to parse (or $CWD)");
-  console.info("  -out <dir>    - Location of parsed JSON output (or -in dir)");
-  console.info("  -files <glob> - Filename pattern to parse (or *.int)");
-  console.info("  -ext <ext>    - Filename extension to use (or .json)");
-  console.info("  -app <file>   - Generate a single-file application bundle");
+  console.info("  -in <dir>      - Location of templates to parse (or $CWD)");
+  console.info("  -out <dir>     - Location of parsed JSON output (or -in dir)");
+  console.info("  -files <glob>  - Filename pattern to parse (or *.int)");
+  console.info("  -ext <ext>     - Filename extension to use (or .json)");
+  console.info("  -app <file>    - Generate a single-file application bundle");
+  console.info("    -prop <name> - Property name for the registered bundle");
+  console.info("    -sandbox     - Sandbox the application bundle's imports");
   console.info("");
 }
 

@@ -231,4 +231,4 @@
     }
   })();
 
-})(typeof require === 'function' ? require('../interpol') : $interpol);
+})(typeof require === 'function' ? require('../interpol') : this.$interpol);
