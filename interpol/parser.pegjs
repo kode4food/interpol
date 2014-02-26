@@ -318,8 +318,8 @@ paramList
     }
 
 fromStatement
-  = From _ module:Identifier __ Import _ imports:importList  {
-      return [lit('mi'), [[module, imports]]];
+  = From _ path:modulePath __ Import _ imports:importList  {
+      return [lit('mi'), [[path, imports]]];
     }
   / Import _ modules:moduleList  {
       return [lit('mi'), modules];
@@ -339,9 +339,19 @@ importItem
     }
 
 moduleList
-  = start:Identifier
-    cont:( _ "," __ id:Identifier { return [id, []]; } )*  {
+  = start:modulePath
+    cont:( _ "," __ path:modulePath { return [path, []]; } )*  {
       return [[start, []]].concat(cont);
+    }
+
+modulePath
+  = start:moduleComp cont:( "." item:moduleComp { return item; } )*  {
+      return lit([start].concat(cont).join('/'));
+    }
+
+moduleComp
+  = !ReservedWord id:IdentifierName  {
+      return id;
     }
 
 forStatement

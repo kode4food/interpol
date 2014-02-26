@@ -8,6 +8,8 @@ app.engine('int', require('interpol').__express);
 app.set('view engine', 'int');
 ```
 
+You can also instantiate customized engines.  Customizations include modifying the search path and turning off file-system monitoring.
+
 ## Version 0.1.3 - Let, Unless, Imports and Stuff
 Getting close to a usable system
 
