@@ -195,6 +195,8 @@
             }
             catch ( err ) {
               // TODO: How to handle this, maybe not at all
+              console.warn("Error Compiling " + jsonName);
+              console.warn(err);
             }
           }
 
@@ -210,6 +212,8 @@
             }
             catch ( err ) {
               // TODO: How to handle this, maybe not at all
+              console.warn("Error Parsing " + intName);
+              console.warn(err);
             }
           }
         }
@@ -218,8 +222,8 @@
       }
 
       function cacheModule(name, module) {
-        cache.putModule(name, module);
         dirty[name] = false;
+        return cache.putModule(name, module);
       }
 
       function monitorResult(event, filename) {

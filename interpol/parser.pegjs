@@ -120,7 +120,7 @@ Char
   = .
 
 WS
-  = [\t\v\f ]
+  = [ \t\v\f]
 
 NL
   = [\n\r]
@@ -213,40 +213,39 @@ Additive = Add / Sub
 Multiplicative = Mul / Div / Mod
 Unary = Neg / Not
 
-_  = WS*
-__ = ( WS / NL / Comment )*
-
-___
-  = s:( WS { return ' '; } / (NL / Comment) { return '\n'; } )*  {
+__ = s:( WS { return ' '; } / ( NL / Comment ) { return '\n'; } )*  {
       var res = s.join('');
       if ( !res.length ) {
         return null;
       }
-      return res.indexOf('\n') !== -1 ? lit('\n') : lit(' ');
-    }
+      return res.indexOf('\n') !== -1 ? '\n' : ' ';
+   }
+
+_  = WS*  { return ' '; }
 
 /** Parser *******************************************************************/
 
 module
-  = s:statements  { return [lit('im'), s]; }
+  = __ s:statements  { return [lit('im'), s]; }
 
 statements
   = statements:blockStatement*  {
       var results = [];
       for ( var i = 0, len = statements.length; i < len; i++ ) {
         results.push(statements[i][0]);
-        if ( statements[i][1] !== null ) {
-          results.push([lit('ou'), statements[i][1]]);
+        var ws = statements[i][1];
+        if ( ws ) {
+          results.push([lit('ou'), lit(ws)]);
         }
       }
       return results;
     }
 
 blockStatement
-  = __ s:statementWhitespace ws:___ {
+  = s:statementWhitespace ws:__ {
       return [s, ws];
     }
-  / __ s:statementNoWhitespace __ {
+  / s:statementNoWhitespace __ {
       return [s, null];
     }
 
@@ -255,8 +254,7 @@ statement
   / statementNoWhitespace
 
 statementWhitespace
-  = docType
-  / htmlComment
+  = htmlComment
   / closeTag
   / openTag
   / exprStatement
@@ -470,7 +468,7 @@ unary
   / call
 
 call
-  = member:member _ args:callArgs?  {
+  = member:member args:( _ a:callArgs { return a; } )?  {
       if ( args ) {
         return [lit('ca'), member, args];
       }
@@ -487,15 +485,15 @@ callArgs
 
 member
   = head:tuple
-    tail:( sel:memberSelector { return [lit('mb'), sel]; } )*  {
+    tail:( _ sel:memberSelector { return [lit('mb'), sel]; } )*  {
       return buildBinaryChain(head, tail);
     }
 
 memberSelector
-  = _ "." __ elem:Identifier  {
+  = "." __ elem:Identifier  {
       return elem;
     }
-  / _ "[" __ elem:expr __ "]"  {
+  / "[" __ elem:expr __ "]"  {
       return elem;
     }
 

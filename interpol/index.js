@@ -6,5 +6,13 @@
  * @author Thom Bradford (github/kode4food)
  */
 
-module.exports = require('./interpol');
+var interpol = module.exports = require('./interpol');
 require('./resolvers');
+
+try {
+  require('express');
+  interpol.__express = require('./express').createExpressEngine();
+}
+catch ( err ) {
+  console.warn("Skipping registration of Express render engine");
+}

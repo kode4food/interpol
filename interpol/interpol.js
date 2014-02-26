@@ -341,6 +341,7 @@
       }
       exportedContext = extendContext(globalContext);
       evaluator(exportedContext, NullWriter);
+      exportedContext.self = compiledTemplate;
       return exportedContext;
     }
     

@@ -1,5 +1,13 @@
 # Change History
 
+## Version 0.1.4 - Express Views
+Added a view engine for [Express](http://expressjs.com/).  To set a development instance as the default engine, you can do the following:
+
+```javascript
+app.engine('int', require('interpol').__express);
+app.set('view engine', 'int');
+```
+
 ## Version 0.1.3 - Let, Unless, Imports and Stuff
 Getting close to a usable system
 
