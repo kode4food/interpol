@@ -7,12 +7,9 @@
  */
 
 var interpol = module.exports = require('./interpol');
+
+// Pull in default Resolvers
 require('./resolvers');
 
-try {
-  require('express');
-  interpol.__express = require('./express').createExpressEngine();
-}
-catch ( err ) {
-  console.warn("Skipping registration of Express render engine");
-}
+// Pull in Express View Engine
+interpol.__express = require('./express').createExpressEngine();
