@@ -41,9 +41,9 @@ function createExpressEngine(localOptions) {
         , interpolOptions = { resolvers: resolvers };
 
       for ( var i = resolvers.length; i--; ) {
-        var mod = resolvers[i].resolveModule(moduleName, interpolOptions);
-        if ( mod ) {
-          callback(null, mod.self(options));
+        var module = resolvers[i].resolveModule(moduleName, interpolOptions);
+        if ( module ) {
+          callback(null, module(options));
           return;
         }
       }

@@ -15,7 +15,7 @@ exports.scope = nodeunit.testCase({
   },
 
   "Shadow Global Scope": function (test) {
-    test.equal(eval("let greeting='Not Hello!' greeting"), "Not Hello!");
+    test.equal(eval("let greeting='Not Hello!'\ngreeting"), "Not Hello!");
     test.equal(eval("greeting"), "Hello, World!");
     test.done();
   },

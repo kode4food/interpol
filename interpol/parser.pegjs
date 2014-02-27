@@ -232,7 +232,7 @@ statements
   = statements:blockStatement*  {
       var results = [];
       for ( var i = 0, len = statements.length; i < len; i++ ) {
-        results.push(statements[i][0]);
+        results.push.apply(results, statements[i][0]);
         var ws = statements[i][1];
         if ( ws ) {
           results.push([lit('ou'), lit(ws)]);
@@ -242,24 +242,28 @@ statements
     }
 
 blockStatement
-  = s:statementWhitespace ws:__ {
-      return [s, ws];
+  = s:( htmlStatement / exprStatement ) ws:__  {
+      return [[s], ws];
     }
-  / s:statementNoWhitespace __ {
-      return [s, null];
+  / s:interpolStatement
+    t:( ( _ es:htmlStatement { return es; } ) / EOL { return null; } ) __  {
+      if ( t ) {
+        return [[s, t], null];
+      }
+      return [[s], null];
     }
 
 statement
-  = statementWhitespace
-  / statementNoWhitespace
+  = htmlStatement
+  / interpolStatement
+  / exprStatement
 
-statementWhitespace
+htmlStatement
   = htmlComment
   / closeTag
   / openTag
-  / exprStatement
 
-statementNoWhitespace
+interpolStatement
   = defStatement
   / fromStatement
   / forStatement
@@ -297,11 +301,16 @@ closeTag
     }
 
 defStatement
-  = Def _ id:Identifier _ params:params? _ ":" __ stmt:statement  {
-      return [lit('de'), id, params || [], [stmt]];
-    }
-  / Def _ id:Identifier _ params:params? __ stmts:statements End  {
+  = Def _ id:Identifier _ params:params? stmts:performedStatements  {
       return [lit('de'), id, params || [], stmts];
+    }
+
+performedStatements
+  = _ ":" __ stmt:statement  {
+      return [stmt];
+    }
+  / __ stmts:statements End  {
+      return stmts;
     }
 
 params
@@ -355,10 +364,7 @@ moduleComp
     }
 
 forStatement
-  = For _ ranges:ranges _ ":" __ stmt:statement  {
-      return [lit('fr'), ranges, [stmt]];
-    }
-  / For _ ranges:ranges __ stmts:statements End  {
+  = For _ ranges:ranges stmts:performedStatements  {
       return [lit('fr'), ranges, stmts];
     }
 

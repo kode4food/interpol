@@ -13,43 +13,85 @@
 
   var globalResolvers = interpol.resolvers();
 
+  function formatSyntaxError(filePath, err) {
+    if ( !err.name || err.name !== 'SyntaxError') {
+      return err;
+    }
+
+    var unexpected = err.found ? "'" + err.found + "'" : "end of file"
+      , errString = "Unexpected " + unexpected
+      , lineInfo = ":" + err.line + ":" + err.column;
+
+    return Error(filePath + lineInfo + ": " + errString);
+  }
+
   function createModuleCache() {
     var cache = {};
 
     return {
+      exists: exists,
       getModule: getModule,
+      getExports: getExports,
       putModule: putModule,
       removeModule: removeModule
     };
 
-    function getModule(name) {
+    function exists(name) {
       return cache[name];
     }
 
-    function putModule(name, module) {
-      var cached = cache[name]
-        , key;
+    function getModule(name) {
+      var result = cache[name];
+      return result ? result.module : null;
+    }
 
-      if ( !cached ) {
-        cache[name] = cached = {};
+    function getExports(name) {
+      var result = cache[name];
+      if ( !result ) {
+        return null;
+      }
+
+      if ( !result.dirtyExports ) {
+        return result.moduleExports;
+      }
+
+      var moduleExports = result.moduleExports
+        , key = null;
+
+      if ( !moduleExports ) {
+        moduleExports = result.moduleExports = {};
       }
       else {
         // This logic is necessary because another module may already be
         // caching this result as a dependency.
-        for ( key in cached ) {
-          if ( cached.hasOwnProperty(key) ) {
-            delete cached[key];
+        for ( key in moduleExports ) {
+          if ( moduleExports.hasOwnProperty(key) ) {
+            delete moduleExports[key];
           }
         }
       }
 
-      for ( key in module ) {
-        if ( module.hasOwnProperty(key) ) {
-          cached[key] = module[key];
+      var exported = result.module.exports();
+      for ( key in exported ) {
+        if ( exported.hasOwnProperty(key) ) {
+          moduleExports[key] = exported[key];
         }
       }
 
-      return cached;
+      result.dirtyExports = false;
+      return moduleExports;
+    }
+
+    function putModule(name, module) {
+      var cached = cache[name];
+      if ( cached ) {
+        cached.module = module;
+        cached.dirtyExports = true;
+      }
+      else {
+        cached = cache[name] = { module: module, dirtyExports: true };
+      }
+      return cached.module;
     }
 
     function removeModule(name) {
@@ -69,16 +111,21 @@
       options = options || {};
 
       var moduleName = options.name || 'helpers'
-        , module = {};
+        , moduleExports = {};
 
       return {
         resolveModule: resolveModule,
+        resolveExports: resolveExports,
         registerHelper: registerHelper,
         unregisterHelper: unregisterHelper
       };
 
       function resolveModule(name) {
-        return name === moduleName ? module : null;
+        return null;
+      }
+
+      function resolveExports(name) {
+        return name === moduleName ? moduleExports : null;
       }
 
       function registerHelper(name, func) {
@@ -89,8 +136,7 @@
           }
           name = func.name;
         }
-        func._interpolPartial = true;
-        module[name] = func;
+        moduleExports[name] = interpol.bless(func);
       }
 
       function unregisterHelper(name) {
@@ -98,7 +144,7 @@
           name = name.name;
         }
         if ( name ) {
-          delete module[name];
+          delete moduleExports[name];
         }
       }
     }
@@ -117,6 +163,7 @@
 
       return {
         resolveModule: cache.getModule,
+        resolveExports: cache.getExports,
         unregisterModule: cache.removeModule,
         registerModule: registerModule
       };
@@ -124,18 +171,13 @@
       function registerModule(name, module) {
         if ( typeof module === 'function' &&
              typeof module.exports === 'function' ) {
-          cache.putModule(name, module.exports());
+          cache.putModule(name, module);
           return;
         }
 
         if ( typeof module === 'string' ||
              typeof module.length === 'number' ) {
-          cache.putModule(name, interpol(module).exports());
-          return;
-        }
-
-        if ( typeof module === 'object' ) {
-          cache.putModule(name, module);
+          cache.putModule(name, interpol(module));
           return;
         }
 
@@ -161,7 +203,8 @@
         , isDirty = options.monitor ? util.createDirtyChecker() : notDirty;
 
       return {
-        resolveModule: resolveModule
+        resolveModule: resolveModule,
+        resolveExports: resolveExports
       };
 
       function notDirty() {
@@ -169,24 +212,20 @@
         return false;
       }
 
-      function resolveModule(name, options) {
-        var module = cache.getModule(name)
-          , sourcePath = path.resolve(searchPath, name + '.int');
+      function reloadIfNeeded(name, options) {
+        var sourcePath = path.resolve(searchPath, name + '.int')
+          , dirty = isDirty(sourcePath);
 
-        if ( !isDirty(sourcePath) && module ) {
-          return module;
-        }
+        var loadable = ( dirty && dirty.isFile() ) ||
+                       ( !dirty && fs.existsSync(sourcePath) );
 
-        if ( fs.existsSync(sourcePath) ) {
+        if ( loadable ) {
           try {
             var content = fs.readFileSync(sourcePath).toString();
-            return cacheModule(name, interpol(content, options).exports());
+            cache.putModule(name, interpol(content, options));
           }
           catch ( err ) {
-            // TODO: How to handle this, maybe not at all
-            console.warn("Error Parsing " + sourcePath);
-            console.warn(err);
-            return module;
+            throw formatSyntaxError(name + '.int', err);
           }
         }
         else {
@@ -195,8 +234,14 @@
         }
       }
 
-      function cacheModule(name, module) {
-        return cache.putModule(name, module);
+      function resolveModule(name, options) {
+        reloadIfNeeded(name, options);
+        return cache.getModule(name);
+      }
+
+      function resolveExports(name, options) {
+        reloadIfNeeded(name, options);
+        return cache.getExports(name);
       }
     }
   })();

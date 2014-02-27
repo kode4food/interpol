@@ -252,6 +252,23 @@
     return compile(parseOutput, options);
   }
 
+  function bless(func) {
+    if ( typeof func !== 'function' ) {
+      throw new Error("Argument to bless must be a Function");
+    }
+
+    if ( func.__interpolPartial ) {
+      return func;
+    }
+
+    blessedWrapper.__interpolPartial = true;
+    return blessedWrapper;
+
+    function blessedWrapper() {
+      return func.apply(this, arguments);
+    }
+  }
+
   function parse(template) {
     if ( !parser ) {
       if ( typeof interpol.parser !== 'function' ) {
@@ -339,9 +356,12 @@
       if ( exportedContext ) {
         return exportedContext;
       }
+
       exportedContext = extendContext(globalContext);
+      exportedContext.__interpolExports = true;
       evaluator(exportedContext, NullWriter);
-      exportedContext.self = compiledTemplate;
+      delete exportedContext.__interpolExports;
+
       return exportedContext;
     }
     
@@ -494,24 +514,24 @@
             , moduleName = importItem[0]
             , toResolve = importItem[1];
 
-          var module = resolveModule(moduleName, true);
+          var moduleExports = resolveExports(moduleName, true);
 
           if ( toResolve ) {
             for ( var j = toResolve.length; j--; ) {
               var aliasMap = toResolve[j];
-              ctx[aliasMap[0]] = module[aliasMap[1]]
+              ctx[aliasMap[0]] = moduleExports[aliasMap[1]]
             }
           }
           else {
-            mixin(ctx, module);
+            mixin(ctx, moduleExports);
           }
         }
       }
 
-      function resolveModule(moduleName, raiseError) {
+      function resolveExports(moduleName, raiseError) {
         var module = null;
         for ( var i = resolvers.length; !module && i--; ) {
-          module = resolvers[i].resolveModule(moduleName, compilerOptions);
+          module = resolvers[i].resolveExports(moduleName, compilerOptions);
         }
         if ( !module && raiseError ) {
           throw new Error("Module '" + moduleName +"' not resolved");
@@ -529,7 +549,7 @@
       return closureEvaluator;
 
       function closureEvaluator(ctx /*, writer */) {
-        bodyEvaluator._interpolPartial = true;
+        bodyEvaluator.__interpolPartial = true;
         ctx[name] = bodyEvaluator;
 
         function bodyEvaluator(writer) {
@@ -552,7 +572,11 @@
 
       function callEvaluator(ctx, writer) {
         var func = member(ctx, writer);
-        if ( typeof func !== 'function' || !func._interpolPartial ) {
+
+        if ( typeof func !== 'function' || !func.__interpolPartial ) {
+          if ( ctx.__interpolExports ) {
+            return;
+          }
           throw new Error("Attempting to call a non-partial");
         }
 
@@ -1038,6 +1062,7 @@
   interpol.options = function options() { return globalOptions; };
   interpol.globals = function globals() { return globalContext; };
   interpol.resolvers = function resolvers() { return globalResolvers; };
+  interpol.bless = bless;
   interpol.parse = parse;
   interpol.compile = compile;
   return interpol;

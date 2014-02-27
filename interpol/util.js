@@ -45,7 +45,10 @@ function createDirtyChecker() {
     }
 
     stats.mtime = stats.mtime.getTime();
-    return cached.size !== stats.size || cached.mtime !== stats.mtime;
+    if ( cached.size !== stats.size || cached.mtime !== stats.mtime ) {
+      return stats;
+    }
+    return false;
   }
 }
 
