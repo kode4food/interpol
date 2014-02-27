@@ -150,87 +150,53 @@
     if ( !isNode ) { return; }
 
     var fs = require('fs')
-      , path = require('path');
-
-    var FilenameExtensionRegex = /\.int(\.json)?$/;
+      , path = require('path')
+      , util = require('./util');
 
     interpol.createFileResolver = createFileResolver;
 
     function createFileResolver(options) {
       var cache = createModuleCache()
         , searchPath = options.path || process.cwd()
-        , performCompilation = options.compile
-        , monitorChanges = options.monitor
-        , dirty = {};
-
-      if ( !Array.isArray(searchPath) ) {
-        searchPath = [searchPath];
-      }
-      searchPath = searchPath.reverse();
-
-      if ( monitorChanges ) {
-        for ( var i = searchPath.length; i--; ) {
-          fs.watch(searchPath[i], monitorResult);
-        }
-      }
+        , isDirty = options.monitor ? util.createDirtyChecker() : notDirty;
 
       return {
         resolveModule: resolveModule
       };
 
+      function notDirty() {
+        // Always return false
+        return false;
+      }
+
       function resolveModule(name, options) {
-        var module = cache.getModule(name);
-        if ( module && !dirty[name] ) {
+        var module = cache.getModule(name)
+          , sourcePath = path.resolve(searchPath, name + '.int');
+
+        if ( !isDirty(sourcePath) && module ) {
           return module;
         }
 
-        for ( var i = searchPath.length; i--; ) {
-          var jsonName = path.resolve(searchPath[i], name + '.int.json')
-            , content;
-
-          if ( fs.existsSync(jsonName) ) {
-            try {
-              content = JSON.parse(fs.readFileSync(jsonName));
-              return cacheModule(name, interpol(content, options).exports());
-            }
-            catch ( err ) {
-              // TODO: How to handle this, maybe not at all
-              console.warn("Error Compiling " + jsonName);
-              console.warn(err);
-            }
+        if ( fs.existsSync(sourcePath) ) {
+          try {
+            var content = fs.readFileSync(sourcePath).toString();
+            return cacheModule(name, interpol(content, options).exports());
           }
-
-          if ( !performCompilation ) {
-            continue;
-          }
-
-          var intName = path.resolve(searchPath[i], name + '.int');
-          if ( fs.existsSync(intName) ) {
-            try {
-              content = fs.readFileSync(intName).toString();
-              return cacheModule(name, interpol(content, options).exports());
-            }
-            catch ( err ) {
-              // TODO: How to handle this, maybe not at all
-              console.warn("Error Parsing " + intName);
-              console.warn(err);
-            }
+          catch ( err ) {
+            // TODO: How to handle this, maybe not at all
+            console.warn("Error Parsing " + sourcePath);
+            console.warn(err);
+            return module;
           }
         }
-
-        return null;
+        else {
+          cache.removeModule(name);
+          return null;
+        }
       }
 
       function cacheModule(name, module) {
-        dirty[name] = false;
         return cache.putModule(name, module);
-      }
-
-      function monitorResult(event, filename) {
-        if ( filename && filename.match(FilenameExtensionRegex) ) {
-          var name = filename.replace(FilenameExtensionRegex, '');
-          dirty[name] = true;
-        }
       }
     }
   })();

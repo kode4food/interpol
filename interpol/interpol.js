@@ -465,16 +465,13 @@
 
     function createImportEvaluator(fromNodes) {
       var importList = []
-        , ilen = fromNodes.length
-        , modules = {};
+        , ilen = fromNodes.length;
 
       for ( var i = ilen; i--; ) {
         var fromNode = fromNodes[i]
           , moduleName = lits[fromNode[0]]
           , aliases = fromNode[1]
           , toResolve = null;
-
-        resolveModule(moduleName); // Try it, though it may silently fail
 
         if ( aliases && aliases.length ) {
           toResolve = [];
@@ -497,7 +494,7 @@
             , moduleName = importItem[0]
             , toResolve = importItem[1];
 
-          var module = modules[moduleName] || resolveModule(moduleName, true);
+          var module = resolveModule(moduleName, true);
 
           if ( toResolve ) {
             for ( var j = toResolve.length; j--; ) {
@@ -519,7 +516,7 @@
         if ( !module && raiseError ) {
           throw new Error("Module '" + moduleName +"' not resolved");
         }
-        return modules[moduleName] = module;
+        return module;
       }
     }
 

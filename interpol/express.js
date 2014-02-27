@@ -16,33 +16,19 @@ var fs = require('fs')
 require('./resolvers');
 
 var ModuleNameRegex = /^[$_a-zA-Z][$_a-zA-Z0-9]*/
-  , DefaultOptions = { compile: true, monitor: true };
-
-var resolverCache = {};
+  , DefaultOptions = { monitor: true };
 
 function createExpressEngine(localOptions) {
   var engineOptions = util.extend({}, DefaultOptions, localOptions || {})
-    , engineResolvers = engineOptions.resolvers
-    , enginePath = engineOptions.path || [];
+    , defaultPath = path.resolve(process.cwd(), 'views')
+    , resOptions = util.extend({ path: defaultPath}, engineOptions)
+    , resolver = interpol.createFileResolver(resOptions)
+    , resolvers = interpol.resolvers().concat(resolver);
 
   return renderFile;
 
   function renderFile(templatePath, options, callback) {
     try {
-      var searchPath = enginePath.concat(path.dirname(templatePath))
-        , resolverKey = searchPath.join(':')
-        , resolvers = resolverCache[resolverKey];
-
-      if ( !resolvers ) {
-        var resOptions = util.extend({}, engineOptions, { path: searchPath })
-          , resolver = interpol.createFileResolver(resOptions);
-
-        resolvers = (engineResolvers || interpol.resolvers()).slice(0);
-        resolvers.push(resolver);
-
-        resolverCache[resolverKey] = resolvers;
-      }
-
       var basename = path.basename(templatePath)
         , match = ModuleNameRegex.exec(basename);
 
