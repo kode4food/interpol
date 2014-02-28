@@ -19,6 +19,7 @@ There are several support structures and functions attached to the `$interpol()`
   * `options{}` - Global Options Object (overridden when calling a compiled tempalte)
   * `globals{}` - Global Variable Context (available to all compiled templates)
   * `resolvers[]` - Global Resolver Instances (overridden at compile-time)
+  * `bless()` - Blesses a Function as being Interpol-safe
 
 Each compiled closure also attaches a single function called `exports()`.  This function is used by resolvers to retrieve partials and variables when the compiled closure is loaded as a module.
 
