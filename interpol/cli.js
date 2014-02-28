@@ -17,7 +17,7 @@ var fs = require('fs')
   , mkdirp = require('mkdirp')
   , interpol = require('./interpol');
 
-var ModuleNameRegex = /^[$_a-zA-Z][$_a-zA-Z0-9]*/
+var ModuleNameRegex = /^[$_a-zA-Z][$_a-zA-Z0-9\\/]*/
   , OptionRegex = /^-([_a-zA-Z][_a-zA-Z0-9]*)$/;
 
 var slice = Array.prototype.slice;
@@ -47,7 +47,7 @@ function commandLine() {
     , appProperty = args.prop || null
     , appSandbox = args.sandbox || false
     , appModules = {}
-    , pattern = args.files || '*.int'
+    , pattern = args.files || '**/*.int'
     , ext = args.ext || '.json'
     , files = glob.sync(pattern, { cwd: inDir })
     , success = []
@@ -59,14 +59,16 @@ function commandLine() {
   }
 
   for ( var i = 0, len = files.length; i < len; i++ ) {
-    var inputPath = path.join(inDir, files[i])
-      , outputPath = path.join(outDir, files[i] + ext);
+    var file = files[i]
+      , moduleName = getModuleName(file)
+      , inputPath = path.join(inDir, file)
+      , outputPath = path.join(outDir, file + ext);
 
     try {
       var result = processFile(inputPath, outputPath)
         , info = result[1];
       success.push(result);
-      appModules[info.module] = info.json;
+      appModules[moduleName] = info.json;
     }
     catch ( err ) {
       errors.push([inputPath, err]);
@@ -103,7 +105,7 @@ function commandLine() {
     }
   }
   else if ( appFile ) {
-    var bundleName = getBundleName(appProperty || appFile)
+    var bundleName = getModuleName(appProperty || path.basename(appFile))
       , bundleStr = JSON.stringify(appModules)
       , output = [];
 
@@ -158,21 +160,19 @@ function processFile(inputPath, outputPath) {
   return [inputPath, {
     size: output.length,
     duration: duration,
-    module: getBundleName(inputPath),
     json: json
   }];
 }
 
 // Support Functions ********************************************************
 
-function getBundleName(filePath) {
-  var filename = path.basename(filePath)
-    , match = ModuleNameRegex.exec(filename);
+function getModuleName(filePath) {
+  var match = ModuleNameRegex.exec(filePath);
 
   if ( !match ) {
     throw new Error("No module name to be extracted from " + filePath);
   }
-  return match[0];
+  return match[0].replace('\\', '/');
 }
 
 function parseArguments(passedArguments) {
@@ -218,7 +218,7 @@ function displayUsage() {
   console.info("");
   console.info("  -in <dir>      - Location of templates to parse (or $CWD)");
   console.info("  -out <dir>     - Location of parsed JSON output (or -in dir)");
-  console.info("  -files <glob>  - Filename pattern to parse (or *.int)");
+  console.info("  -files <glob>  - Filename pattern to parse (or **/*.int)");
   console.info("  -ext <ext>     - Filename extension to use (or .json)");
   console.info("  -app <file>    - Generate a single-file application bundle");
   console.info("    -prop <name> - Property name for the registered bundle");
