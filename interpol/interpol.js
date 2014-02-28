@@ -9,7 +9,7 @@
 (function (parser, exportTarget, exportName) {
   "use strict";
 
-  var CURRENT_VERSION = "0.1.4"
+  var CURRENT_VERSION = "0.1.5"
     , TemplateCacheMax = 256
     , globalOptions = { writer: null, errorCallback: null }
     , globalContext = {}
@@ -121,7 +121,7 @@
 
       var match = paramMatch[0]
         , matchIdx = paramMatch.index + paramMatch[1].length
-        , matchLen = match.length - paramMatch[1].length
+        , matchLen = match.length - paramMatch[1].length;
 
       if ( paramMatch[1] === '%' ) {
         funcs.push(createLiteralFunction(formatStr.substring(0, matchIdx)));
@@ -265,6 +265,7 @@
     return blessedWrapper;
 
     function blessedWrapper() {
+      /* jshint validthis:true */
       return func.apply(this, arguments);
     }
   }
@@ -519,7 +520,7 @@
           if ( toResolve ) {
             for ( var j = toResolve.length; j--; ) {
               var aliasMap = toResolve[j];
-              ctx[aliasMap[0]] = moduleExports[aliasMap[1]]
+              ctx[aliasMap[0]] = moduleExports[aliasMap[1]];
             }
           }
           else {

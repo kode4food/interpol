@@ -111,29 +111,34 @@ function commandLine() {
 
     output.push("(function(i){");
     output.push("if(!i)throw Error('Interpol not loaded');");
-    // Create the resolvers
+
     output.push("var b={},c={},r=i.resolvers()");
     output.push(appSandbox ? ".slice(0);" : ";");
     output.push("r.push({");
+
     // resolveExports
     output.push("resolveExports:");
     output.push("function(n){");
     output.push("var m=c[n];");
     output.push("if(m){return m;}");
     output.push("return c[n]=b[n].exports();},");
+
     // resolveModule
     output.push("resolveModule:");
     output.push("function(n){");
     output.push("return b[n];}");
     output.push("});");
+
     // Compile the pre-parsed templates
     output.push("var j=" + bundleStr + ";");
     output.push("for(var k in j){");
     output.push("b[k]=i(j[k],{resolvers:r});");
     output.push("}");
 
+    // Finish up
     output.push("i." + bundleName + "=b;");
     output.push("j=null;");
+
     output.push("})(typeof require==='function'");
     output.push("?require('interpol'):this.$interpol);");
 

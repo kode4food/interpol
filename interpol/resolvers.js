@@ -22,7 +22,7 @@
       , errString = "Unexpected " + unexpected
       , lineInfo = ":" + err.line + ":" + err.column;
 
-    return Error(filePath + lineInfo + ": " + errString);
+    return new Error(filePath + lineInfo + ": " + errString);
   }
 
   function createModuleCache() {

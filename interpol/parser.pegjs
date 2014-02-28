@@ -264,7 +264,7 @@ htmlStatement
   / openTag
 
 interpolStatement
-  = defStatement
+  = d:defStatement
   / fromStatement
   / forStatement
   / ifStatement
