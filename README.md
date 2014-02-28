@@ -141,11 +141,6 @@ app.set('view engine', 'int');
 
 *Note:* You can also instantiate customized engines.  Customizations include setting the search path for import resolution (uses './views' by default) and turning off file-system monitoring ('true' by default).
 
-```javascript
-app.engine('int', require('interpol').__express);
-app.set('view engine', 'int');
-```
-
 ## Inclusion in a Browser
 There are two ways to include Interpol templates in a browser-based application.  The first is to parse/compile raw templates using the PEG.js parser.  The second is to compile the templates from pre-parsed JSON output.  The PEG.js parser is *massive* and slower than parsing JSON, but it may be necessary if you want to compile ad-hoc templates.
 
