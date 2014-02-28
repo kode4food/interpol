@@ -22,8 +22,7 @@
   },
   "dependencies": {
     "mkdirp": "*",
-    "glob": "*",
-    "node-watch": "*"
+    "glob": "*"
   },
   "devDependencies": {
     "pegjs": "*",
