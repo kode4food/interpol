@@ -334,6 +334,16 @@ fromStatement
       return [lit('mi'), modules];
     }
 
+modulePath
+  = start:moduleComp cont:( "." item:moduleComp { return item; } )*  {
+      return lit([start].concat(cont).join('/'));
+    }
+
+moduleComp
+  = !ReservedWord id:IdentifierName  {
+      return id;
+    }
+
 importList
   = start:importItem cont:( _ "," __ item:importItem { return item; } )*  {
       return [start].concat(cont);
@@ -348,20 +358,15 @@ importItem
     }
 
 moduleList
-  = start:modulePath
-    cont:( _ "," __ path:modulePath { return [path, []]; } )*  {
-      return [[start, []]].concat(cont);
+  = start:moduleSpecifier
+    cont:( _ "," __ spec:moduleSpecifier { return spec; } )*  {
+      return [start].concat(cont);
     }
 
-modulePath
-  = start:moduleComp cont:( "." item:moduleComp { return item; } )*  {
-      return lit([start].concat(cont).join('/'));
-    }
-
-moduleComp
-  = !ReservedWord id:IdentifierName  {
-      return id;
-    }
+moduleSpecifier
+  = path:modulePath alias:( _ As _ id:Identifier  { return id; } )?  {
+    return [path, alias];
+  }
 
 forStatement
   = For _ ranges:ranges stmts:performedStatements  {

@@ -1,5 +1,13 @@
 # Change History
 
+## Version 0.1.5 - Import Revisited
+To reduce ambiguity and context pollution, the `import <module>` statement now imports a module as a single variable rather than automatically importing all of its exported properties.  This will require drilling into its membership.  You can also alias the imported module using `as`.  For example:
+
+```python
+import myModule as myAlias
+myAlias.myPartial(someContext)
+```
+
 ## Version 0.1.4 - Express Views
 Added a view engine for [Express](http://expressjs.com/).  To set a development instance as the default engine, you can do the following:
 

@@ -492,19 +492,26 @@
         var fromNode = fromNodes[i]
           , moduleName = lits[fromNode[0]]
           , aliases = fromNode[1]
+          , moduleAlias = null
           , toResolve = null;
 
-        if ( aliases && aliases.length ) {
-          toResolve = [];
-          for ( var j = aliases.length; j--; ) {
-            var importInfo = aliases[j]
-              , name = lits[importInfo[0]]
-              , alias = importInfo[1] ? lits[importInfo[1]] : name;
-            toResolve.push([alias, name]);
+        if ( typeof aliases === 'number' ) {
+          moduleAlias = lits[aliases];
+        }
+        else {
+          moduleAlias = moduleName.split('/').pop();
+          if ( isArray(aliases) && aliases.length ) {
+            toResolve = [];
+            for ( var j = aliases.length; j--; ) {
+              var importInfo = aliases[j]
+                , name = lits[importInfo[0]]
+                , alias = importInfo[1] ? lits[importInfo[1]] : name;
+              toResolve.push([alias, name]);
+            }
           }
         }
-
-        importList.push([moduleName, toResolve]);
+        
+        importList.push([moduleName, moduleAlias, toResolve]);
       }
 
       return importEvaluator;
@@ -513,7 +520,8 @@
         for ( var i = ilen; i--; ) {
           var importItem = importList[i]
             , moduleName = importItem[0]
-            , toResolve = importItem[1];
+            , moduleAlias = importItem[1]
+            , toResolve = importItem[2];
 
           var moduleExports = resolveExports(moduleName, true);
 
@@ -524,7 +532,7 @@
             }
           }
           else {
-            mixin(ctx, moduleExports);
+            ctx[moduleAlias] = moduleExports;
           }
         }
       }

@@ -25,7 +25,7 @@ exports.imports = nodeunit.testCase({
 
   "Helper Import": function (test) {
     var script1 = "import helpers\n" +
-                  "testHelper(1,2)";
+                  "helpers.testHelper(1,2)";
 
     var script2 = "from helpers import testHelper as test\n" +
                   "test(5,6)";
@@ -36,8 +36,8 @@ exports.imports = nodeunit.testCase({
   },
 
   "File Import": function (test) {
-    var script = "import test\n" +
-                 "renderTest('Curly')";
+    var script = "import test as t\n" +
+                 "t.renderTest('Curly')";
 
     test.equal(eval(script), "Hello Curly\n");
     test.done();
