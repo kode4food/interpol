@@ -70,6 +70,40 @@ end
 
 Partials are first-class elements of Interpol, meaning they can be passed around and assigned to variables.
 
+### Importing
+Importing partials and variables in Interpol is similar to Python.  One can either import an entire module as a single variable, or can cherry-pick individual properties.  In all cases, the imported items can be aliased locally.
+
+#### Importing Entire Modules
+```python
+import dir.subdir.module1  # will import as 'module1'
+
+import dir.subdir.module1, dir.subdir.module2
+
+import dir.subdir.module1 as myModule  # will import as `myModule`
+
+import dir.subdir.module1 as mod1,
+       dir.subdir.module2 as mod2
+```
+
+When you've imported an entire module, you have to address its partials or variables via membership paths:
+
+```python
+import dir.subdir.module1 as myModule
+myModule.myPartial("Hello")
+```
+
+#### Cherry-Picking Items
+When cherry picking, only the imported items will be placed in the local scope, the module itself will be discarded.
+
+```python
+from dir.subdir.module1 import myVariable
+
+from dir.subdir.module1 import myVariable as myVar
+
+from dir.subdir.module1 import myVariable, myPartial as partial1
+partial1("Hello")
+```
+
 ### For Loops
 For loops allow one to recursively iterate over sets of items.  For example:
 
