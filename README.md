@@ -95,7 +95,7 @@ end
 And import them like so:
 
 ```html
-from mystuff import renderItem, renderList
+from mystuff import renderList
 
 <html>
   <head>
@@ -107,8 +107,6 @@ from mystuff import renderItem, renderList
   </body>
 </html>
 ```
-
-*Note:* Resolving imports is still under development.  It works well enough under Node.js but is not fully supported in the browser.
 
 ## Current Status
 The project was just started, so there's still quite a bit to do.  Check [the TODO document](doc/TODO.md) for an idea of what's to come.
