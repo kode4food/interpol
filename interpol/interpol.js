@@ -495,22 +495,22 @@
           , moduleAlias = null
           , toResolve = null;
 
-        if ( typeof aliases === 'number' ) {
+        if ( isArray(aliases) ) {
+          toResolve = [];
+          for ( var j = aliases.length; j--; ) {
+            var importInfo = aliases[j]
+              , name = lits[importInfo[0]]
+              , alias = importInfo[1] ? lits[importInfo[1]] : name;
+            toResolve.push([alias, name]);
+          }
+        }
+        else if ( typeof aliases === 'number' ) {
           moduleAlias = lits[aliases];
         }
         else {
           moduleAlias = moduleName.split('/').pop();
-          if ( isArray(aliases) && aliases.length ) {
-            toResolve = [];
-            for ( var j = aliases.length; j--; ) {
-              var importInfo = aliases[j]
-                , name = lits[importInfo[0]]
-                , alias = importInfo[1] ? lits[importInfo[1]] : name;
-              toResolve.push([alias, name]);
-            }
-          }
         }
-        
+
         importList.push([moduleName, moduleAlias, toResolve]);
       }
 
