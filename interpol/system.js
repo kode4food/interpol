@@ -36,7 +36,6 @@
     return resolver;
 
     function resolveExports(name) {
-      console.log("checking for " + name);
       return modules[name];
     }
   }
