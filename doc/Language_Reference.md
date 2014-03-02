@@ -74,6 +74,8 @@ Partials are first-class elements of Interpol, meaning they can be passed around
 Importing partials and variables in Interpol is similar to Python.  One can either import an entire module as a single variable, or can cherry-pick individual properties.  In all cases, the imported items can be aliased locally.
 
 #### Importing Entire Modules
+When an entire module is imported, it will be stored as a single local Object variable whose name (unless aliased) is the last component of its module path.
+
 ```python
 import dir.subdir.module1  # will import as 'module1'
 
@@ -93,7 +95,7 @@ myModule.myPartial("Hello")
 ```
 
 #### Cherry-Picking Items
-When cherry picking, only the imported items will be placed in the local scope, the module itself will be discarded.
+When cherry-picking, only the imported items will be placed in the local scope, the module itself will be discarded.
 
 ```python
 from dir.subdir.module1 import myVariable
