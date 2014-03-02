@@ -177,13 +177,13 @@ You can also compute the name of a tag or attribute dynamically by enclosing the
 <(theTagName) id="parent" (theAttrName || "class")="listItem " + otherClasses>
 ```
 
-HTMLish elements *do not* create nested scopes and are not paired semantically into single statement blocks.  In fact, a closing element is not required at all.  Therefore, code like this will be invalid:
+HTMLish elements *do not* create nested scopes and are not paired semantically into single statement blocks.  In fact, a closing element is not required at all.  Therefore, code like this will yield incorrect results:
 
 ```python
 if person.name == 'Curly': <strong>"Curly is awesome!"</strong>
 ```
 
-Interpol will only treat the initial `<strong>` tag as part of the statement and expect a line ending to follow.  Instead, the statement would have to be formed as follows:
+Interpol will only treat the initial `<strong>` tag as part of the `if` statement.  Instead, the statement would have to be formed as follows:
 
 ```python
 if person.name == 'Curly'
