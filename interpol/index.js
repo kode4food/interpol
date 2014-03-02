@@ -9,6 +9,7 @@
 var interpol = module.exports = require('./interpol');
 
 // Pull in default Resolvers
+require('./system');
 require('./resolvers');
 
 // Pull in Express View Engine
