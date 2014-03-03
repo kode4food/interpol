@@ -1,4 +1,5 @@
 # Interpol (Templates Sans Facial Hair)
+[![Build Status](https://travis-ci.org/kode4food/interpol.png?branch=master)](https://travis-ci.org/kode4food/interpol)
 
 ## Introduction
 
@@ -115,10 +116,10 @@ The project was just started, so there's still quite a bit to do.  Check [the TO
 A pre-built version of the parser is already included.  If you'd like to build it yourself then you can do so by issuing the following command from the package's top-level directory:
 
 ```bash
-npm install && npm run-script build
+npm install && npm run-script build && npm test
 ```
 
-This will also install any development dependencies and maybe run the nodeunit test suite.
+This will also install any development dependencies and run the nodeunit test suite.
 
 ## Inclusion in Node.js
 Assuming you have installed the Interpol package with npm, you can include it in your Node code with the following:
@@ -148,8 +149,8 @@ There are two ways to include Interpol templates in a browser-based application.
 If you *must* parse raw templates in the browser, you will need to load the Interpol PEG.js parser.  The order in which you load the parser doesn't matter, so long as it's loaded before you attempt to compile a raw template.
 
 ```html
-<script src="js/interpol-parser.min.js" type="text/javascript"></script>
-<script src="js/interpol.min.js" type="text/javascript"></script>
+<script src="build/interpol-parser.min.js" type="text/javascript"></script>
+<script src="build/interpol.min.js" type="text/javascript"></script>
 ```
 
 ### Compiling Pre-Parsed JSON
@@ -158,7 +159,7 @@ The `$interpol()` function will accept a pre-parsed JSON object instead of a Jav
 You can also invoke the compiler by calling the `$interpol.compile(Object)` function.
 
 ```html
-<script src="js/interpol.min.js" type="text/javascript"></script>
+<script src="build/interpol.min.js" type="text/javascript"></script>
 ```
 
 *Note:* The Interpol command-line interface generates pre-parsed JSON.  You can install this globally using `npm -g install` and can then invoke the tools at your terminal by typing `interpol`.
