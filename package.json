@@ -18,7 +18,7 @@
     "url": "https://github.com/kode4food/interpol.git"
   },
   "scripts": {
-    "build": "pegjs -e \"(typeof module==='object'?module:this.\\$interpol=this.\\$interpol||{})[typeof module==='object'?'exports':'parser']\" lib/parser.pegjs && nodeunit test/index.js && cat lib/interpol.js lib/resolvers/system.js lib/resolvers/helper.js lib/resolvers/memory.js > interpol.js"
+    "build": "pegjs -e \"(typeof module==='object'?module:this.\\$interpol=this.\\$interpol||{})[typeof module==='object'?'exports':'parser']\" lib/parser.pegjs && nodeunit test/index.js && cat lib/interpol.js lib/resolvers/system.js lib/resolvers/helper.js lib/resolvers/memory.js > interpol.js && uglifyjs interpol.js -o ./interpol.min.js"
   },
   "dependencies": {
     "mkdirp": "*",
@@ -26,7 +26,8 @@
   },
   "devDependencies": {
     "pegjs": "*",
-    "nodeunit": "*"
+    "nodeunit": "*",
+    "uglify-js": "*"
   },
   "engines": {
     "node": "*"
