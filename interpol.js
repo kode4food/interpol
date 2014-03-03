@@ -1079,3 +1079,396 @@
 })(typeof require === 'function' ? require('./parser') : null,
    typeof module === 'object' ? module : this,
    typeof module === 'object' ? 'exports' : '$interpol');
+/**
+ * Interpol (Templates Sans Facial Hair)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thom Bradford (github/kode4food)
+ */
+
+(function (interpol) {
+  "use strict";
+
+  var slice = Array.prototype.slice
+    , isArray = Array.isArray;
+
+  if ( !isArray ) {
+    isArray = (function () {
+      return function _isArray(obj) {
+        return obj && obj.length && toString.call(obj) === '[object Array]';
+      };
+    })();
+  }
+
+  var globalResolvers = interpol.resolvers()
+    , systemResolver = createSystemResolver();
+
+  interpol.createSystemResolver = createSystemResolver;
+  interpol.systemResolver = systemResolver;
+  globalResolvers.push(systemResolver);
+
+  // Implementation ***********************************************************
+
+  function createSystemResolver() {
+    var modules = buildModules()
+      , resolver = { resolveExports: resolveExports };
+
+    return resolver;
+
+    function resolveExports(name) {
+      return modules[name];
+    }
+  }
+
+  function wrapFunction(func) {
+    wrappedFunction.__interpolPartial = true;
+    return wrappedFunction;
+
+    function wrappedFunction(writer) {
+      /* jshint validthis:true */
+      return func.apply(this, slice.call(arguments, 1));
+    }
+  }
+
+  function buildModules() {
+    return {
+      "math": blessModule(buildMathModule()),
+      "array": blessModule(buildArrayModule()),
+      "string": blessModule(buildStringModule()),
+      "json": blessModule(buildJSONModule())
+    };
+  }
+
+  function blessModule(module) {
+    var result = {};
+    for ( var key in module ) {
+      result[key] = interpol.bless(module[key]);
+    }
+    return result;
+  }
+
+  function buildMathModule() {
+    return {
+      "number": wrapFunction(Number),
+
+      "abs": wrapFunction(Math.abs),
+      "acos": wrapFunction(Math.acos),
+      "asin": wrapFunction(Math.asin),
+      "atan": wrapFunction(Math.atan),
+      "atan2": wrapFunction(Math.atan2),
+      "ceil": wrapFunction(Math.ceil),
+      "cos": wrapFunction(Math.cos),
+      "exp": wrapFunction(Math.exp),
+      "floor": wrapFunction(Math.floor),
+      "log": wrapFunction(Math.log),
+      "pow": wrapFunction(Math.pow),
+      "round": wrapFunction(Math.round),
+      "sin": wrapFunction(Math.sin),
+      "sqrt": wrapFunction(Math.sqrt),
+      "tan": wrapFunction(Math.tan),
+      
+      "avg": function avg(writer, value) {
+        if ( !isArray(value) ) {
+          return typeof value === 'number' ? value : NaN;
+        }
+        if ( value.length === 0 ) return 0;
+        for ( var i = 0, r = 0, l = value.length; i < l; r += value[i++] );
+        return r / l;
+      },
+
+      "count": function count(writer, value) {
+        return isArray(value) ? value.length : 0;
+      },
+
+      "max": function max(writer, value) {
+        if ( !isArray(value) ) {
+          return typeof value === 'number' ? value : NaN;
+        }
+        return Math.max.apply(Math, value);
+      },
+
+      "median": function median(writer, value) {
+        if ( !isArray(value) ) {
+          return typeof value === 'number' ? value : NaN;
+        }
+        if ( value.length === 0 ) return 0;
+        var temp = value.slice(0).order();
+        if ( temp.length % 2 === 0 ) {
+          var mid = temp.length / 2;
+          return (temp[mid - 1] + temp[mid]) / 2;
+        }
+        return temp[(temp.length + 1) / 2];
+      },
+
+      "min": function min(writer, value) {
+        if ( !isArray(value) ) {
+          return typeof value === 'number' ? value : NaN;
+        }
+        return Math.min.apply(Math, value);
+      },
+
+      "sum": function sum(writer, value) {
+        if ( !isArray(value) ) {
+          return typeof value === 'number' ? value : NaN;
+        }
+        for ( var i = 0, res = 0, l = value.length; i < l; res += value[i++] );
+        return res;
+      }
+    };
+  }
+
+  function buildArrayModule() {
+    return {
+      "first": function first(writer, value) {
+        if ( !isArray(value) ) {
+          return value;
+        }
+        return value[0];
+      },
+
+      "last": function last(writer, value) {
+        if ( !isArray(value) ) {
+          return value;
+        }
+        if ( value.length ) return value[value.length - 1];
+        return null;
+      },
+
+      "empty": function empty(writer, value) {
+        if ( !isArray(value) ) {
+          return typeof value === 'undefined' || value === null;
+        }
+        return !value.length;
+      }
+    };
+  }
+
+  function buildStringModule() {
+    return {
+      "string": wrapFunction(String),
+
+      "lower": function lower(writer, value) {
+        return typeof value === 'string' ? value.toLowerCase() : value;
+      },
+
+      "split": function split(writer, value, delim, idx) {
+        var val = String(value).split(delim || ' \n\r\t');
+        return typeof idx !== 'undefined' ? val[idx] : val;
+      },
+
+      "join": function join(writer, value, delim) {
+        if ( Array.isArray(value) ) {
+          return value.join(delim || '');
+        }
+        return value;
+      },
+
+      "title": function title(writer, value) {
+        if ( typeof value !== 'string' ) return value;
+        return value.replace(/\w\S*/g, function (word) {
+          return word.charAt(0).toUpperCase() + word.substr(1).toLowerCase();
+        });
+      },
+
+      "upper": function upper(writer, value) {
+        return typeof value === 'string' ? value.toUpperCase() : value;
+      }
+    };
+  }
+
+  function buildJSONModule() {
+    return {
+      "parse": wrapFunction(JSON.parse),
+      "stringify": wrapFunction(JSON.stringify)
+    };
+  }
+
+})(typeof require === 'function' ? require('../interpol') : this.$interpol);
+/**
+ * Interpol (Templates Sans Facial Hair)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thom Bradford (github/kode4food)
+ */
+
+(function (interpol) {
+  "use strict";
+
+  var globalResolvers = interpol.resolvers()
+    , helperResolver = createHelperResolver({});
+
+  interpol.createHelperResolver = createHelperResolver;
+  interpol.helperResolver = helperResolver;
+  globalResolvers.push(helperResolver);
+
+  // Implementation ***********************************************************
+
+  function createHelperResolver(options) {
+    options = options || {};
+
+    var moduleName = options.name || 'helpers'
+      , moduleExports = {};
+
+    return {
+      resolveModule: resolveModule,
+      resolveExports: resolveExports,
+      registerHelper: registerHelper,
+      unregisterHelper: unregisterHelper
+    };
+
+    function resolveModule(name) {
+      return null;
+    }
+
+    function resolveExports(name) {
+      return name === moduleName ? moduleExports : null;
+    }
+
+    function registerHelper(name, func) {
+      if ( typeof name === 'function' ) {
+        func = name;
+        if ( !func.name ) {
+          throw new Error("Function requires a name");
+        }
+        name = func.name;
+      }
+      moduleExports[name] = interpol.bless(func);
+    }
+
+    function unregisterHelper(name) {
+      if ( typeof name === 'function' ) {
+        name = name.name;
+      }
+      if ( name ) {
+        delete moduleExports[name];
+      }
+    }
+  }
+
+})(typeof require === 'function' ? require('../interpol') : this.$interpol);
+/**
+ * Interpol (Templates Sans Facial Hair)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thom Bradford (github/kode4food)
+ */
+
+(function (interpol) {
+  "use strict";
+
+  var globalResolvers = interpol.resolvers()
+    , memoryResolver = createMemoryResolver({});
+
+  interpol.createMemoryResolver = createMemoryResolver;
+  interpol.memoryResolver = memoryResolver;
+  globalResolvers.push(memoryResolver);
+
+  // Implementation ***********************************************************
+
+  function createMemoryResolver(options) {
+    var cache = createModuleCache();
+
+    return {
+      resolveModule: cache.getModule,
+      resolveExports: cache.getExports,
+      unregisterModule: cache.removeModule,
+      registerModule: registerModule
+    };
+
+    function registerModule(name, module) {
+      if ( typeof module === 'function' &&
+           typeof module.exports === 'function' ) {
+        cache.putModule(name, module);
+        return;
+      }
+
+      if ( typeof module === 'string' ||
+           typeof module.length === 'number' ) {
+        cache.putModule(name, interpol(module));
+        return;
+      }
+
+      throw new Error("Module not provided");
+    }
+  }
+
+  // Utilities ****************************************************************
+
+  function createModuleCache() {
+    var cache = {};
+
+    return {
+      exists: exists,
+      getModule: getModule,
+      getExports: getExports,
+      putModule: putModule,
+      removeModule: removeModule
+    };
+
+    function exists(name) {
+      return cache[name];
+    }
+
+    function getModule(name) {
+      var result = cache[name];
+      return result ? result.module : null;
+    }
+
+    function getExports(name) {
+      var result = cache[name];
+      if ( !result ) {
+        return null;
+      }
+
+      if ( !result.dirtyExports ) {
+        return result.moduleExports;
+      }
+
+      var moduleExports = result.moduleExports
+        , key = null;
+
+      if ( !moduleExports ) {
+        moduleExports = result.moduleExports = {};
+      }
+      else {
+        // This logic is necessary because another module may already be
+        // caching this result as a dependency.
+        for ( key in moduleExports ) {
+          if ( moduleExports.hasOwnProperty(key) ) {
+            delete moduleExports[key];
+          }
+        }
+      }
+
+      var exported = result.module.exports();
+      for ( key in exported ) {
+        if ( exported.hasOwnProperty(key) ) {
+          moduleExports[key] = exported[key];
+        }
+      }
+
+      result.dirtyExports = false;
+      return moduleExports;
+    }
+
+    function putModule(name, module) {
+      var cached = cache[name];
+      if ( cached ) {
+        cached.module = module;
+        cached.dirtyExports = true;
+      }
+      else {
+        cached = cache[name] = { module: module, dirtyExports: true };
+      }
+      return cached.module;
+    }
+
+    function removeModule(name) {
+      delete cache[name];
+    }
+  }
+
+})(typeof require === 'function' ? require('../interpol') : this.$interpol);
