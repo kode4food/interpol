@@ -13,12 +13,10 @@
   "contributors": [
     { "name": "Thom Bradford", "email": "thom@kode4food.it" }
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/kode4food/interpol.git"
-  },
+  "repository": "git://github.com/kode4food/interpol",
   "scripts": {
-    "build": "pegjs -e \"(typeof module==='object'?module:this.\\$interpol=this.\\$interpol||{})[typeof module==='object'?'exports':'parser']\" lib/parser.pegjs && nodeunit test/index.js && cat lib/interpol.js lib/resolvers/system.js lib/resolvers/helper.js lib/resolvers/memory.js > js/interpol.js && uglifyjs --preamble \"`cat doc/preamble.js`\" js/interpol.js -o js/interpol.min.js && uglifyjs --preamble \"`cat doc/preamble.js`\" lib/parser.js -o js/interpol-parser.min.js"
+    "build": "pegjs -e \"(typeof module==='object'?module:this.\\$interpol=this.\\$interpol||{})[typeof module==='object'?'exports':'parser']\" lib/parser.pegjs build/parser.js && cat lib/interpol.js lib/resolvers/system.js lib/resolvers/helper.js lib/resolvers/memory.js > build/interpol.js && uglifyjs --preamble \"`cat doc/preamble.js`\" build/interpol.js -o build/interpol.min.js && uglifyjs --preamble \"`cat doc/preamble.js`\" build/parser.js -o build/interpol-parser.min.js",
+    "test": "nodeunit test/index.js"
   },
   "dependencies": {
     "mkdirp": "*",

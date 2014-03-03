@@ -45,6 +45,7 @@ exports.imports = nodeunit.testCase({
   },
 
   "System Import": function (test) {
+    test.equal(eval("import math\nmath.round(9.5)"), "10");
     test.done();
   }
 });

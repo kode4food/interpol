@@ -1074,9 +1074,8 @@
   interpol.bless = bless;
   interpol.parse = parse;
   interpol.compile = compile;
-  return interpol;
 
-})(typeof require === 'function' ? require('./parser') : null,
+})(typeof require === 'function' ? require('../build/parser') : null,
    typeof module === 'object' ? module : this,
    typeof module === 'object' ? 'exports' : '$interpol');
 /**
