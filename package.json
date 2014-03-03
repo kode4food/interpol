@@ -7,7 +7,7 @@
   "homepage": "http://www.interpoljs.io/",
   "main": "index.js",
   "bin": {
-    "interpol": "interpol/cli.js"
+    "interpol": "lib/cli.js"
   },
   "keywords": ["javascript", "html", "nodejs", "browser", "templates"],
   "contributors": [
@@ -15,10 +15,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/kode4food/interpol.git"
+    "url": "https://github.com/kode4food/lib.git"
   },
   "scripts": {
-    "build": "pegjs -e \"(typeof module==='object'?module:this.\\$interpol=this.\\$interpol||{})[typeof module==='object'?'exports':'parser']\" interpol/parser.pegjs && nodeunit test/index.js"
+    "build": "pegjs -e \"(typeof module==='object'?module:this.\\$lib=this.\\$lib||{})[typeof module==='object'?'exports':'parser']\" lib/parser.pegjs && nodeunit test/index.js"
   },
   "dependencies": {
     "mkdirp": "*",

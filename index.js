@@ -1,1 +1,1 @@
-module.exports = require('./interpol');
+module.exports = require('./lib');

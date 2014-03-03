@@ -1,5 +1,5 @@
 var nodeunit = require('nodeunit')
-  , interpol = require('../interpol');
+  , interpol = require('../lib');
 
 function eval(str, ctx) {
   var template = interpol(str);

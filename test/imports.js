@@ -1,5 +1,5 @@
 var nodeunit = require('nodeunit')
-  , interpol = require('../interpol');
+  , interpol = require('../lib');
 
 function eval(str, ctx) {
   var template = interpol(str);
@@ -15,6 +15,7 @@ exports.imports = nodeunit.testCase({
     });
 
     var globalResolvers = interpol.resolvers();
+
     var fileResolver = interpol.createFileResolver({
       path: "./test", compile: true, monitor: false
     });
@@ -40,6 +41,10 @@ exports.imports = nodeunit.testCase({
                  "t.renderTest('Curly')";
 
     test.equal(eval(script), "Hello Curly\n");
+    test.done();
+  },
+
+  "System Import": function (test) {
     test.done();
   }
 });
