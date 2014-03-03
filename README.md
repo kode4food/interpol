@@ -148,8 +148,8 @@ There are two ways to include Interpol templates in a browser-based application.
 If you *must* parse raw templates in the browser, you will need to load the Interpol PEG.js parser.  The order in which you load the parser doesn't matter, so long as it's loaded before you attempt to compile a raw template.
 
 ```html
-<script src="/js/interpol/parser.js" type="text/javascript"></script>
-<script src="/js/interpol.min.js" type="text/javascript"></script>
+<script src="js/interpol-parser.min.js" type="text/javascript"></script>
+<script src="js/interpol.min.js" type="text/javascript"></script>
 ```
 
 ### Compiling Pre-Parsed JSON
@@ -158,7 +158,7 @@ The `$interpol()` function will accept a pre-parsed JSON object instead of a Jav
 You can also invoke the compiler by calling the `$interpol.compile(Object)` function.
 
 ```html
-<script src="/js/interpol.min.js" type="text/javascript"></script>
+<script src="js/interpol.min.js" type="text/javascript"></script>
 ```
 
 *Note:* The Interpol command-line interface generates pre-parsed JSON.  You can install this globally using `npm -g install` and can then invoke the tools at your terminal by typing `interpol`.
