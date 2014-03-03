@@ -15,7 +15,7 @@
   ],
   "repository": "git://github.com/kode4food/interpol",
   "scripts": {
-    "build": "pegjs -e \"(typeof module==='object'?module:(this.\\$interpol=this.\\$interpol||{}))[typeof module==='object'?'exports':'parser']\" lib/parser.pegjs build/parser.js && cat lib/interpol.js lib/resolvers/system.js lib/resolvers/helper.js lib/resolvers/memory.js > build/interpol.js && uglifyjs -m --preamble \"`cat doc/preamble.js`\" build/interpol.js -o build/interpol.min.js && cat build/interpol.js build/parser.js | uglifyjs -m --preamble \"`cat doc/preamble.js`\" > build/interpol-parser.min.js",
+    "build": "pegjs lib/parser.pegjs build/parser.js && browserify browserify.js > build/interpol.js && uglifyjs -m --preamble \"`cat doc/preamble.js`\" build/interpol.js -o build/interpol.min.js && browserify browserify-parser.js | uglifyjs -m --preamble \"`cat doc/preamble.js`\" -o build/interpol-parser.min.js",
     "test": "nodeunit test/index.js"
   },
   "dependencies": {
@@ -25,7 +25,8 @@
   "devDependencies": {
     "pegjs": "*",
     "nodeunit": "*",
-    "uglify-js": "*"
+    "uglify-js": "*",
+    "browserify": "*"
   },
   "engines": {
     "node": "*"
