@@ -3,6 +3,8 @@ var interpol = require('./lib/interpol');
 require('./lib/resolvers/system');
 require('./lib/resolvers/helper');
 require('./lib/resolvers/memory');
+
+// Set the Interpol browser global
 window.$interpol = interpol;
 
 },{"./lib/interpol":2,"./lib/resolvers/helper":3,"./lib/resolvers/memory":4,"./lib/resolvers/system":5}],2:[function(require,module,exports){
@@ -1069,7 +1071,6 @@ var interpol = require('../interpol');
 var globalResolvers = interpol.resolvers()
   , helperResolver = createHelperResolver({});
 
-interpol.createHelperResolver = createHelperResolver;
 interpol.helperResolver = helperResolver;
 globalResolvers.push(helperResolver);
 
@@ -1118,7 +1119,7 @@ function createHelperResolver(options) {
 }
 
 // Exports
-exports.createHelperResolver = createHelperResolver;
+interpol.createHelperResolver = createHelperResolver;
 
 },{"../interpol":2}],4:[function(require,module,exports){
 /**
@@ -1137,7 +1138,6 @@ var interpol = require('../interpol')
 var globalResolvers = interpol.resolvers()
   , memoryResolver = createMemoryResolver({});
 
-interpol.createMemoryResolver = createMemoryResolver;
 interpol.memoryResolver = memoryResolver;
 globalResolvers.push(memoryResolver);
 
@@ -1170,84 +1170,9 @@ function createMemoryResolver(options) {
   }
 }
 
-// Utilities ****************************************************************
-
-function createModuleCache() {
-  var cache = {};
-
-  return {
-    exists: exists,
-    getModule: getModule,
-    getExports: getExports,
-    putModule: putModule,
-    removeModule: removeModule
-  };
-
-  function exists(name) {
-    return cache[name];
-  }
-
-  function getModule(name) {
-    var result = cache[name];
-    return result ? result.module : null;
-  }
-
-  function getExports(name) {
-    var result = cache[name];
-    if ( !result ) {
-      return null;
-    }
-
-    if ( !result.dirtyExports ) {
-      return result.moduleExports;
-    }
-
-    var moduleExports = result.moduleExports
-      , key = null;
-
-    if ( !moduleExports ) {
-      moduleExports = result.moduleExports = {};
-    }
-    else {
-      // This logic is necessary because another module may already be
-      // caching this result as a dependency.
-      for ( key in moduleExports ) {
-        if ( moduleExports.hasOwnProperty(key) ) {
-          delete moduleExports[key];
-        }
-      }
-    }
-
-    var exported = result.module.exports();
-    for ( key in exported ) {
-      if ( exported.hasOwnProperty(key) ) {
-        moduleExports[key] = exported[key];
-      }
-    }
-
-    result.dirtyExports = false;
-    return moduleExports;
-  }
-
-  function putModule(name, module) {
-    var cached = cache[name];
-    if ( cached ) {
-      cached.module = module;
-      cached.dirtyExports = true;
-    }
-    else {
-      cached = cache[name] = { module: module, dirtyExports: true };
-    }
-    return cached.module;
-  }
-
-  function removeModule(name) {
-    delete cache[name];
-  }
-}
-
 // Exports
-exports.createMemoryResolver = createMemoryResolver;
+interpol.createMemoryResolver = createMemoryResolver;
+
 
 },{"../interpol":2,"../util":6}],5:[function(require,module,exports){
 /**
@@ -1268,8 +1193,7 @@ var slice = Array.prototype.slice;
 
 var globalResolvers = interpol.resolvers()
   , systemResolver = createSystemResolver();
-
-interpol.createSystemResolver = createSystemResolver;
+  
 interpol.systemResolver = systemResolver;
 globalResolvers.push(systemResolver);
 
@@ -1450,7 +1374,7 @@ function buildJSONModule() {
 }
 
 // Exports
-exports.createSystemResolver = createSystemResolver;
+interpol.createSystemResolver = createSystemResolver;
 
 },{"../interpol":2,"../util":6}],6:[function(require,module,exports){
 /**
