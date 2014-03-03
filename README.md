@@ -146,11 +146,10 @@ There are two ways to include Interpol templates in a browser-based application.
 *Note:* The entry point function for Interpol in the browser is *always* named `$interpol()`.
 
 ### Including the PEG.js Parser
-If you *must* parse raw templates in the browser, you will need to load the Interpol PEG.js parser.  The order in which you load the parser doesn't matter, so long as it's loaded before you attempt to compile a raw template.
+If you *must* parse raw templates in the browser, you will need to load the version of Interpol that includes its PEG.js parser.
 
 ```html
 <script src="build/interpol-parser.min.js" type="text/javascript"></script>
-<script src="build/interpol.min.js" type="text/javascript"></script>
 ```
 
 ### Compiling Pre-Parsed JSON

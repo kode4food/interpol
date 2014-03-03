@@ -1,5 +1,7 @@
 # Change History
 
+## Version 0.1.6 - 
+
 ## Version 0.1.5 - Import Revisited
 To reduce ambiguity and context pollution, the `import <module>` statement now imports a module as a single variable rather than automatically importing all of its exported properties.  This will require drilling into its membership.  You can also alias the imported module using `as`.  For example:
 
