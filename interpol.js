@@ -9,7 +9,7 @@
 (function (parser, exportTarget, exportName) {
   "use strict";
 
-  var CURRENT_VERSION = "0.1.5"
+  var CURRENT_VERSION = "0.1.6"
     , TemplateCacheMax = 256
     , globalOptions = { writer: null, errorCallback: null }
     , globalContext = {}
