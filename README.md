@@ -141,16 +141,9 @@ app.set('view engine', 'int');
 *Note:* You can also instantiate customized engines.  Customizations include setting the search path for import resolution (uses './views' by default) and turning off file-system monitoring ('true' by default).
 
 ## Inclusion in a Browser
-There are two ways to include Interpol templates in a browser-based application.  The first is to parse/compile raw templates using the PEG.js parser.  The second is to compile the templates from pre-parsed JSON output.  The PEG.js parser is *massive* and slower than parsing JSON, but it may be necessary if you want to compile ad-hoc templates.
+There are two ways to include Interpol templates in a browser-based application.  One is to parse/compile raw templates using the PEG.js parser.  Another is to compile the templates from pre-parsed JSON output.  The PEG.js parser is *massive* and slower than parsing JSON, but it may be necessary if you want to compile ad-hoc templates.
 
 *Note:* The entry point function for Interpol in the browser is *always* named `$interpol()`.
-
-### Including the PEG.js Parser
-If you *must* parse raw templates in the browser, you will need to load the version of Interpol that includes its PEG.js parser.
-
-```html
-<script src="build/interpol-parser.min.js" type="text/javascript"></script>
-```
 
 ### Compiling Pre-Parsed JSON
 The `$interpol()` function will accept a pre-parsed JSON object instead of a JavaScript string.  This will allow you to bypass the loading of the PEG.js parser.  Instead, you can load pre-parsed templates from your server for faster compilation.
@@ -162,6 +155,13 @@ You can also invoke the compiler by calling the `$interpol.compile(Object)` func
 ```
 
 *Note:* The Interpol command-line interface generates pre-parsed JSON.  You can install this globally using `npm -g install` and can then invoke the tools at your terminal by typing `interpol`.
+
+### Including the PEG.js Parser
+If you *must* parse raw templates in the browser, you will need to load the version of Interpol that includes its PEG.js parser.
+
+```html
+<script src="build/interpol-parser.min.js" type="text/javascript"></script>
+```
 
 ## Using the Library
 To compile a raw template into a closure, invoke `$interpol(String)` as a function.  Provide to it a string containing your template:
