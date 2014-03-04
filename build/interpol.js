@@ -18,7 +18,7 @@ module.exports = require('./interpol');
 // Pull in default Resolvers
 require('./resolvers/browser');
 
-},{"./interpol":3,"./resolvers/browser":4}],3:[function(require,module,exports){
+},{"./interpol":4,"./resolvers/browser":6}],3:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -28,80 +28,6 @@ require('./resolvers/browser');
  */
 
 "use strict";
-
-var util = require('./util')
-  , isArray = util.isArray
-  , mixin = util.mixin;
-
-var CURRENT_VERSION = "0.1.6"
-  , TemplateCacheMax = 256
-  , globalOptions = { writer: null, errorCallback: null }
-  , globalContext = {}
-  , globalResolvers = []
-  , parser = null;
-
-// Utilities ****************************************************************
-
-var extendContext = Object.create;
-if ( !extendContext ) {
-  extendContext = (function () {
-    function FakeConstructor() {}
-
-    return function _extendContext(obj) {
-      FakeConstructor.prototype = obj;
-      return new FakeConstructor();
-    };
-  })();
-}
-
-var freezeObject = Object.freeze;
-if ( !freezeObject ) {
-  freezeObject = (function () {
-    return function _freezeObject(obj) {
-      return obj;
-    };
-  })();
-}
-
-function noOp() {}
-
-// String Handling **********************************************************
-
-// TODO: Need to handle complex types like Dates
-function stringify(obj) {
-  var type = typeof obj;
-  switch ( type ) {
-    case 'string':    return obj;
-    case 'number':    return obj.toString();
-    case 'boolean':   return obj ? 'true' : 'false';
-    case 'undefined': return '';
-    case 'object':    return obj !== null ? obj.toString() : '';
-    case 'xml':       return obj.toXMLString();
-    default:          return '';
-  }
-}
-
-var EscapeChars = freezeObject({
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#39;'
-});
-
-function escapeAttribute(str) {
-  return str.replace(/[&<>'"]/gm, function(ch) {
-    return EscapeChars[ch];
-  });
-}
-
-function escapeContent(str) {
-  return str.replace(/[&<>]/gm, function(ch) {
-    return EscapeChars[ch];
-  });
-}
-
-// Interpolation Template Builder *******************************************
 
 var ParamRegex = /(.?)%(([1-9][0-9]*)|([$_a-zA-Z][$_a-zA-Z0-9]*))?/;
 
@@ -176,63 +102,49 @@ function buildTemplate(formatStr) {
   }
 }
 
-// Default Writer Implementations *******************************************
+// Exports
+exports.buildTemplate = buildTemplate;
 
-var NullWriter = freezeObject({
-  startElement: noOp,
-  selfCloseElement: noOp,
-  endElement: noOp,
-  comment: noOp,
-  content: noOp,
-  rawContent: noOp
-});
+},{}],4:[function(require,module,exports){
+/**
+ * Interpol (Templates Sans Facial Hair)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thom Bradford (github/kode4food)
+ */
 
-function createArrayWriter(arr) {
-  return freezeObject({
-    startElement: startElement,
-    selfCloseElement: selfCloseElement,
-    endElement: endElement,
-    comment: comment,
-    content: content,
-    rawContent: rawContent
-  });
+"use strict";
 
-  function writeAttributes(attributes) {
-    for ( var key in attributes ) {
-      arr.push(" ", key, "=\"", escapeAttribute(attributes[key]), "\"");
-    }
-  }
+var util = require('./util')
+  , writers = require('./writers')
+  , format = require('./format');
 
-  function startElement(tagName, attributes) {
-    arr.push("<", tagName);
-    writeAttributes(attributes);
-    arr.push(">");
-  }
+var isArray = util.isArray
+  , mixin = util.mixin
+  , extendContext = util.extendContext
+  , freezeObject = util.freezeObject
+  , stringify = util.stringify
+  , createArrayWriter = writers.createArrayWriter
+  , buildTemplate = format.buildTemplate;
 
-  function selfCloseElement(tagName, attributes) {
-    arr.push("<", tagName);
-    writeAttributes(attributes);
-    arr.push(" />");
-  }
+var CURRENT_VERSION = "0.1.6"
+  , TemplateCacheMax = 256
+  , NullWriter = writers.createNullWriter()
+  , globalOptions = { writer: null, errorCallback: null }
+  , globalContext = {}
+  , globalResolvers = []
+  , parser = null;
 
-  function endElement(tagName) {
-    arr.push("</", tagName, ">");
-  }
+// Bootstrap ****************************************************************
 
-  function comment(content) {
-    arr.push("<!--", content, "-->");
-  }
-
-  function content() {
-    for ( var i = 0, len = arguments.length; i < len; i++ ) {
-      arr.push(escapeContent(arguments[i]));
-    }
-  }
-
-  function rawContent() {
-    arr.push.apply(arr, arguments);
-  }
-}
+interpol.VERSION = CURRENT_VERSION;
+interpol.options = function options() { return globalOptions; };
+interpol.globals = function globals() { return globalContext; };
+interpol.resolvers = function resolvers() { return globalResolvers; };
+interpol.bless = bless;
+interpol.parse = parse;
+interpol.compile = compile;
 
 // Core Interpol Implementation *********************************************
 
@@ -1053,20 +965,98 @@ function compile(parseOutput, localOptions) {
   }
 }
 
-// Bootstrap ****************************************************************
-
-interpol.VERSION = CURRENT_VERSION;
-interpol.options = function options() { return globalOptions; };
-interpol.globals = function globals() { return globalContext; };
-interpol.resolvers = function resolvers() { return globalResolvers; };
-interpol.bless = bless;
-interpol.parse = parse;
-interpol.compile = compile;
-
 // Exports
 module.exports = interpol;
 
-},{"./util":8}],4:[function(require,module,exports){
+},{"./format":3,"./util":10,"./writers":12}],5:[function(require,module,exports){
+/**
+ * Interpol (Templates Sans Facial Hair)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thom Bradford (github/kode4food)
+ */
+
+"use strict";
+
+function createModuleCache() {
+  var cache = {};
+
+  return {
+    exists: exists,
+    getModule: getModule,
+    getExports: getExports,
+    putModule: putModule,
+    removeModule: removeModule
+  };
+
+  function exists(name) {
+    return cache[name];
+  }
+
+  function getModule(name) {
+    var result = cache[name];
+    return result ? result.module : null;
+  }
+
+  function getExports(name) {
+    var result = cache[name];
+    if ( !result ) {
+      return null;
+    }
+
+    if ( !result.dirtyExports ) {
+      return result.moduleExports;
+    }
+
+    var moduleExports = result.moduleExports
+      , key = null;
+
+    if ( !moduleExports ) {
+      moduleExports = result.moduleExports = {};
+    }
+    else {
+      // This logic is necessary because another module may already be
+      // caching this result as a dependency.
+      for ( key in moduleExports ) {
+        if ( moduleExports.hasOwnProperty(key) ) {
+          delete moduleExports[key];
+        }
+      }
+    }
+
+    var exported = result.module.exports();
+    for ( key in exported ) {
+      if ( exported.hasOwnProperty(key) ) {
+        moduleExports[key] = exported[key];
+      }
+    }
+
+    result.dirtyExports = false;
+    return moduleExports;
+  }
+
+  function putModule(name, module) {
+    var cached = cache[name];
+    if ( cached ) {
+      cached.module = module;
+      cached.dirtyExports = true;
+    }
+    else {
+      cached = cache[name] = { module: module, dirtyExports: true };
+    }
+    return cached.module;
+  }
+
+  function removeModule(name) {
+    delete cache[name];
+  }
+}
+
+// Exports
+exports.createModuleCache = createModuleCache;
+
+},{}],6:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1081,7 +1071,7 @@ require('./system');
 require('./helper');
 require('./memory');
 
-},{"./helper":5,"./memory":6,"./system":7}],5:[function(require,module,exports){
+},{"./helper":7,"./memory":8,"./system":9}],7:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1147,7 +1137,7 @@ interpol.resolvers().push(helperResolver);
 interpol.createHelperResolver = createHelperResolver;
 exports.createHelperResolver = createHelperResolver;
 
-},{"../interpol":3}],6:[function(require,module,exports){
+},{"../interpol":4}],8:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1159,12 +1149,12 @@ exports.createHelperResolver = createHelperResolver;
 "use strict";
 
 var interpol = require('../interpol')
-  , util = require('../util');
+  , modules = require('../modules');
 
 // Implementation ***********************************************************
 
 function createMemoryResolver(options) {
-  var cache = util.createModuleCache();
+  var cache = modules.createModuleCache();
 
   return {
     resolveModule: cache.getModule,
@@ -1199,7 +1189,7 @@ interpol.resolvers().push(memoryResolver);
 exports.createMemoryResolver = createMemoryResolver;
 interpol.createMemoryResolver = createMemoryResolver;
 
-},{"../interpol":3,"../util":8}],7:[function(require,module,exports){
+},{"../interpol":4,"../modules":5}],9:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1211,10 +1201,10 @@ interpol.createMemoryResolver = createMemoryResolver;
 "use strict";
 
 var interpol = require('../interpol')
-  , util = require('../util')
-  , isArray = util.isArray;
+  , util = require('../util');
 
-var slice = Array.prototype.slice;
+var isArray = util.isArray
+  , slice = Array.prototype.slice;
 
 // Implementation ***********************************************************
 
@@ -1401,7 +1391,7 @@ interpol.resolvers().push(systemResolver);
 exports.createSystemResolver = createSystemResolver;
 interpol.createSystemResolver = createSystemResolver;
 
-},{"../interpol":3,"../util":8}],8:[function(require,module,exports){
+},{"../interpol":4,"../util":10}],10:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1411,7 +1401,9 @@ interpol.createSystemResolver = createSystemResolver;
  */
 
 "use strict";
- 
+
+// Array and Object Handling **************************************************
+
 var toString = Object.prototype.toString;
 
 var isArray = Array.isArray;
@@ -1439,79 +1431,64 @@ function mixin(target) {
   return target;
 }
 
-function createModuleCache() {
-  var cache = {};
+var extendContext = Object.create;
+if ( !extendContext ) {
+  extendContext = (function () {
+    function FakeConstructor() {}
 
-  return {
-    exists: exists,
-    getModule: getModule,
-    getExports: getExports,
-    putModule: putModule,
-    removeModule: removeModule
-  };
+    return function _extendContext(obj) {
+      FakeConstructor.prototype = obj;
+      return new FakeConstructor();
+    };
+  })();
+}
 
-  function exists(name) {
-    return cache[name];
-  }
+var freezeObject = Object.freeze;
+if ( !freezeObject ) {
+  freezeObject = (function () {
+    return function _freezeObject(obj) {
+      return obj;
+    };
+  })();
+}
 
-  function getModule(name) {
-    var result = cache[name];
-    return result ? result.module : null;
-  }
+// String Handling ************************************************************
 
-  function getExports(name) {
-    var result = cache[name];
-    if ( !result ) {
-      return null;
-    }
+var EscapeChars = freezeObject({
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;'
+});
 
-    if ( !result.dirtyExports ) {
-      return result.moduleExports;
-    }
+function escapeAttribute(str) {
+  return str.replace(/[&<>'"]/gm, function(ch) {
+    return EscapeChars[ch];
+  });
+}
 
-    var moduleExports = result.moduleExports
-      , key = null;
+function escapeContent(str) {
+  return str.replace(/[&<>]/gm, function(ch) {
+    return EscapeChars[ch];
+  });
+}
 
-    if ( !moduleExports ) {
-      moduleExports = result.moduleExports = {};
-    }
-    else {
-      // This logic is necessary because another module may already be
-      // caching this result as a dependency.
-      for ( key in moduleExports ) {
-        if ( moduleExports.hasOwnProperty(key) ) {
-          delete moduleExports[key];
-        }
-      }
-    }
-
-    var exported = result.module.exports();
-    for ( key in exported ) {
-      if ( exported.hasOwnProperty(key) ) {
-        moduleExports[key] = exported[key];
-      }
-    }
-
-    result.dirtyExports = false;
-    return moduleExports;
-  }
-
-  function putModule(name, module) {
-    var cached = cache[name];
-    if ( cached ) {
-      cached.module = module;
-      cached.dirtyExports = true;
-    }
-    else {
-      cached = cache[name] = { module: module, dirtyExports: true };
-    }
-    return cached.module;
-  }
-
-  function removeModule(name) {
-    delete cache[name];
+// TODO: Need to handle complex types like Dates
+function stringify(obj) {
+  var type = typeof obj;
+  switch ( type ) {
+    case 'string':    return obj;
+    case 'number':    return obj.toString();
+    case 'boolean':   return obj ? 'true' : 'false';
+    case 'undefined': return '';
+    case 'object':    return obj !== null ? obj.toString() : '';
+    case 'xml':       return obj.toXMLString();
+    default:          return '';
   }
 }
+
+// Exceptions *****************************************************************
 
 function formatSyntaxError(err, filePath) {
   if ( !err.name || err.name !== 'SyntaxError') {
@@ -1522,13 +1499,130 @@ function formatSyntaxError(err, filePath) {
     , errString = "Unexpected " + unexpected
     , lineInfo = ":" + err.line + ":" + err.column;
 
-  return new Error((filePath || '') + lineInfo + ": " + errString);
+  return new Error((filePath || 'string') + lineInfo + ": " + errString);
 }
 
 // Exports
 exports.isArray = isArray;
 exports.mixin = mixin;
-exports.createModuleCache = createModuleCache;
+exports.extendContext = extendContext;
+exports.freezeObject = freezeObject;
+exports.escapeAttribute = escapeAttribute;
+exports.escapeContent = escapeContent;
+exports.stringify = stringify;
 exports.formatSyntaxError = formatSyntaxError;
 
-},{}]},{},[1])
+},{}],11:[function(require,module,exports){
+/**
+ * Interpol (Templates Sans Facial Hair)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thom Bradford (github/kode4food)
+ */
+
+"use strict";
+
+var util = require('../util');
+
+var freezeObject = util.freezeObject
+  , escapeAttribute = util.escapeAttribute
+  , escapeContent = util.escapeContent;
+
+function createArrayWriter(arr) {
+  return freezeObject({
+    startElement: startElement,
+    selfCloseElement: selfCloseElement,
+    endElement: endElement,
+    comment: comment,
+    content: content,
+    rawContent: rawContent
+  });
+
+  function writeAttributes(attributes) {
+    for ( var key in attributes ) {
+      arr.push(" ", key, "=\"", escapeAttribute(attributes[key]), "\"");
+    }
+  }
+
+  function startElement(tagName, attributes) {
+    arr.push("<", tagName);
+    writeAttributes(attributes);
+    arr.push(">");
+  }
+
+  function selfCloseElement(tagName, attributes) {
+    arr.push("<", tagName);
+    writeAttributes(attributes);
+    arr.push(" />");
+  }
+
+  function endElement(tagName) {
+    arr.push("</", tagName, ">");
+  }
+
+  function comment(content) {
+    arr.push("<!--", content, "-->");
+  }
+
+  function content() {
+    for ( var i = 0, len = arguments.length; i < len; i++ ) {
+      arr.push(escapeContent(arguments[i]));
+    }
+  }
+
+  function rawContent() {
+    arr.push.apply(arr, arguments);
+  }
+}
+
+// Exports
+exports.createArrayWriter = createArrayWriter;
+
+},{"../util":10}],12:[function(require,module,exports){
+/**
+ * Interpol (Templates Sans Facial Hair)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thom Bradford (github/kode4food)
+ */
+
+"use strict";
+
+// Exports
+exports.createNullWriter = require('./null').createNullWriter;
+exports.createArrayWriter = require('./array').createArrayWriter;
+
+},{"./array":11,"./null":13}],13:[function(require,module,exports){
+/**
+ * Interpol (Templates Sans Facial Hair)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thom Bradford (github/kode4food)
+ */
+
+"use strict";
+
+var util = require('../util');
+
+var freezeObject = util.freezeObject;
+
+function noOp() {}
+
+function createNullWriter() {
+  return freezeObject({
+    startElement: noOp,
+    selfCloseElement: noOp,
+    endElement: noOp,
+    comment: noOp,
+    content: noOp,
+    rawContent: noOp
+  });
+}
+
+// Exports
+exports.createNullWriter = createNullWriter;
+
+},{"../util":10}]},{},[1])
