@@ -1,13 +1,24 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var interpol = require('./lib/interpol');
-require('./lib/resolvers/system');
-require('./lib/resolvers/helper');
-require('./lib/resolvers/memory');
-
 // Set the Interpol browser global
-window.$interpol = interpol;
+window.$interpol = require('./lib/browser');
 
-},{"./lib/interpol":2,"./lib/resolvers/helper":3,"./lib/resolvers/memory":4,"./lib/resolvers/system":5}],2:[function(require,module,exports){
+},{"./lib/browser":2}],2:[function(require,module,exports){
+/**
+ * Interpol (Templates Sans Facial Hair)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thom Bradford (github/kode4food)
+ */
+
+"use strict";
+
+module.exports = require('./interpol');
+
+// Pull in default Resolvers
+require('./resolvers/browser');
+
+},{"./interpol":3,"./resolvers/browser":4}],3:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -310,7 +321,7 @@ function compile(parseOutput, localOptions) {
     , evaluator = wrapEvaluator(parseOutput.n)
     , exportedContext = null;
 
-  compiledTemplate.exports = exports;
+  compiledTemplate.exports = templateExports;
   return freezeObject(compiledTemplate);
 
   function compiledTemplate(obj, localOptions) {
@@ -340,7 +351,7 @@ function compile(parseOutput, localOptions) {
     return content ? content.join('') : null;
   }
 
-  function exports() {
+  function templateExports() {
     if ( exportedContext ) {
       return exportedContext;
     }
@@ -1055,7 +1066,34 @@ interpol.compile = compile;
 // Exports
 module.exports = interpol;
 
-},{"./util":6}],3:[function(require,module,exports){
+},{"./util":8}],4:[function(require,module,exports){
+/**
+ * Interpol (Templates Sans Facial Hair)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thom Bradford (github/kode4food)
+ */
+
+"use strict";
+
+var interpol = require('../interpol')
+  , system = require('./system')
+  , helper = require('./helper')
+  , memory = require('./memory');
+
+var globalResolvers = interpol.resolvers()
+  , systemResolver = system.createSystemResolver()
+  , helperResolver = helper.createHelperResolver({})
+  , memoryResolver = memory.createMemoryResolver({});
+
+interpol.systemResolver = systemResolver;
+interpol.helperResolver = helperResolver;
+interpol.memoryResolver = memoryResolver;
+
+globalResolvers.push(systemResolver, helperResolver, memoryResolver);
+
+},{"../interpol":3,"./helper":5,"./memory":6,"./system":7}],5:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1067,12 +1105,6 @@ module.exports = interpol;
 "use strict";
 
 var interpol = require('../interpol');
-
-var globalResolvers = interpol.resolvers()
-  , helperResolver = createHelperResolver({});
-
-interpol.helperResolver = helperResolver;
-globalResolvers.push(helperResolver);
 
 // Implementation ***********************************************************
 
@@ -1120,8 +1152,8 @@ function createHelperResolver(options) {
 
 // Exports
 interpol.createHelperResolver = createHelperResolver;
-
-},{"../interpol":2}],4:[function(require,module,exports){
+exports.createHelperResolver = createHelperResolver;
+},{"../interpol":3}],6:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1134,12 +1166,6 @@ interpol.createHelperResolver = createHelperResolver;
 
 var interpol = require('../interpol')
   , util = require('../util');
-
-var globalResolvers = interpol.resolvers()
-  , memoryResolver = createMemoryResolver({});
-
-interpol.memoryResolver = memoryResolver;
-globalResolvers.push(memoryResolver);
 
 // Implementation ***********************************************************
 
@@ -1171,10 +1197,10 @@ function createMemoryResolver(options) {
 }
 
 // Exports
+exports.createMemoryResolver = createMemoryResolver;
 interpol.createMemoryResolver = createMemoryResolver;
 
-
-},{"../interpol":2,"../util":6}],5:[function(require,module,exports){
+},{"../interpol":3,"../util":8}],7:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1190,12 +1216,6 @@ var interpol = require('../interpol')
   , isArray = util.isArray;
 
 var slice = Array.prototype.slice;
-
-var globalResolvers = interpol.resolvers()
-  , systemResolver = createSystemResolver();
-  
-interpol.systemResolver = systemResolver;
-globalResolvers.push(systemResolver);
 
 // Implementation ***********************************************************
 
@@ -1374,9 +1394,9 @@ function buildJSONModule() {
 }
 
 // Exports
+exports.createSystemResolver = createSystemResolver;
 interpol.createSystemResolver = createSystemResolver;
-
-},{"../interpol":2,"../util":6}],6:[function(require,module,exports){
+},{"../interpol":3,"../util":8}],8:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License

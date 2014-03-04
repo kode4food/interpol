@@ -1,2 +1,2 @@
-require('./browserify');
+require('./browser');
 require('./lib/parser');
