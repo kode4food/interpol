@@ -8,6 +8,5 @@
 
 "use strict";
 
-require('./system');
-require('./helper');
-require('./memory');
+require('./standard');
+require('../lib/parser');
