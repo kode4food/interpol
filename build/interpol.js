@@ -1077,22 +1077,11 @@ module.exports = interpol;
 
 "use strict";
 
-var interpol = require('../interpol')
-  , system = require('./system')
-  , helper = require('./helper')
-  , memory = require('./memory');
+require('./system');
+require('./helper');
+require('./memory');
 
-var systemResolver = system.createSystemResolver()
-  , helperResolver = helper.createHelperResolver({})
-  , memoryResolver = memory.createMemoryResolver({});
-
-interpol.systemResolver = systemResolver;
-interpol.helperResolver = helperResolver;
-interpol.memoryResolver = memoryResolver;
-
-interpol.resolvers().push(systemResolver, helperResolver, memoryResolver);
-
-},{"../interpol":3,"./helper":5,"./memory":6,"./system":7}],5:[function(require,module,exports){
+},{"./helper":5,"./memory":6,"./system":7}],5:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1149,9 +1138,15 @@ function createHelperResolver(options) {
   }
 }
 
+// Add Default Helper Resolver
+var helperResolver = createHelperResolver();
+interpol.helperResolver = helperResolver;
+interpol.resolvers().push(helperResolver);
+
 // Exports
 interpol.createHelperResolver = createHelperResolver;
 exports.createHelperResolver = createHelperResolver;
+
 },{"../interpol":3}],6:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
@@ -1194,6 +1189,11 @@ function createMemoryResolver(options) {
     throw new Error("Module not provided");
   }
 }
+
+// Add Default Memory Resolver
+var memoryResolver = createMemoryResolver();
+interpol.memoryResolver = memoryResolver;
+interpol.resolvers().push(memoryResolver);
 
 // Exports
 exports.createMemoryResolver = createMemoryResolver;
@@ -1391,6 +1391,11 @@ function buildJSONModule() {
     "stringify": wrapFunction(JSON.stringify)
   };
 }
+
+// Add Default System Resolver
+var systemResolver = createSystemResolver();
+interpol.systemResolver = systemResolver;
+interpol.resolvers().push(systemResolver);
 
 // Exports
 exports.createSystemResolver = createSystemResolver;
