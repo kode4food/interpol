@@ -1082,8 +1082,7 @@ var interpol = require('../interpol')
   , helper = require('./helper')
   , memory = require('./memory');
 
-var globalResolvers = interpol.resolvers()
-  , systemResolver = system.createSystemResolver()
+var systemResolver = system.createSystemResolver()
   , helperResolver = helper.createHelperResolver({})
   , memoryResolver = memory.createMemoryResolver({});
 
@@ -1091,7 +1090,7 @@ interpol.systemResolver = systemResolver;
 interpol.helperResolver = helperResolver;
 interpol.memoryResolver = memoryResolver;
 
-globalResolvers.push(systemResolver, helperResolver, memoryResolver);
+interpol.resolvers().push(systemResolver, helperResolver, memoryResolver);
 
 },{"../interpol":3,"./helper":5,"./memory":6,"./system":7}],5:[function(require,module,exports){
 /**
@@ -1396,6 +1395,7 @@ function buildJSONModule() {
 // Exports
 exports.createSystemResolver = createSystemResolver;
 interpol.createSystemResolver = createSystemResolver;
+
 },{"../interpol":3,"../util":8}],8:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
