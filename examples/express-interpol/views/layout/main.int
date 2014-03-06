@@ -1,0 +1,13 @@
+def mainLayout(title, content)
+  <html>
+  <head>
+    <title>title</title>
+    <!-- this is a comment -->
+  </head>
+  <body>
+  <div class="content">
+     content()
+  </div>
+  </body>
+  </html>
+end

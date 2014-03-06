@@ -1,6 +1,9 @@
 # Change History
 
-## Version 0.1.6 - 
+## Version 0.1.6 - Modularization
+Have introduced Browserify to manage the build process for browser-targeted versions of Interpol.  This has allowed for some modularization refactorings, making the code much easier to maintain.  Any Browserify-specific code is in the `browserify` directory.
+
+Also added a very simple Express example in the `examples` directory.
 
 ## Version 0.1.5 - Import Revisited
 To reduce ambiguity and context pollution, the `import <module>` statement now imports a module as a single variable rather than automatically importing all of its exported properties.  This will require drilling into its membership.  You can also alias the imported module using `as`.  For example:

@@ -1,0 +1,13 @@
+{
+  "name": "express-interpol",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "*",
+    "interpol": "*",
+    "less-middleware": "*"
+  }
+}
