@@ -15,10 +15,10 @@
   ],
   "repository": "git://github.com/kode4food/interpol",
   "scripts": {
-    "parser": "pegjs lib/parser.pegjs build/parser.js",
+    "build-parser": "pegjs lib/parser.pegjs build/parser.js",
     "bundle-standard": "browserify browserify/standard.js > build/interpol.js && uglifyjs -m --preamble \"`cat doc/preamble.js`\" build/interpol.js -o build/interpol.min.js",
     "bundle-parser": "browserify browserify/parser.js | uglifyjs -m --preamble \"`cat doc/preamble.js`\" -o build/interpol-parser.min.js",
-    "build": "npm run-script parser && npm run-script bundle-standard && npm run-script bundle-parser",
+    "build": "npm run-script build-parser && npm run-script bundle-standard && npm run-script bundle-parser",
     "test": "nodeunit test/index.js"
   },
   "dependencies": {
