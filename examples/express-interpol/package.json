@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "express": "*",
-    "interpol": "*",
+    "interpol": "kode4food/interpol",
     "less-middleware": "*"
   }
 }
