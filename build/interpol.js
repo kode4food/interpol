@@ -141,6 +141,7 @@ interpol.options = function options() { return globalOptions; };
 interpol.globals = function globals() { return globalContext; };
 interpol.resolvers = function resolvers() { return globalResolvers; };
 interpol.bless = bless;
+interpol.evaluate = evaluate;
 interpol.parse = parse;
 interpol.compile = compile;
 
@@ -176,6 +177,11 @@ function bless(func) {
     /* jshint validthis:true */
     return func.apply(this, arguments);
   }
+}
+
+function evaluate(script, obj, options) {
+  var compiled = interpol(script, options);
+  return compiled(obj, options);
 }
 
 function parse(template) {

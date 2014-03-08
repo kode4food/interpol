@@ -212,7 +212,7 @@ module.exports = (function() {
                   results.push([lit('ou'), lit(ws)]);
                 }
               }
-              return results;
+              return hoistPartials(results);
             },
         peg$c150 = function(s, ws) {
               return [[s], ws];
@@ -5986,6 +5986,25 @@ module.exports = (function() {
           head = [ item[0], head, item[1] ];
         }
         return head;
+      }
+
+      function isPartialDefinition(statement) {
+        return isArray(statement) && lits[statement[0]] === 'de';
+      }
+
+      function hoistPartials(statements) {
+        var partials = []
+          , others = [];
+        for ( var i = 0, len = statements.length; i < len; i++ ) {
+          var statement = statements[i];
+          if ( isPartialDefinition(statement) ) {
+            partials.push(statement);
+          }
+          else {
+            others.push(statement);
+          }
+        }
+        return partials.concat(others);
       }
 
 
