@@ -126,7 +126,7 @@ var isArray = util.isArray
   , createArrayWriter = writers.createArrayWriter
   , buildTemplate = format.buildTemplate;
 
-var CURRENT_VERSION = "0.1.6"
+var CURRENT_VERSION = "0.1.7"
   , TemplateCacheMax = 256
   , NullWriter = writers.createNullWriter()
   , globalOptions = { writer: null, errorCallback: null }
