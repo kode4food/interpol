@@ -1,5 +1,35 @@
 # Change History
 
+## Version 0.1.7 - Partial Hoisting
+Partials are now conditionally hoisted to the top of their scope.  The condition for hoisting is that the name can't have already been encountered as a `let` assignment or partial definition in the current scope.  So if you define a partial that doesn't meet this condition, that definition will occur in-place.
+
+For example, this is a valid hoist:
+
+```python
+# content will already be available for calling
+content()
+
+def content
+  "hello"
+end
+```
+
+While this is not a valid hoist:
+
+```python
+let content = "hello"
+
+# error that you're calling a non-partial
+content()
+
+def content
+  "not gonna happen"
+end
+
+# but you *can* call it here
+content()
+```
+
 ## Version 0.1.6 - Modularization
 Have introduced Browserify to manage the build process for browser-targeted versions of Interpol.  This has allowed for some modularization refactorings, making the code much easier to maintain.  Any Browserify-specific code is in the `browserify` directory.
 
