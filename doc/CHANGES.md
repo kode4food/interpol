@@ -1,5 +1,8 @@
 # Change History
 
+## Version 0.2 - First Stable Release
+This is the first stable (even numbered) release of Interpol.  There is no new functionality to be seen.  Instead, the release has focused on additional test coverage and documentation.
+
 ## Version 0.1.7 - Partial Hoisting
 Partials are now conditionally hoisted to the top of their scope.  The condition for hoisting is that the name can't have already been encountered as a `let` assignment or partial definition in the current scope.  So if you define a partial that doesn't meet this condition, that definition will occur in-place.
 

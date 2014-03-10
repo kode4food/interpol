@@ -126,7 +126,7 @@ var isArray = util.isArray
   , createArrayWriter = writers.createArrayWriter
   , buildTemplate = format.buildTemplate;
 
-var CURRENT_VERSION = "0.1.7"
+var CURRENT_VERSION = "0.2.0"
   , TemplateCacheMax = 256
   , NullWriter = writers.createNullWriter()
   , globalOptions = { writer: null, errorCallback: null }
@@ -206,6 +206,7 @@ function compile(parseOutput, localOptions) {
     op: createOpenTagEvaluator,
     cl: createCloseTagEvaluator,
     ct: createCommentTagEvaluator,
+    dt: createDocTypeEvaluator,
     ou: createOutputEvaluator,
     fr: createForEvaluator,
     cn: createConditionalEvaluator,
@@ -600,6 +601,16 @@ function compile(parseOutput, localOptions) {
 
     function commentTagEvaluator(ctx, writer) {
       writer.comment(content);
+    }
+  }
+
+  function createDocTypeEvaluator(rootElemLiteral) {
+    var rootElem = lits[rootElemLiteral];
+
+    return docTypeEvaluator;
+
+    function docTypeEvaluator(ctx, writer) {
+      writer.docType(rootElem);
     }
   }
 
@@ -1524,6 +1535,7 @@ function createArrayWriter(arr) {
     selfCloseElement: selfCloseElement,
     endElement: endElement,
     comment: comment,
+    docType: docType,
     content: content,
     rawContent: rawContent
   });
@@ -1552,6 +1564,10 @@ function createArrayWriter(arr) {
 
   function comment(content) {
     arr.push("<!--", content, "-->");
+  }
+
+  function docType(rootElement) {
+    arr.push("<!DOCTYPE ", rootElement, ">");
   }
 
   function content() {
@@ -1606,6 +1622,7 @@ function createNullWriter() {
     selfCloseElement: noOp,
     endElement: noOp,
     comment: noOp,
+    docType: noOp,
     content: noOp,
     rawContent: noOp
   });
