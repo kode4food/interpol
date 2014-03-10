@@ -30,5 +30,39 @@ exports.partials = nodeunit.testCase({
     test.equal(eval(script2, { coming: true }), "Hello Interpol\n");
     test.equal(eval(script2, { coming: false }), "Goodbye Interpol\n");
     test.done();
+  },
+
+  "Partial Hoisting": function (test) {
+    var script1 = "partialCall('Bob')\n" +
+                  "def partialCall(name)\n" +
+                  "  'Hello, %name!'\n" +
+                  "end";
+
+    var script2 = "partialCall('Bob')\n" +
+                  "let partialCall = 50\n" +
+                  "def partialCall(name)\n" +
+                  "  'Hello, %name!'\n" +
+                  "end";
+
+    var script3 = "test()\n" +
+                  "if true\n" +
+                  "  def test\n" +
+                  "    'first'\n" +
+                  "  end\n" +
+                  "end\n" +
+                  "def test\n" +
+                  "  'second'\n" +
+                  "end\n" +
+                  "test()";
+
+    test.equal(eval(script1), "Hello, Bob!\n\n");
+
+    test.throws(function () {
+      eval(script2);
+    });
+
+    test.equal(eval(script3), "second\n\nfirst\n");
+
+    test.done();
   }
 });
