@@ -87,11 +87,10 @@ function buildTemplate(formatStr) {
   }
 
   function createLiteralFunction(literal) {
-    var str = stringify(literal);
     return literalFunction;
 
     function literalFunction() {
-      return str;
+      return literal;
     }
   }
 
