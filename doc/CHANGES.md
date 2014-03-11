@@ -1,5 +1,8 @@
 # Change History
 
+## Version 0.2.1 - Stringify Fix
+Small bug fix.  `stringify()` should be called on values being interpolated.
+
 ## Version 0.2 - First Stable Release
 This is the first stable (even numbered) release of Interpol.  There isn't any new and noteworthy functionality to be seen.  Instead, the release has focused on additional test coverage and documentation.
 

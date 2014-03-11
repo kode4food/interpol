@@ -27,6 +27,9 @@ require('../lib/resolvers/memory');
 
 "use strict";
 
+var util = require('./util')
+  , stringify = util.stringify;
+
 var ParamRegex = /(.?)%(([1-9][0-9]*)|([$_a-zA-Z][$_a-zA-Z0-9]*))?/;
 
 function buildTemplate(formatStr) {
@@ -84,10 +87,11 @@ function buildTemplate(formatStr) {
   }
 
   function createLiteralFunction(literal) {
+    var str = stringify(literal);
     return literalFunction;
 
     function literalFunction() {
-      return literal;
+      return str;
     }
   }
 
@@ -95,7 +99,7 @@ function buildTemplate(formatStr) {
     return indexedFunction;
 
     function indexedFunction(data) {
-      return data[idx];
+      return stringify(data[idx]);
     }
   }
 }
@@ -103,7 +107,7 @@ function buildTemplate(formatStr) {
 // Exports
 exports.buildTemplate = buildTemplate;
 
-},{}],3:[function(require,module,exports){
+},{"./util":8}],3:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -126,7 +130,7 @@ var isArray = util.isArray
   , createArrayWriter = writers.createArrayWriter
   , buildTemplate = format.buildTemplate;
 
-var CURRENT_VERSION = "0.2.0"
+var CURRENT_VERSION = "0.2.1"
   , TemplateCacheMax = 256
   , NullWriter = writers.createNullWriter()
   , globalOptions = { writer: null, errorCallback: null }
@@ -1477,7 +1481,7 @@ function escapeContent(str) {
   });
 }
 
-// TODO: Need to handle complex types like Dates
+// TODO: Need to better handle complex types like Dates
 function stringify(obj) {
   var type = typeof obj;
   switch ( type ) {
