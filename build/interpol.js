@@ -301,7 +301,7 @@ function compile(parseOutput, localOptions) {
     }
 
     var result = [];
-    for ( var i = arrayNodes.length; i--; ) {
+    for ( var i = arrayNodes.length - 1; i >= 0; i-- ) {
       result[i] = wrapEvaluator(arrayNodes[i]);
     }
     return result;
@@ -313,7 +313,7 @@ function compile(parseOutput, localOptions) {
     }
 
     var result = [];
-    for ( var i = literalArray.length; i--; ) {
+    for ( var i = literalArray.length - 1; i >= 0; i-- ) {
       result[i] = lits[literalArray[i]];
     }
     return result;
@@ -374,13 +374,13 @@ function compile(parseOutput, localOptions) {
     }
 
     var statements = wrapArrayEvaluators(statementNodes).reverse()
-      , slen = statements.length;
+      , slen = statements.length - 1;
 
     return statementsEvaluator;
 
     function statementsEvaluator(ctx, writer) {
       var result = null;
-      for ( var i = slen; i--; ) {
+      for ( var i = slen; i >= 0; i-- ) {
         result = statements[i](ctx, writer);
       }
       return result;
@@ -401,9 +401,9 @@ function compile(parseOutput, localOptions) {
 
   function createImportEvaluator(fromNodes) {
     var importList = []
-      , ilen = fromNodes.length;
+      , ilen = fromNodes.length - 1;
 
-    for ( var i = ilen; i--; ) {
+    for ( var i = ilen; i >= 0; i-- ) {
       var fromNode = fromNodes[i]
         , moduleName = lits[fromNode[0]]
         , aliases = fromNode[1]
@@ -412,7 +412,7 @@ function compile(parseOutput, localOptions) {
 
       if ( isArray(aliases) ) {
         toResolve = [];
-        for ( var j = aliases.length; j--; ) {
+        for ( var j = aliases.length - 1; j >= 0; j-- ) {
           var importInfo = aliases[j]
             , name = lits[importInfo[0]]
             , alias = importInfo[1] ? lits[importInfo[1]] : name;
@@ -432,7 +432,7 @@ function compile(parseOutput, localOptions) {
     return importEvaluator;
 
     function importEvaluator(ctx, writer) {
-      for ( var i = ilen; i--; ) {
+      for ( var i = ilen; i >= 0; i-- ) {
         var importItem = importList[i]
           , moduleName = importItem[0]
           , moduleAlias = importItem[1]
@@ -441,7 +441,7 @@ function compile(parseOutput, localOptions) {
         var moduleExports = resolveExports(moduleName, true);
 
         if ( toResolve ) {
-          for ( var j = toResolve.length; j--; ) {
+          for ( var j = toResolve.length - 1; j >= 0; j-- ) {
             var aliasMap = toResolve[j];
             ctx[aliasMap[0]] = moduleExports[aliasMap[1]];
           }
@@ -454,8 +454,11 @@ function compile(parseOutput, localOptions) {
 
     function resolveExports(moduleName, raiseError) {
       var module = null;
-      for ( var i = resolvers.length; !module && i--; ) {
+      for ( var i = resolvers.length - 1; i >= 0; i-- ) {
         module = resolvers[i].resolveExports(moduleName, compilerOptions);
+        if ( module ) {
+          break;
+        }
       }
       if ( !module && raiseError ) {
         throw new Error("Module '" + moduleName +"' not resolved");
@@ -515,12 +518,12 @@ function compile(parseOutput, localOptions) {
 
   function createAssignEvaluator(assignmentDefs) {
     var assigns = wrapAssignmentEvaluators(assignmentDefs).reverse()
-      , alen = assigns.length;
+      , alen = assigns.length - 1;
 
     return assignEvaluator;
 
     function assignEvaluator(ctx, writer) {
-      for ( var i = alen; i--; ) {
+      for ( var i = alen; i >= 0; i-- ) {
         var assign = assigns[i];
         ctx[assign[0]] = assign[1](ctx, writer);
       }
@@ -530,7 +533,7 @@ function compile(parseOutput, localOptions) {
   function createOpenTagEvaluator(nameNode, attributeDefs, selfClose) {
     var name = createEvaluator(nameNode)
       , attributes = wrapAttributeEvaluators(attributeDefs).reverse()
-      , alen = attributes.length;
+      , alen = attributes.length - 1;
 
     if ( typeof name === 'function' ) {
       return selfClose ? selfCloseFuncEvaluator : openTagFuncEvaluator;
@@ -557,7 +560,7 @@ function compile(parseOutput, localOptions) {
 
     function getAttributes(ctx, writer) {
       var result = {};
-      for ( var i = alen; i--; ) {
+      for ( var i = alen; i >= 0; i-- ) {
         var attribute = attributes[i]
           , key = attribute[0];
 
