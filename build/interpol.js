@@ -1481,13 +1481,31 @@ function escapeContent(str) {
 function stringify(obj) {
   var type = typeof obj;
   switch ( type ) {
-    case 'string':    return obj;
-    case 'number':    return obj.toString();
-    case 'boolean':   return obj ? 'true' : 'false';
-    case 'undefined': return '';
-    case 'object':    return obj !== null ? obj.toString() : '';
-    case 'xml':       return obj.toXMLString();
-    default:          return '';
+    case 'string':
+      return obj;
+
+    case 'number':
+      return obj.toString();
+
+    case 'boolean':
+      return obj ? 'true' : 'false';
+
+    case 'xml':
+      return obj.toXMLString();
+
+    case 'object':
+      if ( isArray(obj) ) {
+        var result = [];
+        for ( var i = 0, len = obj.length; i < len; i++ ) {
+          result[i] = stringify(obj[i]);
+        }
+        return result.join(' ');
+      }
+      return obj !== null ? obj.toString() : '';
+
+    default:
+      // catches 'undefined'
+      return '';
   }
 }
 
