@@ -68,7 +68,7 @@ def renderItem(person, brother)
 end
 ```
 
-Partials are first-class elements of Interpol, meaning they can be passed around and assigned to variables.
+Partials are first-class elements of Interpol, meaning they can be passed around and assigned to variables.  In certain situations, they are also hoisted to the top of their scope, so you can call them in your code even before they've been defined.
 
 ### Importing
 Importing partials and variables in Interpol is similar to Python.  One can either import an entire module as a single variable, or can cherry-pick individual properties.  In all cases, the imported items can be aliased locally.
