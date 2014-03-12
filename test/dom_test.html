@@ -4,7 +4,7 @@
 </head>
 <body>
   <p>This is not a <em>best-practice</em>, just a test of getting pre-parsed templates rendered</p>
-  <div id="content"/>
+  <div id="content"></div>
 </body>
 <script src="../build/interpol-debug.js" type="application/javascript"></script>
 <script src="./test_app.js" type="application/javascript"></script>
@@ -21,6 +21,8 @@
 <script type="application/javascript">
   var data = JSON.parse(document.getElementById("data").textContent);
   var template = $interpol.testApp['test'];
-  document.getElementById('content').innerHTML = template(data);
+  var parentElem = document.getElementById('content');
+  var domWriter = $interpol.createDOMWriter(parentElem, true);
+  template(data, { writer: domWriter });
 </script>
 </html>

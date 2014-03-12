@@ -11,6 +11,12 @@
 // Set the Interpol browser global
 window.$interpol = require('../lib/interpol');
 
+// Resolvers
 require('../lib/resolvers/system');
 require('../lib/resolvers/helper');
 require('../lib/resolvers/memory');
+
+// Writers
+require('../lib/writers/null');
+require('../lib/writers/array');
+require('../lib/writers/dom');

@@ -12,11 +12,17 @@
 // Set the Interpol browser global
 window.$interpol = require('../lib/interpol');
 
+// Resolvers
 require('../lib/resolvers/system');
 require('../lib/resolvers/helper');
 require('../lib/resolvers/memory');
 
-},{"../lib/interpol":3,"../lib/resolvers/helper":5,"../lib/resolvers/memory":6,"../lib/resolvers/system":7}],2:[function(require,module,exports){
+// Writers
+require('../lib/writers/null');
+require('../lib/writers/array');
+require('../lib/writers/dom');
+
+},{"../lib/interpol":3,"../lib/resolvers/helper":5,"../lib/resolvers/memory":6,"../lib/resolvers/system":7,"../lib/writers/array":9,"../lib/writers/dom":10,"../lib/writers/null":11}],2:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -118,7 +124,6 @@ exports.buildTemplate = buildTemplate;
 "use strict";
 
 var util = require('./util')
-  , writers = require('./writers')
   , format = require('./format');
 
 var isArray = util.isArray
@@ -126,12 +131,10 @@ var isArray = util.isArray
   , extendContext = util.extendContext
   , freezeObject = util.freezeObject
   , stringify = util.stringify
-  , createArrayWriter = writers.createArrayWriter
   , buildTemplate = format.buildTemplate;
 
 var CURRENT_VERSION = "0.2.1"
   , TemplateCacheMax = 256
-  , NullWriter = writers.createNullWriter()
   , globalOptions = { writer: null, errorCallback: null }
   , globalContext = {}
   , globalResolvers = []
@@ -200,6 +203,9 @@ function parse(template) {
 }
 
 function compile(parseOutput, localOptions) {
+  var createArrayWriter = interpol.createArrayWriter
+    , NullWriter = interpol.createNullWriter();
+
   var Evaluators = freezeObject({
     im: createModuleEvaluator,
     mi: createImportEvaluator,
@@ -257,7 +263,9 @@ function compile(parseOutput, localOptions) {
     }
 
     try {
+      writer.startRender();
       evaluator(ctx, writer);
+      writer.endRender();
     }
     catch ( err ) {
       if ( typeof processingOptions.errorCallback === 'function' ) {
@@ -989,7 +997,7 @@ function compile(parseOutput, localOptions) {
 // Exports
 module.exports = interpol;
 
-},{"./format":2,"./util":8,"./writers":10}],4:[function(require,module,exports){
+},{"./format":2,"./util":8}],4:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1547,14 +1555,19 @@ exports.formatSyntaxError = formatSyntaxError;
 
 "use strict";
 
-var util = require('../util');
+var interpol = require('../interpol')
+  , util = require('../util');
 
 var freezeObject = util.freezeObject
   , escapeAttribute = util.escapeAttribute
   , escapeContent = util.escapeContent;
 
+function noOp() {}
+
 function createArrayWriter(arr) {
   return freezeObject({
+    startRender: noOp,
+    endRender: noOp,
     startElement: startElement,
     selfCloseElement: selfCloseElement,
     endElement: endElement,
@@ -1607,8 +1620,8 @@ function createArrayWriter(arr) {
 
 // Exports
 exports.createArrayWriter = createArrayWriter;
-
-},{"../util":8}],10:[function(require,module,exports){
+interpol.createArrayWriter = createArrayWriter;
+},{"../interpol":3,"../util":8}],10:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1618,12 +1631,47 @@ exports.createArrayWriter = createArrayWriter;
  */
 
 "use strict";
+
+var interpol = require('../interpol')
+  , array = require('./array')
+  , util = require('../util');
+
+var createArrayWriter = array.createArrayWriter
+  , freezeObject = util.freezeObject
+  , mixin = util.mixin;
+
+function createDOMWriter(parentElement, append) {
+  var arr = []
+    , writer = createArrayWriter(arr);
+
+  return freezeObject(mixin({}, writer, {
+    startRender: startRender,
+    endRender: endRender
+  }));
+
+  function startRender() {
+    arr.length = 0;
+  }
+
+  function endRender() {
+    var content = arr.join('');
+    arr.length = 0;
+    if ( append ) {
+      var container = document.createElement("span");
+      container.innerHTML = content;
+      parentElement.appendChild(container);
+    }
+    else {
+      parentElement.innerHTML = content;
+    }
+  }
+}
 
 // Exports
-exports.createNullWriter = require('./null').createNullWriter;
-exports.createArrayWriter = require('./array').createArrayWriter;
+exports.createDOMWriter = createDOMWriter;
+interpol.createDOMWriter = createDOMWriter;
 
-},{"./array":9,"./null":11}],11:[function(require,module,exports){
+},{"../interpol":3,"../util":8,"./array":9}],11:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1634,7 +1682,8 @@ exports.createArrayWriter = require('./array').createArrayWriter;
 
 "use strict";
 
-var util = require('../util');
+var interpol = require('../interpol')
+  , util = require('../util');
 
 var freezeObject = util.freezeObject;
 
@@ -1642,6 +1691,8 @@ function noOp() {}
 
 function createNullWriter() {
   return freezeObject({
+    startRender: noOp,
+    endRender: noOp,
     startElement: noOp,
     selfCloseElement: noOp,
     endElement: noOp,
@@ -1654,5 +1705,5 @@ function createNullWriter() {
 
 // Exports
 exports.createNullWriter = createNullWriter;
-
-},{"../util":8}]},{},[1])
+interpol.createNullWriter = createNullWriter;
+},{"../interpol":3,"../util":8}]},{},[1])
