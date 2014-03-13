@@ -247,6 +247,7 @@ function compile(parseOutput, localOptions) {
     , evaluator = wrapEvaluator(parseOutput.n)
     , exportedContext = null;
 
+  compiledTemplate.configure = configure;
   compiledTemplate.exports = templateExports;
   return freezeObject(compiledTemplate);
 
@@ -254,18 +255,12 @@ function compile(parseOutput, localOptions) {
     var ctx = mixin(extendContext(globalContext), obj)
       , processingOptions = mixin({}, globalOptions, localOptions);
 
-    var writer = processingOptions.writer
-      , content = null;
-
-    if ( !writer ) {
-      content = [];
-      writer = createArrayWriter(content);
-    }
+    var writer = processingOptions.writer || createArrayWriter();
 
     try {
       writer.startRender();
       evaluator(ctx, writer);
-      writer.endRender();
+      return writer.endRender();
     }
     catch ( err ) {
       if ( typeof processingOptions.errorCallback === 'function' ) {
@@ -275,8 +270,14 @@ function compile(parseOutput, localOptions) {
       // Re-raise if no callback
       throw err;
     }
+  }
 
-    return content ? content.join('') : null;
+  function configure(localOptions) {
+    return configuredTemplate;
+
+    function configuredTemplate(obj) {
+      return compiledTemplate(obj, localOptions);
+    }
   }
 
   function templateExports() {
@@ -1565,9 +1566,11 @@ var freezeObject = util.freezeObject
 function noOp() {}
 
 function createArrayWriter(arr) {
+  arr = arr || [];
+
   return freezeObject({
     startRender: noOp,
-    endRender: noOp,
+    endRender: endRender,
     startElement: startElement,
     selfCloseElement: selfCloseElement,
     endElement: endElement,
@@ -1576,6 +1579,10 @@ function createArrayWriter(arr) {
     content: content,
     rawContent: rawContent
   });
+
+  function endRender() {
+    return arr.join('');
+  }
 
   function writeAttributes(attributes) {
     for ( var key in attributes ) {

@@ -1,13 +1,6 @@
-<html>
-<head>
-  <title>title</title>
-  <!-- this is a comment -->
-</head>
-<body>
-  "There are %length stooges" % people
-  renderList(people)
-</body>
-</html>
+<h2>title</h2>
+"There are %length stooges" % people
+renderList(people)
 
 def renderList(people)
   <ul>
