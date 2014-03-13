@@ -22,7 +22,7 @@
   var data = JSON.parse(document.getElementById("data").textContent);
   var template = $interpol.testApp['test'];
   var parentElem = document.getElementById('content');
-  var domWriter = $interpol.createDOMWriter(parentElem, true);
+  var domWriter = $interpol.createDOMWriter(parentElem, 'insert');
   template(data, { writer: domWriter });
 </script>
 </html>
