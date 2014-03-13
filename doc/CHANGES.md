@@ -1,5 +1,21 @@
 # Change History
 
+## Version 0.3 - DOM Writer
+A very basic DOM Writer is now available for the browser.  You can create an instance by calling `createDOMWriter` with a parent Element and an optional rendering mode.
+
+```javascript
+var parentElem = document.getElementById('content')
+  , domWriter = $interpol.createDOMWriter(parentElem, 'insert');
+```
+
+Now, every time you invoke your template with this writer, the parentElem's contents will be updated:
+
+```javascript
+myTemplate(data, { writer: domWriter });
+```
+
+There are three modes: Append, Insert, and Replace (the default).  `append` places any rendering after parentElem's current children, and `insert` at the beginning.  `replace` replaces all of the parentElem's content.
+
 ## Version 0.2.1 - Stringify Fix
 Small bug fix.  `stringify()` should be called on values being interpolated.
 
