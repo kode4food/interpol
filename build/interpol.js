@@ -22,7 +22,7 @@ require('../lib/writers/null');
 require('../lib/writers/array');
 require('../lib/writers/dom');
 
-},{"../lib/interpol":3,"../lib/resolvers/helper":5,"../lib/resolvers/memory":6,"../lib/resolvers/system":7,"../lib/writers/array":9,"../lib/writers/dom":10,"../lib/writers/null":11}],2:[function(require,module,exports){
+},{"../lib/interpol":3,"../lib/resolvers/helper":5,"../lib/resolvers/memory":6,"../lib/resolvers/system":8,"../lib/writers/array":14,"../lib/writers/dom":15,"../lib/writers/null":16}],2:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -112,7 +112,7 @@ function buildTemplate(formatStr) {
 // Exports
 exports.buildTemplate = buildTemplate;
 
-},{"./util":8}],3:[function(require,module,exports){
+},{"./util":13}],3:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -998,7 +998,7 @@ function compile(parseOutput, localOptions) {
 // Exports
 module.exports = interpol;
 
-},{"./format":2,"./util":8}],4:[function(require,module,exports){
+},{"./format":2,"./util":13}],4:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1215,17 +1215,65 @@ interpol.createMemoryResolver = createMemoryResolver;
 
 "use strict";
 
-var interpol = require('../interpol')
-  , util = require('../util');
+var util = require('../../util')
+  , isArray = util.isArray;
+  
+function first(writer, value) {
+  if ( !isArray(value) ) {
+    return value;
+  }
+  return value[0];
+}
 
-var isArray = util.isArray
-  , slice = Array.prototype.slice;
+function join(writer, value, delim) {
+  if ( isArray(value) ) {
+    return value.join(delim || '');
+  }
+  return value;
+}
+
+function last(writer, value) {
+  if ( !isArray(value) ) {
+    return value;
+  }
+  if ( value.length ) return value[value.length - 1];
+  return null;
+}
+
+function empty(writer, value) {
+  if ( !isArray(value) ) {
+    return typeof value === 'undefined' || value === null;
+  }
+  return !value.length;
+}
+
+// Exports
+exports.first = first;
+exports.join = join;
+exports.last = last;
+exports.empty = empty;
+
+},{"../../util":13}],8:[function(require,module,exports){
+/**
+ * Interpol (Templates Sans Facial Hair)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thom Bradford (github/kode4food)
+ */
+
+"use strict";
+
+var interpol = require('../../interpol')
+  , util = require('../../util');
+
+var freezeObject = util.freezeObject;
 
 // Implementation ***********************************************************
 
 function createSystemResolver() {
-  var modules = buildModules()
-    , resolver = { resolveExports: resolveExports };
+  var resolver = { resolveExports: resolveExports }
+    , modules = buildModules();
 
   return resolver;
 
@@ -1234,23 +1282,13 @@ function createSystemResolver() {
   }
 }
 
-function wrapFunction(func) {
-  wrappedFunction.__interpolPartial = true;
-  return wrappedFunction;
-
-  function wrappedFunction(writer) {
-    /* jshint validthis:true */
-    return func.apply(this, slice.call(arguments, 1));
-  }
-}
-
 function buildModules() {
-  return {
-    "math": blessModule(buildMathModule()),
-    "array": blessModule(buildArrayModule()),
-    "string": blessModule(buildStringModule()),
-    "json": blessModule(buildJSONModule())
-  };
+  return freezeObject({
+    math: blessModule(require('./math')),
+    array: blessModule(require('./array')),
+    string: blessModule(require('./string')),
+    json: blessModule(require('./json'))
+  });
 }
 
 function blessModule(module) {
@@ -1259,142 +1297,6 @@ function blessModule(module) {
     result[key] = interpol.bless(module[key]);
   }
   return result;
-}
-
-function buildMathModule() {
-  return {
-    "number": wrapFunction(Number),
-
-    "abs": wrapFunction(Math.abs),
-    "acos": wrapFunction(Math.acos),
-    "asin": wrapFunction(Math.asin),
-    "atan": wrapFunction(Math.atan),
-    "atan2": wrapFunction(Math.atan2),
-    "ceil": wrapFunction(Math.ceil),
-    "cos": wrapFunction(Math.cos),
-    "exp": wrapFunction(Math.exp),
-    "floor": wrapFunction(Math.floor),
-    "log": wrapFunction(Math.log),
-    "pow": wrapFunction(Math.pow),
-    "round": wrapFunction(Math.round),
-    "sin": wrapFunction(Math.sin),
-    "sqrt": wrapFunction(Math.sqrt),
-    "tan": wrapFunction(Math.tan),
-    
-    "avg": function avg(writer, value) {
-      if ( !isArray(value) ) {
-        return typeof value === 'number' ? value : NaN;
-      }
-      if ( value.length === 0 ) return 0;
-      for ( var i = 0, r = 0, l = value.length; i < l; r += value[i++] );
-      return r / l;
-    },
-
-    "count": function count(writer, value) {
-      return isArray(value) ? value.length : 0;
-    },
-
-    "max": function max(writer, value) {
-      if ( !isArray(value) ) {
-        return typeof value === 'number' ? value : NaN;
-      }
-      return Math.max.apply(Math, value);
-    },
-
-    "median": function median(writer, value) {
-      if ( !isArray(value) ) {
-        return typeof value === 'number' ? value : NaN;
-      }
-      if ( value.length === 0 ) return 0;
-      var temp = value.slice(0).order();
-      if ( temp.length % 2 === 0 ) {
-        var mid = temp.length / 2;
-        return (temp[mid - 1] + temp[mid]) / 2;
-      }
-      return temp[(temp.length + 1) / 2];
-    },
-
-    "min": function min(writer, value) {
-      if ( !isArray(value) ) {
-        return typeof value === 'number' ? value : NaN;
-      }
-      return Math.min.apply(Math, value);
-    },
-
-    "sum": function sum(writer, value) {
-      if ( !isArray(value) ) {
-        return typeof value === 'number' ? value : NaN;
-      }
-      for ( var i = 0, res = 0, l = value.length; i < l; res += value[i++] );
-      return res;
-    }
-  };
-}
-
-function buildArrayModule() {
-  return {
-    "first": function first(writer, value) {
-      if ( !isArray(value) ) {
-        return value;
-      }
-      return value[0];
-    },
-
-    "last": function last(writer, value) {
-      if ( !isArray(value) ) {
-        return value;
-      }
-      if ( value.length ) return value[value.length - 1];
-      return null;
-    },
-
-    "empty": function empty(writer, value) {
-      if ( !isArray(value) ) {
-        return typeof value === 'undefined' || value === null;
-      }
-      return !value.length;
-    }
-  };
-}
-
-function buildStringModule() {
-  return {
-    "string": wrapFunction(String),
-
-    "lower": function lower(writer, value) {
-      return typeof value === 'string' ? value.toLowerCase() : value;
-    },
-
-    "split": function split(writer, value, delim, idx) {
-      var val = String(value).split(delim || ' \n\r\t');
-      return typeof idx !== 'undefined' ? val[idx] : val;
-    },
-
-    "join": function join(writer, value, delim) {
-      if ( Array.isArray(value) ) {
-        return value.join(delim || '');
-      }
-      return value;
-    },
-
-    "title": function title(writer, value) {
-      if ( typeof value !== 'string' ) return value;
-      return value.replace(/\w\S*/g, function (word) {
-        return word.charAt(0).toUpperCase() + word.substr(1).toLowerCase();
-      });
-    },
-
-    "upper": function upper(writer, value) {
-      return typeof value === 'string' ? value.toUpperCase() : value;
-    }
-  };
-}
-
-function buildJSONModule() {
-  return {
-    "parse": wrapFunction(JSON.parse),
-    "stringify": wrapFunction(JSON.stringify)
-  };
 }
 
 // Add Default System Resolver
@@ -1406,7 +1308,180 @@ interpol.resolvers().push(systemResolver);
 exports.createSystemResolver = createSystemResolver;
 interpol.createSystemResolver = createSystemResolver;
 
-},{"../interpol":3,"../util":8}],8:[function(require,module,exports){
+},{"../../interpol":3,"../../util":13,"./array":7,"./json":9,"./math":10,"./string":11}],9:[function(require,module,exports){
+/**
+ * Interpol (Templates Sans Facial Hair)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thom Bradford (github/kode4food)
+ */
+
+"use strict";
+
+var wrapFunction = require('./wrap');
+
+// Exports
+exports.parse = wrapFunction(JSON.parse);
+exports.stringify = wrapFunction(JSON.stringify);
+
+},{"./wrap":12}],10:[function(require,module,exports){
+/**
+ * Interpol (Templates Sans Facial Hair)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thom Bradford (github/kode4food)
+ */
+
+"use strict";
+
+var util = require('../../util')
+  , isArray = util.isArray;
+
+var wrapFunction = require('./wrap');
+
+function avg(writer, value) {
+  if ( !isArray(value) ) {
+    return typeof value === 'number' ? value : NaN;
+  }
+  if ( value.length === 0 ) return 0;
+  for ( var i = 0, r = 0, l = value.length; i < l; r += value[i++] );
+  return r / l;
+}
+
+function count(writer, value) {
+  return isArray(value) ? value.length : 0;
+}
+
+function max(writer, value) {
+  if ( !isArray(value) ) {
+    return typeof value === 'number' ? value : NaN;
+  }
+  return Math.max.apply(Math, value);
+}
+
+function median(writer, value) {
+  if ( !isArray(value) ) {
+    return typeof value === 'number' ? value : NaN;
+  }
+  if ( value.length === 0 ) return 0;
+  var temp = value.slice(0).order();
+  if ( temp.length % 2 === 0 ) {
+    var mid = temp.length / 2;
+    return (temp[mid - 1] + temp[mid]) / 2;
+  }
+  return temp[(temp.length + 1) / 2];
+}
+
+function min(writer, value) {
+  if ( !isArray(value) ) {
+    return typeof value === 'number' ? value : NaN;
+  }
+  return Math.min.apply(Math, value);
+}
+
+function sum(writer, value) {
+  if ( !isArray(value) ) {
+    return typeof value === 'number' ? value : NaN;
+  }
+  for ( var i = 0, res = 0, l = value.length; i < l; res += value[i++] );
+  return res;
+}
+
+// Exports
+exports.avg = avg;
+exports.count = count;
+exports.max = max;
+exports.median = median;
+exports.min = min;
+exports.sum = sum;
+
+exports.number = wrapFunction(Number);
+exports.abs = wrapFunction(Math.abs);
+exports.acos = wrapFunction(Math.acos);
+exports.asin = wrapFunction(Math.asin);
+exports.atan = wrapFunction(Math.atan);
+exports.atan2 = wrapFunction(Math.atan2);
+exports.ceil = wrapFunction(Math.ceil);
+exports.cos = wrapFunction(Math.cos);
+exports.exp = wrapFunction(Math.exp);
+exports.floor = wrapFunction(Math.floor);
+exports.log = wrapFunction(Math.log);
+exports.pow = wrapFunction(Math.pow);
+exports.round = wrapFunction(Math.round);
+exports.sin = wrapFunction(Math.sin);
+exports.sqrt = wrapFunction(Math.sqrt);
+exports.tan = wrapFunction(Math.tan);
+
+},{"../../util":13,"./wrap":12}],11:[function(require,module,exports){
+/**
+ * Interpol (Templates Sans Facial Hair)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thom Bradford (github/kode4food)
+ */
+
+"use strict";
+
+var wrapFunction = require('./wrap');
+
+function lower(writer, value) {
+  return typeof value === 'string' ? value.toLowerCase() : value;
+}
+
+function split(writer, value, delim, idx) {
+  var val = String(value).split(delim || ' \n\r\t');
+  return typeof idx !== 'undefined' ? val[idx] : val;
+}
+
+function title(writer, value) {
+  if ( typeof value !== 'string' ) return value;
+  return value.replace(/\w\S*/g, function (word) {
+    return word.charAt(0).toUpperCase() + word.substr(1).toLowerCase();
+  });
+}
+
+function upper(writer, value) {
+  return typeof value === 'string' ? value.toUpperCase() : value;
+}
+
+// Exports
+exports.lower = lower;
+exports.split = split;
+exports.title = title;
+exports.upper = upper;
+
+exports.string = wrapFunction(String);
+
+},{"./wrap":12}],12:[function(require,module,exports){
+/**
+ * Interpol (Templates Sans Facial Hair)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thom Bradford (github/kode4food)
+ */
+
+"use strict";
+
+var slice = Array.prototype.slice;
+
+function wrapFunction(func) {
+  wrappedFunction.__interpolPartial = true;
+  return wrappedFunction;
+
+  function wrappedFunction(writer) {
+    /* jshint validthis:true */
+    return func.apply(this, slice.call(arguments, 1));
+  }
+}
+
+// Exports
+module.exports = wrapFunction;
+
+},{}],13:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1545,7 +1620,7 @@ exports.escapeContent = escapeContent;
 exports.stringify = stringify;
 exports.formatSyntaxError = formatSyntaxError;
 
-},{}],9:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1629,7 +1704,7 @@ function createArrayWriter(arr) {
 exports.createArrayWriter = createArrayWriter;
 interpol.createArrayWriter = createArrayWriter;
 
-},{"../interpol":3,"../util":8}],10:[function(require,module,exports){
+},{"../interpol":3,"../util":13}],15:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1698,7 +1773,7 @@ function createDOMWriter(parentElement, renderMode) {
 exports.createDOMWriter = createDOMWriter;
 interpol.createDOMWriter = createDOMWriter;
 
-},{"../interpol":3,"../util":8,"./array":9}],11:[function(require,module,exports){
+},{"../interpol":3,"../util":13,"./array":14}],16:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1734,4 +1809,4 @@ function createNullWriter() {
 exports.createNullWriter = createNullWriter;
 interpol.createNullWriter = createNullWriter;
 
-},{"../interpol":3,"../util":8}]},{},[1])
+},{"../interpol":3,"../util":13}]},{},[1])
