@@ -36,7 +36,13 @@ require('../lib/writers/dom');
 var util = require('./util')
   , stringify = util.stringify;
 
-var ParamRegex = /(.?)%(([1-9][0-9]*)|([$_a-zA-Z][$_a-zA-Z0-9]*))?/;
+var nullWriter;
+
+var Digits = "[1-9][0-9]*"
+  , Ident = "[$_a-zA-Z][$_a-zA-Z0-9]*"
+  , Params = "(.?)%(("+Digits+")|("+Ident+"))?(([|]"+Ident+")*)?";
+
+var ParamRegex = new RegExp(Params);
 
 function buildTemplate(formatStr) {
   var funcs = []
@@ -72,7 +78,14 @@ function buildTemplate(formatStr) {
       idx = parseInt(paramMatch[3], 10) - 1;
     }
 
-    funcs.push(createIndexedFunction(idx));
+    if ( typeof paramMatch[5] !== 'undefined' ) {
+      var formatters = paramMatch[5].slice(1).split('|');
+      funcs.push(createPipedFunction(idx, formatters));
+    }
+    else {
+      funcs.push(createIndexedFunction(idx));
+    }
+
     formatStr = formatStr.substring(matchIdx + matchLen);
   }
   flen = funcs.length;
@@ -107,12 +120,37 @@ function buildTemplate(formatStr) {
       return stringify(data[idx]);
     }
   }
+
+  function createPipedFunction(idx, formatters) {
+    var funcs = formatters.reverse()
+      , flen = funcs.length - 1;
+
+    if ( !nullWriter ) {
+      var createNullWriter = require('./writers/null').createNullWriter;
+      nullWriter = createNullWriter();
+    }
+
+    return pipedFunction;
+
+    function pipedFunction(data) {
+      var value = data[idx];
+      for ( var i = flen; i >= 0; i-- ) {
+        var func = data[funcs[i]];
+        if ( typeof func !== 'function' || !func.__interpolPartial ) {
+          // TODO: Do something better here
+          continue;
+        }
+        value = func(nullWriter, value);
+      }
+      return stringify(value);
+    }
+  }
 }
 
 // Exports
 exports.buildTemplate = buildTemplate;
 
-},{"./util":13}],3:[function(require,module,exports){
+},{"./util":13,"./writers/null":16}],3:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1227,7 +1265,7 @@ function first(writer, value) {
 
 function join(writer, value, delim) {
   if ( isArray(value) ) {
-    return value.join(delim || '');
+    return value.join(delim || ' ');
   }
   return value;
 }
@@ -1241,10 +1279,7 @@ function last(writer, value) {
 }
 
 function empty(writer, value) {
-  if ( !isArray(value) ) {
-    return typeof value === 'undefined' || value === null;
-  }
-  return !value.length;
+  return !value || !value.length;
 }
 
 // Exports

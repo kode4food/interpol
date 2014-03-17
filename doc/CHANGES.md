@@ -1,6 +1,29 @@
 # Change History
 
-## Version 0.3 - DOM Writer
+## Version 0.3 - Piped Calls, DOM Writer
+
+### Piped Calls
+Basic Piped Calls are now supported.  This is useful to create filtering and formatting chains against helper functions.  For example:
+
+```python
+from array import join
+from string import title
+('single', 'title', 'cased', 'string') | join | title
+```
+
+The pipe operator has a relatively high precedence.  It is higher than multiplication, but lower than unary operators.  It is also lower than normal calls.
+
+### Piped Interpolation
+A limited form of the operator is also supported in string interpolation.
+
+```python
+from string import title
+"My name is %name|title"
+```
+
+The restrictions in using this method are that the pipe character *can not* be surrounded by spaces and the right-hand operands can only be identifiers.
+
+### DOM Writer
 A very basic DOM Writer is now available for the browser.  You can create an instance by calling `createDOMWriter` with a parent Element and an optional rendering mode.
 
 ```javascript
