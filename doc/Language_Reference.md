@@ -174,7 +174,7 @@ In this case, the value of the class attribute will be computed dynamically from
 You can also compute the name of a tag or attribute dynamically by enclosing the expression in a single-element tuple).  For example:
 
 ```
-<(theTagName) id="parent" (theAttrName || "class")="listItem " + otherClasses>
+<(theTagName) id="parent" (theAttrName or "class")="listItem " + otherClasses>
 ```
 
 HTMLish elements *do not* create nested scopes and are not paired semantically into single statement blocks.  In fact, a closing element is not required at all.  Therefore, code like this will yield incorrect results:
@@ -277,7 +277,7 @@ Like in JavaScript, membership expressions allow you to drill into an object's p
 
 ```javascript
 myList[0]
-myList[someIndex || 0]
+myList[someIndex or 0]
 myObject.someProperty
 myObject['someProperty']
 ```
@@ -312,10 +312,10 @@ The relational operators are `lt` (less than), `le` (less than or equal), `gt` (
 The equality operators are `==` (equal to) and `!=` (not equal to).
 
 ### And
-The and `&&` operator performs a boolean *and* between the two operands, short circuiting if the left operand does not evaluate to JavaScript *truthy*.
+The and `and` operator performs a boolean *and* between the two operands, short circuiting if the left operand does not evaluate to JavaScript *truthy*.
 
 ### Or
-The or `||` operator performs a boolean *or* between the two operands, short circuiting if the left operand evaluates to JavaScript *truthy*.
+The or `or` operator performs a boolean *or* between the two operands, short circuiting if the left operand evaluates to JavaScript *truthy*.
 
 ### Conditional (Ternary)
 The conditional or ternary operator `?:` works just as you would expect from JavaScript or C.  It will evaluate the first operand, and depending on whether that evaluation is JavaScript *truthy* it will return the evaluation of the second or third operand.
