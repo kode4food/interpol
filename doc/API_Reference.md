@@ -10,7 +10,7 @@ var template = $interpol("'Hello, %!' % name");
 template({ name: 'World' }); //-> Hello, World!
 ```
 
-There are several support structures and functions attached to the `$interpol()` function.  They are as follows:
+There are several support structures and functions attached to the `$interpol()` function.  Be default, they are as follows:
 
   * `VERSION` - The current version of Interpol, represented as a String.
   * `parser` - The Interpol PEG.js Parser Object.
@@ -21,7 +21,7 @@ There are several support structures and functions attached to the `$interpol()`
   * `resolvers[]` - Global Resolver Instances (overridden at compile-time)
   * `bless()` - Blesses a Function as being Interpol-safe
 
-Each compiled closure also attaches a single function called `exports()`.  This function is used by resolvers to retrieve partials and variables when the compiled closure is loaded as a module.
+Each compiled closure also attaches additional functions, the most important being called `exports()`.  This function is used by resolvers to retrieve partials and variables when the compiled closure is loaded as a module.
 
 ## Resolvers (interpol/resolvers.js)
 A resolver is an interface used by Interpol to resolve an imported module.  There are three available for develop use, and one automatically registered for apps bundled by the command-line interface.
