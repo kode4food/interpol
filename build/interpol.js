@@ -41,6 +41,7 @@ var nullWriter;
 var Digits = "[1-9][0-9]*"
   , Ident = "[$_a-zA-Z][$_a-zA-Z0-9]*"
   , Params = "(.?)%(("+Digits+")|("+Ident+"))?(([|]"+Ident+")*)?";
+             // "%" ( digits | identifier )? ( "|" identifier )*
 
 var ParamRegex = new RegExp(Params);
 
@@ -1460,26 +1461,28 @@ exports.tan = wrapFunction(Math.tan);
 
 "use strict";
 
+var util = require('../../util')
+  , stringify = util.stringify;
+
 var wrapFunction = require('./wrap');
 
 function lower(writer, value) {
-  return typeof value === 'string' ? value.toLowerCase() : value;
+  return stringify(value).toLowerCase();
 }
 
 function split(writer, value, delim, idx) {
-  var val = String(value).split(delim || ' \n\r\t');
+  var val = stringify(value).split(delim || ' \n\r\t');
   return typeof idx !== 'undefined' ? val[idx] : val;
 }
 
 function title(writer, value) {
-  if ( typeof value !== 'string' ) return value;
-  return value.replace(/\w\S*/g, function (word) {
+  return stringify(value).replace(/\w\S*/g, function (word) {
     return word.charAt(0).toUpperCase() + word.substr(1).toLowerCase();
   });
 }
 
 function upper(writer, value) {
-  return typeof value === 'string' ? value.toUpperCase() : value;
+  return stringify(value).toUpperCase();
 }
 
 // Exports
@@ -1490,7 +1493,7 @@ exports.upper = upper;
 
 exports.string = wrapFunction(String);
 
-},{"./wrap":12}],12:[function(require,module,exports){
+},{"../../util":13,"./wrap":12}],12:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
