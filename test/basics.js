@@ -69,36 +69,14 @@ exports.basics = nodeunit.testCase({
     test.done();
   },
 
-  "Interpolation Operator": function (test) {
-    test.equal(eval("'% is the new %' % ('red', 'black')"),
-               "red is the new black");
-    test.equal(eval("'%2 is the new %1' % ('red', 'black')"),
-               "black is the new red");
-    test.equal(eval("dogs_lbl % ('red', 'cats', 'dogs')", this.data),
-               "Furthermore, dogs are the new cats");
-    test.done();
-  },
-
-  "Automatic Interpolation": function (test) {
-    test.equal(eval("'%% %% % %% %% %'"), "%% %% % %% %% %");
-    test.equal(eval("'Hello, %name!'", { name: 'World'}), "Hello, World!");
-    test.equal(eval("'Hello, %name! %'", { name: 'World'}), "Hello, World! ");
-    test.equal(eval("'%% %name'", { name: 'World'}), "% World");
-    test.equal(eval("'This % should not interpolate'"),
-               "This % should not interpolate");
-    test.equal(eval("hello_lbl % 'wrong '", this.data), "Hello, !");
-    test.equal(eval("hello_lbl % self", this.data), "Hello, World!");
-    test.done();
-  },
-
   "Boolean Or/And Evaluation": function (test) {
-    test.equal(eval("true && false"), "false");
-    test.equal(eval("true || false"), "true");
-    test.equal(eval("people[0].age * 2 == 100 && 'yep'", this.data), "yep");
-    test.equal(eval("people[0].age * 2 == 99 || 'nope'", this.data), "nope");
-    test.equal(eval("'yep' && people[0].age * 2", this.data), "100");
-    test.equal(eval("'yep' || people[0].age * 2", this.data), "yep");
-    test.equal(eval("false || people[0].age * 2", this.data), "100");
+    test.equal(eval("true and false"), "false");
+    test.equal(eval("true or false"), "true");
+    test.equal(eval("people[0].age * 2 == 100 and 'yep'", this.data), "yep");
+    test.equal(eval("people[0].age * 2 == 99 or 'nope'", this.data), "nope");
+    test.equal(eval("'yep' and people[0].age * 2", this.data), "100");
+    test.equal(eval("'yep' or people[0].age * 2", this.data), "yep");
+    test.equal(eval("false or people[0].age * 2", this.data), "100");
     test.done();
   },
 
