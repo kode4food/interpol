@@ -38,10 +38,11 @@ var util = require('./util')
 
 var nullWriter;
 
-var Number = "[1-9][0-9]*"
-  , Ident = "[$_a-zA-Z][$_a-zA-Z0-9]*";
+var Digits = "[1-9][0-9]*"
+  , Ident = "[$_a-zA-Z][$_a-zA-Z0-9]*"
+  , Params = "(.?)%(("+Digits+")|("+Ident+"))?(([|]"+Ident+")*)?";
 
-var ParamRegex = RegExp("(.?)%(("+Number+")|("+Ident+"))?(([|]"+Ident+")*)?");
+var ParamRegex = new RegExp(Params);
 
 function buildTemplate(formatStr) {
   var funcs = []
