@@ -291,6 +291,13 @@ for item in list
 end
 ```
 
+### Piped Calls
+A piped call is an operator where the left operand is passed as the sole argument to the right operand.  The right operand must evaluate to a callable function.  These calls can be chained from left to right, where the result of each call is passed into the next right-hand operand.
+
+```python
+classes | join | title
+```
+
 ### Unary Operators
 Only two unary operators are supported.  They are `-` for numeric negation, and `!` for boolean *not* negation.
 
@@ -387,4 +394,11 @@ Automatic Interpolation is supported for literal strings containing named indexi
 
 ```python
 "User Profile - %name"
+```
+
+#### Piped Interpolation
+The Interpolation feature also supports a restricted form of the piped call operator.  The restrictions in using this method are that the pipe character *can not* be surrounded by spaces and the right-hand operands can only be identifiers.  For example:
+
+```python
+"User Profile - %name|title"
 ```

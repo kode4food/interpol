@@ -11,7 +11,7 @@ from string import title
 ('single', 'title', 'cased', 'string') | join | title
 ```
 
-The pipe operator has a relatively high precedence.  It is higher than multiplication, but lower than unary operators.  It is also lower than normal calls.
+The pipe operator has a relatively high precedence.  It is higher than unary, but lower than normal partial calls.
 
 ### Piped Interpolation
 A limited form of the operator is also supported in string interpolation.
