@@ -1,6 +1,7 @@
 # Change History
 
-## Version 0.3.1 -
+## Version 0.3.1 - Better Piped Interpolation
+Piped interpolation can now retrieve functions from the local scope if they're not present in the evaluated data.
 
 ## Version 0.3 - Piped Calls, DOM Writer
 
