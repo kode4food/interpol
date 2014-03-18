@@ -93,14 +93,14 @@ function buildTemplate(formatStr) {
 
   return templateFunction;
 
-  function templateFunction(data) {
+  function templateFunction(data, ctx) {
     if ( typeof data !== 'object' || data === null ) {
       data = [data];
     }
 
     var output = [];
     for ( var i = 0; i < flen; i++ ) {
-      output[i] = funcs[i](data);
+      output[i] = funcs[i](data, ctx);
     }
 
     return output.join('');
@@ -133,14 +133,26 @@ function buildTemplate(formatStr) {
 
     return pipedFunction;
 
-    function pipedFunction(data) {
+    function pipedFunction(data, ctx) {
       var value = data[idx];
       for ( var i = flen; i >= 0; i-- ) {
-        var func = data[funcs[i]];
-        if ( typeof func !== 'function' || !func.__interpolPartial ) {
-          // TODO: Do something better here
-          continue;
+        var funcName = funcs[i]
+          , func = data[funcName]
+          , type = typeof func;
+
+        if ( type === 'undefined' ) {
+          // Only fall back to context if func is not in data at all
+          func = ctx[funcName];
+          type = typeof func;
         }
+
+        if ( type !== 'function' || !func.__interpolFunction ) {
+          if ( ctx.__interpolExports ) {
+            continue;
+          }
+          throw new Error("Attempting to call an unblessed function");
+        }
+
         value = func(nullWriter, value);
       }
       return stringify(value);
@@ -172,7 +184,7 @@ var isArray = util.isArray
   , stringify = util.stringify
   , buildTemplate = format.buildTemplate;
 
-var CURRENT_VERSION = "0.3.0"
+var CURRENT_VERSION = "0.3.1"
   , TemplateCacheMax = 256
   , globalOptions = { writer: null, errorCallback: null }
   , globalContext = {}
@@ -211,11 +223,11 @@ function bless(func) {
     throw new Error("Argument to bless must be a Function");
   }
 
-  if ( func.__interpolPartial ) {
+  if ( func.__interpolFunction ) {
     return func;
   }
 
-  blessedWrapper.__interpolPartial = true;
+  blessedWrapper.__interpolFunction = true;
   return blessedWrapper;
 
   function blessedWrapper() {
@@ -527,7 +539,7 @@ function compile(parseOutput, localOptions) {
     return closureEvaluator;
 
     function closureEvaluator(ctx /*, writer */) {
-      bodyEvaluator.__interpolPartial = true;
+      bodyEvaluator.__interpolFunction = true;
       ctx[name] = bodyEvaluator;
 
       function bodyEvaluator(writer) {
@@ -551,11 +563,11 @@ function compile(parseOutput, localOptions) {
     function callEvaluator(ctx, writer) {
       var func = member(ctx, writer);
 
-      if ( typeof func !== 'function' || !func.__interpolPartial ) {
+      if ( typeof func !== 'function' || !func.__interpolFunction ) {
         if ( ctx.__interpolExports ) {
           return;
         }
-        throw new Error("Attempting to call a non-partial");
+        throw new Error("Attempting to call an unblessed function");
       }
 
       var callArgs = [writer];
@@ -932,7 +944,7 @@ function compile(parseOutput, localOptions) {
     return dynamicFormatEvaluator;
 
     function builtFormatEvaluator(ctx, writer) {
-      return template($2(ctx, writer));
+      return template($2(ctx, writer), ctx);
     }
 
     function dynamicFormatEvaluator(ctx, writer) {
@@ -953,7 +965,7 @@ function compile(parseOutput, localOptions) {
         cacheCount++;
       }
 
-      return dynamicTemplate(data);
+      return dynamicTemplate(data, ctx);
     }
   }
 
@@ -1507,7 +1519,7 @@ exports.string = wrapFunction(String);
 var slice = Array.prototype.slice;
 
 function wrapFunction(func) {
-  wrappedFunction.__interpolPartial = true;
+  wrappedFunction.__interpolFunction = true;
   return wrappedFunction;
 
   function wrappedFunction(writer) {
