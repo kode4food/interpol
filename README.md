@@ -125,10 +125,8 @@ This will also install any development dependencies and run the nodeunit test su
 Assuming you have installed the Interpol package with npm, you can include it in your Node code with the following:
 
 ```javascript
-var $interpol = require('interpol');
+var interpol = require('interpol');
 ```
-
-*Note:* In Node you can name the returned function anything you'd like.  For these examples it will be `$interpol()`.  I leave out the dollar sign `$`.
 
 ## Inclusion in Express
 A basic View Engine for [Express](http://expressjs.com/) is supported.  To set a development instance as the default engine, you can do the following:
@@ -138,7 +136,9 @@ app.engine('int', require('interpol').__express);
 app.set('view engine', 'int');
 ```
 
-*Note:* You can also instantiate customized engines.  Customizations include setting the search path for import resolution (uses './views' by default) and turning off file-system monitoring ('true' by default).
+If Express is started in development mode, the view engine will monitor the `./views` directory and continuously reload any modified files ending in `.int`.  Otherwise, the engine will expect to see pre-parsed files ending in `.int.json` and will *not* monitor the directory for changes.
+
+*Note:* You can also instantiate customized engines.  Customizations include setting the search path for import resolution (uses './views' by default) and overriding file-system monitoring and compilation (otherwise determined by `process.env.NODE_ENV`).
 
 ## Inclusion in a Browser
 There are two ways to include Interpol templates in a browser-based application.  One is to parse/compile raw templates using the PEG.js parser.  Another is to compile the templates from pre-parsed JSON output.  The PEG.js parser is *massive* and slower than parsing JSON, but it may be necessary if you want to compile ad-hoc templates.
