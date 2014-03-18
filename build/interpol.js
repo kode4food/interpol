@@ -82,6 +82,7 @@ function buildTemplate(formatStr) {
     if ( typeof paramMatch[5] !== 'undefined' ) {
       var formatters = paramMatch[5].slice(1).split('|');
       funcs.push(createPipedFunction(idx, formatters));
+      templateFunction.__requiresContext = true;
     }
     else {
       funcs.push(createIndexedFunction(idx));
@@ -140,7 +141,7 @@ function buildTemplate(formatStr) {
           , func = data[funcName]
           , type = typeof func;
 
-        if ( type === 'undefined' ) {
+        if ( type === 'undefined' && ctx ) {
           // Only fall back to context if func is not in data at all
           func = ctx[funcName];
           type = typeof func;
@@ -184,7 +185,7 @@ var isArray = util.isArray
   , stringify = util.stringify
   , buildTemplate = format.buildTemplate;
 
-var CURRENT_VERSION = "0.3.1"
+var CURRENT_VERSION = "0.3.2"
   , TemplateCacheMax = 256
   , globalOptions = { writer: null, errorCallback: null }
   , globalContext = {}
@@ -932,10 +933,13 @@ function compile(parseOutput, localOptions) {
     var template = null;
     if ( !$1_func ) {
       template = buildTemplate($1);
-      if ( !$2_func ) {
-        return template($2);
+      if ( $2_func ) {
+        return builtExpressionEvaluator;
       }
-      return builtFormatEvaluator;
+      if ( template.__requiresContext ) {
+        return builtLiteralEvaluator;
+      }
+      return template($2);
     }
 
     var cache = {}
@@ -943,8 +947,12 @@ function compile(parseOutput, localOptions) {
 
     return dynamicFormatEvaluator;
 
-    function builtFormatEvaluator(ctx, writer) {
+    function builtExpressionEvaluator(ctx, writer) {
       return template($2(ctx, writer), ctx);
+    }
+
+    function builtLiteralEvaluator(ctx, writer) {
+      return template($2, ctx);
     }
 
     function dynamicFormatEvaluator(ctx, writer) {

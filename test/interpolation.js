@@ -51,7 +51,11 @@ exports.interpolation = nodeunit.testCase({
                   "from array import join\n" +
                   "'Result is %some_array|join|title'";
 
+    var script2 = "from string import upper\n" +
+                  "'The Title is %|upper' % 'upper'";
+
     test.equal(eval(script1, this.data), "Result is Title Case String");
+    test.equal(eval(script2, this.data), "The Title is UPPER");
     test.done();
   }
 });

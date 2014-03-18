@@ -1,5 +1,9 @@
 # Change History
 
+## Version 0.3.2 - Even Better Piped Interpolation
+* Fixed a bug in piped interpolation where literals were used as a right-hand operands.
+* Express View Engine now stops monitoring/compiling if NODE_ENV != 'development'.
+
 ## Version 0.3.1 - Better Piped Interpolation
 Piped interpolation can now retrieve functions from the local scope if they're not present in the evaluated data.
 
