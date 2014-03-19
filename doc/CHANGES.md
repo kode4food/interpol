@@ -1,7 +1,7 @@
 # Change History
 
 ## Version 0.3.3 - Configurable Imports
-Modules exposed by the system resolver now allow their functions to be configured.  This enables the developer to pre-configure pipeline functions.  For example:
+Modules exposed by the system resolver now allow their functions to be configured.  This enables the developer to generate pre-configured pipeline functions.  For example:
 
 ```python
 from array import join
