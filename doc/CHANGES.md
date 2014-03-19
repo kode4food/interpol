@@ -1,5 +1,23 @@
 # Change History
 
+## Version 0.3.3 - Configurable Imports
+Modules exposed by the system resolver now allow their functions to be configured.  This enables the developer to pre-configure pipeline functions.  For example:
+
+```python
+from array import join
+let j = join.configure(" -- ")
+let a = ('joined','with','dashes')
+"Result is %a|j"
+```
+
+This would output:
+
+```
+Result is joined -- with -- dashes
+```
+
+The convention used here is that we always treat the first argument to a function as the piped input, and any subsequent arguments are configurable.  Of course, you could have also called `j` normally with `"Result is " + j(a)`
+
 ## Version 0.3.2 - Even Better Piped Interpolation
 * Fixed a bug in piped interpolation where literals were used as a right-hand operands.
 * Express View Engine now stops monitoring/compiling if NODE_ENV != 'development'.

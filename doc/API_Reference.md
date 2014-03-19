@@ -81,3 +81,6 @@ interpol.resolvers().push(fileResolver);
 If you wanted to import from a module named 'myModule', Interpol will check for `./my_templates/myModule.int.json`.  If that file doesn't exist, and if `compile` is set to true, then Interpol will check for `./my_templates/myModule.int`.
 
 The `path` property of createFileResolver's options can also take an Array of paths.  The `compile` flag tells the resolver that it should compile Interpol templates (in-memory only) if a JSON file can't be found.  The `monitor` flag tells the resolver that it should monitor the directories for changes and reload the modules automatically.
+
+### System
+The system resolver exposes the standard run-time library of Interpol.  This library consists of several modules that provide a variety of functionality.  These modules include array and string manipulation, as well as math and local functions.  See [the Language Reference](Language_Reference.md) for more information.

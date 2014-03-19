@@ -47,5 +47,15 @@ exports.imports = nodeunit.testCase({
   "System Import": function (test) {
     test.equal(eval("import math\nmath.round(9.5)"), "10");
     test.done();
+  },
+
+  "Configurable System Import": function (test) {
+    var script = "from array import join\n" +
+                 "let a = ('this', 'is', 'an', 'array')\n" +
+                 "let j = join.configure('///')\n" +
+                 "a | j";
+
+    test.equal(eval(script), "this///is///an///array");
+    test.done();
   }
 });

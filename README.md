@@ -18,6 +18,7 @@ That said, Interpol's goals are modest:
 This last goal is important because the templates we're creating are often devoid of static content.  So why must we 'escape' into a dynamic content mode using braces or processing instructions?  Why don't we just start in that mode and stay there?
 
 ```html
+from string import title
 <html>
   <head>
     <title>"a static title"</title>
@@ -27,7 +28,7 @@ This last goal is important because the templates we're creating are often devoi
     <ul>
     for item in list
       <li class=item.type id="id-%id" % item>
-        item.name
+        item.name | title
       </li>
     end
     </ul>
@@ -48,9 +49,11 @@ I say 'HTMLish' because it's not pure HTML.  The values of attributes are also e
 That's all well and good, but what about the ability to reuse templates?  Well, to do that you define partials:
 
 ```html
+from string import title
+
 def renderItem(item)
   <li class=item.type id="id-%id" % item>
-    item.name
+    item.name | title
   </li>
 end
 
@@ -77,10 +80,11 @@ What if you use these partials in multiple templates?  Then you can move them ou
 
 ```html
 # this is mystuff.int
+from string import title
 
 def renderItem(item)
   <li class=item.type id="id-%id" % item>
-    item.name
+    item.name | title
   </li>
 end
 
@@ -110,7 +114,7 @@ from mystuff import renderList
 ```
 
 ## Current Status
-The project was just started, so there's still quite a bit to do.  Check [the TODO document](doc/TODO.md) for an idea of what's to come.
+The grammar has stabilized.  The run-time library is still under development, particularly formatting generators.  Optimizations still need to be made.  Check [the TODO document](doc/TODO.md) for an idea of what's to come.
 
 ## Installation
 A pre-built version of the parser is already included.  If you'd like to build it yourself then you can do so by issuing the following command from the package's top-level directory:

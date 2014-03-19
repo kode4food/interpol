@@ -180,17 +180,21 @@ var util = require('./util')
 
 var isArray = util.isArray
   , mixin = util.mixin
+  , configure = util.configure
+  , bless = util.bless
   , extendContext = util.extendContext
   , freezeObject = util.freezeObject
   , stringify = util.stringify
   , buildTemplate = format.buildTemplate;
 
-var CURRENT_VERSION = "0.3.2"
+var CURRENT_VERSION = "0.3.3"
   , TemplateCacheMax = 256
   , globalOptions = { writer: null, errorCallback: null }
   , globalContext = {}
   , globalResolvers = []
   , parser = null;
+
+var slice = Array.prototype.slice;
 
 // Bootstrap ****************************************************************
 
@@ -217,24 +221,6 @@ function interpol(template, options) {
     parseOutput = parse(template);
   }
   return compile(parseOutput, options);
-}
-
-function bless(func) {
-  if ( typeof func !== 'function' ) {
-    throw new Error("Argument to bless must be a Function");
-  }
-
-  if ( func.__interpolFunction ) {
-    return func;
-  }
-
-  blessedWrapper.__interpolFunction = true;
-  return blessedWrapper;
-
-  function blessedWrapper() {
-    /* jshint validthis:true */
-    return func.apply(this, arguments);
-  }
 }
 
 function evaluate(script, obj, options) {
@@ -299,7 +285,7 @@ function compile(parseOutput, localOptions) {
     , evaluator = wrapEvaluator(parseOutput.n)
     , exportedContext = null;
 
-  compiledTemplate.configure = configure;
+  compiledTemplate.configure = configureTemplate;
   compiledTemplate.exports = templateExports;
   return freezeObject(compiledTemplate);
 
@@ -324,12 +310,8 @@ function compile(parseOutput, localOptions) {
     }
   }
 
-  function configure(localOptions) {
-    return configuredTemplate;
-
-    function configuredTemplate(obj) {
-      return compiledTemplate(obj, localOptions);
-    }
+  function configureTemplate(defaultObj, defaultOptions) {
+    return configure(compiledTemplate, 0, slice.call(arguments, 0));
   }
 
   function templateExports() {
@@ -1000,7 +982,8 @@ function compile(parseOutput, localOptions) {
       , $2 = createEvaluator(elemNode)
       , type = getBinaryType($1, $2);
 
-    if ( (type === 0 || type === 2) && typeof $1 !== 'object' ) {
+    if ( ( type === 0 || type === 2 ) &&
+         ( typeof $1 === 'undefined' || $1 === null ) ) {
       return null;
     }
 
@@ -1008,7 +991,10 @@ function compile(parseOutput, localOptions) {
 
     function memLeft(c, w) {
       var parent = $1(c, w);
-      return typeof parent === 'object' ? parent[$2] : null;
+      if ( typeof parent === 'undefined' || parent === null ) {
+        return null;
+      }
+      return parent[$2];
     }
 
     function memRight(c, w) {
@@ -1017,7 +1003,10 @@ function compile(parseOutput, localOptions) {
 
     function memBoth(c, w) {
       var parent = $1(c, w);
-      return typeof parent === 'object' ? parent[$2(c, w)] : null;
+      if ( typeof parent === 'undefined' || parent === null ) {
+        return null;
+      }
+      return parent[$2(c, w)];
     }
   }
 
@@ -1156,7 +1145,10 @@ exports.createModuleCache = createModuleCache;
 
 "use strict";
 
-var interpol = require('../interpol');
+var interpol = require('../interpol')
+  , util = require('../util');
+
+var bless = util.bless;
 
 // Implementation ***********************************************************
 
@@ -1189,7 +1181,7 @@ function createHelperResolver(options) {
       }
       name = func.name;
     }
-    moduleExports[name] = interpol.bless(func);
+    moduleExports[name] = bless(func);
   }
 
   function unregisterHelper(name) {
@@ -1211,7 +1203,7 @@ interpol.resolvers().push(helperResolver);
 interpol.createHelperResolver = createHelperResolver;
 exports.createHelperResolver = createHelperResolver;
 
-},{"../interpol":3}],6:[function(require,module,exports){
+},{"../interpol":3,"../util":13}],6:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1321,9 +1313,12 @@ exports.empty = empty;
 "use strict";
 
 var interpol = require('../../interpol')
-  , util = require('../../util');
+  , util = require('../../util')
+  , wrap = require('./wrap');
 
-var freezeObject = util.freezeObject;
+var freezeObject = util.freezeObject
+  , bless = util.bless
+  , configurable = wrap.configurable;
 
 // Implementation ***********************************************************
 
@@ -1350,7 +1345,7 @@ function buildModules() {
 function blessModule(module) {
   var result = {};
   for ( var key in module ) {
-    result[key] = interpol.bless(module[key]);
+    result[key] = configurable(bless(module[key]));
   }
   return result;
 }
@@ -1364,7 +1359,7 @@ interpol.resolvers().push(systemResolver);
 exports.createSystemResolver = createSystemResolver;
 interpol.createSystemResolver = createSystemResolver;
 
-},{"../../interpol":3,"../../util":13,"./array":7,"./json":9,"./math":10,"./string":11}],9:[function(require,module,exports){
+},{"../../interpol":3,"../../util":13,"./array":7,"./json":9,"./math":10,"./string":11,"./wrap":12}],9:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1375,11 +1370,11 @@ interpol.createSystemResolver = createSystemResolver;
 
 "use strict";
 
-var wrapFunction = require('./wrap');
+var wrap = require('./wrap').wrap;
 
 // Exports
-exports.parse = wrapFunction(JSON.parse);
-exports.stringify = wrapFunction(JSON.stringify);
+exports.parse = wrap(JSON.parse);
+exports.stringify = wrap(JSON.stringify);
 
 },{"./wrap":12}],10:[function(require,module,exports){
 /**
@@ -1395,7 +1390,7 @@ exports.stringify = wrapFunction(JSON.stringify);
 var util = require('../../util')
   , isArray = util.isArray;
 
-var wrapFunction = require('./wrap');
+var wrap = require('./wrap').wrap;
 
 function avg(writer, value) {
   if ( !isArray(value) ) {
@@ -1453,22 +1448,22 @@ exports.median = median;
 exports.min = min;
 exports.sum = sum;
 
-exports.number = wrapFunction(Number);
-exports.abs = wrapFunction(Math.abs);
-exports.acos = wrapFunction(Math.acos);
-exports.asin = wrapFunction(Math.asin);
-exports.atan = wrapFunction(Math.atan);
-exports.atan2 = wrapFunction(Math.atan2);
-exports.ceil = wrapFunction(Math.ceil);
-exports.cos = wrapFunction(Math.cos);
-exports.exp = wrapFunction(Math.exp);
-exports.floor = wrapFunction(Math.floor);
-exports.log = wrapFunction(Math.log);
-exports.pow = wrapFunction(Math.pow);
-exports.round = wrapFunction(Math.round);
-exports.sin = wrapFunction(Math.sin);
-exports.sqrt = wrapFunction(Math.sqrt);
-exports.tan = wrapFunction(Math.tan);
+exports.number = wrap(Number);
+exports.abs = wrap(Math.abs);
+exports.acos = wrap(Math.acos);
+exports.asin = wrap(Math.asin);
+exports.atan = wrap(Math.atan);
+exports.atan2 = wrap(Math.atan2);
+exports.ceil = wrap(Math.ceil);
+exports.cos = wrap(Math.cos);
+exports.exp = wrap(Math.exp);
+exports.floor = wrap(Math.floor);
+exports.log = wrap(Math.log);
+exports.pow = wrap(Math.pow);
+exports.round = wrap(Math.round);
+exports.sin = wrap(Math.sin);
+exports.sqrt = wrap(Math.sqrt);
+exports.tan = wrap(Math.tan);
 
 },{"../../util":13,"./wrap":12}],11:[function(require,module,exports){
 /**
@@ -1484,7 +1479,7 @@ exports.tan = wrapFunction(Math.tan);
 var util = require('../../util')
   , stringify = util.stringify;
 
-var wrapFunction = require('./wrap');
+var wrap = require('./wrap').wrap;
 
 function lower(writer, value) {
   return stringify(value).toLowerCase();
@@ -1511,7 +1506,7 @@ exports.split = split;
 exports.title = title;
 exports.upper = upper;
 
-exports.string = wrapFunction(String);
+exports.string = wrap(String);
 
 },{"../../util":13,"./wrap":12}],12:[function(require,module,exports){
 /**
@@ -1524,11 +1519,14 @@ exports.string = wrapFunction(String);
 
 "use strict";
 
-var slice = Array.prototype.slice;
+var util = require('../../util');
 
-function wrapFunction(func) {
-  wrappedFunction.__interpolFunction = true;
-  return wrappedFunction;
+var slice = Array.prototype.slice
+  , bless = util.bless
+  , configure = util.configure;
+
+function wrap(func) {
+  return bless(wrappedFunction);
 
   function wrappedFunction(writer) {
     /* jshint validthis:true */
@@ -1536,10 +1534,24 @@ function wrapFunction(func) {
   }
 }
 
-// Exports
-module.exports = wrapFunction;
+function configurable(func) {
+  blessedConfigure.__interpolFunction = true;
+  func.configure = blessedConfigure;
+  return func;
 
-},{}],13:[function(require,module,exports){
+  function blessedConfigure(writer) {
+    // writer, value are always passed to configurables, hence the '2'
+    var configured = configure(func, 2, slice.call(arguments, 1));
+    configured.__interpolFunction = true;
+    return configured;
+  }
+}
+
+// Exports
+exports.wrap = wrap;
+exports.configurable = configurable;
+
+},{"../../util":13}],13:[function(require,module,exports){
 /**
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1552,7 +1564,8 @@ module.exports = wrapFunction;
 
 // Array and Object Handling **************************************************
 
-var toString = Object.prototype.toString;
+var toString = Object.prototype.toString
+  , slice = Array.prototype.slice;
 
 var isArray = Array.isArray;
 if ( !isArray ) {
@@ -1668,6 +1681,40 @@ function formatSyntaxError(err, filePath) {
   return new Error((filePath || 'string') + lineInfo + ": " + errString);
 }
 
+// Function Invocation ********************************************************
+
+function bless(func) {
+  if ( typeof func !== 'function' ) {
+    throw new Error("Argument to bless must be a Function");
+  }
+
+  if ( func.__interpolFunction ) {
+    return func;
+  }
+
+  blessedWrapper.__interpolFunction = true;
+  return blessedWrapper;
+
+  function blessedWrapper() {
+    /* jshint validthis:true */
+    return func.apply(this, arguments);
+  }
+}
+
+function configure(func, requiredCount, defaultArgs) {
+  var required = [];
+  required.length = requiredCount;
+  var argTemplate = required.concat(defaultArgs);
+  return configuredWrapper;
+
+  function configuredWrapper() {
+    /* jshint validthis:true */
+    var args = slice.call(arguments, 0)
+      , applyArgs = args.concat(argTemplate.slice(args.length));
+    return func.apply(this, applyArgs);
+  }
+}
+
 // Exports
 exports.isArray = isArray;
 exports.mixin = mixin;
@@ -1677,6 +1724,8 @@ exports.escapeAttribute = escapeAttribute;
 exports.escapeContent = escapeContent;
 exports.stringify = stringify;
 exports.formatSyntaxError = formatSyntaxError;
+exports.bless = bless;
+exports.configure = configure;
 
 },{}],14:[function(require,module,exports){
 /**
