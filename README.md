@@ -49,14 +49,14 @@ I say 'HTMLish' because it's not pure HTML.  The values of attributes are also e
 That's all well and good, but what about the ability to reuse templates?  Well, to do that you define partials:
 
 ```html
-from string import title
+from string import title as titleCase
 
-body(myContent)
+body("a dynamic title", myContent)
 
 def body(title, content)
   <html>
     <head>
-      <title>title</title>
+      <title>title | titleCase</title>
     </head>
     <body>
       content()
@@ -79,7 +79,7 @@ end
 
 def renderItem(item)
   <li class=item.type id="id-%id" % item>
-    item.name | title
+    item.name | titleCase
   </li>
 end
 ```
@@ -88,11 +88,12 @@ What if you use these partials in multiple templates?  Then you can move them ou
 
 ```html
 # this is layout.int
+from string import title as titleCase
 
 def body(title, content)
   <html>
     <head>
-      <title>title</title>
+      <title>title | titleCase</title>
     </head>
     <body>
       content()
@@ -104,7 +105,7 @@ end
 ```html
 # this is lists.int
 
-from string import title
+from string import title as titleCase
 
 def renderList(list)
   <ul>
@@ -116,7 +117,7 @@ end
 
 def renderItem(item)
   <li class=item.type id="id-%id" % item>
-    item.name | title
+    item.name | titleCase
   </li>
 end
 ```
@@ -127,7 +128,7 @@ And import them like so:
 from layout import body
 from lists import renderList
 
-body(myContent)
+body("a dynamic title", myContent)
 
 def myContent
   "this is a list with %length items" % list
