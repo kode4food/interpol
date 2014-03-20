@@ -51,9 +51,9 @@ That's all well and good, but what about the ability to reuse templates?  Well, 
 ```html
 from string import title as titleCase
 
-body("a dynamic title", myContent)
+page("a dynamic title", myContent)
 
-def body(title, content)
+def page(title, content)
   <html>
     <head>
       <title>title | titleCase</title>
@@ -90,7 +90,7 @@ What if you use these partials in multiple templates?  Then you can move them ou
 # this is layout.int
 from string import title as titleCase
 
-def body(title, content)
+def page(title, content)
   <html>
     <head>
       <title>title | titleCase</title>
@@ -125,10 +125,10 @@ end
 And import them like so:
 
 ```html
-from layout import body
+from layout import page
 from lists import renderList
 
-body("a dynamic title", myContent)
+page("a dynamic title", myContent)
 
 def myContent
   "this is a list with %length items" % list
