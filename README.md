@@ -51,10 +51,22 @@ That's all well and good, but what about the ability to reuse templates?  Well, 
 ```html
 from string import title
 
-def renderItem(item)
-  <li class=item.type id="id-%id" % item>
-    item.name | title
-  </li>
+body(myContent)
+
+def body(title, content)
+  <html>
+    <head>
+      <title>title</title>
+    </head>
+    <body>
+      content()
+    </body>
+  </html>
+end
+
+def myContent
+  "this is a list with %length items" % list
+  renderList(list)
 end
 
 def renderList(list)
@@ -65,28 +77,34 @@ def renderList(list)
   </ul>
 end
 
-<html>
-  <head>
-    <title>"a static title"</title>
-  </head>
-  <body>
-    "this is a list with %length items" % list
-    renderList(list)
-  </body>
-</html>
+def renderItem(item)
+  <li class=item.type id="id-%id" % item>
+    item.name | title
+  </li>
+end
 ```
 
-What if you use these partials in multiple templates?  Then you can move them out into their own module called `mystuff.int`
+What if you use these partials in multiple templates?  Then you can move them out into their own modules, maybe called `layout.int` and `lists.int`.
 
 ```html
-# this is mystuff.int
-from string import title
+# this is layout.int
 
-def renderItem(item)
-  <li class=item.type id="id-%id" % item>
-    item.name | title
-  </li>
+def body(title, content)
+  <html>
+    <head>
+      <title>title</title>
+    </head>
+    <body>
+      content()
+    </body>
+  </html>
 end
+```
+
+```html
+# this is lists.int
+
+from string import title
 
 def renderList(list)
   <ul>
@@ -94,24 +112,30 @@ def renderList(list)
     renderItem(item)
   end
   </ul>
+end
+
+def renderItem(item)
+  <li class=item.type id="id-%id" % item>
+    item.name | title
+  </li>
 end
 ```
 
 And import them like so:
 
 ```html
-from mystuff import renderList
+from layout import body
+from lists import renderList
 
-<html>
-  <head>
-    <title>"a static title"</title>
-  </head>
-  <body>
-    "this is a list with %length items" % list
-    renderList(list)
-  </body>
-</html>
+body(myContent)
+
+def myContent
+  "this is a list with %length items" % list
+  renderList(list)
+end
 ```
+
+Easy as pie!
 
 ## Current Status
 The grammar has stabilized.  The run-time library is still under development, particularly formatting generators.  Optimizations still need to be made.  Check [the TODO document](doc/TODO.md) for an idea of what's to come.
@@ -141,8 +165,6 @@ app.set('view engine', 'int');
 ```
 
 If Express is started in development mode, the view engine will monitor the `./views` directory and continuously reload any modified files ending in `.int`.  Otherwise, the engine will expect to see pre-parsed files ending in `.int.json` and will *not* monitor the directory for changes.
-
-*Note:* You can also instantiate customized engines.  Customizations include setting the search path for import resolution (uses './views' by default) and overriding file-system monitoring and compilation (otherwise determined by `process.env.NODE_ENV`).
 
 ## Inclusion in a Browser
 There are two ways to include Interpol templates in a browser-based application.  One is to parse/compile raw templates using the PEG.js parser.  Another is to compile the templates from pre-parsed JSON output.  The PEG.js parser is *massive* and slower than parsing JSON, but it may be necessary if you want to compile ad-hoc templates.
