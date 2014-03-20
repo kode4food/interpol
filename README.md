@@ -135,7 +135,7 @@ def myContent
 end
 ```
 
-Easy as pie!
+Easy as pie!  And your primary template gets right to the point.
 
 ## Current Status
 The grammar has stabilized.  The run-time library is still under development, particularly formatting generators.  Optimizations still need to be made.  Check [the TODO document](doc/TODO.md) for an idea of what's to come.
