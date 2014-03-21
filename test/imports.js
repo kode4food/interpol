@@ -57,5 +57,11 @@ exports.imports = nodeunit.testCase({
 
     test.equal(eval(script), "this///is///an///array");
     test.done();
+  },
+
+  "Math Constant Import": function (test) {
+    test.equal(eval("import math\nmath.E"), Math.E);
+    test.equal(eval("import math\nmath.PI"), Math.PI);
+    test.done();
   }
 });
