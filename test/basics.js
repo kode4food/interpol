@@ -91,12 +91,12 @@ exports.basics = nodeunit.testCase({
     test.done();
   },
 
-  "Null Evaluation": function (test ) {
-    test.equal(eval("true == null"), "false");
-    test.equal(eval("null != null"), "false");
-    test.equal(eval("null == null"), "true");
-    test.equal(eval("bogusValue != null"), "false");
-    test.equal(eval("bogusValue == null"), "true");
+  "Nil Evaluation": function (test ) {
+    test.equal(eval("true == nil"), "false");
+    test.equal(eval("nil != nil"), "false");
+    test.equal(eval("nil == nil"), "true");
+    test.equal(eval("bogusValue != nil"), "false");
+    test.equal(eval("bogusValue == nil"), "true");
     test.done();
   }
 });

@@ -262,7 +262,7 @@ $someIdentifier
 _my_id_
 ```
 
-A special identifier exists called `self` that returns the current evaluation context.
+There are two special identifiers.  The first is called `self` and it returns the current evaluation context.  The second is called `nil` and I think you can guess what that returns.
 
 ### Tuples
 Tuples are like Arrays, except that they're not.  A single element tuple is automatically exposed as an atomic Object, whereas a tuple with more than one element is exposed as an Array.  Fortunately, Interpolation (their primary use case) doesn't care about the difference.

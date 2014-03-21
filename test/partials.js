@@ -11,6 +11,18 @@ exports.partials = nodeunit.testCase({
     callback();
   },
 
+  "Partial Compilation": function (test) {
+    var script = "def oneStatement(arg1)\n" +
+                 "  if arg1 == true\n" +
+                 "    'Hello'\n" +
+                 "  end\n" +
+                 "end\n" +
+                 "oneStatement(true)";
+
+    test.equal(eval(script), "Hello\n");
+    test.done();
+  },
+
   "First-Class Partials": function (test) {
     var script1 = "def firstClass(arg1)\n" +
                   "  'Hello %arg1'\n" +

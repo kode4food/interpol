@@ -75,8 +75,8 @@ module.exports = (function() {
         peg$c38 = "self",
         peg$c39 = { type: "literal", value: "self", description: "\"self\"" },
         peg$c40 = function() { return 'se'; },
-        peg$c41 = "null",
-        peg$c42 = { type: "literal", value: "null", description: "\"null\"" },
+        peg$c41 = "nil",
+        peg$c42 = { type: "literal", value: "nil", description: "\"nil\"" },
         peg$c43 = function() { return null; },
         peg$c44 = "if",
         peg$c45 = { type: "literal", value: "if", description: "\"if\"" },
@@ -1105,13 +1105,13 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parseNull() {
+    function peg$parseNil() {
       var s0, s1, s2, s3;
 
       s0 = peg$currPos;
-      if (input.substr(peg$currPos, 4) === peg$c41) {
+      if (input.substr(peg$currPos, 3) === peg$c41) {
         s1 = peg$c41;
-        peg$currPos += 4;
+        peg$currPos += 3;
       } else {
         s1 = peg$FAILED;
         if (peg$silentFails === 0) { peg$fail(peg$c42); }
@@ -1472,7 +1472,7 @@ module.exports = (function() {
                             if (s0 === peg$FAILED) {
                               s0 = peg$parseSelf();
                               if (s0 === peg$FAILED) {
-                                s0 = peg$parseNull();
+                                s0 = peg$parseNil();
                                 if (s0 === peg$FAILED) {
                                   s0 = peg$parseIf();
                                   if (s0 === peg$FAILED) {
@@ -6202,7 +6202,7 @@ module.exports = (function() {
             if (s0 === peg$FAILED) {
               s0 = peg$parseself();
               if (s0 === peg$FAILED) {
-                s0 = peg$parsenull();
+                s0 = peg$parsenil();
               }
             }
           }
@@ -6274,11 +6274,11 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parsenull() {
+    function peg$parsenil() {
       var s0, s1;
 
       s0 = peg$currPos;
-      s1 = peg$parseNull();
+      s1 = peg$parseNil();
       if (s1 !== peg$FAILED) {
         peg$reportedPos = s0;
         s1 = peg$c261(s1);

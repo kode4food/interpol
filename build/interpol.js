@@ -411,10 +411,6 @@ function compile(parseOutput, localOptions) {
   }
 
   function createStatementsEvaluator(statementNodes) {
-    if ( !statementNodes ) {
-      return [];
-    }
-
     if ( statementNodes.length === 1 ) {
       return createEvaluator(statementNodes[0]);
     }
