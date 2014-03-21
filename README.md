@@ -104,7 +104,6 @@ end
 
 ```html
 # this is lists.int
-
 from string import title as titleCase
 
 def renderList(list)
