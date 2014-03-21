@@ -89,5 +89,14 @@ exports.basics = nodeunit.testCase({
     test.equal(eval("-people[0].age + 10", this.data), "-40");
     test.equal(eval("!(people[0].age == 25)", this.data), "true");
     test.done();
+  },
+
+  "Null Evaluation": function (test ) {
+    test.equal(eval("true == null"), "false");
+    test.equal(eval("null != null"), "false");
+    test.equal(eval("null == null"), "true");
+    test.equal(eval("bogusValue != null"), "false");
+    test.equal(eval("bogusValue == null"), "true");
+    test.done();
   }
 });

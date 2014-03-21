@@ -276,7 +276,8 @@ function compile(parseOutput, localOptions) {
     mb: createMemberEvaluator,
     tu: createTupleEvaluator,
     id: createIdEvaluator,
-    se: createSelfEvaluator
+    se: createSelfEvaluator,
+    nu: createNullEvaluator
   });
 
   var lits = parseOutput.l
@@ -1040,6 +1041,10 @@ function compile(parseOutput, localOptions) {
     function selfEvaluator(ctx, writer) {
       return ctx;
     }
+  }
+
+  function createNullEvaluator() {
+    return null;
   }
 }
 
