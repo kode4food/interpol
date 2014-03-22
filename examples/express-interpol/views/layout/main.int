@@ -1,7 +1,9 @@
+from string import title as titleCase
+
 def mainLayout(title, content)
   <html>
   <head>
-    <title>title</title>
+    <title>title | titleCase</title>
     <!-- this is a comment -->
   </head>
   <body>
