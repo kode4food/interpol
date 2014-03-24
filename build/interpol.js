@@ -184,6 +184,7 @@ var isArray = util.isArray
   , bless = util.bless
   , extendContext = util.extendContext
   , freezeObject = util.freezeObject
+  , createStaticMixin = util.createStaticMixin
   , stringify = util.stringify
   , buildTemplate = format.buildTemplate;
 
@@ -281,6 +282,7 @@ function compile(parseOutput, localOptions) {
 
   var lits = parseOutput.l
     , compilerOptions = mixin({}, globalOptions, localOptions)
+    , cacheModules = compilerOptions.cache
     , resolvers = compilerOptions.resolvers || globalResolvers
     , evaluator = wrapEvaluator(parseOutput.n)
     , exportedContext = null;
@@ -443,7 +445,9 @@ function compile(parseOutput, localOptions) {
 
   function createImportEvaluator(fromNodes) {
     var importList = []
-      , ilen = fromNodes.length - 1;
+      , ilen = fromNodes.length - 1
+      , evaluator = dynamicEvaluator
+      , cachedImports = null;
 
     for ( var i = ilen; i >= 0; i-- ) {
       var fromNode = fromNodes[i]
@@ -474,6 +478,17 @@ function compile(parseOutput, localOptions) {
     return importEvaluator;
 
     function importEvaluator(ctx, writer) {
+      return evaluator(ctx, writer);
+    }
+
+    function cachedEvaluator(ctx, writer) {
+      cachedImports(ctx);
+    }
+
+    function dynamicEvaluator(ctx, writer) {
+      var generateCache = cacheModules && !ctx.__interpolExports
+        , target = generateCache ? {} : ctx;
+
       for ( var i = ilen; i >= 0; i-- ) {
         var importItem = importList[i]
           , moduleName = importItem[0]
@@ -485,12 +500,18 @@ function compile(parseOutput, localOptions) {
         if ( toResolve ) {
           for ( var j = toResolve.length - 1; j >= 0; j-- ) {
             var aliasMap = toResolve[j];
-            ctx[aliasMap[0]] = moduleExports[aliasMap[1]];
+            target[aliasMap[0]] = moduleExports[aliasMap[1]];
           }
         }
         else {
-          ctx[moduleAlias] = moduleExports;
+          target[moduleAlias] = moduleExports;
         }
+      }
+
+      if ( generateCache ) {
+        evaluator = cachedEvaluator;
+        cachedImports = createStaticMixin(target);
+        cachedImports(ctx);
       }
     }
 
@@ -1614,6 +1635,36 @@ if ( !freezeObject ) {
   })();
 }
 
+var objectKeys = Object.keys;
+if ( !objectKeys ) {
+  objectKeys = (function () {
+    return function _objectKeys(obj) {
+      var keys = [];
+      for ( var key in obj ) {
+        if ( obj.hasOwnProperty(key) ) {
+          keys.push(key);
+        }
+      }
+      return keys;
+    };
+  });
+}
+
+function createStaticMixin(obj) {
+  var keys = objectKeys(freezeObject(obj)).reverse()
+    , klen = keys.length - 1;
+
+  return staticMixin;
+
+  function staticMixin(target) {
+    for ( var i = klen; i >= 0; i-- ) {
+      var key = keys[i];
+      target[key] = obj[key];
+    }
+    return target;
+  }
+}
+
 // String Handling ************************************************************
 
 var EscapeChars = freezeObject({
@@ -1721,6 +1772,8 @@ exports.isArray = isArray;
 exports.mixin = mixin;
 exports.extendContext = extendContext;
 exports.freezeObject = freezeObject;
+exports.objectKeys = objectKeys;
+exports.createStaticMixin = createStaticMixin;
 exports.escapeAttribute = escapeAttribute;
 exports.escapeContent = escapeContent;
 exports.stringify = stringify;
