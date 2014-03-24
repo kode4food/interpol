@@ -446,8 +446,7 @@ function compile(parseOutput, localOptions) {
   function createImportEvaluator(fromNodes) {
     var importList = []
       , ilen = fromNodes.length - 1
-      , evaluator = dynamicEvaluator
-      , cachedImports = null;
+      , evaluator = cacheModules ? cacheableEvaluator : dynamicEvaluator
 
     for ( var i = ilen; i >= 0; i-- ) {
       var fromNode = fromNodes[i]
@@ -478,17 +477,22 @@ function compile(parseOutput, localOptions) {
     return importEvaluator;
 
     function importEvaluator(ctx, writer) {
-      return evaluator(ctx, writer);
+      evaluator(ctx, writer);
     }
 
-    function cachedEvaluator(ctx, writer) {
-      cachedImports(ctx);
+    function cacheableEvaluator(ctx, writer) {
+      if ( ctx.__interpolExports ) {
+        dynamicEvaluator(ctx, writer);
+        return;
+      }
+
+      var target = {};
+      dynamicEvaluator(target, writer);
+      evaluator = createStaticMixin(target);
+      evaluator(ctx);
     }
 
     function dynamicEvaluator(ctx, writer) {
-      var generateCache = cacheModules && !ctx.__interpolExports
-        , target = generateCache ? {} : ctx;
-
       for ( var i = ilen; i >= 0; i-- ) {
         var importItem = importList[i]
           , moduleName = importItem[0]
@@ -500,18 +504,12 @@ function compile(parseOutput, localOptions) {
         if ( toResolve ) {
           for ( var j = toResolve.length - 1; j >= 0; j-- ) {
             var aliasMap = toResolve[j];
-            target[aliasMap[0]] = moduleExports[aliasMap[1]];
+            ctx[aliasMap[0]] = moduleExports[aliasMap[1]];
           }
         }
         else {
-          target[moduleAlias] = moduleExports;
+          ctx[moduleAlias] = moduleExports;
         }
-      }
-
-      if ( generateCache ) {
-        evaluator = cachedEvaluator;
-        cachedImports = createStaticMixin(target);
-        cachedImports(ctx);
       }
     }
 
