@@ -446,8 +446,7 @@ function compile(parseOutput, localOptions) {
   function createImportEvaluator(fromNodes) {
     var importList = []
       , ilen = fromNodes.length - 1
-      , evaluator = dynamicEvaluator
-      , cachedImports = null;
+      , evaluator = dynamicEvaluator;
 
     for ( var i = ilen; i >= 0; i-- ) {
       var fromNode = fromNodes[i]
@@ -481,10 +480,6 @@ function compile(parseOutput, localOptions) {
       return evaluator(ctx, writer);
     }
 
-    function cachedEvaluator(ctx, writer) {
-      cachedImports(ctx);
-    }
-
     function dynamicEvaluator(ctx, writer) {
       var generateCache = cacheModules && !ctx.__interpolExports
         , target = generateCache ? {} : ctx;
@@ -509,9 +504,8 @@ function compile(parseOutput, localOptions) {
       }
 
       if ( generateCache ) {
-        evaluator = cachedEvaluator;
-        cachedImports = createStaticMixin(target);
-        cachedImports(ctx);
+        evaluator = createStaticMixin(target);
+        evaluator(ctx);
       }
     }
 
