@@ -1459,6 +1459,7 @@ exports.median = median;
 exports.min = min;
 exports.sum = sum;
 
+// Math functions
 exports.number = wrap(Number);
 exports.abs = wrap(Math.abs);
 exports.acos = wrap(Math.acos);
