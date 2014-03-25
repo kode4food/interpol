@@ -33,7 +33,7 @@ module.exports = (function() {
         peg$startRuleFunction  = peg$parsestart,
 
         peg$c0 = function(m) {
-              return { i: 'interpol', v: -1, l: lits, n: m };
+              return constructModule(m);
             },
         peg$c1 = peg$FAILED,
         peg$c2 = "for",
@@ -45,7 +45,7 @@ module.exports = (function() {
         peg$c8 = function() { return 'de'; },
         peg$c9 = "from",
         peg$c10 = { type: "literal", value: "from", description: "\"from\"" },
-        peg$c11 = function() { return 'mi'; },
+        peg$c11 = function() { return 'im'; },
         peg$c12 = "import",
         peg$c13 = { type: "literal", value: "import", description: "\"import\"" },
         peg$c14 = "let",
@@ -97,7 +97,7 @@ module.exports = (function() {
         peg$c60 = "end",
         peg$c61 = { type: "literal", value: "end", description: "\"end\"" },
         peg$c62 = function(id) {
-              return lit(id);
+              return sym(id, 'id');
             },
         peg$c63 = [],
         peg$c64 = function(start, cont) {
@@ -141,7 +141,7 @@ module.exports = (function() {
               return '.' + d.join('');
             },
         peg$c96 = function(c, f, e) {
-              return lit(parseFloat(c + (f ? f : '') + (e ? e : '')));
+              return sym(parseFloat(c + (f ? f : '') + (e ? e : '')), 'lit');
             },
         peg$c97 = { type: "any", description: "any character" },
         peg$c98 = /^[ \t\x0B\f]/,
@@ -154,16 +154,16 @@ module.exports = (function() {
         peg$c105 = { type: "literal", value: "\"\"\"", description: "\"\\\"\\\"\\\"\"" },
         peg$c106 = function(c) { return c; },
         peg$c107 = function(chars) {
-              return lit(chars.join(''));
+              return sym(chars.join(''));
             },
         peg$c108 = "'''",
         peg$c109 = { type: "literal", value: "'''", description: "\"'''\"" },
         peg$c110 = "\"",
         peg$c111 = { type: "literal", value: "\"", description: "\"\\\"\"" },
-        peg$c112 = function() { return lit(''); },
+        peg$c112 = function() { return sym('', 'lit'); },
         peg$c113 = "'",
         peg$c114 = { type: "literal", value: "'", description: "\"'\"" },
-        peg$c115 = function(c) { return lit(c.join('')); },
+        peg$c115 = function(c) { return sym(c.join(''), 'lit'); },
         peg$c116 = /^[^"\\]/,
         peg$c117 = { type: "class", value: "[^\"\\\\]", description: "[^\"\\\\]" },
         peg$c118 = /^[^'\\]/,
@@ -223,14 +223,14 @@ module.exports = (function() {
               }
               return res.indexOf('\n') !== -1 ? '\n' : ' ';
            },
-        peg$c169 = function(s) { return [lit('im'), s]; },
+        peg$c169 = function(s) { return s; },
         peg$c170 = function(statements) {
               var results = [];
               for ( var i = 0, len = statements.length; i < len; i++ ) {
                 results.push.apply(results, statements[i][0]);
                 var ws = statements[i][1];
                 if ( ws ) {
-                  results.push([lit('ou'), lit(ws)]);
+                  results.push([sym('ou'), sym(ws)]);
                 }
               }
               return hoistPartials(results);
@@ -250,20 +250,20 @@ module.exports = (function() {
         peg$c176 = "-->",
         peg$c177 = { type: "literal", value: "-->", description: "\"-->\"" },
         peg$c178 = function(comment) {
-              return [lit('ct'), lit(comment.join(''))];
+              return [sym('ct'), sym(comment.join(''))];
             },
         peg$c179 = "<!",
         peg$c180 = { type: "literal", value: "<!", description: "\"<!\"" },
         peg$c181 = ">",
         peg$c182 = { type: "literal", value: ">", description: "\">\"" },
         peg$c183 = function(rootElem) {
-              return [lit('dt'), rootElem];
+              return [sym('dt'), rootElem];
             },
         peg$c184 = "<",
         peg$c185 = { type: "literal", value: "<", description: "\"<\"" },
         peg$c186 = function(a) { return a; },
         peg$c187 = function(tag, attrs, t) {
-              return [lit('op'), tag, attrs, t];
+              return [sym('op'), tag, attrs, t];
             },
         peg$c188 = "(",
         peg$c189 = { type: "literal", value: "(", description: "\"(\"" },
@@ -280,15 +280,15 @@ module.exports = (function() {
         peg$c198 = { type: "literal", value: "=", description: "\"=\"" },
         peg$c199 = function(e) { return e; },
         peg$c200 = function(name, value) {
-              return [name, value === null ? lit(null) : value];
+              return [name, value === null ? sym(null) : value];
             },
         peg$c201 = "</",
         peg$c202 = { type: "literal", value: "</", description: "\"</\"" },
         peg$c203 = function(tag) {
-              return [lit('cl'), tag];
+              return [sym('cl'), tag];
             },
         peg$c204 = function(op, id, params, stmts) {
-              return [lit(op), id, params || [], stmts];
+              return [sym(op), id, params || [], stmts];
             },
         peg$c205 = ":",
         peg$c206 = { type: "literal", value: ":", description: "\":\"" },
@@ -311,14 +311,14 @@ module.exports = (function() {
               return [start].concat(cont);
             },
         peg$c215 = function(op, path, imports) {
-              return [lit(op), [[path, imports]]];
+              return [sym(op), [[path, imports]]];
             },
         peg$c216 = function(op, modules) {
-              return [lit(op), modules];
+              return [sym(op), modules];
             },
         peg$c217 = function(item) { return item; },
         peg$c218 = function(start, cont) {
-              return lit([start].concat(cont).join('/'));
+              return sym([start].concat(cont).join('/'));
             },
         peg$c219 = function(id) {
               return id;
@@ -334,19 +334,19 @@ module.exports = (function() {
             return [path, alias];
           },
         peg$c223 = function(op, ranges, stmts) {
-              return [lit(op), ranges, stmts];
+              return [sym(op), ranges, stmts];
             },
         peg$c224 = function(r) { return r; },
         peg$c225 = function(id, col) {
               return [id, col];
             },
         peg$c226 = function(op, expr, stmt) {
-              if ( !op ) { expr = [lit('no'), expr]; }
-              return [lit('cn'), expr, [stmt], [lit(null)]];
+              if ( !op ) { expr = [sym('no'), expr]; }
+              return [sym('cn'), expr, [stmt], [sym(null)]];
             },
         peg$c227 = function(op, expr, stmts, tail) {
-              if ( !op ) { expr = [lit('no'), expr]; }
-              return [lit('cn'), expr, stmts, tail];
+              if ( !op ) { expr = [sym('no'), expr]; }
+              return [sym('cn'), expr, stmts, tail];
             },
         peg$c228 = function(s) {
               return [s];
@@ -355,23 +355,45 @@ module.exports = (function() {
               return [i];
             },
         peg$c230 = function() {
-              return [lit(null)];
+              return [sym(null)];
             },
         peg$c231 = function(op, a) {
-            return [lit(op), a];
+            return [sym(op), a];
           },
         peg$c232 = function(id, expr) {
               return [id, expr];
             },
-        peg$c233 = function(e) { return [lit('ou'), e]; },
+        peg$c233 = function(e) { return [sym('ou'), e]; },
         peg$c234 = "%",
         peg$c235 = { type: "literal", value: "%", description: "\"%\"" },
-        peg$c236 = function(r) { return [lit('fm'), r]; },
+        peg$c236 = function(r) { return [sym('fm'), r]; },
         peg$c237 = function(head, tail) {
-              if ( ( !tail || !tail.length ) && !isArray(head) ) {
-                var val = lits[head];
-                if ( typeof val === 'string' && ParamContextCheck.test(val) ) {
-                  return [lit('fm'), head, [lit('se')]];
+              if ( !tail || !tail.length ) {
+                if ( !isString(head) ) {
+                  return head;
+                }
+                var val = head.value;
+                if ( ParamContextCheck.test(val) ) {
+                  // Need to pull it from local variables
+                  return [sym('fm'), head, [sym('se')]];
+                }
+                else {
+                  // Process any double percents
+                  head.value = val.replace(/%%/gm, '%');
+                  return head;
+                }
+              }
+
+              var lastItem = tail[tail.length-1];
+              if ( isString(lastItem[1]) ) {
+                val = lastItem[1].value;
+                if ( ParamContextCheck.test(val) ) {
+                  // Need to pull it from local variables
+                  tail.push([sym('fm'), [sym('se')]])
+                }
+                else {
+                  // Process any double percents
+                  lastItem[1].value = val.replace(/%%/gm, '%');
                 }
               }
               return buildBinaryChain(head, tail);
@@ -379,33 +401,33 @@ module.exports = (function() {
         peg$c238 = "?",
         peg$c239 = { type: "literal", value: "?", description: "\"?\"" },
         peg$c240 = function(cond, tval, fval) {
-              return [lit('cn'), cond, [tval], [fval]];
+              return [sym('cn'), cond, [tval], [fval]];
             },
-        peg$c241 = function(op, r) { return [lit(op), r]; },
+        peg$c241 = function(op, r) { return [sym(op), r]; },
         peg$c242 = function(head, tail) {
               return buildBinaryChain(head, tail);
             },
         peg$c243 = function(op, expr) {
-              return [lit(op), expr];
+              return [sym(op), expr];
             },
         peg$c244 = "|",
         peg$c245 = { type: "literal", value: "|", description: "\"|\"" },
         peg$c246 = function(args, calls) {
               if ( calls && calls.length ) {
                 for ( var i = 0, len = calls.length; i < len; i++ ) {
-                  args = [lit('ca'), calls[i], [args]];
+                  args = [sym('ca'), calls[i], [args]];
                 }
               }
               return args;
             },
-        peg$c247 = function(a) { return [lit('ca'), a]; },
+        peg$c247 = function(a) { return [sym('ca'), a]; },
         peg$c248 = function(member, args) {
               return buildBinaryChain(member, args);
             },
         peg$c249 = function(elems) {
               return elems;
             },
-        peg$c250 = function(sel) { return [lit('mb'), sel]; },
+        peg$c250 = function(sel) { return [sym('mb'), sel]; },
         peg$c251 = function(elem) {
               return elem;
             },
@@ -415,20 +437,20 @@ module.exports = (function() {
         peg$c255 = { type: "literal", value: "]", description: "\"]\"" },
         peg$c256 = function(elems) {
               if ( elems.length > 1 ) {
-                return [lit('tu'), elems];
+                return [sym('tu'), elems];
               }
               return elems[0];
             },
-        peg$c257 = function() { return lit(true); },
-        peg$c258 = function() { return lit(false); },
+        peg$c257 = function() { return sym(true, 'lit'); },
+        peg$c258 = function() { return sym(false, 'lit'); },
         peg$c259 = function(id) {
-              return [lit('id'), id];
+              return [sym('id'), id];
             },
         peg$c260 = function(op) {
-              return [lit(op)];
+              return [sym(op)];
             },
         peg$c261 = function(op) {
-              return lit(op);
+              return sym(op, 'lit');
             },
 
         peg$currPos          = 0,
@@ -6289,7 +6311,7 @@ module.exports = (function() {
     }
 
 
-      var ParamContextCheck = /(^|[^%])%[$_a-zA-Z][$_a-zA-Z0-9]*/;
+      var ParamContextCheck = /(^|[^%])%[$_a-zA-Z][$_a-zA-Z0-9]*/m;
 
       var isArray = Array.isArray;
       if ( !isArray ) {
@@ -6300,17 +6322,57 @@ module.exports = (function() {
         })();
       }
 
-      // Literal Handling
-      var lits = [], reverseLits = {};
+      function sym(value, type) {
+        type = type || 'op';
+        return { value: value, type: type };
+      }
 
-      function lit(value) {
-        var idx = reverseLits[value];
-        if ( typeof idx === 'number' ) {
+      function constructModule(module) {
+        var lits = [], reverseLits = {};
+        replaceSymbols(module);
+        return { i: 'interpol', v: -1, l: lits, n: module };
+
+        function lit(value) {
+          var idx = reverseLits[value];
+          if ( typeof idx === 'number' ) {
+            return idx;
+          }
+          idx = lits.push(value) - 1;
+          reverseLits[value] = idx;
           return idx;
         }
-        idx = lits.push(value) - 1;
-        reverseLits[value] = idx;
-        return idx;
+
+        function replaceSymbols(node) {
+          if ( !isArray(node) ) {
+            if ( isSymbol(node) ) {
+              return lit(node.value);
+            }
+            return node;
+          }
+          for ( var i = 0, len = node.length; i < len; i++ ) {
+            node[i] = replaceSymbols(node[i]);
+          }
+          return node;
+        }
+      }
+
+      function isSymbol(symbol) {
+        return symbol != null
+            && typeof symbol === 'object'
+            && typeof symbol.value !== 'undefined'
+            && typeof symbol.type !== 'undefined';
+      }
+
+      function isOperator(symbol, operator) {
+        return isSymbol(symbol)
+            && symbol.type === 'op'
+            && symbol.value === operator;
+      }
+
+      function isString(symbol) {
+        return isSymbol(symbol)
+            && symbol.type === 'lit'
+            && typeof symbol.value === 'string';
       }
 
       function buildBinaryChain(head, tail) {
@@ -6325,12 +6387,12 @@ module.exports = (function() {
         return head;
       }
 
-      function isPartialDefinition(statement) {
-        return isArray(statement) && lits[statement[0]] === 'de';
+      function isPartialDef(statement) {
+        return isArray(statement) && isOperator(statement[0], 'de');
       }
 
       function isLetStatement(statement) {
-        return isArray(statement) && lits[statement[0]] === 'as';
+        return isArray(statement) && isOperator(statement[0], 'as');
       }
 
       function hoistPartials(statements) {
@@ -6340,16 +6402,20 @@ module.exports = (function() {
 
         for ( var i = 0, ilen = statements.length; i < ilen; i++ ) {
           var statement = statements[i];
-          if ( isPartialDefinition(statement) && !encountered[statement[1]] ) {
-            partials.push(statement);
-            encountered[statement[1]] = true;
-            continue;
+          if ( isPartialDef(statement) ) {
+            var name = statement[1].value;
+            if ( !encountered[name] ) {
+              partials.push(statement);
+              encountered[name] = true;
+              continue;
+            }
           }
           else if ( isLetStatement(statement) ) {
             var assignments = statement[1];
             for ( var j = assignments.length; j--; ) {
-              var assignment = assignments[j];
-              encountered[assignment[0]] = true;
+              var assignment = assignments[j]
+                , name = assignment[0].value;
+              encountered[name] = true;
             }
           }
           others.push(statement);

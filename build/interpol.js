@@ -43,7 +43,7 @@ var Digits = "[1-9][0-9]*"
   , Params = "(.?)%(("+Digits+")|("+Ident+"))?(([|]"+Ident+")*)?";
              // "%" ( digits | identifier )? ( "|" identifier )*
 
-var ParamRegex = new RegExp(Params);
+var ParamRegex = new RegExp(Params, "m");
 
 function buildTemplate(formatStr) {
   var funcs = []
@@ -188,7 +188,7 @@ var isArray = util.isArray
   , stringify = util.stringify
   , buildTemplate = format.buildTemplate;
 
-var CURRENT_VERSION = "0.3.3"
+var CURRENT_VERSION = "0.3.4"
   , TemplateCacheMax = 256
   , globalOptions = { writer: null, errorCallback: null }
   , globalContext = {}
@@ -246,8 +246,7 @@ function compile(parseOutput, localOptions) {
     , NullWriter = interpol.createNullWriter();
 
   var Evaluators = freezeObject({
-    im: createModuleEvaluator,
-    mi: createImportEvaluator,
+    im: createImportEvaluator,
     de: createPartialEvaluator,
     ca: createCallEvaluator,
     as: createAssignEvaluator,
@@ -284,7 +283,7 @@ function compile(parseOutput, localOptions) {
     , compilerOptions = mixin({}, globalOptions, localOptions)
     , cacheModules = compilerOptions.cache
     , resolvers = compilerOptions.resolvers || globalResolvers
-    , evaluator = wrapEvaluator(parseOutput.n)
+    , evaluator = wrapLiteral(createStatementsEvaluator(parseOutput.n))
     , exportedContext = null;
 
   compiledTemplate.configure = configureTemplate;
@@ -331,15 +330,14 @@ function compile(parseOutput, localOptions) {
   
   // Evaluator Generation Utilities *****************************************
 
-  function wrapEvaluator(node) {
-    var result = createEvaluator(node);
-    if ( typeof result === 'function' ) {
-      return result;
+  function wrapLiteral(value) {
+    if ( typeof value === 'function' ) {
+      return value;
     }
-    return evalWrapper;
+    return wrapper;
 
-    function evalWrapper() {
-      return result;
+    function wrapper() {
+      return value;
     }
   }
 
@@ -350,7 +348,7 @@ function compile(parseOutput, localOptions) {
 
     var result = [];
     for ( var i = arrayNodes.length - 1; i >= 0; i-- ) {
-      result[i] = wrapEvaluator(arrayNodes[i]);
+      result[i] = wrapLiteral(createEvaluator(arrayNodes[i]));
     }
     return result;
   }
@@ -389,7 +387,8 @@ function compile(parseOutput, localOptions) {
     var result = [];
     for ( var i = 0, len = assignNodes.length; i < len; i++ ) {
       var assignNode = assignNodes[i];
-      result[i] = [lits[assignNode[0]], wrapEvaluator(assignNode[1])];
+      result[i] = [lits[assignNode[0]],
+                   wrapLiteral(createEvaluator(assignNode[1]))];
     }
     return result;
   }
@@ -423,11 +422,9 @@ function compile(parseOutput, localOptions) {
     return statementsEvaluator;
 
     function statementsEvaluator(ctx, writer) {
-      var result = null;
       for ( var i = slen; i >= 0; i-- ) {
-        result = statements[i](ctx, writer);
+        statements[i](ctx, writer);
       }
-      return result;
     }
   }
 
@@ -438,10 +435,6 @@ function compile(parseOutput, localOptions) {
   }
 
   // Evaluator Generation ***************************************************
-
-  function createModuleEvaluator(statementNodes) {
-    return createStatementsEvaluator(statementNodes);
-  }
 
   function createImportEvaluator(fromNodes) {
     var importList = []
@@ -1283,7 +1276,7 @@ interpol.createMemoryResolver = createMemoryResolver;
 
 var util = require('../../util')
   , isArray = util.isArray;
-  
+
 function first(writer, value) {
   if ( !isArray(value) ) {
     return value;

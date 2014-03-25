@@ -70,6 +70,8 @@ end
 
 Partials are first-class elements of Interpol, meaning they can be passed around and assigned to variables.  In certain situations, they are also hoisted to the top of their scope, so you can call them in your code even before they've been defined.
 
+*Note:* When invoked, a partials always return `undefined`.
+
 ### Importing
 Importing partials and variables in Interpol is similar to Python.  One can either import an entire module as a single variable, or can cherry-pick individual properties.  In all cases, the imported items can be aliased locally.
 
@@ -364,7 +366,7 @@ In truth, the implicit approach is rather limited, particularly since you could 
 You could perform interpolation against an entry in the table by doing the following:
 
 ```python
-str[lang]['stooge_summary'] % (people.length, people.best)
+str[lang].stooge_summary % (people.length, people.best)
 ```
 
 If your parameters always appear in the same order, then the simple `%` characters embedded into the strings will work fine.  But what if the ordering is not consistent?  Then you have to explicitly identify the index of the parameter you'd like to use, keeping in mind that they're 1-based:
