@@ -439,7 +439,7 @@ function compile(parseOutput, localOptions) {
   function createImportEvaluator(fromNodes) {
     var importList = []
       , ilen = fromNodes.length - 1
-      , evaluator = cacheModules ? cacheableEvaluator : dynamicEvaluator
+      , evaluator = cacheModules ? cacheableEvaluator : dynamicEvaluator;
 
     for ( var i = ilen; i >= 0; i-- ) {
       var fromNode = fromNodes[i]
