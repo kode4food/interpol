@@ -1431,16 +1431,6 @@ if ( !isArray ) {
   })();
 }
 
-function isInterpolJSON(value) {
-  return typeof value === 'object' &&
-         value !== null &&
-         value.i === 'interpol' &&
-         typeof value.v === 'string' &&
-         !isArray(value) &&
-         isArray(value.l) &&
-         isArray(value.n);
-}
-
 function mixin(target) {
   for ( var i = 1, len = arguments.length; i < len; i++ ) {
     var src = arguments[i];
@@ -1506,6 +1496,16 @@ function createStaticMixin(obj) {
     }
     return target;
   }
+}
+
+function isInterpolJSON(value) {
+  return typeof value === 'object' &&
+    value !== null &&
+    value.i === 'interpol' &&
+    typeof value.v === 'string' &&
+    !isArray(value) &&
+    isArray(value.l) &&
+    isArray(value.n);
 }
 
 // String Handling ************************************************************
@@ -1612,12 +1612,12 @@ function configure(func, requiredCount, defaultArgs) {
 
 // Exports
 exports.isArray = isArray;
-exports.isInterpolJSON = isInterpolJSON;
 exports.mixin = mixin;
 exports.extendContext = extendContext;
 exports.freezeObject = freezeObject;
 exports.objectKeys = objectKeys;
 exports.createStaticMixin = createStaticMixin;
+exports.isInterpolJSON = isInterpolJSON;
 exports.escapeAttribute = escapeAttribute;
 exports.escapeContent = escapeContent;
 exports.stringify = stringify;
