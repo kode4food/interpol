@@ -1432,13 +1432,13 @@ if ( !isArray ) {
 }
 
 function isInterpolJSON(value) {
-  return typeof value === 'object'
-      && value !== null
-      && value.i === 'interpol'
-      && typeof value.v === 'string'
-      && !isArray(value)
-      && isArray(value.l)
-      && isArray(value.n);
+  return typeof value === 'object' &&
+         value !== null &&
+         value.i === 'interpol' &&
+         typeof value.v === 'string' &&
+         !isArray(value) &&
+         isArray(value.l) &&
+         isArray(value.n);
 }
 
 function mixin(target) {
