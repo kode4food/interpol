@@ -8,18 +8,16 @@ function eval(str, ctx) {
 
 exports.imports = nodeunit.testCase({
   setUp: function (callback) {
-    var helperResolver = interpol.helperResolver;
-
-    helperResolver.registerHelper(function testHelper(writer, arg1, arg2) {
-      writer.content("arg1=" + arg1 + ":arg2=" + arg2);
+    interpol.registerModule('helpers', {
+      testHelper: function testHelper(writer, arg1, arg2) {
+        writer.content("arg1=" + arg1 + ":arg2=" + arg2);
+      }
     });
-
-    var globalResolvers = interpol.resolvers();
 
     var fileResolver = interpol.createFileResolver({
       path: "./test", compile: true, monitor: false
     });
-    globalResolvers.push(fileResolver);
+    interpol.resolvers().push(fileResolver);
 
     callback();
   },

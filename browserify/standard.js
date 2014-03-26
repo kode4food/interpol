@@ -12,9 +12,8 @@
 window.$interpol = require('../lib/interpol');
 
 // Resolvers
-require('../lib/resolvers/system');
-require('../lib/resolvers/helper');
 require('../lib/resolvers/memory');
+require('../lib/resolvers/system');
 
 // Writers
 require('../lib/writers/null');

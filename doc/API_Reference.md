@@ -24,27 +24,10 @@ There are several support structures and functions attached to the `$interpol()`
 Each compiled closure also attaches additional functions, the most important being called `exports()`.  This function is used by resolvers to retrieve partials and variables when the compiled closure is loaded as a module.
 
 ## Resolvers (interpol/resolvers)
-A resolver is an interface used by Interpol to resolve an imported module.  There are three available for develop use, and one automatically registered for apps bundled by the command-line interface.
-
-### Helpers
-The 'helpers' resolver allows the developer to register JavaScript functions by name.  This Function will then become available as part of the 'helpers' module. An instance of this resolver is registered by default.  It can be retrieved like so:
-
-```javascript
-var helperResolver = $interpol.helperResolver;
-helperResolver.registerHelper(function hello(writer, name) {
-  writer.content("Hello, " + name + "!");
-});
-```
-
-You can then resolve it in your template:
-
-```html
-from helpers import hello
-hello('World')
-```
+A resolver is an interface used by Interpol to resolve an imported module.  There are two available for developer use, and one automatically registered for apps bundled by the command-line interface.
 
 ### Memory
-A memory resolver allows you to register templates as named modules.  These templates can be strings to be compiled, pre-parsed JSON, or compiled closures.  An instance of this resolver is registered by default.  It can be retrieved like so:
+A memory resolver allows you to register templates as named modules.  These templates can be strings to be compiled, pre-parsed JSON, compiled closures or Objects containing JavaScript functions.  An instance of this resolver is registered by default.  It can be retrieved like so:
 
 ```javascript
 var memoryResolver = $interpol.memoryResolver;
@@ -63,7 +46,7 @@ hello('World')
 ```
 
 ### File (Node.js only)
-A file resolver allows you to monitor a set of directories on disk as a source for your templates.  It's a little more complicated to use than the helper and memory resolvers, and so is not registered by default.  To create one:
+A file resolver allows you to monitor a set of directories on disk as a source for your templates.  It's a little more complicated to use than the memory resolver, and so is not registered by default.  To create one:
 
 ```javascript
 var interpol = require('interpol')
