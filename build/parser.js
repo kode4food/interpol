@@ -6313,6 +6313,7 @@ module.exports = (function() {
 
       var ParamContextCheck = /(^|[^%])%[$_a-zA-Z][$_a-zA-Z0-9]*/m;
 
+      var toString = Object.prototype.toString;
       var isArray = Array.isArray;
       if ( !isArray ) {
         isArray = (function () {
