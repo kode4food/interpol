@@ -27,7 +27,7 @@ Each compiled closure also attaches additional functions, the most important bei
 A resolver is an interface used by Interpol to resolve an imported module.  There are two available for developer use, and one automatically registered for apps bundled by the command-line interface.
 
 ### Memory
-A memory resolver allows you to register templates as named modules.  These templates can be strings to be compiled, pre-parsed JSON, compiled closures or Objects containing JavaScript functions.  An instance of this resolver is registered by default.  It can be retrieved like so:
+A memory resolver allows you to register templates as named modules.  These templates can be strings to be compiled, pre-parsed JSON, compiled closures or Objects containing JavaScript functions.  An instance of this resolver is registered by default, and is also used to export Interpol's system modules.  It can be retrieved like so:
 
 ```javascript
 var memoryResolver = $interpol.memoryResolver;
@@ -65,5 +65,5 @@ If you wanted to import from a module named 'myModule', Interpol will check for 
 
 The `path` property of createFileResolver's options can also take an Array of paths.  The `compile` flag tells the resolver that it should compile Interpol templates (in-memory only) if a JSON file can't be found.  The `monitor` flag tells the resolver that it should monitor the directories for changes and reload the modules automatically.
 
-### System
-The system resolver exposes the standard run-time library of Interpol.  This library consists of several modules that provide a variety of functionality.  These modules include array and string manipulation, as well as math and local functions.  See [the Language Reference](Language_Reference.md) for more information.
+### System Modules
+The default memory resolver exposes the standard run-time library of Interpol.  This library consists of several modules that provide a variety of functionality.  These modules include array and string manipulation, as well as math and local functions.  See [the Language Reference](Language_Reference.md) for more information.
