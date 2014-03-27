@@ -394,7 +394,7 @@ Rather than simple values or tuples, an object can be passed to the right side o
 Here, the `length` property of `people` will be interpolated into the resulting string.
 
 #### Automatic Interpolation
-Automatic Interpolation is supported for literal strings containing named indexing.  The value used in this interpolation is retrieved from the current scope.  So far example, if there is a variable called `name` in the current scope, you can expose it as follows:
+Automatic Interpolation is supported for literal strings containing named indexing.  The value used in this interpolation is retrieved from the current scope.  So for example, if there is a variable called `name` in the current scope, you can expose it as follows:
 
 ```python
 "User Profile - %name"
