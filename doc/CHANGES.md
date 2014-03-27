@@ -1,5 +1,21 @@
 # Change History
 
+## Version 0.3.4 - Consolidated Resolvers
+The Helper and System Resolvers have been merged into the Memory Resolver since it's all in memory anyway.  The default Memory Resolver's register/unregister functions are now exposed from the `interpol()` function , so registering a module of JavaScript helpers is easy:
+
+```javascript
+interpol.registerModule('myModule', {
+  'hello': function (writer, name) {
+    writer.content("Hello ," + name + "!");
+  },
+  'goodbye': function (writer, name) {
+    writer.content("Goodbye ," + name + "!");
+  }
+});
+```
+
+See [the API Reference](API_Reference.md) for more information.
+
 ## Version 0.3.3 - Configurable Imports
 Modules exposed by the system resolver now allow their functions to be configured.  This enables the developer to generate pre-configured pipeline functions.  For example:
 
