@@ -21,9 +21,8 @@
 <script type="application/javascript">
   var parentElem = document.getElementById('content');
   var domWriter = $interpol.createDOMWriter(parentElem, 'insert');
-  var template = $interpol.testApp['test'].configure({ writer: domWriter });
-
   var data = JSON.parse(document.getElementById("data").textContent);
+  var template = $interpol.testApp.test.configure(data, { writer: domWriter });
   template(data);
 </script>
 </html>
