@@ -297,6 +297,8 @@ end
 A piped call is an operator where the left operand is passed as the sole argument to the right operand.  The right operand must evaluate to a callable function.  These calls can be chained from left to right, where the result of each call is passed into the next right-hand operand.
 
 ```python
+from array import join
+from string import title
 classes | join | title
 ```
 
@@ -402,6 +404,7 @@ Automatic Interpolation is supported for literal strings containing named indexi
 The Interpolation feature also supports a restricted form of the piped call operator.  The restrictions in using this method are that the pipe character *can not* be surrounded by spaces and the right-hand operands can only be identifiers.  For example:
 
 ```python
+from string import title
 "User Profile - %name|title"
 ```
 
