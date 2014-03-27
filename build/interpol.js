@@ -178,13 +178,13 @@ var util = require('./util')
   , format = require('./format');
 
 var isArray = util.isArray
-  , isInterpolJSON = util.isInterpolJSON
   , mixin = util.mixin
   , configure = util.configure
   , bless = util.bless
   , extendContext = util.extendContext
   , freezeObject = util.freezeObject
   , createStaticMixin = util.createStaticMixin
+  , isInterpolJSON = util.isInterpolJSON
   , stringify = util.stringify
   , buildTemplate = format.buildTemplate;
 
@@ -1106,10 +1106,12 @@ function createMemoryResolver(options) {
   }
 
   function unregisterModule(name) {
-    delete cache[name];
+    delete cache[normalizeModuleName(name)];
   }
    
   function registerModule(name, module) {
+    name = normalizeModuleName(name);
+
     if ( typeof module === 'function' &&
          typeof module.exports === 'function' ) {
       cache[name] = { module: module };
@@ -1157,6 +1159,10 @@ function configurable(func) {
     configured.__interpolFunction = true;
     return configured;
   }
+}
+
+function normalizeModuleName(name) {
+  return name.replace(/[/\\.]+/g, '/');
 }
 
 // Add Default Memory Resolver
