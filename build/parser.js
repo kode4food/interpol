@@ -331,8 +331,11 @@ module.exports = (function() {
             },
         peg$c221 = function(spec) { return spec; },
         peg$c222 = function(path, alias) {
-            return [path, alias];
-          },
+              if ( alias ) {
+                return [path, alias];
+              }
+              return [path];
+            },
         peg$c223 = function(op, ranges, stmts) {
               return [sym(op), ranges, stmts];
             },
