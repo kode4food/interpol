@@ -20,7 +20,7 @@
     "bundle-standard": "browserify browserify/standard.js > build/interpol.js && uglifyjs -m --preamble \"`cat doc/preamble.js`\" build/interpol.js -o build/interpol.min.js",
     "bundle-parser": "browserify browserify/parser.js | uglifyjs -m --preamble \"`cat doc/preamble.js`\" -o build/interpol-parser.min.js",
     "bundle-debug": "browserify --debug browserify/parser.js > build/interpol-debug.js",
-    "build": "npm run-script build-parser && npm run-script bundle-standard && npm run-script bundle-parser && npm run-script bundle-debug && npm run-script build-doc",
+    "build": "npm run-script build-parser && npm run-script bundle-standard && npm run-script bundle-parser && npm run-script bundle-debug",
     "test": "nodeunit test/index.js"
   },
   "dependencies": {
