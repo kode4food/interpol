@@ -30,7 +30,8 @@
     "pegjs": "*",
     "nodeunit": "*",
     "uglify-js": "*",
-    "browserify": "*"
+    "browserify": "*",
+    "docco": "*"
   },
   "engines": {
     "node": "*"
