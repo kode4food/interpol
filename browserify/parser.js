@@ -8,5 +8,10 @@
 
 "use strict";
 
+/*
+ * This module is used to collect the requirements for a parser-included
+ * Browserify build.  It's of no interest to Node.js
+ */
+
 require('./standard');
 require('../lib/parser');
