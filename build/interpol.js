@@ -1,5 +1,5 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-/**
+/*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
  * see doc/LICENSE.md
@@ -8,6 +8,9 @@
  */
 
 "use strict";
+
+// This module is used to collect the requirements for a minimal
+// Browserify build.  It's of no interest to Node.js
 
 // Set the Interpol browser global
 window.$interpol = require('../lib/interpol');
@@ -22,7 +25,7 @@ require('../lib/writers/array');
 require('../lib/writers/dom');
 
 },{"../lib/interpol":3,"../lib/resolvers/memory":4,"../lib/resolvers/system":6,"../lib/writers/array":11,"../lib/writers/dom":12,"../lib/writers/null":13}],2:[function(require,module,exports){
-/**
+/*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
  * see doc/LICENSE.md
@@ -40,9 +43,17 @@ var nullWriter;
 var Digits = "[1-9][0-9]*"
   , Ident = "[$_a-zA-Z][$_a-zA-Z0-9]*"
   , Params = "(.?)%(("+Digits+")|("+Ident+"))?(([|]"+Ident+")*)?";
-             // "%" ( digits | identifier )? ( "|" identifier )*
+             /* "%" ( digits | identifier )? ( "|" identifier )* */
 
 var ParamRegex = new RegExp(Params, "m");
+
+// Builds a closure that will be used internally to support Interpol's
+// interpolation operations.  The returned closure may attach a flag
+// `__requiresContext` that identifies it as requiring an Interpol
+// context to fulfill its formatting.  This usually occurs when the
+// pipe `|` operator is used.
+//
+// * formatStr:String - The String to be used in performing interpolation
 
 function buildTemplate(formatStr) {
   var funcs = []
@@ -164,7 +175,7 @@ function buildTemplate(formatStr) {
 exports.buildTemplate = buildTemplate;
 
 },{"./util":10,"./writers/null":13}],3:[function(require,module,exports){
-/**
+/*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
  * see doc/LICENSE.md
@@ -197,7 +208,7 @@ var CURRENT_VERSION = "0.3.4"
 
 var slice = Array.prototype.slice;
 
-// Bootstrap ****************************************************************
+// ## Bootstrap
 
 interpol.VERSION = CURRENT_VERSION;
 interpol.options = function options() { return globalOptions; };
@@ -208,7 +219,14 @@ interpol.evaluate = evaluate;
 interpol.parse = parse;
 interpol.compile = compile;
 
-// Core Interpol Implementation *********************************************
+// ## Core Interpol Implementation
+
+// Main Interpol entry point.  Compiles a template and returns a closure
+// for rendering it.  The template can either be an unparsed String or a
+// pre-parsed JSON Object.
+//
+// * template:(String|Object) - The template to be compiled
+// * options:Object? - Configuration Object passed to the compile step
 
 function interpol(template, options) {
   var parseOutput = null;
@@ -224,10 +242,19 @@ function interpol(template, options) {
   return compile(parseOutput, options);
 }
 
+// Convenience function to compile and execute a template against a context
+// Object and options.  Not generally recommended.
+
 function evaluate(script, obj, options) {
   var compiled = interpol(script, options);
   return compiled(obj, options);
 }
+
+// Invokes the PEG.js parser against the specified template and returns a
+// pre-parsed JSON instance.  The PEG.js parser has to be loaded for this
+// to work.
+//
+// * template:String - The Interpol Template to be parsed
 
 function parse(template) {
   if ( !parser ) {
@@ -240,6 +267,14 @@ function parse(template) {
   result.v = CURRENT_VERSION;
   return result;
 }
+
+// Converts a pre-parsed JSON instance to an evaluative closure.
+//
+// * parseOutput:Object - The pre-parsed JSON to compile
+//
+// * localOptions:Object? - Object for configuring the closure, including:
+//   * resolvers:[Resolver]? - Resolvers to use for performing imports
+//   * cache:boolean? - Whether or not to cache resolved imports
 
 function compile(parseOutput, localOptions) {
   var createArrayWriter = interpol.createArrayWriter
@@ -290,6 +325,16 @@ function compile(parseOutput, localOptions) {
   compiledTemplate.exports = templateExports;
   return freezeObject(compiledTemplate);
 
+  // The result of a template compilation is this closure.  `obj` is the
+  // Object to be used as a working context, while `localOptions` are
+  // options to be applied to a particular rendering.
+  //
+  // * obj:Object - The context Object to be rendered
+  //
+  // * localOptions:Object? - Object for configuring the current render
+  //   * writer:Writer? - A Writer to use (otherwise ArrayWriter is created)
+  //   * errorCallback:Function? - A callback for errors (otherwise throw them)
+
   function compiledTemplate(obj, localOptions) {
     var ctx = mixin(extendContext(globalContext), obj)
       , processingOptions = mixin({}, globalOptions, localOptions);
@@ -311,9 +356,18 @@ function compile(parseOutput, localOptions) {
     }
   }
 
+  // Returns a preconfigured version of the compiled template with a
+  // default obj and options.  Convenient if you're doing DOM writing
+  // or need to repeatedly call the template with the same Object.
+
   function configureTemplate(defaultObj, defaultOptions) {
     return configure(compiledTemplate, 0, slice.call(arguments, 0));
   }
+
+  // Returns the symbols (partials and assignments) that the compiled
+  // template will product against an empty `{}` context Object.  This is
+  // the method by which Interpol imports work.  Partials produced with
+  // this method still have access to the global context.
 
   function templateExports() {
     if ( exportedContext ) {
@@ -328,7 +382,7 @@ function compile(parseOutput, localOptions) {
     return exportedContext;
   }
   
-  // Evaluator Generation Utilities *****************************************
+  // ## Evaluator Generation Utilities
 
   function wrapLiteral(value) {
     if ( typeof value === 'function' ) {
@@ -434,7 +488,7 @@ function compile(parseOutput, localOptions) {
     return l | r;
   }
 
-  // Evaluator Generation ***************************************************
+  // ## Evaluator Generation
 
   function createImportEvaluator(fromNodes) {
     var importList = []
@@ -1055,7 +1109,7 @@ function compile(parseOutput, localOptions) {
 module.exports = interpol;
 
 },{"./format":2,"./util":10}],4:[function(require,module,exports){
-/**
+/*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
  * see doc/LICENSE.md
@@ -1074,7 +1128,22 @@ var slice = Array.prototype.slice
   , bless = util.bless
   , configure = util.configure;
 
-// Implementation ***********************************************************
+// Create a new Memory Resolver.  As its name implies, this resolver allows
+// one to register a module to be stored in memory.  A default instance of
+// this resolver is used to store the System Modules.  Because of its
+// flexibility, it can also be used to store custom modules and native
+// JavaScript helpers.  The types of instantiated resolver exposes the
+// following interface:
+//
+// * registerModule(name, module) - where name is the name of the module to
+// be registered, and module can be one of the following:
+//
+//   * Function - A compiled Interpol closure
+//   * String - An unparsed Interpol template
+//   * Object - A pre-parsed Interpol template
+//   * Object - A hash of Helpers (name->Function)
+//
+// * unregisterModule(name) - where name is the name of the module to remove
 
 function createMemoryResolver(options) {
   var cache = {};
@@ -1132,8 +1201,6 @@ function createMemoryResolver(options) {
   }
 }
 
-// Utilities ****************************************************************
-
 function blessModule(module) {
   var result = {};
   for ( var key in module ) {
@@ -1177,7 +1244,7 @@ exports.createMemoryResolver = createMemoryResolver;
 interpol.createMemoryResolver = createMemoryResolver;
 
 },{"../interpol":3,"../util":10}],5:[function(require,module,exports){
-/**
+/*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
  * see doc/LICENSE.md
@@ -1228,7 +1295,7 @@ exports.length = length;
 exports.empty = empty;
 
 },{"../../util":10}],6:[function(require,module,exports){
-/**
+/*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
  * see doc/LICENSE.md
@@ -1246,7 +1313,7 @@ defaultMemoryResolver.registerModule('array', require('./array'));
 defaultMemoryResolver.registerModule('string', require('./string'));
 
 },{"../memory":4,"./array":5,"./math":7,"./string":8}],7:[function(require,module,exports){
-/**
+/*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
  * see doc/LICENSE.md
@@ -1342,7 +1409,7 @@ exports.SQRT1_2 = Math.SQRT1_2;
 exports.SQRT2 = Math.SQRT2;
 
 },{"../../util":10,"./wrap":9}],8:[function(require,module,exports){
-/**
+/*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
  * see doc/LICENSE.md
@@ -1385,7 +1452,7 @@ exports.upper = upper;
 exports.string = wrap(String);
 
 },{"../../util":10,"./wrap":9}],9:[function(require,module,exports){
-/**
+/*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
  * see doc/LICENSE.md
@@ -1413,7 +1480,7 @@ function wrap(func) {
 module.exports = wrap;
 
 },{"../../util":10}],10:[function(require,module,exports){
-/**
+/*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
  * see doc/LICENSE.md
@@ -1423,7 +1490,7 @@ module.exports = wrap;
 
 "use strict";
 
-// Array and Object Handling **************************************************
+// ## Array and Object Handling
 
 var toString = Object.prototype.toString
   , slice = Array.prototype.slice;
@@ -1435,22 +1502,6 @@ if ( !isArray ) {
       return obj && obj.length && toString.call(obj) === '[object Array]';
     };
   })();
-}
-
-function mixin(target) {
-  for ( var i = 1, len = arguments.length; i < len; i++ ) {
-    var src = arguments[i];
-    if ( !src ) {
-      continue;
-    }
-    for ( var key in src ) {
-      if ( !src.hasOwnProperty(key) ) {
-        continue;
-      }
-      target[key] = src[key];
-    }
-  }
-  return target;
 }
 
 var extendContext = Object.create;
@@ -1489,6 +1540,26 @@ if ( !objectKeys ) {
   });
 }
 
+function mixin(target) {
+  for ( var i = 1, ilen = arguments.length; i < ilen; i++ ) {
+    var src = arguments[i];
+    if ( !src || typeof src !== 'object') {
+      continue;
+    }
+    var keys = objectKeys(src);
+    for ( var j = keys.length - 1; j >= 0; j-- ) {
+      var key = keys[j];
+      target[key] = src[key];
+    }
+  }
+  return target;
+}
+
+// Creates a closure whose job it is to mixin the configured Object's
+// properties into a target provided to the closure.
+//
+// * obj:Object the Object to copy (will be frozen)
+
 function createStaticMixin(obj) {
   var keys = objectKeys(freezeObject(obj)).reverse()
     , klen = keys.length - 1;
@@ -1504,6 +1575,11 @@ function createStaticMixin(obj) {
   }
 }
 
+// Checks whether or not the provided value is an Interpol Pre-Parsed JSON
+// Object.
+//
+// * value:Object - An Object to be checked
+
 function isInterpolJSON(value) {
   return typeof value === 'object' &&
     value !== null &&
@@ -1514,7 +1590,7 @@ function isInterpolJSON(value) {
     isArray(value.n);
 }
 
-// String Handling ************************************************************
+// ## String Handling
 
 var EscapeChars = freezeObject({
   '&': '&amp;',
@@ -1536,31 +1612,32 @@ function escapeContent(str) {
   });
 }
 
-// TODO: Need to better handle complex types like Dates
-function stringify(obj) {
-  var type = typeof obj;
+// Stringify the provided value for Interpol's purposes.
+
+function stringify(value) {
+  var type = typeof value;
   switch ( type ) {
     case 'string':
-      return obj;
+      return value;
 
     case 'number':
-      return obj.toString();
+      return value.toString();
 
     case 'boolean':
-      return obj ? 'true' : 'false';
+      return value ? 'true' : 'false';
 
     case 'xml':
-      return obj.toXMLString();
+      return value.toXMLString();
 
     case 'object':
-      if ( isArray(obj) ) {
+      if ( isArray(value) ) {
         var result = [];
-        for ( var i = 0, len = obj.length; i < len; i++ ) {
-          result[i] = stringify(obj[i]);
+        for ( var i = 0, len = value.length; i < len; i++ ) {
+          result[i] = stringify(value[i]);
         }
         return result.join(' ');
       }
-      return obj !== null ? obj.toString() : '';
+      return value !== null ? value.toString() : '';
 
     default:
       // catches 'undefined'
@@ -1568,7 +1645,12 @@ function stringify(obj) {
   }
 }
 
-// Exceptions *****************************************************************
+// ## Exceptions
+
+// Intercepts a PEG.js Exception and generate a human-readable error message.
+//
+// * err:Exception - The Exception that was raised
+// * filePath:String? - The path to the file that was being parsed (if any)
 
 function formatSyntaxError(err, filePath) {
   if ( !err.name || err.name !== 'SyntaxError') {
@@ -1582,7 +1664,13 @@ function formatSyntaxError(err, filePath) {
   return new Error((filePath || 'string') + lineInfo + ": " + errString);
 }
 
-// Function Invocation ********************************************************
+// ## Function Invocation
+
+// 'bless' a Function as being Interpol-compatible.  This essentially means
+// that the Function must accept a Writer instance as the first argument, as
+// a writer will be passed to it by the compiled template.
+//
+// * func:Function - the Function to 'bless'
 
 function bless(func) {
   if ( typeof func !== 'function' ) {
@@ -1602,6 +1690,14 @@ function bless(func) {
   }
 }
 
+// Returns a 'configured' version of the provided function.  By configured,
+// this means that the wrapper will provide default values for any arguments
+// that aren't required.
+//
+// * func:Function - The Function to configure
+// * requiredCount:Number - The number of arguments that are required
+// * defaultArgs:Array - Default values for the rest of the arguments
+
 function configure(func, requiredCount, defaultArgs) {
   var required = [];
   required.length = requiredCount;
@@ -1618,10 +1714,10 @@ function configure(func, requiredCount, defaultArgs) {
 
 // Exports
 exports.isArray = isArray;
-exports.mixin = mixin;
 exports.extendContext = extendContext;
 exports.freezeObject = freezeObject;
 exports.objectKeys = objectKeys;
+exports.mixin = mixin;
 exports.createStaticMixin = createStaticMixin;
 exports.isInterpolJSON = isInterpolJSON;
 exports.escapeAttribute = escapeAttribute;
@@ -1632,7 +1728,7 @@ exports.bless = bless;
 exports.configure = configure;
 
 },{}],11:[function(require,module,exports){
-/**
+/*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
  * see doc/LICENSE.md
@@ -1650,6 +1746,13 @@ var freezeObject = util.freezeObject
   , escapeContent = util.escapeContent;
 
 function noOp() {}
+
+// Creates an Array Writer.  Interpol will create one by default if it is not
+// provided as an option to a compiled template.  An Array Writer manages the
+// writing of content as an Array of Strings.  This Array is joined and
+// returned when the `endRender` function is called.
+//
+// * arr:Array - The Array to manage (otherwise one is created)
 
 function createArrayWriter(arr) {
   arr = arr || [];
@@ -1716,7 +1819,7 @@ exports.createArrayWriter = createArrayWriter;
 interpol.createArrayWriter = createArrayWriter;
 
 },{"../interpol":3,"../util":10}],12:[function(require,module,exports){
-/**
+/*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
  * see doc/LICENSE.md
@@ -1737,6 +1840,19 @@ var freezeObject = util.freezeObject
 var REPLACE = createDOMWriter.REPLACE = 'replace'
   , APPEND = createDOMWriter.APPEND = 'append'
   , INSERT = createDOMWriter.INSERT = 'insert';
+
+// Creates a DOM Writer.  A DOM Writer attaches itself to a DOM Element,
+// and will manipulate that Element's content when a template is rendered
+// with it.  The writer is very simple and won't cover all use-cases, it
+// also may not be the most performant approach.
+//
+// The default mode is REPLACE, meaning all of the Element's children are
+// replaced when the associated template is rendered.  INSERT and APPEND
+// will insert new renderings to the beginning or end of the child list
+// respectively.
+//
+// * parentElement:Element - The Element to which this DOMWriter attaches
+// * renderMode:String? - The DOM rendering mode (REPLACE|APPEND|INSERT)
 
 function createDOMWriter(parentElement, renderMode) {
   var arr = []
@@ -1785,7 +1901,7 @@ exports.createDOMWriter = createDOMWriter;
 interpol.createDOMWriter = createDOMWriter;
 
 },{"../interpol":3,"../util":10,"./array":11}],13:[function(require,module,exports){
-/**
+/*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
  * see doc/LICENSE.md
@@ -1801,6 +1917,10 @@ var interpol = require('../interpol')
 var freezeObject = util.freezeObject;
 
 function noOp() {}
+
+// Creates a Null Writer.  All calls to this writer find their way into the
+// bit bucket.  Its primary purpose is to support the background rendering of
+// modules in order to yield their exported symbols.
 
 function createNullWriter() {
   return freezeObject({
