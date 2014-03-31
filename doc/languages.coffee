@@ -8,6 +8,7 @@ module.exports = LANGUAGES =
   JavaScript:
     nameMatchers:      ['.js']
     pygmentsLexer:     'javascript'
+    multiLineComment:  ['/**', '*', '*/']
     singleLineComment: ['//']
     ignorePrefix:      '}'
     foldPrefix:        '^'
