@@ -1,1 +1,1 @@
-/*! Interpol v0.3.4 | (c) 2014 Thomas S. Bradford | interpoljs.io/license */
+/*! Interpol v0.3.5 | (c) 2014 Thomas S. Bradford | interpoljs.io/license */

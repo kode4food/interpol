@@ -1,5 +1,7 @@
 # Change History
 
+## Version 0.3.5 - Documentation
+
 ## Version 0.3.4 - Consolidated Resolvers
 The Helper and System Resolvers have been merged into the Memory Resolver since it's all in memory anyway.  The default Memory Resolver's register/unregister functions are now exposed from the `interpol()` function , so registering a module of JavaScript helpers is easy:
 
