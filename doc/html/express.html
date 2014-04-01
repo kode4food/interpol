@@ -15,7 +15,8 @@
 
 <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./resolvers&#39;</span><span class="p">);</span>
 
-<span class="kd">var</span> <span class="nx">ModuleNameRegex</span> <span class="o">=</span> <span class="sr">/^[$_a-zA-Z][$_a-zA-Z0-9]*/</span>
+<span class="kd">var</span> <span class="nx">ModuleName</span> <span class="o">=</span> <span class="s2">&quot;[$_a-zA-Z][$_a-zA-Z0-9]*&quot;</span>
+  <span class="p">,</span> <span class="nx">ModulePathRegex</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="nx">ModuleName</span> <span class="o">+</span> <span class="s2">&quot;([/]&quot;</span> <span class="o">+</span> <span class="nx">ModuleName</span> <span class="o">+</span> <span class="s2">&quot;)*&quot;</span><span class="p">)</span>
   <span class="p">,</span> <span class="nx">nodeEnv</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">NODE_ENV</span> <span class="o">||</span> <span class="s1">&#39;development&#39;</span>
   <span class="p">,</span> <span class="nx">isDevelopment</span> <span class="o">=</span> <span class="nx">nodeEnv</span> <span class="o">===</span> <span class="s1">&#39;development&#39;</span><span class="p">;</span>
 
@@ -44,7 +45,7 @@ three properties recognized by the localOptions.</p>
   <span class="kd">function</span> <span class="nx">renderFile</span><span class="p">(</span><span class="nx">templatePath</span><span class="p">,</span> <span class="nx">options</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">try</span> <span class="p">{</span>
       <span class="kd">var</span> <span class="nx">basename</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">basename</span><span class="p">(</span><span class="nx">templatePath</span><span class="p">)</span>
-        <span class="p">,</span> <span class="nx">match</span> <span class="o">=</span> <span class="nx">ModuleNameRegex</span><span class="p">.</span><span class="nx">exec</span><span class="p">(</span><span class="nx">basename</span><span class="p">);</span>
+        <span class="p">,</span> <span class="nx">match</span> <span class="o">=</span> <span class="nx">ModulePathRegex</span><span class="p">.</span><span class="nx">exec</span><span class="p">(</span><span class="nx">basename</span><span class="p">);</span>
 
       <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">match</span> <span class="p">)</span> <span class="p">{</span>
         <span class="nx">callback</span><span class="p">(</span><span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s2">&quot;Filename must be a resolvable identifier&quot;</span><span class="p">),</span> <span class="kc">null</span><span class="p">);</span>
@@ -60,7 +61,9 @@ three properties recognized by the localOptions.</p>
           <span class="nx">callback</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">module</span><span class="p">(</span><span class="nx">options</span><span class="p">));</span>
           <span class="k">return</span><span class="p">;</span>
         <span class="p">}</span>
-      <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Last Resort</p></div></div><div class="code"><div class="wrapper">      <span class="nx">console</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="s2">&quot;Last resort compilation - Resolver not doing its job&quot;</span><span class="p">);</span>
+      <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Last Resort.  This happens if the Resolver finds nothing when
+trying to resolve a template.  It usually means that you've
+configured the Resolver incorrectly.</p></div></div><div class="code"><div class="wrapper">      <span class="nx">console</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="s2">&quot;Last resort compilation - Resolver not doing its job&quot;</span><span class="p">);</span>
       <span class="kd">var</span> <span class="nx">templateSource</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="nx">templatePath</span><span class="p">).</span><span class="nx">toString</span><span class="p">()</span>
         <span class="p">,</span> <span class="nx">template</span> <span class="o">=</span> <span class="nx">interpol</span><span class="p">(</span><span class="nx">templateSource</span><span class="p">,</span> <span class="nx">interpolOptions</span><span class="p">);</span>
 
