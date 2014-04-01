@@ -1,0 +1,32 @@
+<!DOCTYPE html><html lang="en"><head><title>writers/null</title></head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"><meta name="groc-relative-root" content="../"><meta name="groc-document-path" content="writers/null"><meta name="groc-project-path" content="lib/writers/null.js"><link rel="stylesheet" type="text/css" media="all" href="../assets/style.css"><script type="text/javascript" src="../assets/behavior.js"></script><body><div id="meta"><div class="file-path">lib/writers/null.js</div></div><div id="document"><div class="segment"><div class="code"><div class="wrapper"><span class="cm">/*</span>
+<span class="cm"> * Interpol (Templates Sans Facial Hair)</span>
+<span class="cm"> * Licensed under the MIT License</span>
+<span class="cm"> * see doc/LICENSE.md</span>
+<span class="cm"> *</span>
+<span class="cm"> * @author Thom Bradford (github/kode4food)</span>
+<span class="cm"> */</span>
+
+<span class="s2">&quot;use strict&quot;</span><span class="p">;</span>
+
+<span class="kd">var</span> <span class="nx">interpol</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../interpol&#39;</span><span class="p">)</span>
+  <span class="p">,</span> <span class="nx">util</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../util&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">freezeObject</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">freezeObject</span><span class="p">;</span>
+
+<span class="kd">function</span> <span class="nx">noOp</span><span class="p">()</span> <span class="p">{}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Creates a Null Writer.  All calls to this writer find their way into the
+bit bucket.  Its primary purpose is to support the background rendering of
+modules in order to yield their exported symbols.</p></div></div><div class="code"><div class="wrapper"> 
+<span class="kd">function</span> <span class="nx">createNullWriter</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">freezeObject</span><span class="p">({</span>
+    <span class="nx">startRender</span><span class="o">:</span> <span class="nx">noOp</span><span class="p">,</span>
+    <span class="nx">endRender</span><span class="o">:</span> <span class="nx">noOp</span><span class="p">,</span>
+    <span class="nx">startElement</span><span class="o">:</span> <span class="nx">noOp</span><span class="p">,</span>
+    <span class="nx">selfCloseElement</span><span class="o">:</span> <span class="nx">noOp</span><span class="p">,</span>
+    <span class="nx">endElement</span><span class="o">:</span> <span class="nx">noOp</span><span class="p">,</span>
+    <span class="nx">comment</span><span class="o">:</span> <span class="nx">noOp</span><span class="p">,</span>
+    <span class="nx">docType</span><span class="o">:</span> <span class="nx">noOp</span><span class="p">,</span>
+    <span class="nx">content</span><span class="o">:</span> <span class="nx">noOp</span><span class="p">,</span>
+    <span class="nx">rawContent</span><span class="o">:</span> <span class="nx">noOp</span>
+  <span class="p">});</span>
+<span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Exports</p></div></div><div class="code"><div class="wrapper"><span class="nx">exports</span><span class="p">.</span><span class="nx">createNullWriter</span> <span class="o">=</span> <span class="nx">createNullWriter</span><span class="p">;</span>
+<span class="nx">interpol</span><span class="p">.</span><span class="nx">createNullWriter</span> <span class="o">=</span> <span class="nx">createNullWriter</span><span class="p">;</span></div></div></div></div></body></html>

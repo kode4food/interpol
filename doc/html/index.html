@@ -1,0 +1,234 @@
+<!DOCTYPE html><html lang="en"><head><title>index</title></head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"><meta name="groc-relative-root" content=""><meta name="groc-document-path" content="index"><meta name="groc-project-path" content="README.md"><link rel="stylesheet" type="text/css" media="all" href="assets/style.css"><script type="text/javascript" src="assets/behavior.js"></script><body><div id="meta"><div class="file-path">README.md</div></div><div id="document"><div class="segment"><div class="comments "><div class="wrapper"><h1 id="interpol-templates-sans-facial-hair">Interpol (Templates Sans Facial Hair)</h1>
+
+<p><a href="http://badge.fury.io/gh/kode4food%2Finterpol"><img src="https://badge.fury.io/gh/kode4food%2Finterpol.png" alt="GitHub version" title="" /></a> <a href="https://travis-ci.org/kode4food/interpol"><img src="https://travis-ci.org/kode4food/interpol.png?branch=master" alt="Build Status" title="" /></a></p>
+
+<h2 id="introduction">Introduction</h2>
+
+<p>There are a lot of templating systems out there and they're all similar.  In truth, Interpol isn't so different, which might beg the question:</p>
+
+<pre><code>Why the hell another templating system?
+</code></pre>
+
+<p>The answer is simple.  I'm sick of looking at a template and feeling as though coding takes a back-seat to presentation.  The two roles seem to have blurred completely in recent years, so why the distinction?  I'm also sick of looking at a template and being unable to read the thing, even if it's one that I wrote yesterday.  That's why I developed Interpol.</p>
+
+<p>That said, Interpol's goals are modest:</p>
+
+<ul>
+<li>Provide easy to read/write templates that operate against JSON data</li>
+<li>Work well in both Node.js and the Browser</li>
+<li>Focus on an experience that favors dynamic content creation</li>
+</ul>
+
+<p>This last goal is important because the templates we're creating are often devoid of static content.  So why must we 'escape' into a dynamic content mode using braces or processing instructions?  Why don't we just start in that mode and stay there?</p>
+
+<pre><code class="html">from string import title
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;"a static title"&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    "this is a list with %length items" % list
+    &lt;ul&gt;
+    for item in list
+      &lt;li class=item.type id="id-%id" % item&gt;
+        item.name | title
+      &lt;/li&gt;
+    end
+    &lt;/ul&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<p>The only static element on this page was its title, and usually even that isn't static.  So what did we do to escape <em>it</em> for static rendering?  We wrapped it in quotes.  The rest of the page was a clean mixture of HTMLish elements and dynamic content.</p>
+
+<p>I say 'HTMLish' because it's not pure HTML.  The values of attributes are also evaluated.  For example:</p>
+
+<pre><code class="html">&lt;li class=item.type id="id-%id" % item&gt;
+</code></pre>
+
+<p><code>class=item.type</code> outputs a class attribute whose value is taken from the item.type property.  <code>id="id-%" % item.id</code> outputs an id attribute whose value is interpolated from the item.id property.</p>
+
+<p>That's all well and good, but what about the ability to reuse templates?  Well, to do that you define partials:</p>
+
+<pre><code class="html">from string import title as titleCase
+
+page("a dynamic title", myContent)
+
+def page(title, content)
+  &lt;html&gt;
+    &lt;head&gt;
+      &lt;title&gt;title | titleCase&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+      content()
+    &lt;/body&gt;
+  &lt;/html&gt;
+end
+
+def myContent
+  "this is a list with %length items" % list
+  renderList(list)
+end
+
+def renderList(list)
+  &lt;ul&gt;
+  for item in list
+    renderItem(item)
+  end
+  &lt;/ul&gt;
+end
+
+def renderItem(item)
+  &lt;li class=item.type id="id-%id" % item&gt;
+    item.name | titleCase
+  &lt;/li&gt;
+end
+</code></pre>
+
+<p>What if you use these partials in multiple templates?  Then you can move them out into their own modules, maybe called <code>layout.int</code> and <code>lists.int</code>.</p>
+
+<pre><code class="html"># this is layout.int
+from string import title as titleCase
+
+def page(title, content)
+  &lt;html&gt;
+    &lt;head&gt;
+      &lt;title&gt;title | titleCase&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+      content()
+    &lt;/body&gt;
+  &lt;/html&gt;
+end
+</code></pre>
+
+<pre><code class="html"># this is lists.int
+from string import title as titleCase
+
+def renderList(list)
+  &lt;ul&gt;
+  for item in list
+    renderItem(item)
+  end
+  &lt;/ul&gt;
+end
+
+def renderItem(item)
+  &lt;li class=item.type id="id-%id" % item&gt;
+    item.name | titleCase
+  &lt;/li&gt;
+end
+</code></pre>
+
+<p>And import them like so:</p>
+
+<pre><code class="html">from layout import page
+from lists import renderList
+
+page("a dynamic title", myContent)
+
+def myContent
+  "this is a list with %length items" % list
+  renderList(list)
+end
+</code></pre>
+
+<p>Easy as pie!  And your primary template gets right to the point.</p>
+
+<h2 id="current-status">Current Status</h2>
+
+<p>The grammar has stabilized.  The run-time library is still under development, particularly formatting generators.  Optimizations still need to be made.  Check <a href="doc/TODO.md">the TODO document</a> for an idea of what's to come.</p>
+
+<h2 id="installation">Installation</h2>
+
+<p>A pre-built version of the parser is already included.  If you'd like to build it yourself then you can do so by issuing the following command from the package's top-level directory:</p>
+
+<pre><code class="bash">npm install &amp;&amp; npm run-script build &amp;&amp; npm test
+</code></pre>
+
+<p>This will also install any development dependencies and run the nodeunit test suite.</p>
+
+<h2 id="inclusion-in-nodejs">Inclusion in Node.js</h2>
+
+<p>Assuming you have installed the Interpol package with npm, you can include it in your Node code with the following:</p>
+
+<pre><code class="javascript">var interpol = require('interpol');
+</code></pre>
+
+<h2 id="inclusion-in-express">Inclusion in Express</h2>
+
+<p>A basic View Engine for <a href="http://expressjs.com/">Express</a> is supported.  To set a development instance as the default engine, you can do the following:</p>
+
+<pre><code class="javascript">app.engine('int', require('interpol').__express);
+app.set('view engine', 'int');
+</code></pre>
+
+<p>If Express is started in development mode, the view engine will monitor the <code>./views</code> directory and continuously reload any modified files ending in <code>.int</code>.  Otherwise, the engine will expect to see pre-parsed files ending in <code>.int.json</code> and will <em>not</em> monitor the directory for changes.</p>
+
+<h2 id="inclusion-in-a-browser">Inclusion in a Browser</h2>
+
+<p>There are two ways to include Interpol templates in a browser-based application.  One is to parse/compile raw templates using the PEG.js parser.  Another is to compile the templates from pre-parsed JSON output.  The PEG.js parser is <em>massive</em> and slower than parsing JSON, but it may be necessary if you want to compile ad-hoc templates.</p>
+
+<p><em>Note:</em> The entry point function for Interpol in the browser is <em>always</em> named <code>$interpol()</code>.</p>
+
+<h3 id="compiling-pre-parsed-json">Compiling Pre-Parsed JSON</h3>
+
+<p>The <code>$interpol()</code> function will accept a pre-parsed JSON object instead of a JavaScript string.  This will allow you to bypass the loading of the PEG.js parser.  Instead, you can load pre-parsed templates from your server for faster compilation.</p>
+
+<p>You can also invoke the compiler by calling the <code>$interpol.compile(Object)</code> function.</p>
+
+<pre><code class="html">&lt;script src="build/interpol.min.js" type="text/javascript"&gt;&lt;/script&gt;
+</code></pre>
+
+<p><em>Note:</em> The Interpol command-line interface generates pre-parsed JSON.  You can install this globally using <code>npm -g install</code> and can then invoke the tools at your terminal by typing <code>interpol</code>.</p>
+
+<h3 id="including-the-pegjs-parser">Including the PEG.js Parser</h3>
+
+<p>If you <em>must</em> parse raw templates in the browser, you will need to load the version of Interpol that includes its PEG.js parser.</p>
+
+<pre><code class="html">&lt;script src="build/interpol-parser.min.js" type="text/javascript"&gt;&lt;/script&gt;
+</code></pre>
+
+<h2 id="using-the-library">Using the Library</h2>
+
+<p>To compile a raw template into a closure, invoke <code>$interpol(String)</code> as a function.  Provide to it a string containing your template:</p>
+
+<pre><code class="javascript">var compiledTemplate = $interpol(someTemplateString);
+</code></pre>
+
+<p>This will generate a closure that takes up to two parameters, both of which are optional.  The first is the data that your template renders.  The second is an options object used to override the content writer interface.  By default, the library writes to a JavaScript string.</p>
+
+<pre><code class="javascript">console.log(
+  compiledTemplate({
+    list: [
+      { type: 'task', id: 1, name: 'This is my first task' },
+      { type: 'story', id: 2, name: 'This is my first story' }
+    ]
+  })
+);
+</code></pre>
+
+<h2 id="license-mit-license">License (MIT License)</h2>
+
+<p>Copyright (c) 2014 Thomas S. Bradford</p>
+
+<p>Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or
+sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:</p>
+
+<p>The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.</p>
+
+<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.</p></div></div></div></div></body></html>
