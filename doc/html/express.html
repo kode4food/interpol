@@ -13,6 +13,8 @@
   <span class="p">,</span> <span class="nx">interpol</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./interpol&#39;</span><span class="p">)</span>
   <span class="p">,</span> <span class="nx">util</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./util&#39;</span><span class="p">);</span>
 
+<span class="kd">var</span> <span class="nx">freezeObject</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">freezeObject</span><span class="p">;</span>
+
 <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./resolvers&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">ModuleName</span> <span class="o">=</span> <span class="s2">&quot;[$_a-zA-Z][$_a-zA-Z0-9]*&quot;</span>
@@ -30,22 +32,26 @@ three properties recognized by the localOptions.</p>
 <ul>
 <li><p><strong>localOptions is optional and must be an Object.</strong><br/>(Object for configuring the Engine)</p>
 
-<ul><li><p><strong>localOptions.path is optional and must be a String.</strong><br/>(the directory for resolving modules)</p></li>
+<ul><li><p><strong>localOptions.path is optional and must be a String.</strong><br/>(the fallback path for resolving modules)</p></li>
 <li><p><strong>localOptions.monitor is optional and must be a boolean.</strong><br/>(monitor files for changes)</p></li>
 <li><p><strong>localOptions.compile is optional and must be a boolean.</strong><br/>(Parse raw templates)</p></li></ul></li>
 </ul></div></div><div class="code"><div class="wrapper"><span class="kd">function</span> <span class="nx">createExpressEngine</span><span class="p">(</span><span class="nx">localOptions</span><span class="p">)</span> <span class="p">{</span>
   <span class="kd">var</span> <span class="nx">engineOptions</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">mixin</span><span class="p">({},</span> <span class="nx">DefaultOptions</span><span class="p">,</span> <span class="nx">localOptions</span> <span class="o">||</span> <span class="p">{})</span>
     <span class="p">,</span> <span class="nx">defaultPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">cwd</span><span class="p">(),</span> <span class="s1">&#39;views&#39;</span><span class="p">)</span>
-    <span class="p">,</span> <span class="nx">resOptions</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">mixin</span><span class="p">({</span> <span class="nx">path</span><span class="o">:</span> <span class="nx">defaultPath</span> <span class="p">},</span> <span class="nx">engineOptions</span><span class="p">)</span>
-    <span class="p">,</span> <span class="nx">resolver</span> <span class="o">=</span> <span class="nx">interpol</span><span class="p">.</span><span class="nx">createFileResolver</span><span class="p">(</span><span class="nx">resOptions</span><span class="p">)</span>
-    <span class="p">,</span> <span class="nx">resolvers</span> <span class="o">=</span> <span class="p">[</span><span class="nx">resolver</span><span class="p">].</span><span class="nx">concat</span><span class="p">(</span><span class="nx">interpol</span><span class="p">.</span><span class="nx">resolvers</span><span class="p">());</span>
+    <span class="p">,</span> <span class="nx">optionsCache</span> <span class="o">=</span> <span class="p">{};</span>
 
   <span class="k">return</span> <span class="nx">renderFile</span><span class="p">;</span>
 
   <span class="kd">function</span> <span class="nx">renderFile</span><span class="p">(</span><span class="nx">templatePath</span><span class="p">,</span> <span class="nx">options</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">try</span> <span class="p">{</span>
-      <span class="kd">var</span> <span class="nx">basename</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">basename</span><span class="p">(</span><span class="nx">templatePath</span><span class="p">)</span>
-        <span class="p">,</span> <span class="nx">match</span> <span class="o">=</span> <span class="nx">ModulePathRegex</span><span class="p">.</span><span class="nx">exec</span><span class="p">(</span><span class="nx">basename</span><span class="p">);</span>
+      <span class="kd">var</span> <span class="nx">viewsPath</span> <span class="o">=</span> <span class="nx">options</span><span class="p">.</span><span class="nx">settings</span><span class="p">.</span><span class="nx">views</span> <span class="o">||</span> <span class="nx">defaultPath</span>
+        <span class="p">,</span> <span class="nx">modulePath</span> <span class="o">=</span> <span class="nx">templatePath</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="nx">viewsPath</span><span class="p">.</span><span class="nx">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">,</span> <span class="nx">interpolOptions</span> <span class="o">=</span> <span class="nx">optionsCache</span><span class="p">[</span><span class="nx">viewsPath</span><span class="p">]</span>
+        <span class="p">,</span> <span class="nx">match</span> <span class="o">=</span> <span class="nx">ModulePathRegex</span><span class="p">.</span><span class="nx">exec</span><span class="p">(</span><span class="nx">modulePath</span><span class="p">);</span>
+
+      <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">interpolOptions</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="nx">interpolOptions</span> <span class="o">=</span> <span class="nx">createOptions</span><span class="p">(</span><span class="nx">viewsPath</span><span class="p">);</span>
+      <span class="p">}</span>
 
       <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">match</span> <span class="p">)</span> <span class="p">{</span>
         <span class="nx">callback</span><span class="p">(</span><span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s2">&quot;Filename must be a resolvable identifier&quot;</span><span class="p">),</span> <span class="kc">null</span><span class="p">);</span>
@@ -53,7 +59,7 @@ three properties recognized by the localOptions.</p>
       <span class="p">}</span>
 
       <span class="kd">var</span> <span class="nx">moduleName</span> <span class="o">=</span> <span class="nx">match</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="p">,</span> <span class="nx">interpolOptions</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">resolvers</span><span class="o">:</span> <span class="nx">resolvers</span><span class="p">,</span> <span class="nx">cache</span><span class="o">:</span> <span class="o">!</span><span class="nx">isDevelopment</span> <span class="p">};</span>
+        <span class="p">,</span> <span class="nx">resolvers</span> <span class="o">=</span> <span class="nx">interpolOptions</span><span class="p">.</span><span class="nx">resolvers</span><span class="p">;</span>
 
       <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="nx">resolvers</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span><span class="o">--</span> <span class="p">)</span> <span class="p">{</span>
         <span class="kd">var</span> <span class="nx">module</span> <span class="o">=</span> <span class="nx">resolvers</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">resolveModule</span><span class="p">(</span><span class="nx">moduleName</span><span class="p">,</span> <span class="nx">interpolOptions</span><span class="p">);</span>
@@ -61,17 +67,25 @@ three properties recognized by the localOptions.</p>
           <span class="nx">callback</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">module</span><span class="p">(</span><span class="nx">options</span><span class="p">));</span>
           <span class="k">return</span><span class="p">;</span>
         <span class="p">}</span>
-      <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Last Resort.  This happens if the Resolver finds nothing when
-trying to resolve a template.  It usually means that you've
-configured the Resolver incorrectly.</p></div></div><div class="code"><div class="wrapper">      <span class="nx">console</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="s2">&quot;Last resort compilation - Resolver not doing its job&quot;</span><span class="p">);</span>
-      <span class="kd">var</span> <span class="nx">templateSource</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="nx">templatePath</span><span class="p">).</span><span class="nx">toString</span><span class="p">()</span>
-        <span class="p">,</span> <span class="nx">template</span> <span class="o">=</span> <span class="nx">interpol</span><span class="p">(</span><span class="nx">templateSource</span><span class="p">,</span> <span class="nx">interpolOptions</span><span class="p">);</span>
+      <span class="p">}</span>
 
-      <span class="nx">callback</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">template</span><span class="p">(</span><span class="nx">options</span><span class="p">));</span>
+      <span class="nx">callback</span><span class="p">(</span><span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s2">&quot;Template not resolved: &quot;</span> <span class="o">+</span> <span class="nx">templatePath</span><span class="p">),</span> <span class="kc">null</span><span class="p">);</span>
     <span class="p">}</span>
     <span class="k">catch</span> <span class="p">(</span> <span class="nx">err</span> <span class="p">)</span> <span class="p">{</span>
       <span class="nx">callback</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="kc">null</span><span class="p">);</span>
     <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="kd">function</span> <span class="nx">createOptions</span><span class="p">(</span><span class="nx">viewsPath</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">resOptions</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">mixin</span><span class="p">({</span> <span class="nx">path</span><span class="o">:</span> <span class="nx">viewsPath</span> <span class="p">},</span> <span class="nx">engineOptions</span><span class="p">)</span>
+      <span class="p">,</span> <span class="nx">resolver</span> <span class="o">=</span> <span class="nx">interpol</span><span class="p">.</span><span class="nx">createFileResolver</span><span class="p">(</span><span class="nx">resOptions</span><span class="p">);</span>
+
+    <span class="kd">var</span> <span class="nx">options</span> <span class="o">=</span> <span class="nx">optionsCache</span><span class="p">[</span><span class="nx">viewsPath</span><span class="p">]</span> <span class="o">=</span> <span class="nx">freezeObject</span><span class="p">({</span>
+      <span class="nx">resolvers</span><span class="o">:</span> <span class="nx">freezeObject</span><span class="p">([</span><span class="nx">resolver</span><span class="p">].</span><span class="nx">concat</span><span class="p">(</span><span class="nx">interpol</span><span class="p">.</span><span class="nx">resolvers</span><span class="p">())),</span>
+      <span class="nx">cache</span><span class="o">:</span> <span class="o">!</span><span class="nx">isDevelopment</span>
+    <span class="p">});</span>
+
+    <span class="k">return</span> <span class="nx">options</span><span class="p">;</span>
   <span class="p">}</span>
 <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Set default View Engine</p></div></div><div class="code"><div class="wrapper"><span class="nx">interpol</span><span class="p">.</span><span class="nx">__express</span> <span class="o">=</span> <span class="nx">createExpressEngine</span><span class="p">();</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Exported Functions</p></div></div><div class="code"><div class="wrapper"><span class="nx">exports</span><span class="p">.</span><span class="nx">createExpressEngine</span> <span class="o">=</span> <span class="nx">createExpressEngine</span><span class="p">;</span>
 <span class="nx">interpol</span><span class="p">.</span><span class="nx">createExpressEngine</span> <span class="o">=</span> <span class="nx">createExpressEngine</span><span class="p">;</span></div></div></div></div></body></html>

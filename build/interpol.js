@@ -47,13 +47,15 @@ var Digits = "[1-9][0-9]*"
 
 var ParamRegex = new RegExp(Params, "m");
 
-// Builds a closure that will be used internally to support Interpol's
-// interpolation operations.  The returned closure may attach a flag
-// `__requiresContext` that identifies it as requiring an Interpol
-// context to fulfill its formatting.  This usually occurs when the
-// pipe `|` operator is used.
-//
-// * formatStr:String - The String to be used in performing interpolation
+/**
+ * Builds a closure that will be used internally to support Interpol's
+ * interpolation operations.  The returned closure may attach a flag
+ * `__requiresContext` that identifies it as requiring an Interpol
+ * context to fulfill its formatting.  This usually occurs when the
+ * pipe `|` operator is used.
+ *
+ * @param {String} formatStr the String to be used for interpolation
+ */
 
 function buildTemplate(formatStr) {
   var funcs = []
@@ -171,7 +173,7 @@ function buildTemplate(formatStr) {
   }
 }
 
-// Exports
+// Exported Functions
 exports.buildTemplate = buildTemplate;
 
 },{"./util":10,"./writers/null":13}],3:[function(require,module,exports){
@@ -199,7 +201,7 @@ var isArray = util.isArray
   , stringify = util.stringify
   , buildTemplate = format.buildTemplate;
 
-var CURRENT_VERSION = "0.3.4"
+var CURRENT_VERSION = "0.3.5"
   , TemplateCacheMax = 256
   , globalOptions = { writer: null, errorCallback: null }
   , globalContext = {}
@@ -221,12 +223,14 @@ interpol.compile = compile;
 
 // ## Core Interpol Implementation
 
-// Main Interpol entry point.  Compiles a template and returns a closure
-// for rendering it.  The template can either be an unparsed String or a
-// pre-parsed JSON Object.
-//
-// * template:(String|Object) - The template to be compiled
-// * options:Object? - Configuration Object passed to the compile step
+/**
+ * Main Interpol entry point.  Compiles a template and returns a closure
+ * for rendering it.  The template can either be an unparsed String or a
+ * pre-parsed JSON Object.
+ *
+ * @param {String|Object} template the template to be compiled
+ * @param {Object} [options] configuration Object passed to the compile step
+ */
 
 function interpol(template, options) {
   var parseOutput = null;
@@ -242,19 +246,23 @@ function interpol(template, options) {
   return compile(parseOutput, options);
 }
 
-// Convenience function to compile and execute a template against a context
-// Object and options.  Not generally recommended.
+/**
+ * Convenience function to compile and execute a template against a context
+ * Object and options.  Not generally recommended.
+ */
 
 function evaluate(script, obj, options) {
   var compiled = interpol(script, options);
   return compiled(obj, options);
 }
 
-// Invokes the PEG.js parser against the specified template and returns a
-// pre-parsed JSON instance.  The PEG.js parser has to be loaded for this
-// to work.
-//
-// * template:String - The Interpol Template to be parsed
+/**
+ * Invokes the PEG.js parser against the specified template and returns a
+ * pre-parsed JSON instance.  The PEG.js parser has to be loaded for this
+ * to work.
+ *
+ * @param {String} template the Interpol Template to be parsed
+ */
 
 function parse(template) {
   if ( !parser ) {
@@ -268,18 +276,20 @@ function parse(template) {
   return result;
 }
 
-// Converts a pre-parsed JSON instance to an evaluative closure.
-//
-// * parseOutput:Object - The pre-parsed JSON to compile
-//
-// * localOptions:Object? - Object for configuring the closure, including:
-//   * resolvers:[Resolver]? - Resolvers to use for performing imports
-//   * cache:boolean? - Whether or not to cache resolved imports
+/**
+ * Converts a pre-parsed JSON instance to an evaluative closure.
+ *
+ * @param {Object} parseOutput the pre-parsed JSON to compile
+ * @param {Object} [localOptions] Object for configuring the closure
+ * @param {[Resolver]} [resolvers] Resolvers to use for performing imports
+ * @param {boolean} [cache] whether or not to cache resolved imports
+ */
 
 function compile(parseOutput, localOptions) {
   var createArrayWriter = interpol.createArrayWriter
     , NullWriter = interpol.createNullWriter();
 
+  // A lookup table of code-path generators
   var Evaluators = freezeObject({
     im: createImportEvaluator,
     de: createPartialEvaluator,
@@ -314,6 +324,11 @@ function compile(parseOutput, localOptions) {
     se: createSelfEvaluator
   });
 
+  // literals are stored in the `l` property of parseOutput, while the parse
+  // tree is stored in the `n` property.  Since a parsed Interpol module
+  // is simply a set of statements, we can create a statementsEvaluator and
+  // call it a day.
+
   var lits = parseOutput.l
     , compilerOptions = mixin({}, globalOptions, localOptions)
     , cacheModules = compilerOptions.cache
@@ -325,20 +340,23 @@ function compile(parseOutput, localOptions) {
   compiledTemplate.exports = templateExports;
   return freezeObject(compiledTemplate);
 
-  // The result of a template compilation is this closure.  `obj` is the
-  // Object to be used as a working context, while `localOptions` are
-  // options to be applied to a particular rendering.
-  //
-  // * obj:Object - The context Object to be rendered
-  //
-  // * localOptions:Object? - Object for configuring the current render
-  //   * writer:Writer? - A Writer to use (otherwise ArrayWriter is created)
-  //   * errorCallback:Function? - A callback for errors (otherwise throw them)
+  /**
+   * The result of a template compilation is this closure.  `obj` is the
+   * Object to be used as a working context, while `localOptions` are
+   * options to be applied to a particular rendering.  If no `errorCallback`
+   * is provided, calls to this function may throw errors.
+   *
+   * @param {Object} obj the context Object to be rendered
+   * @param {Object} [localOptions] Object for configuring the current render
+   * @param {Writer} [localOptions.writer] an alternative Writer to use
+   * @param {Function} [localOptions.errorCallback] a callback for errors 
+   */
 
   function compiledTemplate(obj, localOptions) {
     var ctx = mixin(extendContext(globalContext), obj)
       , processingOptions = mixin({}, globalOptions, localOptions);
 
+    // If no Writer is provided, create a throw-away Array Writer
     var writer = processingOptions.writer || createArrayWriter();
 
     try {
@@ -356,23 +374,34 @@ function compile(parseOutput, localOptions) {
     }
   }
 
-  // Returns a preconfigured version of the compiled template with a
-  // default obj and options.  Convenient if you're doing DOM writing
-  // or need to repeatedly call the template with the same Object.
+  /**
+   * Returns a preconfigured version of the compiled template with a
+   * default obj and options.  Convenient if you're doing DOM writing
+   * or need to repeatedly call the template with the same Object.
+   *
+   * @param {Object} defaultObj default context Object to use
+   * @param {Object} defaultOptions default Options to provide
+   */
 
   function configureTemplate(defaultObj, defaultOptions) {
     return configure(compiledTemplate, 0, slice.call(arguments, 0));
   }
 
-  // Returns the symbols (partials and assignments) that the compiled
-  // template will product against an empty `{}` context Object.  This is
-  // the method by which Interpol imports work.  Partials produced with
-  // this method still have access to the global context.
-
+  /**
+   * Returns the symbols (partials and assignments) that the compiled
+   * template will product against an empty `{}` context Object.  This is
+   * the method by which Interpol imports work.  Partials produced with
+   * this method still have access to the global context.
+   */
+   
   function templateExports() {
     if ( exportedContext ) {
       return exportedContext;
     }
+
+    // `__interpolExports` is an indicator to evaluators that we're
+    // processing exports and so they can be a bit lax about reporting
+    // errors or resolving imports
 
     exportedContext = extendContext(globalContext);
     exportedContext.__interpolExports = true;
@@ -385,6 +414,7 @@ function compile(parseOutput, localOptions) {
   // ## Evaluator Generation Utilities
 
   function wrapLiteral(value) {
+    // if value is already a Function, we don't have to wrap it
     if ( typeof value === 'function' ) {
       return value;
     }
@@ -395,6 +425,7 @@ function compile(parseOutput, localOptions) {
     }
   }
 
+  // Given an array of nodes, create evaluators for each element
   function wrapArrayEvaluators(arrayNodes) {
     if ( !arrayNodes ) {
       return [];
@@ -407,6 +438,7 @@ function compile(parseOutput, localOptions) {
     return result;
   }
 
+  // Given an array of literal ids, expand them to real values
   function expandLiterals(literalArray) {
     if ( !literalArray ) {
       return [];
@@ -419,6 +451,8 @@ function compile(parseOutput, localOptions) {
     return result;
   }
 
+  // wrap evaluators for processing HTML attributes, including the attribute
+  // names, since they can also be represented by expressions
   function wrapAttributeEvaluators(keyValueNodes) {
     if ( !keyValueNodes ) {
       return [];
@@ -433,6 +467,7 @@ function compile(parseOutput, localOptions) {
     return result;
   }
 
+  // wrap evaluators for local variable assignments, name is always a literal
   function wrapAssignmentEvaluators(assignNodes) {
     if ( !assignNodes ) {
       return [];
@@ -446,6 +481,15 @@ function compile(parseOutput, localOptions) {
     }
     return result;
   }
+
+  /**
+   * The busiest function in the 'compile' process.  createEvaluator
+   * resolves the evaluator generation function to use by taking the
+   * first element of the node array.  It then passes the rest of the
+   * node's elements as arguments to that generation function.
+   *
+   * @param {Array|Number} node Either an Array or a Literal Id
+   */
 
   function createEvaluator(node) {
     if ( !isArray(node) ) {
@@ -482,6 +526,16 @@ function compile(parseOutput, localOptions) {
     }
   }
 
+  /**
+   * Depending on the value types for `left` and `right`, will return an
+   * index into an Array for choosing the best code-path to take in
+   * evaluating an operator.  0=both are literals, 1=left is a function,
+   * 2=right is a function, 3=both are functions.
+   *
+   * @param {Function|Mixed} left the left operand
+   * @param {Function|Mixed} right the right operand
+   */
+
   function getBinaryType(left, right) {
     var l = typeof left === 'function' ? 1 : 0
       , r = typeof right === 'function' ? 2 : 0;
@@ -490,6 +544,7 @@ function compile(parseOutput, localOptions) {
 
   // ## Evaluator Generation
 
+  // generate an evaluator to deal with 'from' and 'import' statements
   function createImportEvaluator(fromNodes) {
     var importList = []
       , ilen = fromNodes.length - 1
@@ -524,9 +579,12 @@ function compile(parseOutput, localOptions) {
     return importEvaluator;
 
     function importEvaluator(ctx, writer) {
+      // have to call it like this because we can't override importEvaluator
+      // after it has been returned to a parent evaluator
       evaluator(ctx, writer);
     }
 
+    // if moduleCaching is on, we use the cachable form of the evaluator
     function cacheableEvaluator(ctx, writer) {
       if ( ctx.__interpolExports ) {
         dynamicEvaluator(ctx, writer);
@@ -539,6 +597,7 @@ function compile(parseOutput, localOptions) {
       evaluator(ctx);
     }
 
+    // if moduleCaching is off, we resolve the exports every time
     function dynamicEvaluator(ctx, writer) {
       for ( var i = ilen; i >= 0; i-- ) {
         var importItem = importList[i]
@@ -560,6 +619,9 @@ function compile(parseOutput, localOptions) {
       }
     }
 
+    // where exports are actually resolved. raiseError will be false
+    // if we're in the process of evaluating a template for the purpose
+    // of yielding its exports
     function resolveExports(moduleName, raiseError) {
       var module = null;
       for ( var i = resolvers.length - 1; i >= 0; i-- ) {
@@ -575,6 +637,7 @@ function compile(parseOutput, localOptions) {
     }
   }
 
+  // generate an evaluator to represent a partial and its associated closure
   function createPartialEvaluator(nameLiteral, paramDefs, statementNodes) {
     var name = lits[nameLiteral]
       , params = [null].concat(expandLiterals(paramDefs))
@@ -584,9 +647,11 @@ function compile(parseOutput, localOptions) {
     return closureEvaluator;
 
     function closureEvaluator(ctx /*, writer */) {
+      // just assign the closure to a local variable
       bodyEvaluator.__interpolFunction = true;
       ctx[name] = bodyEvaluator;
 
+      // the function that will be called
       function bodyEvaluator(writer) {
         var newCtx = extendContext(ctx);
         newCtx[name] = bodyEvaluator;
@@ -598,6 +663,7 @@ function compile(parseOutput, localOptions) {
     }
   }
 
+  // generate an evaluator to perform a function or partial call
   function createCallEvaluator(memberNode, argNodes) {
     var member = createEvaluator(memberNode)
       , args = [null].concat(wrapArrayEvaluators(argNodes))
@@ -605,6 +671,10 @@ function compile(parseOutput, localOptions) {
 
     return callEvaluator;
 
+    // If we're in the process of gathering module exports, and the called
+    // function can't be resolved, then just exit without exploding.
+    // What happens inside of a function probably shouldn't influence the
+    // top-level export context anyway
     function callEvaluator(ctx, writer) {
       var func = member(ctx, writer);
 
@@ -624,6 +694,7 @@ function compile(parseOutput, localOptions) {
     }
   }
 
+  // generate an evaluator to perform local variable assignment
   function createAssignEvaluator(assignmentDefs) {
     var assigns = wrapAssignmentEvaluators(assignmentDefs).reverse()
       , alen = assigns.length - 1;
@@ -638,6 +709,7 @@ function compile(parseOutput, localOptions) {
     }
   }
 
+  // generate an evaluator to write an html opening tag
   function createOpenTagEvaluator(nameNode, attributeDefs, selfClose) {
     var name = createEvaluator(nameNode)
       , attributes = wrapAttributeEvaluators(attributeDefs).reverse()
@@ -690,6 +762,7 @@ function compile(parseOutput, localOptions) {
     }
   }
 
+  // generate an evaluator to write an html closing tag
   function createCloseTagEvaluator(nameNode) {
     var name = createEvaluator(nameNode)
       , name_func = typeof name === 'function';
@@ -705,6 +778,7 @@ function compile(parseOutput, localOptions) {
     }
   }
 
+  // generate an evaluator to write an html comment
   function createCommentTagEvaluator(contentLiteral) {
     var content = lits[contentLiteral];
 
@@ -715,6 +789,7 @@ function compile(parseOutput, localOptions) {
     }
   }
 
+  // generate an evaluator to write an html5 doctype
   function createDocTypeEvaluator(rootElemLiteral) {
     var rootElem = lits[rootElemLiteral];
 
@@ -725,6 +800,7 @@ function compile(parseOutput, localOptions) {
     }
   }
 
+  // generate an evaluator that writes the result of an expression
   function createOutputEvaluator(exprNode) {
     var $1 = createEvaluator(exprNode);
 
@@ -743,6 +819,7 @@ function compile(parseOutput, localOptions) {
     }
   }
 
+  // generate an evaluator that performs for looping over ranges
   function createForEvaluator(rangeNodes, statementNodes) {
     var ranges = wrapAssignmentEvaluators(rangeNodes).reverse()
       , rlen = ranges.length
@@ -751,6 +828,7 @@ function compile(parseOutput, localOptions) {
     return forEvaluator;
 
     function forEvaluator(ctx, writer) {
+      // The entire for loop is only a single nested context
       var newCtx = extendContext(ctx);
       processRange(rlen - 1);
 
@@ -776,6 +854,7 @@ function compile(parseOutput, localOptions) {
     }
   }
 
+  // generate a conditional evaluator (if/else or ternary)
   function createConditionalEvaluator(conditionNode, trueNodes, falseNodes) {
     var $1 = createEvaluator(conditionNode)
       , $2 = createStatementsEvaluator(trueNodes)
@@ -794,6 +873,7 @@ function compile(parseOutput, localOptions) {
     function condBoth(c, w) { return $1(c, w) ? $2(c, w) : $3(c, w); }
   }
 
+  // generate an 'or' evaluator, including short circuiting
   function createOrEvaluator(leftNode, rightNode) {
     var $1 = createEvaluator(leftNode)
       , $2 = createEvaluator(rightNode);
@@ -815,6 +895,7 @@ function compile(parseOutput, localOptions) {
     }
   }
 
+  // generate an 'and' evaluator, including short circuiting
   function createAndEvaluator(leftNode, rightNode) {
     var $1 = createEvaluator(leftNode)
       , $2 = createEvaluator(rightNode);
@@ -836,6 +917,7 @@ function compile(parseOutput, localOptions) {
     }
   }
 
+  // generate an equality evaluator
   function createEqEvaluator(leftNode, rightNode) {
     var $1 = createEvaluator(leftNode)
       , $2 = createEvaluator(rightNode)
@@ -848,6 +930,7 @@ function compile(parseOutput, localOptions) {
     function eqBoth(c, w) { return $1(c, w) == $2(c, w); }
   }
 
+  // generate an inequality evaluator
   function createNeqEvaluator(leftNode, rightNode) {
     var $1 = createEvaluator(leftNode)
       , $2 = createEvaluator(rightNode)
@@ -860,6 +943,7 @@ function compile(parseOutput, localOptions) {
     function neqBoth(c, w) { return $1(c, w) != $2(c, w); }
   }
 
+  // generate a greater-than evaluator
   function createGtEvaluator(leftNode, rightNode) {
     var $1 = createEvaluator(leftNode)
       , $2 = createEvaluator(rightNode)
@@ -872,6 +956,7 @@ function compile(parseOutput, localOptions) {
     function gtBoth(c, w) { return $1(c, w) > $2(c, w); }
   }
 
+  // generate a greater-than or equal to evaluator
   function createGteEvaluator(leftNode, rightNode) {
     var $1 = createEvaluator(leftNode)
       , $2 = createEvaluator(rightNode)
@@ -884,6 +969,7 @@ function compile(parseOutput, localOptions) {
     function gteBoth(c, w) { return $1(c, w) >= $2(c, w); }
   }
 
+  // generate a less-than evaluator
   function createLtEvaluator(leftNode, rightNode) {
     var $1 = createEvaluator(leftNode)
       , $2 = createEvaluator(rightNode)
@@ -896,6 +982,7 @@ function compile(parseOutput, localOptions) {
     function ltBoth(c, w) { return $1(c, w) < $2(c, w); }
   }
 
+  // generate a less-than or equal to evaluator
   function createLteEvaluator(leftNode, rightNode) {
     var $1 = createEvaluator(leftNode)
       , $2 = createEvaluator(rightNode)
@@ -908,6 +995,7 @@ function compile(parseOutput, localOptions) {
     function lteBoth(c, w) { return $1(c, w) <= $2(c, w); }
   }
 
+  // generate an addition evaluator
   function createAddEvaluator(leftNode, rightNode) {
     var $1 = createEvaluator(leftNode)
       , $2 = createEvaluator(rightNode)
@@ -920,6 +1008,7 @@ function compile(parseOutput, localOptions) {
     function addBoth(c, w) { return $1(c, w) + $2(c, w); }
   }
 
+  // generate a subtraction evaluator
   function createSubEvaluator(leftNode, rightNode) {
     var $1 = createEvaluator(leftNode)
       , $2 = createEvaluator(rightNode)
@@ -932,6 +1021,7 @@ function compile(parseOutput, localOptions) {
     function subBoth(c, w) { return $1(c, w) - $2(c, w); }
   }
 
+  // generate a multiplication evaluator
   function createMulEvaluator(leftNode, rightNode) {
     var $1 = createEvaluator(leftNode)
       , $2 = createEvaluator(rightNode)
@@ -944,6 +1034,7 @@ function compile(parseOutput, localOptions) {
     function mulBoth(c, w) { return $1(c, w) * $2(c, w); }
   }
 
+  // generate a division evaluator
   function createDivEvaluator(leftNode, rightNode) {
     var $1 = createEvaluator(leftNode)
       , $2 = createEvaluator(rightNode)
@@ -956,6 +1047,7 @@ function compile(parseOutput, localOptions) {
     function divBoth(c, w) { return $1(c, w) / $2(c, w); }
   }
 
+  // generate a remainder evaluator
   function createModEvaluator(leftNode, rightNode) {
     var $1 = createEvaluator(leftNode)
       , $2 = createEvaluator(rightNode)
@@ -967,7 +1059,8 @@ function compile(parseOutput, localOptions) {
     function modRight(c, w) { return $1 % $2(c, w); }
     function modBoth(c, w) { return $1(c, w) % $2(c, w); }
   }
-  
+
+  // generate an interpolation evaluator
   function createFormatEvaluator(formatNode, exprNode) {
     var $1 = createEvaluator(formatNode)
       , $1_func = typeof $1 === 'function'
@@ -976,6 +1069,7 @@ function compile(parseOutput, localOptions) {
 
     var template = null;
     if ( !$1_func ) {
+      // we can cache everything if the left operand is a literal
       template = buildTemplate($1);
       if ( $2_func ) {
         return builtExpressionEvaluator;
@@ -989,6 +1083,7 @@ function compile(parseOutput, localOptions) {
     var cache = {}
       , cacheCount = 0;
 
+    // otherwise, we have to evaluate the interpolation every time
     return dynamicFormatEvaluator;
 
     function builtExpressionEvaluator(ctx, writer) {
@@ -999,6 +1094,10 @@ function compile(parseOutput, localOptions) {
       return template($2, ctx);
     }
 
+    // If we exhaust TemplateCacheMax, then something is clearly wrong here
+    // and we're not using the evaluator for localized strings.  If we keep
+    // caching, we're going to start leaking memory.  So this evaluator will
+    // blow away the cache and start over
     function dynamicFormatEvaluator(ctx, writer) {
       var formatStr = $1(ctx, writer)
         , data = $2_func ? $2(ctx, writer) : $2
@@ -1006,12 +1105,10 @@ function compile(parseOutput, localOptions) {
 
       if ( !dynamicTemplate ) {
         if ( cacheCount >= TemplateCacheMax ) {
-          // Something is clearly wrong here and we're not using this for
-          // localized strings.  If we keep caching, we're going to start
-          // leaking memory.  So blow away the cache and start over
           cache = {};
           cacheCount = 0;
         }
+        // build and cache the dynamic template
         dynamicTemplate = buildTemplate(formatStr);
         cache[formatStr] = dynamicTemplate;
         cacheCount++;
@@ -1021,6 +1118,7 @@ function compile(parseOutput, localOptions) {
     }
   }
 
+  // generate a logical 'not' evaluator
   function createNotEvaluator(node) {
     var $1 = createEvaluator(node);
     return typeof $1 === 'function' ? notEvaluator : !$1;
@@ -1030,6 +1128,7 @@ function compile(parseOutput, localOptions) {
     }
   }
 
+  // generate a mathematic negation evaluator
   function createNegEvaluator(node) {
     var $1 = createEvaluator(node);
     return typeof $1 === 'function' ? negEvaluator : -$1;
@@ -1039,11 +1138,13 @@ function compile(parseOutput, localOptions) {
     }
   }
 
+  // generate an array or object member access evaluator
   function createMemberEvaluator(parentNode, elemNode) {
     var $1 = createEvaluator(parentNode)
       , $2 = createEvaluator(elemNode)
       , type = getBinaryType($1, $2);
 
+    // do this if the left operand is a literal, though it shouldn't be
     if ( ( type === 0 || type === 2 ) &&
          ( typeof $1 === 'undefined' || $1 === null ) ) {
       return null;
@@ -1072,6 +1173,7 @@ function compile(parseOutput, localOptions) {
     }
   }
 
+  // generate a tuple (array) evaluator
   function createTupleEvaluator(elemNodes) {
     var elems = wrapArrayEvaluators(elemNodes)
       , elen = elems.length;
@@ -1087,6 +1189,7 @@ function compile(parseOutput, localOptions) {
     }
   }
 
+  // generate a local variable retrieval evaluator
   function createIdEvaluator(nameLiteral) {
     var name = lits[nameLiteral];
     return idEvaluator;
@@ -1096,6 +1199,7 @@ function compile(parseOutput, localOptions) {
     }
   }
 
+  // generate a self-reference evaluator
   function createSelfEvaluator() {
     return selfEvaluator;
 
@@ -1105,7 +1209,7 @@ function compile(parseOutput, localOptions) {
   }
 }
 
-// Exports
+// Exported Functions
 module.exports = interpol;
 
 },{"./format":2,"./util":10}],4:[function(require,module,exports){
@@ -1128,22 +1232,13 @@ var slice = Array.prototype.slice
   , bless = util.bless
   , configure = util.configure;
 
-// Create a new Memory Resolver.  As its name implies, this resolver allows
-// one to register a module to be stored in memory.  A default instance of
-// this resolver is used to store the System Modules.  Because of its
-// flexibility, it can also be used to store custom modules and native
-// JavaScript helpers.  The types of instantiated resolver exposes the
-// following interface:
-//
-// * registerModule(name, module) - where name is the name of the module to
-// be registered, and module can be one of the following:
-//
-//   * Function - A compiled Interpol closure
-//   * String - An unparsed Interpol template
-//   * Object - A pre-parsed Interpol template
-//   * Object - A hash of Helpers (name->Function)
-//
-// * unregisterModule(name) - where name is the name of the module to remove
+/**
+ * Creates a new Memory Resolver.  As its name implies, this resolver
+ * allows one to register a module to be stored in memory.  A default 
+ * instance of this resolver is used to store the System Modules.  
+ * Because of its flexibility, it can also be used to store custom 
+ * modules and native JavaScript helpers.
+ */
 
 function createMemoryResolver(options) {
   var cache = {};
@@ -1174,24 +1269,41 @@ function createMemoryResolver(options) {
     return moduleExports;
   }
 
+  /**
+   * Removes a module from the resolver cache.
+   *
+   * @param {String} name the name of the module to remove
+   */
+
   function unregisterModule(name) {
     delete cache[normalizeModuleName(name)];
   }
-   
+
+  /**
+   * Registers a module in the module cache.
+   *
+   * @param {String} name the name of the module to be registered
+   * @param {Function|String|Object} module the module to register
+   */
+
   function registerModule(name, module) {
     name = normalizeModuleName(name);
 
+    // *Function* - A compiled Interpol closure
     if ( typeof module === 'function' &&
          typeof module.exports === 'function' ) {
       cache[name] = { module: module };
       return;
     }
 
+    // *String* - An unparsed Interpol template **or** 
+    // *Object* - A pre-parsed Interpol template
     if ( typeof module === 'string' || isInterpolJSON(module) ) {
       cache[name] = { module: interpol(module) };
       return;
     }
 
+    // *Object* - A hash of Helpers (name->Function)
     if ( typeof module === 'object' && !isArray(module) ) {
       cache[name] = { moduleExports: blessModule(module) };
       return;
@@ -1200,6 +1312,13 @@ function createMemoryResolver(options) {
     throw new Error("Module not provided");
   }
 }
+
+/**
+ * Creates a 'blessed' module where are Functions are made to be both
+ * Interpol-compatible and configurable.
+ *
+ * @param {Object} module the Module to bless
+ */
 
 function blessModule(module) {
   var result = {};
@@ -1214,6 +1333,15 @@ function blessModule(module) {
   }
   return result;
 }
+
+/**
+ * Attaches a Function called `configure` to the provided Function.  This
+ * attached Function allows one to configure defaults for calls to the
+ * owning Function.  The result is that any function imported into an
+ * Interpol template can be configured for easy re-use and piping.
+ *
+ * @param {Function} func the Function to make configurable
+ */
 
 function configurable(func) {
   blessedConfigure.__interpolFunction = true;
@@ -1238,7 +1366,7 @@ interpol.resolvers().push(defaultMemoryResolver);
 interpol.registerModule = defaultMemoryResolver.registerModule;
 interpol.unregisterModule = defaultMemoryResolver.unregisterModule;
 
-// Exports
+// Exported Functions
 exports.defaultMemoryResolver = defaultMemoryResolver;
 exports.createMemoryResolver = createMemoryResolver;
 interpol.createMemoryResolver = createMemoryResolver;
@@ -1257,6 +1385,9 @@ interpol.createMemoryResolver = createMemoryResolver;
 var util = require('../../util')
   , isArray = util.isArray;
 
+// `first(value)` returns the first item of the provided array (or `null` if
+// the array is empty).
+
 function first(writer, value) {
   if ( !isArray(value) ) {
     return value;
@@ -1264,12 +1395,19 @@ function first(writer, value) {
   return value[0];
 }
 
+// `join(value, delim)` returns the result of joining the elements of the
+// provided array. Each element will be concatenated into a string separated
+// by the specified delimiter (or ' ').
+
 function join(writer, value, delim) {
   if ( isArray(value) ) {
     return value.join(delim || ' ');
   }
   return value;
 }
+
+// `last(value)` returns the last item of the provided array (or `null` if
+// the array is empty).
 
 function last(writer, value) {
   if ( !isArray(value) ) {
@@ -1279,9 +1417,15 @@ function last(writer, value) {
   return null;
 }
 
+// `length(value)` if it is an array, returns the length of the provided
+// value (otherwise `0`).
+
 function length(writer, value) {
   return isArray(value) ? value.length : 0;
 }
+
+// `empty(value)` returns true or false depending on whether or not the
+// provided array is empty.
 
 function empty(writer, value) {
   return !value || !value.length;
@@ -1328,6 +1472,8 @@ var util = require('../../util')
 
 var wrap = require('./wrap');
 
+// `avg(value)` if an Array, returns the average (mathematical mean) of
+// value's elements
 function avg(writer, value) {
   if ( !isArray(value) ) {
     return typeof value === 'number' ? value : NaN;
@@ -1337,6 +1483,7 @@ function avg(writer, value) {
   return r / l;
 }
 
+// `max(value)` if an Array, return the greatest value in it
 function max(writer, value) {
   if ( !isArray(value) ) {
     return typeof value === 'number' ? value : NaN;
@@ -1344,6 +1491,8 @@ function max(writer, value) {
   return Math.max.apply(Math, value);
 }
 
+// `median(value)` if an Array, return the mathematical median of
+// value's elements
 function median(writer, value) {
   if ( !isArray(value) ) {
     return typeof value === 'number' ? value : NaN;
@@ -1357,6 +1506,7 @@ function median(writer, value) {
   return temp[(temp.length + 1) / 2];
 }
 
+// `min(value)` if an Array, return the lowest value in it
 function min(writer, value) {
   if ( !isArray(value) ) {
     return typeof value === 'number' ? value : NaN;
@@ -1364,6 +1514,8 @@ function min(writer, value) {
   return Math.min.apply(Math, value);
 }
 
+// `sum(value)` if an Array, return the mathematical sum of value's
+// elements
 function sum(writer, value) {
   if ( !isArray(value) ) {
     return typeof value === 'number' ? value : NaN;
@@ -1372,41 +1524,68 @@ function sum(writer, value) {
   return res;
 }
 
-// Exports
+// ### Math functions
+
+// `number(value)` convert value to a Number
+exports.number = wrap(Number);
+// `abs(value)` returns the absolute value
+exports.abs = wrap(Math.abs);
+// `acos(value)` returns the arc-cosine of value (in radians)
+exports.acos = wrap(Math.acos);
+// `asin(value)` returns the arc-sine of value (in radians)
+exports.asin = wrap(Math.asin);
+// `atan(value)` returns the arc-tangent of value (in radians)
+exports.atan = wrap(Math.atan);
+// `atan2(x,y)` returns the arc-tangent of the coords
+exports.atan2 = wrap(Math.atan2);
+// `ceil(value)` rounds to the next highest integer
+exports.ceil = wrap(Math.ceil);
+// `cos(value)` returns the cosine of value (in radians)
+exports.cos = wrap(Math.cos);
+// `exp(x)` returns E to the power of x
+exports.exp = wrap(Math.exp);
+// `floor(value)` rounds to the next lowest integer
+exports.floor = wrap(Math.floor);
+// `log(value)` returns the natural logarithm
+exports.log = wrap(Math.log);
+// `pow(x,y)` returns x raised to the power of y
+exports.pow = wrap(Math.pow);
+// `random()` returns a random number (0 <= x < 1)
+exports.random = wrap(Math.random);
+// `round(value)` rounds up or down to the closest integer
+exports.round = wrap(Math.round);
+// `sin(value)` returns the sine of value (in radians)
+exports.sin = wrap(Math.sin);
+// `sqrt(value)` returns the square root
+exports.sqrt = wrap(Math.sqrt);
+// `tan(value)` returns the tangent of value (in radians)
+exports.tan = wrap(Math.tan);
+
+// ### Constants
+
+// `E` is Euler's Number
+exports.E = Math.E;
+// `LN2` is the Natural Logarithm of 2
+exports.LN2 = Math.LN2;
+// `LN10` is the Natural Logarithm of 10
+exports.LN10 = Math.LN10;
+// `LOG2E` is the Base-2 Logarithm of E
+exports.LOG2E = Math.LOG2E;
+// `LOG10E` is the Base-10 Logarithm of E
+exports.LOG10E = Math.LOG10E;
+// `PI` is Pi
+exports.PI = Math.PI;
+// `SQRT1_2` is the Square Root of 1/2
+exports.SQRT1_2 = Math.SQRT1_2;
+// `SQRT2` is the Square Root of 2
+exports.SQRT2 = Math.SQRT2;
+
+// Exported Functions
 exports.avg = avg;
 exports.max = max;
 exports.median = median;
 exports.min = min;
 exports.sum = sum;
-
-// Math functions
-exports.number = wrap(Number);
-exports.abs = wrap(Math.abs);
-exports.acos = wrap(Math.acos);
-exports.asin = wrap(Math.asin);
-exports.atan = wrap(Math.atan);
-exports.atan2 = wrap(Math.atan2);
-exports.ceil = wrap(Math.ceil);
-exports.cos = wrap(Math.cos);
-exports.exp = wrap(Math.exp);
-exports.floor = wrap(Math.floor);
-exports.log = wrap(Math.log);
-exports.pow = wrap(Math.pow);
-exports.random = wrap(Math.random);
-exports.round = wrap(Math.round);
-exports.sin = wrap(Math.sin);
-exports.sqrt = wrap(Math.sqrt);
-exports.tan = wrap(Math.tan);
-
-// Constants
-exports.E = Math.E;
-exports.LN2 = Math.LN2;
-exports.LN10 = Math.LN10;
-exports.LOG2E = Math.LOG2E;
-exports.LOG10E = Math.LOG10E;
-exports.PI = Math.PI;
-exports.SQRT1_2 = Math.SQRT1_2;
-exports.SQRT2 = Math.SQRT2;
 
 },{"../../util":10,"./wrap":9}],8:[function(require,module,exports){
 /*
@@ -1424,32 +1603,43 @@ var util = require('../../util')
 
 var wrap = require('./wrap');
 
+// `lower(value)` converts the provided string to lower-case and returns
+// the result.
 function lower(writer, value) {
   return stringify(value).toLowerCase();
 }
 
+// `split(value, delim, idx)` splits the provided string wherever the
+// specified delimiter (or whitespace) is encountered and returns the
+// result.
 function split(writer, value, delim, idx) {
   var val = stringify(value).split(delim || ' \n\r\t');
   return typeof idx !== 'undefined' ? val[idx] : val;
 }
 
+// `title(value)` converts the provided string to title-case and returns
+// the result.  Title case converts the first character of each word to
+// upper-case, and the rest to lower-case.
 function title(writer, value) {
   return stringify(value).replace(/\w\S*/g, function (word) {
     return word.charAt(0).toUpperCase() + word.substr(1).toLowerCase();
   });
 }
 
+// `upper(value)` converts the provided string to upper-case and returns
+// the result.
 function upper(writer, value) {
   return stringify(value).toUpperCase();
 }
 
-// Exports
+// `string(value)` converts value to a String
+exports.string = wrap(String);
+
+// Exported Functions
 exports.lower = lower;
 exports.split = split;
 exports.title = title;
 exports.upper = upper;
-
-exports.string = wrap(String);
 
 },{"../../util":10,"./wrap":9}],9:[function(require,module,exports){
 /*
@@ -1476,7 +1666,7 @@ function wrap(func) {
   }
 }
 
-// Export
+// Exported Functions
 module.exports = wrap;
 
 },{"../../util":10}],10:[function(require,module,exports){
@@ -1555,10 +1745,12 @@ function mixin(target) {
   return target;
 }
 
-// Creates a closure whose job it is to mixin the configured Object's
-// properties into a target provided to the closure.
-//
-// * obj:Object the Object to copy (will be frozen)
+/**
+ * Creates a closure whose job it is to mix the configured Object's
+ * properties into a target provided to the closure.
+ *
+ * @param {Object} obj the Object to copy (will be frozen)
+ */
 
 function createStaticMixin(obj) {
   var keys = objectKeys(freezeObject(obj)).reverse()
@@ -1575,10 +1767,12 @@ function createStaticMixin(obj) {
   }
 }
 
-// Checks whether or not the provided value is an Interpol Pre-Parsed JSON
-// Object.
-//
-// * value:Object - An Object to be checked
+/**
+ * Checks whether or not the provided value is an Interpol Pre-Parsed JSON
+ * Object.
+ *
+ * @param {Object} value an Object to be checked
+ */
 
 function isInterpolJSON(value) {
   return typeof value === 'object' &&
@@ -1612,7 +1806,11 @@ function escapeContent(str) {
   });
 }
 
-// Stringify the provided value for Interpol's purposes.
+/**
+ * Stringify the provided value for Interpol's purposes.
+ * 
+ * @param {Mixed} value the value to stringify
+ */
 
 function stringify(value) {
   var type = typeof value;
@@ -1647,10 +1845,12 @@ function stringify(value) {
 
 // ## Exceptions
 
-// Intercepts a PEG.js Exception and generate a human-readable error message.
-//
-// * err:Exception - The Exception that was raised
-// * filePath:String? - The path to the file that was being parsed (if any)
+/**
+ * Intercepts a PEG.js Exception and generate a human-readable error message.
+ *
+ * @param {Exception} err the Exception that was raised
+ * @param {String} [filePath] path to the file that was being parsed
+ */
 
 function formatSyntaxError(err, filePath) {
   if ( !err.name || err.name !== 'SyntaxError') {
@@ -1666,11 +1866,13 @@ function formatSyntaxError(err, filePath) {
 
 // ## Function Invocation
 
-// 'bless' a Function as being Interpol-compatible.  This essentially means
-// that the Function must accept a Writer instance as the first argument, as
-// a writer will be passed to it by the compiled template.
-//
-// * func:Function - the Function to 'bless'
+/**
+ * 'bless' a Function as being Interpol-compatible.  This essentially means
+ * that the Function must accept a Writer instance as the first argument, as
+ * a writer will be passed to it by the compiled template.
+ *
+ * @param {Function} func the Function to 'bless'
+ */
 
 function bless(func) {
   if ( typeof func !== 'function' ) {
@@ -1690,13 +1892,15 @@ function bless(func) {
   }
 }
 
-// Returns a 'configured' version of the provided function.  By configured,
-// this means that the wrapper will provide default values for any arguments
-// that aren't required.
-//
-// * func:Function - The Function to configure
-// * requiredCount:Number - The number of arguments that are required
-// * defaultArgs:Array - Default values for the rest of the arguments
+/**
+ * Returns a 'configured' version of the provided function.  By configured,
+ * this means that the wrapper will provide default values for any arguments
+ * that aren't required.
+ *
+ * @param {Function} func the Function to configure
+ * @param {Number} requiredCount the number of arguments that are required
+ * @param {Array} defaultArgs default values for the rest of the arguments
+ */
 
 function configure(func, requiredCount, defaultArgs) {
   var required = [];
@@ -1712,7 +1916,7 @@ function configure(func, requiredCount, defaultArgs) {
   }
 }
 
-// Exports
+// Exported Functions
 exports.isArray = isArray;
 exports.extendContext = extendContext;
 exports.freezeObject = freezeObject;
@@ -1747,12 +1951,14 @@ var freezeObject = util.freezeObject
 
 function noOp() {}
 
-// Creates an Array Writer.  Interpol will create one by default if it is not
-// provided as an option to a compiled template.  An Array Writer manages the
-// writing of content as an Array of Strings.  This Array is joined and
-// returned when the `endRender` function is called.
-//
-// * arr:Array - The Array to manage (otherwise one is created)
+/**
+ * Creates an Array Writer.  Interpol will create one by default if it is not
+ * provided as an option to a compiled template.  An Array Writer manages the
+ * writing of content as an Array of Strings.  This Array is joined and
+ * returned when the `endRender()` function is called.
+ *
+ * @param {Array} [arr] The Array to manage, otherwise one is created
+ */
 
 function createArrayWriter(arr) {
   arr = arr || [];
@@ -1814,7 +2020,7 @@ function createArrayWriter(arr) {
   }
 }
 
-// Exports
+// Exported Functions
 exports.createArrayWriter = createArrayWriter;
 interpol.createArrayWriter = createArrayWriter;
 
@@ -1841,18 +2047,20 @@ var REPLACE = createDOMWriter.REPLACE = 'replace'
   , APPEND = createDOMWriter.APPEND = 'append'
   , INSERT = createDOMWriter.INSERT = 'insert';
 
-// Creates a DOM Writer.  A DOM Writer attaches itself to a DOM Element,
-// and will manipulate that Element's content when a template is rendered
-// with it.  The writer is very simple and won't cover all use-cases, it
-// also may not be the most performant approach.
-//
-// The default mode is REPLACE, meaning all of the Element's children are
-// replaced when the associated template is rendered.  INSERT and APPEND
-// will insert new renderings to the beginning or end of the child list
-// respectively.
-//
-// * parentElement:Element - The Element to which this DOMWriter attaches
-// * renderMode:String? - The DOM rendering mode (REPLACE|APPEND|INSERT)
+/**
+ * Creates a DOM Writer.  A DOM Writer attaches itself to a DOM Element,
+ * and will manipulate that Element's content when a template is rendered
+ * with it.  The writer is very simple and won't cover all use-cases, it
+ * also may not be the most performant approach.
+ *
+ * The default mode is REPLACE, meaning all of the Element's children are
+ * replaced when the associated template is rendered.  INSERT and APPEND
+ * will insert new renderings to the beginning or end of the child list
+ * respectively.
+ *
+ * @param {Element} parentElement the Element to which this DOMWriter attaches
+ * @param {String} [renderMode] the DOM rendering mode: REPLACE|APPEND|INSERT
+ */
 
 function createDOMWriter(parentElement, renderMode) {
   var arr = []
@@ -1896,7 +2104,7 @@ function createDOMWriter(parentElement, renderMode) {
   }
 }
 
-// Exports
+// Exported Functions
 exports.createDOMWriter = createDOMWriter;
 interpol.createDOMWriter = createDOMWriter;
 
@@ -1918,10 +2126,12 @@ var freezeObject = util.freezeObject;
 
 function noOp() {}
 
-// Creates a Null Writer.  All calls to this writer find their way into the
-// bit bucket.  Its primary purpose is to support the background rendering of
-// modules in order to yield their exported symbols.
-
+/**
+ * Creates a Null Writer.  All calls to this writer find their way into the
+ * bit bucket.  Its primary purpose is to support the background rendering of
+ * modules in order to yield their exported symbols.
+ */
+ 
 function createNullWriter() {
   return freezeObject({
     startRender: noOp,
@@ -1936,7 +2146,7 @@ function createNullWriter() {
   });
 }
 
-// Exports
+// Exported Functions
 exports.createNullWriter = createNullWriter;
 interpol.createNullWriter = createNullWriter;
 
