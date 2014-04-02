@@ -385,8 +385,8 @@ of yielding its exports</p></div></div><div class="code"><div class="wrapper">  
 
     <span class="k">return</span> <span class="nx">closureEvaluator</span><span class="p">;</span>
 
-    <span class="kd">function</span> <span class="nx">closureEvaluator</span><span class="p">(</span><span class="nx">ctx</span> <span class="cm">/*, writer */</span><span class="p">)</span> <span class="p">{</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>all we're doing here is assigning the closure to a local variable</p></div></div><div class="code"><div class="wrapper">      <span class="nx">bodyEvaluator</span><span class="p">.</span><span class="nx">__interpolFunction</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
-      <span class="nx">ctx</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="nx">bodyEvaluator</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>this is function that will be called</p></div></div><div class="code"><div class="wrapper">      <span class="kd">function</span> <span class="nx">bodyEvaluator</span><span class="p">(</span><span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">function</span> <span class="nx">closureEvaluator</span><span class="p">(</span><span class="nx">ctx</span> <span class="cm">/*, writer */</span><span class="p">)</span> <span class="p">{</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>just assign the closure to a local variable</p></div></div><div class="code"><div class="wrapper">      <span class="nx">bodyEvaluator</span><span class="p">.</span><span class="nx">__interpolFunction</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+      <span class="nx">ctx</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="nx">bodyEvaluator</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>the function that will be called</p></div></div><div class="code"><div class="wrapper">      <span class="kd">function</span> <span class="nx">bodyEvaluator</span><span class="p">(</span><span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">var</span> <span class="nx">newCtx</span> <span class="o">=</span> <span class="nx">extendContext</span><span class="p">(</span><span class="nx">ctx</span><span class="p">);</span>
         <span class="nx">newCtx</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="nx">bodyEvaluator</span><span class="p">;</span>
         <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">plen</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
@@ -400,16 +400,15 @@ of yielding its exports</p></div></div><div class="code"><div class="wrapper">  
       <span class="p">,</span> <span class="nx">args</span> <span class="o">=</span> <span class="p">[</span><span class="kc">null</span><span class="p">].</span><span class="nx">concat</span><span class="p">(</span><span class="nx">wrapArrayEvaluators</span><span class="p">(</span><span class="nx">argNodes</span><span class="p">))</span>
       <span class="p">,</span> <span class="nx">alen</span> <span class="o">=</span> <span class="nx">args</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
 
-    <span class="k">return</span> <span class="nx">callEvaluator</span><span class="p">;</span>
-
-    <span class="kd">function</span> <span class="nx">callEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">callEvaluator</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>If we're in the process of gathering module exports, and the called
+function can't be resolved, then just exit without exploding.
+What happens inside of a function probably shouldn't influence the
+top-level export context anyway</p></div></div><div class="code"><div class="wrapper">    <span class="kd">function</span> <span class="nx">callEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
       <span class="kd">var</span> <span class="nx">func</span> <span class="o">=</span> <span class="nx">member</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">);</span>
 
       <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">func</span> <span class="o">!==</span> <span class="s1">&#39;function&#39;</span> <span class="o">||</span> <span class="o">!</span><span class="nx">func</span><span class="p">.</span><span class="nx">__interpolFunction</span> <span class="p">)</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="p">(</span> <span class="nx">ctx</span><span class="p">.</span><span class="nx">__interpolExports</span> <span class="p">)</span> <span class="p">{</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>if we're in the process of gathering module exports,
-then just exit without exploding.  What happens inside
-of a function probably shouldn't influence the top-level
-export context anyway</p></div></div><div class="code"><div class="wrapper">          <span class="k">return</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span> <span class="nx">ctx</span><span class="p">.</span><span class="nx">__interpolExports</span> <span class="p">)</span> <span class="p">{</span>
+          <span class="k">return</span><span class="p">;</span>
         <span class="p">}</span>
         <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s2">&quot;Attempting to call an unblessed function&quot;</span><span class="p">);</span>
       <span class="p">}</span>
@@ -748,17 +747,17 @@ export context anyway</p></div></div><div class="code"><div class="wrapper">    
 
     <span class="kd">function</span> <span class="nx">builtLiteralEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
       <span class="k">return</span> <span class="nx">template</span><span class="p">(</span><span class="nx">$2</span><span class="p">,</span> <span class="nx">ctx</span><span class="p">);</span>
-    <span class="p">}</span>
-
-    <span class="kd">function</span> <span class="nx">dynamicFormatEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>If we exhaust TemplateCacheMax, then something is clearly wrong here
+and we're not using the evaluator for localized strings.  If we keep
+caching, we're going to start leaking memory.  So this evaluator will
+blow away the cache and start over</p></div></div><div class="code"><div class="wrapper">    <span class="kd">function</span> <span class="nx">dynamicFormatEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
       <span class="kd">var</span> <span class="nx">formatStr</span> <span class="o">=</span> <span class="nx">$1</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span>
         <span class="p">,</span> <span class="nx">data</span> <span class="o">=</span> <span class="nx">$2_func</span> <span class="o">?</span> <span class="nx">$2</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="o">:</span> <span class="nx">$2</span>
         <span class="p">,</span> <span class="nx">dynamicTemplate</span> <span class="o">=</span> <span class="nx">cache</span><span class="p">[</span><span class="nx">formatStr</span><span class="p">];</span>
 
       <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">dynamicTemplate</span> <span class="p">)</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="p">(</span> <span class="nx">cacheCount</span> <span class="o">&gt;=</span> <span class="nx">TemplateCacheMax</span> <span class="p">)</span> <span class="p">{</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Something is clearly wrong here and we're not using this for
-localized strings.  If we keep caching, we're going to start
-leaking memory.  So blow away the cache and start over</p></div></div><div class="code"><div class="wrapper">          <span class="nx">cache</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="k">if</span> <span class="p">(</span> <span class="nx">cacheCount</span> <span class="o">&gt;=</span> <span class="nx">TemplateCacheMax</span> <span class="p">)</span> <span class="p">{</span>
+          <span class="nx">cache</span> <span class="o">=</span> <span class="p">{};</span>
           <span class="nx">cacheCount</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
         <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>build and cache the dynamic template</p></div></div><div class="code"><div class="wrapper">        <span class="nx">dynamicTemplate</span> <span class="o">=</span> <span class="nx">buildTemplate</span><span class="p">(</span><span class="nx">formatStr</span><span class="p">);</span>
         <span class="nx">cache</span><span class="p">[</span><span class="nx">formatStr</span><span class="p">]</span> <span class="o">=</span> <span class="nx">dynamicTemplate</span><span class="p">;</span>
