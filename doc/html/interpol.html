@@ -119,7 +119,8 @@ to work.</p>
     <span class="nx">no</span><span class="o">:</span> <span class="nx">createNotEvaluator</span><span class="p">,</span>
     <span class="nx">ne</span><span class="o">:</span> <span class="nx">createNegEvaluator</span><span class="p">,</span>
     <span class="nx">mb</span><span class="o">:</span> <span class="nx">createMemberEvaluator</span><span class="p">,</span>
-    <span class="nx">tu</span><span class="o">:</span> <span class="nx">createTupleEvaluator</span><span class="p">,</span>
+    <span class="nx">ar</span><span class="o">:</span> <span class="nx">createArrayEvaluator</span><span class="p">,</span>
+    <span class="nx">dc</span><span class="o">:</span> <span class="nx">createDictionaryEvaluator</span><span class="p">,</span>
     <span class="nx">id</span><span class="o">:</span> <span class="nx">createIdEvaluator</span><span class="p">,</span>
     <span class="nx">se</span><span class="o">:</span> <span class="nx">createSelfEvaluator</span>
   <span class="p">});</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>literals are stored in the <code>l</code> property of parseOutput, while the parse
@@ -809,18 +810,32 @@ blow away the cache and start over</p></div></div><div class="code"><div class="
       <span class="p">}</span>
       <span class="k">return</span> <span class="nx">parent</span><span class="p">[</span><span class="nx">$2</span><span class="p">(</span><span class="nx">c</span><span class="p">,</span> <span class="nx">w</span><span class="p">)];</span>
     <span class="p">}</span>
-  <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>generate a tuple (array) evaluator</p></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">createTupleEvaluator</span><span class="p">(</span><span class="nx">elemNodes</span><span class="p">)</span> <span class="p">{</span>
+  <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>generate an array evaluator</p></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">createArrayEvaluator</span><span class="p">(</span><span class="nx">elemNodes</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">elems</span> <span class="o">=</span> <span class="nx">wrapArrayEvaluators</span><span class="p">(</span><span class="nx">elemNodes</span><span class="p">)</span>
       <span class="p">,</span> <span class="nx">elen</span> <span class="o">=</span> <span class="nx">elems</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
 
-    <span class="k">return</span> <span class="nx">tupleEvaluator</span><span class="p">;</span>
+    <span class="k">return</span> <span class="nx">arrayEvaluator</span><span class="p">;</span>
 
-    <span class="kd">function</span> <span class="nx">tupleEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">function</span> <span class="nx">arrayEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
       <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">[];</span>
       <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">elen</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
         <span class="nx">result</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="nx">elems</span><span class="p">[</span><span class="nx">i</span><span class="p">](</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">);</span>
       <span class="p">}</span>
-      <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+      <span class="k">return</span> <span class="nx">freezeObject</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>generate a dictionary evaluator</p></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">createDictionaryEvaluator</span><span class="p">(</span><span class="nx">assignmentDefs</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">assigns</span> <span class="o">=</span> <span class="nx">wrapAssignmentEvaluators</span><span class="p">(</span><span class="nx">assignmentDefs</span><span class="p">).</span><span class="nx">reverse</span><span class="p">()</span>
+      <span class="p">,</span> <span class="nx">alen</span> <span class="o">=</span> <span class="nx">assigns</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="nx">dictionaryEvaluator</span><span class="p">;</span>
+
+    <span class="kd">function</span> <span class="nx">dictionaryEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">dict</span> <span class="o">=</span> <span class="p">{};</span>
+      <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="nx">alen</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span><span class="o">--</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">assign</span> <span class="o">=</span> <span class="nx">assigns</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+        <span class="nx">dict</span><span class="p">[</span><span class="nx">assign</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="nx">assign</span><span class="p">[</span><span class="mi">1</span><span class="p">](</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="k">return</span> <span class="nx">freezeObject</span><span class="p">(</span><span class="nx">dict</span><span class="p">);</span>
     <span class="p">}</span>
   <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>generate a local variable retrieval evaluator</p></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">createIdEvaluator</span><span class="p">(</span><span class="nx">nameLiteral</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">name</span> <span class="o">=</span> <span class="nx">lits</span><span class="p">[</span><span class="nx">nameLiteral</span><span class="p">];</span>

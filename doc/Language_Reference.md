@@ -267,11 +267,26 @@ _my_id_
 There are two special identifiers.  The first is called `self` and it returns the current evaluation context.  The second is called `nil` and I think you can guess what that returns.
 
 ### Tuples
-Tuples are like Arrays, except that they're not.  A single element tuple is automatically exposed as an atomic Object, whereas a tuple with more than one element is exposed as an Array.  Fortunately, Interpolation (their primary use case) doesn't care about the difference.
+Tuples are a sequence of like elements.  These elements are either all individual expressions or all name/value pairs.  Tuples created in Interpol are immutable.
+
+#### Expressions
+An expression tuple with only a single element is treated simply as a precedence override and is exposed as the enclosed expression.  A tuple with more than one element is exposed as an Array.  Fortunately, Interpolation (their primary use case) doesn't care about the difference.  You can force a single element Array by ending your tuple definition with a comma:
 
 ```python
 (1 + 8)      # this is treated just like the literal number 9
+(1 + 8,)     # this is treated like the array [9]
 (5, 9 + 12)  # this is treated like the array [5, 21]
+```
+
+#### Name/Value Pairs
+Name/Value Tuples are always exposed as a Dictionary.  The name must be a valid identifier, while the value is any valid expression.
+
+```python
+(
+  theMachine: 'Deep Thought', 
+  theAnswer: (28 - 7) * 2
+)
+# Treated like a dictionary { theMachine: 'Deep Thought', theAnswer: 42 }
 ```
 
 ### Membership
@@ -354,15 +369,15 @@ If you have more than one parameter, you need to provide a tuple to the right si
 #### Indexed Interpolation (Explicit)
 In truth, the implicit approach is rather limited, particularly since you could accomplish the same thing with multiple Expression Statements.  Where interpolation becomes important is when you're trying to localize an application and you need to parameterize a string from an expression on the left side of the operator.  Let's say you have the following string table called `str`:
 
-```json
-{
-  "en": {
-    "stooge_summary": "There are % stooges, and % is the best"
-  },
-  "de": {
-    "stooge_summary": "Es gibt % Stooges und % ist die beste"
-  }
-}
+```python
+let str = (
+  en=(
+    stooge_summary="There are % stooges, and % is the best"
+  ),
+  de=(
+    stooge_summary="Es gibt % Stooges und % ist die beste"
+  )
+)
 ```
 
 You could perform interpolation against an entry in the table by doing the following:
@@ -373,15 +388,15 @@ str[lang].stooge_summary % (people.length, people.best)
 
 If your parameters always appear in the same order, then the simple `%` characters embedded into the strings will work fine.  But what if the ordering is not consistent?  Then you have to explicitly identify the index of the parameter you'd like to use, keeping in mind that they're 1-based:
 
-```json
-{
-  "en": {
-    "stooge_summary": "%2 is the best of the %1 Stooges"
-  },
-  "de": {
-    "stooge_summary": "Es gibt %1 Stooges und %2 ist die beste"
-  }
-}
+```python
+let str = (
+  en=(
+    stooge_summary="%2 is the best of the %1 Stooges"
+  ),
+  de=(
+    stooge_summary="Es gibt %1 Stooges und %2 ist die beste"
+  )
+)
 ```
 
 #### Named Interpolation
