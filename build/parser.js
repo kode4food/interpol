@@ -6558,7 +6558,9 @@ module.exports = (function() {
       }
 
       function rewriteStatements(statements) {
-        return mergeAssignments(hoistPartials(statements));
+        statements = hoistPartials(statements);
+        statements = mergeAssignments(statements);
+        return statements;
       }
 
 
