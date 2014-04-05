@@ -1,6 +1,17 @@
 # Change History
 
-## Version 0.3.5 - Documentation
+## Version 0.3.5 - Extended Tuples
+Tuples now allow name/value pairs as well as the ability to force a single-element tuple (rather than treating the parentheses as a precedence operator).  Name/Value Tuples are always exposed as a Dictionary.  The name must be a valid identifier, while the value is any valid expression.
+
+```python
+(
+  theMachine = 'Deep Thought',
+  theAnswer = (28 - 7) * 2
+)
+# Treated like a dictionary { theMachine: 'Deep Thought', theAnswer: 42 }
+```
+
+Forcing a single-element tuple is performed as it would be in Python, by ending the tuple with a comma `,`.  See [the Language Reference](Language_Reference.md) for more information.
 
 ## Version 0.3.4 - Consolidated Resolvers
 The Helper and System Resolvers have been merged into the Memory Resolver since it's all in memory anyway.  The default Memory Resolver's register/unregister functions are now exposed from the `interpol()` function , so registering a module of JavaScript helpers is easy:

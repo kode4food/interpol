@@ -283,8 +283,8 @@ Name/Value Tuples are always exposed as a Dictionary.  The name must be a valid 
 
 ```python
 (
-  theMachine: 'Deep Thought', 
-  theAnswer: (28 - 7) * 2
+  theMachine = 'Deep Thought',
+  theAnswer = (28 - 7) * 2
 )
 # Treated like a dictionary { theMachine: 'Deep Thought', theAnswer: 42 }
 ```
