@@ -319,7 +319,8 @@ function compile(parseOutput, localOptions) {
     no: createNotEvaluator,
     ne: createNegEvaluator,
     mb: createMemberEvaluator,
-    tu: createTupleEvaluator,
+    ar: createArrayEvaluator,
+    dc: createDictionaryEvaluator,
     id: createIdEvaluator,
     se: createSelfEvaluator
   });
@@ -1173,19 +1174,36 @@ function compile(parseOutput, localOptions) {
     }
   }
 
-  // generate a tuple (array) evaluator
-  function createTupleEvaluator(elemNodes) {
+  // generate an array evaluator
+  function createArrayEvaluator(elemNodes) {
     var elems = wrapArrayEvaluators(elemNodes)
       , elen = elems.length;
 
-    return tupleEvaluator;
+    return arrayEvaluator;
 
-    function tupleEvaluator(ctx, writer) {
+    function arrayEvaluator(ctx, writer) {
       var result = [];
       for ( var i = 0; i < elen; i++ ) {
         result[i] = elems[i](ctx, writer);
       }
-      return result;
+      return freezeObject(result);
+    }
+  }
+
+  // generate a dictionary evaluator
+  function createDictionaryEvaluator(assignmentDefs) {
+    var assigns = wrapAssignmentEvaluators(assignmentDefs).reverse()
+      , alen = assigns.length - 1;
+
+    return dictionaryEvaluator;
+
+    function dictionaryEvaluator(ctx, writer) {
+      var dict = {};
+      for ( var i = alen; i >= 0; i-- ) {
+        var assign = assigns[i];
+        dict[assign[0]] = assign[1](ctx, writer);
+      }
+      return freezeObject(dict);
     }
   }
 
