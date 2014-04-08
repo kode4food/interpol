@@ -267,7 +267,7 @@ _my_id_
 There are two special identifiers.  The first is called `self` and it returns the current evaluation context.  The second is called `nil` and I think you can guess what that returns.
 
 ### Tuples
-Tuples are a sequence of like elements.  These elements are either all individual expressions or all name/value pairs.  Tuples created in Interpol are immutable.
+Tuples are a sequence of like elements.  Unlike in Python, they *must* be surrounded by parentheses `()`.  The elements therein are either all individual expressions or all name/value pairs.  Tuples created in Interpol are immutable.
 
 #### Expressions
 An expression tuple with only a single element is treated simply as a precedence override and is exposed as the enclosed expression.  A tuple with more than one element is exposed as an Array.  Fortunately, Interpolation (their primary use case) doesn't care about the difference.  You can force a single element Array by ending your tuple definition with a comma:
