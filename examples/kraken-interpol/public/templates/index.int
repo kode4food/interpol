@@ -1,0 +1,12 @@
+from layouts.master import render
+import i18n.strings as str
+
+render(title, body)
+
+def title
+  str['en'].title
+end
+
+def body
+  <h1>str['en'].greeting</h1>
+end

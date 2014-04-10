@@ -16,7 +16,7 @@
   <span class="p">,</span> <span class="nx">util</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./util&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">ModuleNameRegex</span> <span class="o">=</span> <span class="sr">/^[$_a-zA-Z][$_a-zA-Z0-9\\/]*/</span>
-  <span class="p">,</span> <span class="nx">OptionRegex</span> <span class="o">=</span> <span class="sr">/^-([_a-zA-Z][_a-zA-Z0-9]*)$/</span><span class="p">;</span>
+  <span class="p">,</span> <span class="nx">OptionRegex</span> <span class="o">=</span> <span class="sr">/^-([a-zA-Z][_a-zA-Z0-9]*)$/</span><span class="p">;</span>
 
 <span class="kd">var</span> <span class="nx">slice</span> <span class="o">=</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">slice</span><span class="p">;</span>
 
@@ -38,67 +38,82 @@ script is called directly.</p>
 <li><strong>arguments is optional and must be any number of Strings.</strong><br/>(usage info displayed if an error occurs)</li>
 </ul></div></div><div class="code"><div class="wrapper"><span class="kd">function</span> <span class="nx">commandLine</span><span class="p">()</span> <span class="p">{</span>
   <span class="kd">var</span> <span class="nx">args</span> <span class="o">=</span> <span class="nx">parseArguments</span><span class="p">(</span><span class="nx">arguments</span><span class="p">)</span>
-    <span class="p">,</span> <span class="nx">inDir</span> <span class="o">=</span> <span class="nx">args</span><span class="p">.</span><span class="k">in</span><span class="p">;</span>
+    <span class="p">,</span> <span class="nx">inDirs</span> <span class="o">=</span> <span class="nx">getArrayArg</span><span class="p">(</span><span class="s1">&#39;in&#39;</span><span class="p">);</span>
 
-  <span class="k">if</span> <span class="p">(</span> <span class="nx">args</span><span class="p">.</span><span class="nx">help</span> <span class="o">||</span> <span class="o">!</span><span class="nx">inDir</span> <span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="nx">args</span><span class="p">.</span><span class="nx">help</span> <span class="o">||</span> <span class="o">!</span><span class="nx">inDirs</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span>
     <span class="nx">displayUsage</span><span class="p">();</span>
     <span class="nx">process</span><span class="p">.</span><span class="nx">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
   <span class="p">}</span>
 
-  <span class="kd">var</span> <span class="nx">outDir</span> <span class="o">=</span> <span class="nx">args</span><span class="p">.</span><span class="nx">out</span> <span class="o">||</span> <span class="nx">inDir</span>
-    <span class="p">,</span> <span class="nx">jsonFile</span> <span class="o">=</span> <span class="nx">args</span><span class="p">.</span><span class="nx">json</span> <span class="o">||</span> <span class="kc">null</span>
-    <span class="p">,</span> <span class="nx">appFile</span> <span class="o">=</span> <span class="nx">args</span><span class="p">.</span><span class="nx">app</span> <span class="o">||</span> <span class="kc">null</span>
+  <span class="kd">var</span> <span class="nx">jsonFile</span> <span class="o">=</span> <span class="nx">getValueArg</span><span class="p">(</span><span class="s1">&#39;json&#39;</span><span class="p">)</span> <span class="o">||</span> <span class="kc">null</span>
+    <span class="p">,</span> <span class="nx">appFile</span> <span class="o">=</span> <span class="nx">getValueArg</span><span class="p">(</span><span class="s1">&#39;app&#39;</span><span class="p">)</span> <span class="o">||</span> <span class="kc">null</span>
     <span class="p">,</span> <span class="nx">skipWrite</span> <span class="o">=</span> <span class="nx">jsonFile</span> <span class="o">||</span> <span class="nx">appFile</span>
-    <span class="p">,</span> <span class="nx">appProperty</span> <span class="o">=</span> <span class="nx">args</span><span class="p">.</span><span class="nx">prop</span> <span class="o">||</span> <span class="kc">null</span>
-    <span class="p">,</span> <span class="nx">appSandbox</span> <span class="o">=</span> <span class="nx">args</span><span class="p">.</span><span class="nx">sandbox</span> <span class="o">||</span> <span class="kc">false</span>
+    <span class="p">,</span> <span class="nx">appProperty</span> <span class="o">=</span> <span class="nx">getValueArg</span><span class="p">(</span><span class="s1">&#39;prop&#39;</span><span class="p">)</span> <span class="o">||</span> <span class="kc">null</span>
+    <span class="p">,</span> <span class="nx">appSandbox</span> <span class="o">=</span> <span class="nx">getValueArg</span><span class="p">(</span><span class="s1">&#39;sandbox&#39;</span><span class="p">)</span> <span class="o">||</span> <span class="kc">false</span>
     <span class="p">,</span> <span class="nx">appModules</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="p">,</span> <span class="nx">pattern</span> <span class="o">=</span> <span class="nx">args</span><span class="p">.</span><span class="nx">files</span> <span class="o">||</span> <span class="s1">&#39;**/*.int&#39;</span>
-    <span class="p">,</span> <span class="nx">ext</span> <span class="o">=</span> <span class="nx">args</span><span class="p">.</span><span class="nx">ext</span> <span class="o">||</span> <span class="s1">&#39;.json&#39;</span>
-    <span class="p">,</span> <span class="nx">files</span> <span class="o">=</span> <span class="nx">glob</span><span class="p">.</span><span class="nx">sync</span><span class="p">(</span><span class="nx">pattern</span><span class="p">,</span> <span class="p">{</span> <span class="nx">cwd</span><span class="o">:</span> <span class="nx">inDir</span> <span class="p">})</span>
+    <span class="p">,</span> <span class="nx">pattern</span> <span class="o">=</span> <span class="nx">getValueArg</span><span class="p">(</span><span class="s1">&#39;files&#39;</span><span class="p">)</span> <span class="o">||</span> <span class="s1">&#39;**/*.int&#39;</span>
+    <span class="p">,</span> <span class="nx">ext</span> <span class="o">=</span> <span class="nx">getValueArg</span><span class="p">(</span><span class="s1">&#39;ext&#39;</span><span class="p">)</span> <span class="o">||</span> <span class="s1">&#39;.json&#39;</span>
     <span class="p">,</span> <span class="nx">success</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="p">,</span> <span class="nx">errors</span> <span class="o">=</span> <span class="p">[];</span>
-
-  <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">files</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span>
-    <span class="nx">errorOut</span><span class="p">(</span><span class="s2">&quot;No files found matching &#39;&quot;</span> <span class="o">+</span> <span class="nx">pattern</span> <span class="o">+</span> <span class="s2">&quot;&#39; in &quot;</span> <span class="o">+</span> <span class="nx">inDir</span><span class="p">);</span>
-    <span class="k">return</span><span class="p">;</span>
+    <span class="p">,</span> <span class="nx">errors</span> <span class="o">=</span> <span class="p">[];</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Iterate over the <code>-in</code> directories</p></div></div><div class="code"><div class="wrapper">  <span class="nx">processDirectories</span><span class="p">();</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Display the results</p></div></div><div class="code"><div class="wrapper">  <span class="nx">processResults</span><span class="p">();</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="nx">errors</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>If there are any errors, display them</p></div></div><div class="code"><div class="wrapper">    <span class="nx">processErrors</span><span class="p">();</span>
   <span class="p">}</span>
+  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span> <span class="nx">appFile</span> <span class="o">||</span> <span class="nx">jsonFile</span> <span class="p">)</span> <span class="p">{</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Otherwise generate a bundle if requested</p></div></div><div class="code"><div class="wrapper">    <span class="nx">processBundle</span><span class="p">();</span>
+  <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Done!</p></div></div><div class="code"><div class="wrapper">  <span class="nx">process</span><span class="p">.</span><span class="nx">exit</span><span class="p">(</span><span class="nx">errors</span><span class="p">.</span><span class="nx">length</span> <span class="o">?</span> <span class="mi">1</span> <span class="o">:</span> <span class="mi">0</span><span class="p">);</span>
 
-  <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">files</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">file</span> <span class="o">=</span> <span class="nx">files</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
-      <span class="p">,</span> <span class="nx">moduleName</span> <span class="o">=</span> <span class="nx">getModuleName</span><span class="p">(</span><span class="nx">file</span><span class="p">)</span>
-      <span class="p">,</span> <span class="nx">inputPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">inDir</span><span class="p">,</span> <span class="nx">file</span><span class="p">);</span>
-
-    <span class="k">try</span> <span class="p">{</span>
-      <span class="kd">var</span> <span class="nx">json</span> <span class="o">=</span> <span class="nx">parseInputTemplate</span><span class="p">(</span><span class="nx">inputPath</span><span class="p">);</span>
-
-      <span class="k">if</span> <span class="p">(</span> <span class="nx">skipWrite</span> <span class="p">)</span> <span class="p">{</span>
-        <span class="nx">appModules</span><span class="p">[</span><span class="nx">moduleName</span><span class="p">]</span> <span class="o">=</span> <span class="nx">json</span><span class="p">;</span>
-      <span class="p">}</span>
-      <span class="k">else</span> <span class="p">{</span>
-        <span class="nx">writeTemplateJSON</span><span class="p">(</span><span class="nx">json</span><span class="p">,</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">outDir</span><span class="p">,</span> <span class="nx">file</span> <span class="o">+</span> <span class="nx">ext</span><span class="p">));</span>
-      <span class="p">}</span>
-
-      <span class="nx">success</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="nx">filePath</span><span class="o">:</span> <span class="nx">inputPath</span> <span class="p">});</span>
-    <span class="p">}</span>
-    <span class="k">catch</span> <span class="p">(</span> <span class="nx">err</span> <span class="p">)</span> <span class="p">{</span>
-      <span class="nx">errors</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="nx">filePath</span><span class="o">:</span> <span class="nx">inputPath</span><span class="p">,</span> <span class="nx">err</span><span class="o">:</span> <span class="nx">err</span> <span class="p">});</span>
+  <span class="kd">function</span> <span class="nx">processDirectories</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">inDirs</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="nx">processDirectory</span><span class="p">(</span><span class="nx">inDirs</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span>
     <span class="p">}</span>
   <span class="p">}</span>
 
-  <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;Interpol Parsing Complete&quot;</span><span class="p">);</span>
-  <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">);</span>
-  <span class="k">if</span> <span class="p">(</span> <span class="nx">success</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;  Success: &quot;</span> <span class="o">+</span> <span class="nx">success</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
-  <span class="p">}</span>
-  <span class="k">if</span> <span class="p">(</span> <span class="nx">errors</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;  Failure: &quot;</span> <span class="o">+</span> <span class="nx">errors</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
-  <span class="p">}</span>
-  <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">);</span>
+  <span class="kd">function</span> <span class="nx">processDirectory</span><span class="p">(</span><span class="nx">inDir</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">outDir</span> <span class="o">=</span> <span class="nx">getValueArg</span><span class="p">(</span><span class="s1">&#39;out&#39;</span><span class="p">)</span> <span class="o">||</span> <span class="nx">inDir</span>
+      <span class="p">,</span> <span class="nx">files</span> <span class="o">=</span> <span class="nx">glob</span><span class="p">.</span><span class="nx">sync</span><span class="p">(</span><span class="nx">pattern</span><span class="p">,</span> <span class="p">{</span> <span class="nx">cwd</span><span class="o">:</span> <span class="nx">inDir</span> <span class="p">});</span>
 
-  <span class="k">if</span> <span class="p">(</span> <span class="nx">errors</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">files</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="nx">errorOut</span><span class="p">(</span><span class="s2">&quot;No files found matching &#39;&quot;</span> <span class="o">+</span> <span class="nx">pattern</span> <span class="o">+</span> <span class="s2">&quot;&#39; in &quot;</span> <span class="o">+</span> <span class="nx">inDir</span><span class="p">);</span>
+      <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">files</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">file</span> <span class="o">=</span> <span class="nx">files</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
+        <span class="p">,</span> <span class="nx">moduleName</span> <span class="o">=</span> <span class="nx">getModuleName</span><span class="p">(</span><span class="nx">file</span><span class="p">)</span>
+        <span class="p">,</span> <span class="nx">inputPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">inDir</span><span class="p">,</span> <span class="nx">file</span><span class="p">);</span>
+
+      <span class="k">try</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">json</span> <span class="o">=</span> <span class="nx">parseInputTemplate</span><span class="p">(</span><span class="nx">inputPath</span><span class="p">);</span>
+
+        <span class="k">if</span> <span class="p">(</span> <span class="nx">skipWrite</span> <span class="p">)</span> <span class="p">{</span>
+          <span class="nx">appModules</span><span class="p">[</span><span class="nx">moduleName</span><span class="p">]</span> <span class="o">=</span> <span class="nx">json</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">else</span> <span class="p">{</span>
+          <span class="nx">writeTemplateJSON</span><span class="p">(</span><span class="nx">json</span><span class="p">,</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">outDir</span><span class="p">,</span> <span class="nx">file</span> <span class="o">+</span> <span class="nx">ext</span><span class="p">));</span>
+        <span class="p">}</span>
+
+        <span class="nx">success</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="nx">filePath</span><span class="o">:</span> <span class="nx">inputPath</span> <span class="p">});</span>
+      <span class="p">}</span>
+      <span class="k">catch</span> <span class="p">(</span> <span class="nx">err</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="nx">errors</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="nx">filePath</span><span class="o">:</span> <span class="nx">inputPath</span><span class="p">,</span> <span class="nx">err</span><span class="o">:</span> <span class="nx">err</span> <span class="p">});</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="kd">function</span> <span class="nx">processResults</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;Interpol Parsing Complete&quot;</span><span class="p">);</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="nx">success</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;  Success: &quot;</span> <span class="o">+</span> <span class="nx">success</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="nx">errors</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;  Failure: &quot;</span> <span class="o">+</span> <span class="nx">errors</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">function</span> <span class="nx">processErrors</span><span class="p">()</span> <span class="p">{</span>
     <span class="nx">console</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="s2">&quot;Parsing Errors&quot;</span><span class="p">);</span>
     <span class="nx">console</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="s2">&quot;==============&quot;</span><span class="p">);</span>
-    <span class="k">for</span> <span class="p">(</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">errors</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">errors</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
       <span class="kd">var</span> <span class="nx">error</span> <span class="o">=</span> <span class="nx">errors</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
         <span class="p">,</span> <span class="nx">filePath</span> <span class="o">=</span> <span class="nx">error</span><span class="p">.</span><span class="nx">filePath</span>
         <span class="p">,</span> <span class="nx">err</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">formatSyntaxError</span><span class="p">(</span><span class="nx">error</span><span class="p">.</span><span class="nx">err</span><span class="p">,</span> <span class="nx">filePath</span><span class="p">)</span>
@@ -108,19 +123,32 @@ script is called directly.</p>
       <span class="nx">console</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">);</span>
     <span class="p">}</span>
   <span class="p">}</span>
-  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span> <span class="nx">appFile</span> <span class="o">||</span> <span class="nx">jsonFile</span> <span class="p">)</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">bundleName</span> <span class="o">=</span> <span class="nx">getModuleName</span><span class="p">(</span><span class="nx">appProperty</span> <span class="o">||</span> <span class="nx">path</span><span class="p">.</span><span class="nx">basename</span><span class="p">(</span><span class="nx">appFile</span><span class="p">));</span>
 
+  <span class="kd">function</span> <span class="nx">processBundle</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">bundleName</span> <span class="o">=</span> <span class="nx">getModuleName</span><span class="p">(</span><span class="nx">appProperty</span> <span class="o">||</span> <span class="nx">path</span><span class="p">.</span><span class="nx">basename</span><span class="p">(</span><span class="nx">appFile</span><span class="p">));</span>
     <span class="k">if</span> <span class="p">(</span> <span class="nx">appFile</span> <span class="p">)</span> <span class="p">{</span>
       <span class="nx">writeAppBundle</span><span class="p">(</span><span class="nx">appFile</span><span class="p">,</span> <span class="nx">bundleName</span><span class="p">,</span> <span class="nx">appModules</span><span class="p">,</span> <span class="nx">appSandbox</span><span class="p">);</span>
     <span class="p">}</span>
-
     <span class="k">if</span> <span class="p">(</span> <span class="nx">jsonFile</span> <span class="p">)</span> <span class="p">{</span>
       <span class="nx">writeJSONBundle</span><span class="p">(</span><span class="nx">jsonFile</span><span class="p">,</span> <span class="nx">appModules</span><span class="p">);</span>
     <span class="p">}</span>
   <span class="p">}</span>
 
-  <span class="nx">process</span><span class="p">.</span><span class="nx">exit</span><span class="p">(</span><span class="nx">errors</span><span class="p">.</span><span class="nx">length</span> <span class="o">?</span> <span class="mi">1</span> <span class="o">:</span> <span class="mi">0</span><span class="p">);</span>
+  <span class="kd">function</span> <span class="nx">getArrayArg</span><span class="p">(</span><span class="nx">argName</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">val</span> <span class="o">=</span> <span class="nx">args</span><span class="p">[</span><span class="nx">argName</span><span class="p">];</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">val</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="nx">val</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">val</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">?</span> <span class="p">[</span><span class="nx">val</span><span class="p">]</span> <span class="o">:</span> <span class="p">[];</span>
+  <span class="p">}</span>
+
+  <span class="kd">function</span> <span class="nx">getValueArg</span><span class="p">(</span><span class="nx">argName</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">val</span> <span class="o">=</span> <span class="nx">args</span><span class="p">[</span><span class="nx">argName</span><span class="p">];</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">val</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="nx">val</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">val</span><span class="p">;</span>
+  <span class="p">}</span>
 <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><h2 id="processing-functions">Processing Functions</h2></div></div></div><div class="segment"><div class="code"><div class="wrapper"><span class="kd">function</span> <span class="nx">parseInputTemplate</span><span class="p">(</span><span class="nx">inputPath</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">return</span> <span class="nx">interpol</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="nx">inputPath</span><span class="p">).</span><span class="nx">toString</span><span class="p">());</span>
 <span class="p">}</span>
@@ -168,17 +196,31 @@ script is called directly.</p>
 <span class="p">}</span>
 
 <span class="kd">function</span> <span class="nx">parseArguments</span><span class="p">(</span><span class="nx">passedArguments</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">{</span> <span class="p">};</span>
+  <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">{</span> <span class="p">}</span>
+    <span class="p">,</span> <span class="nx">argName</span> <span class="o">=</span> <span class="kc">null</span>
+    <span class="p">,</span> <span class="nx">argValue</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
   <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">passedArguments</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">arg</span> <span class="o">=</span> <span class="nx">passedArguments</span><span class="p">[</span><span class="nx">i</span><span class="o">++</span><span class="p">];</span>
     <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="nx">OptionRegex</span><span class="p">.</span><span class="nx">exec</span><span class="p">(</span><span class="nx">arg</span><span class="p">);</span>
+
     <span class="k">if</span> <span class="p">(</span> <span class="nx">match</span> <span class="p">)</span> <span class="p">{</span>
-      <span class="kd">var</span> <span class="nx">argName</span> <span class="o">=</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="p">,</span> <span class="nx">argValue</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
-      <span class="k">if</span> <span class="p">(</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">OptionRegex</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">passedArguments</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span> <span class="p">)</span> <span class="p">{</span>
-        <span class="nx">argValue</span> <span class="o">=</span> <span class="nx">passedArguments</span><span class="p">[</span><span class="nx">i</span><span class="o">++</span><span class="p">];</span>
-      <span class="p">}</span>
+      <span class="nx">argName</span> <span class="o">=</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+      <span class="nx">argValue</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
       <span class="nx">result</span><span class="p">[</span><span class="nx">argName</span><span class="p">]</span> <span class="o">=</span> <span class="nx">argValue</span><span class="p">;</span>
+      <span class="k">continue</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">argValue</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="nx">argValue</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">arg</span><span class="p">);</span>
+      <span class="k">continue</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span> <span class="nx">argValue</span> <span class="o">===</span> <span class="kc">true</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="nx">result</span><span class="p">[</span><span class="nx">argName</span><span class="p">]</span> <span class="o">=</span> <span class="nx">arg</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span>
+      <span class="nx">result</span><span class="p">[</span><span class="nx">argName</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nx">argValue</span><span class="p">,</span> <span class="nx">arg</span><span class="p">];</span>
     <span class="p">}</span>
   <span class="p">}</span>
   <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
@@ -209,7 +251,7 @@ script is called directly.</p>
   <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;  Options:&quot;</span><span class="p">);</span>
   <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">);</span>
   <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;  -help          - You&#39;re looking at me right now&quot;</span><span class="p">);</span>
-  <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;  -in &lt;dir&gt;      - Location of templates to parse&quot;</span><span class="p">);</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;  -in &lt;dirs&gt;     - Locations of templates to parse&quot;</span><span class="p">);</span>
   <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;  -out &lt;dir&gt;     - Location of parsed JSON output (or -in dir)&quot;</span><span class="p">);</span>
   <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;  -files &lt;glob&gt;  - Filename pattern to parse (or **/*.int)&quot;</span><span class="p">);</span>
   <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;  -ext &lt;ext&gt;     - Filename extension to use (or .json)&quot;</span><span class="p">);</span>
