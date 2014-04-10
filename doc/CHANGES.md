@@ -1,5 +1,26 @@
 # Change History
 
+## Version 0.3.6 - Kraken Support
+Added a [Kraken](http://krakenjs.com/) entry point.  In order to use Interpol in a Kraken app, you will have to modify `config/app.json` to include the following:
+
+```json
+"view engines": {
+  "int": {
+    "module": "interpol/kraken"
+  }
+}
+```
+
+Also, if you plan to use Interpol as your default view engine, you can configure it like so:
+
+```json
+"express": {
+  "view engine": "int"
+}
+```
+
+*Note:* Be aware that Interpol template filenames must contain valid Interpol identifers, so filenames like `errors/400.dust` will have to become something like `errors/http_400.int`.
+
 ## Version 0.3.5 - Extended Tuples
 Tuples now allow name/value pairs as well as the ability to force a single-element tuple (rather than treating the parentheses as a precedence operator).  Name/Value Tuples are always exposed as a Dictionary.  The name must be a valid identifier, while the value is any valid expression.
 

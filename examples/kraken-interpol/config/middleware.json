@@ -1,9 +1,9 @@
 {
     "middleware": {
         "errorPages": {
-            "404": "errors/404",
-            "500": "errors/500",
-            "503": "errors/503"
+            "404": "errors/http_404",
+            "500": "errors/http_500",
+            "503": "errors/http_503"
         }
 //      "appsec": {
 //        "csrf": true,
