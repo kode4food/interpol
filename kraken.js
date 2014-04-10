@@ -10,4 +10,5 @@
 
 var interpol = require('./index');
 
+// This is all Kraken requires
 exports.int = interpol.createExpressEngine;

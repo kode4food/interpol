@@ -14,10 +14,7 @@
 
   "view engines": {
     "int": {
-      "module": "interpol/lib/kraken",
-      "settings": {
-        "path": "./public/templates"
-      }
+      "module": "interpol/kraken"
     }
   },
 
