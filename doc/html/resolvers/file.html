@@ -36,19 +36,22 @@ the resolvers from the end of the list).</p>
     <span class="nx">resolveModule</span><span class="o">:</span> <span class="nx">monitor</span> <span class="o">?</span> <span class="nx">resolveMonitoredModule</span> <span class="o">:</span> <span class="nx">resolveCachedModule</span><span class="p">,</span>
     <span class="nx">resolveExports</span><span class="o">:</span> <span class="nx">monitor</span> <span class="o">?</span> <span class="nx">resolveMonitoredExports</span> <span class="o">:</span> <span class="nx">resolveCachedExports</span>
   <span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p>Load (or Reload) the specified file if necessary.  The options will
-be passed through to the Interpol compile, if necessary.</p>
+be passed through to the Interpol compiler, if necessary.</p>
 
 <p>Parameters:</p>
 
 <ul>
 <li><p><strong>name must be a String.</strong><br/>(the name of the file to check)</p></li>
 <li><p><strong>options must be an Object.</strong><br/>(the Interpol compiler options)</p></li>
-</ul></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">reloadIfNeeded</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">sourcePath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">basePath</span><span class="p">,</span> <span class="nx">name</span> <span class="o">+</span> <span class="nx">ext</span><span class="p">)</span>
-      <span class="p">,</span> <span class="nx">dirty</span> <span class="o">=</span> <span class="nx">isDirty</span><span class="p">(</span><span class="nx">sourcePath</span><span class="p">);</span>
+</ul></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">reloadIfNeeded</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span> <span class="p">{</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Prefer to resolve a module by moduleName + extension</p></div></div><div class="code"><div class="wrapper">    <span class="kd">var</span> <span class="nx">sourcePath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">basePath</span><span class="p">,</span> <span class="nx">name</span> <span class="o">+</span> <span class="nx">ext</span><span class="p">)</span>
+      <span class="p">,</span> <span class="nx">loadable</span> <span class="o">=</span> <span class="nx">resolveLoadable</span><span class="p">(</span><span class="nx">sourcePath</span><span class="p">);</span>
 
-    <span class="kd">var</span> <span class="nx">loadable</span> <span class="o">=</span> <span class="p">(</span> <span class="nx">dirty</span> <span class="o">&amp;&amp;</span> <span class="nx">dirty</span><span class="p">.</span><span class="nx">isFile</span><span class="p">()</span> <span class="p">)</span> <span class="o">||</span>
-                   <span class="p">(</span> <span class="o">!</span><span class="nx">dirty</span> <span class="o">&amp;&amp;</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">existsSync</span><span class="p">(</span><span class="nx">sourcePath</span><span class="p">)</span> <span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">loadable</span> <span class="p">)</span> <span class="p">{</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Otherwise check a directory's <code>index.int</code> file if there is one</p></div></div><div class="code"><div class="wrapper">      <span class="kd">var</span> <span class="nx">modulePath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">basePath</span><span class="p">,</span> <span class="nx">name</span><span class="p">);</span>
+      <span class="k">if</span> <span class="p">(</span> <span class="nx">statDirectory</span><span class="p">(</span><span class="nx">modulePath</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="nx">sourcePath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">basePath</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="s1">&#39;index&#39;</span> <span class="o">+</span> <span class="nx">ext</span><span class="p">);</span>
+        <span class="nx">loadable</span> <span class="o">=</span> <span class="nx">resolveLoadable</span><span class="p">(</span><span class="nx">sourcePath</span><span class="p">);</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
 
     <span class="k">if</span> <span class="p">(</span> <span class="nx">loadable</span> <span class="p">)</span> <span class="p">{</span>
       <span class="k">try</span> <span class="p">{</span>
@@ -65,6 +68,12 @@ be passed through to the Interpol compile, if necessary.</p>
       <span class="k">delete</span> <span class="nx">cache</span><span class="p">[</span><span class="nx">name</span><span class="p">];</span>
       <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
     <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="kd">function</span> <span class="nx">resolveLoadable</span><span class="p">(</span><span class="nx">sourcePath</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">dirty</span> <span class="o">=</span> <span class="nx">isDirty</span><span class="p">(</span><span class="nx">sourcePath</span><span class="p">);</span>
+    <span class="k">return</span> <span class="p">(</span> <span class="nx">dirty</span> <span class="o">&amp;&amp;</span> <span class="nx">dirty</span><span class="p">.</span><span class="nx">isFile</span><span class="p">()</span> <span class="p">)</span> <span class="o">||</span>
+           <span class="p">(</span> <span class="o">!</span><span class="nx">dirty</span> <span class="o">&amp;&amp;</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">existsSync</span><span class="p">(</span><span class="nx">sourcePath</span><span class="p">)</span> <span class="p">);</span>
   <span class="p">}</span>
 
   <span class="kd">function</span> <span class="nx">resolveMonitoredModule</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span> <span class="p">{</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Always attempt to reload the file if necessary</p></div></div><div class="code"><div class="wrapper">    <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">reloadIfNeeded</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span>
@@ -118,6 +127,26 @@ be passed through to the Interpol compile, if necessary.</p>
 
 <span class="kd">function</span> <span class="nx">loadContentJSON</span><span class="p">(</span><span class="nx">sourcePath</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">return</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="nx">sourcePath</span><span class="p">).</span><span class="nx">toString</span><span class="p">());</span>
+<span class="p">}</span>
+
+<span class="kd">function</span> <span class="nx">statFile</span><span class="p">(</span><span class="nx">filePath</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">try</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">stat</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">statSync</span><span class="p">(</span><span class="nx">filePath</span><span class="p">);</span>
+    <span class="k">return</span> <span class="nx">stat</span> <span class="o">&amp;&amp;</span> <span class="nx">stat</span><span class="p">.</span><span class="nx">isFile</span><span class="p">()</span> <span class="o">?</span> <span class="nx">stat</span> <span class="o">:</span> <span class="kc">null</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">catch</span> <span class="p">(</span> <span class="nx">err</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">function</span> <span class="nx">statDirectory</span><span class="p">(</span><span class="nx">dirPath</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">try</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">stat</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">statSync</span><span class="p">(</span><span class="nx">dirPath</span><span class="p">);</span>
+    <span class="k">return</span> <span class="nx">stat</span> <span class="o">&amp;&amp;</span> <span class="nx">stat</span><span class="p">.</span><span class="nx">isDirectory</span><span class="p">()</span> <span class="o">?</span> <span class="nx">stat</span> <span class="o">:</span> <span class="kc">null</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">catch</span> <span class="p">(</span> <span class="nx">err</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+  <span class="p">}</span>
 <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Creates a cache of file modification timestamps in order to check
 whether or not a file has been modified since last requested.  This
 interface introduces a performance hit for template processing, and
@@ -128,14 +157,7 @@ is only used when the File Resolver's <code>monitor</code> property is set.</p><
 
   <span class="kd">function</span> <span class="nx">isDirty</span><span class="p">(</span><span class="nx">filePath</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">cached</span> <span class="o">=</span> <span class="nx">cache</span><span class="p">[</span><span class="nx">filePath</span><span class="p">]</span>
-      <span class="p">,</span> <span class="nx">stats</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-
-    <span class="k">try</span> <span class="p">{</span>
-      <span class="nx">stats</span> <span class="o">=</span> <span class="nx">cache</span><span class="p">[</span><span class="nx">filePath</span><span class="p">]</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">statSync</span><span class="p">(</span><span class="nx">filePath</span><span class="p">);</span>
-    <span class="p">}</span>
-    <span class="k">catch</span> <span class="p">(</span> <span class="nx">err</span> <span class="p">)</span> <span class="p">{</span>
-      <span class="nx">stats</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-    <span class="p">}</span>
+      <span class="p">,</span> <span class="nx">stats</span> <span class="o">=</span> <span class="nx">cache</span><span class="p">[</span><span class="nx">filePath</span><span class="p">]</span> <span class="o">=</span> <span class="nx">statFile</span><span class="p">(</span><span class="nx">filePath</span><span class="p">);</span>
 
     <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="p">(</span><span class="nx">stats</span> <span class="o">&amp;&amp;</span> <span class="nx">cached</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
       <span class="k">return</span> <span class="nx">stats</span> <span class="o">||</span> <span class="nx">cached</span><span class="p">;</span>

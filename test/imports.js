@@ -42,6 +42,17 @@ exports.imports = nodeunit.testCase({
     test.done();
   },
 
+  "File Submodule Import": function (test) {
+    var script1 = "import module1\nmodule1.test_value"
+      , script2 = "import module2\nmodule2.test_value"
+      , script3 = "import module1.index\nindex.test_value";
+
+    test.equal(eval(script1), "right!");
+    test.equal(eval(script2), "right!");
+    test.equal(eval(script3), "wrong!");
+    test.done();
+  },
+
   "System Import": function (test) {
     test.equal(eval("import math\nmath.round(9.5)"), "10");
     test.done();
