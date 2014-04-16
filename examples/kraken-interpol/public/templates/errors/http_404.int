@@ -1,2 +1,2 @@
 from errors import render
-render(404, "File Not Found")
+render(404, url, err)

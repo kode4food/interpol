@@ -1,2 +1,2 @@
 from errors import render
-render(500, "Internal Server Error")
+render(500, url, err)

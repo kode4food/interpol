@@ -1,12 +1,16 @@
-from layouts.master import render
-import i18n.strings as str
+from layouts import master
+import locales as str
 
-render(title, body)
+# Context Variables
+#  * lang: The locale identifier (ex: US_en)
+#  * name: The name passed from the model (ex: 'kraken-interpol')
+
+master(title, body)
 
 def title
-  str['en'].title
+  str[lang].title()
 end
 
 def body
-  <h1>str['en'].greeting</h1>
+  <h1>str[lang].greeting(name)</h1>
 end

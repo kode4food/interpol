@@ -1,6 +1,9 @@
 # Change History
 
-## Version 0.3.6 - Kraken Support
+## Version 0.3.6 - Module Organization
+The FileResolver and Bundled Apps now support resolving a file called `index.int` as the stand-in for a module that is otherwise represented as a directory.  This should be familiar to Node.js (`index.js`) and Python (`__init__.py`) developers.  The resolver will first attempt to load the module as a file.  If no file is found, it will test for a directory and associated `index.int` file in order to resolve the module.
+
+### Kraken Support
 Added a [Kraken](http://krakenjs.com/) entry point.  In order to use Interpol in a Kraken app, you will have to modify `config/app.json` to include the following:
 
 ```json

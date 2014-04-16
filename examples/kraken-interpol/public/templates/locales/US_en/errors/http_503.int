@@ -1,0 +1,2 @@
+def header: "Service unavailable"
+def description: "The service is unavailable. Please try back shortly."
