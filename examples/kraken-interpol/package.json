@@ -14,7 +14,7 @@
     "dependencies": {
         "dustjs-helpers": "~1.2.0",
         "kraken-js": "~0.7.0",
-        "express": "~3.4.4",
+        "express": "~3.4.8",
         "nconf": "~0.6.8",
         "less": "~1.6.1",
         "interpol": "kode4food/interpol",

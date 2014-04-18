@@ -6,7 +6,7 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "express": "*",
+    "express": "~3.4.8",
     "interpol": "kode4food/interpol"
   }
 }
