@@ -1,5 +1,8 @@
 # Change History
 
+## Version 0.3.7 - Extracted Express/Kraken Support
+Support for Express and Kraken have been extracted from Interpol-proper and now exist in a separate project called `interpol-express`.
+
 ## Version 0.3.6 - Module Organization
 The FileResolver and Bundled Apps now support resolving a file called `index.int` as the stand-in for a module that is otherwise represented as a directory.  This should be familiar to Node.js (`index.js`) and Python (`__init__.py`) developers.  The resolver will first attempt to load the module as a file.  If no file is found, it will test for a directory and associated `index.int` file in order to resolve the module.
 

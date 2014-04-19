@@ -1,8 +1,0 @@
-def header: "Internal server error"
-
-def description(url, err)
-  "The URL"
-  <code>url</code>
-  "had the following error"
-  <code>err</code> "."
-end

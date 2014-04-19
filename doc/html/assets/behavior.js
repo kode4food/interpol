@@ -63,14 +63,6 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
               "type": "heading",
               "data": {
                 "level": 2,
-                "title": "Inclusion in Express",
-                "slug": "inclusion-in-express"
-              },
-              "depth": 2
-            }, {
-              "type": "heading",
-              "data": {
-                "level": 2,
                 "title": "Inclusion in a Browser",
                 "slug": "inclusion-in-a-browser"
               },
@@ -147,14 +139,6 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
             "level": 2,
             "title": "Inclusion in Node.js",
             "slug": "inclusion-in-nodejs"
-          },
-          "depth": 2
-        }, {
-          "type": "heading",
-          "data": {
-            "level": 2,
-            "title": "Inclusion in Express",
-            "slug": "inclusion-in-express"
           },
           "depth": 2
         }, {
@@ -248,26 +232,6 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
           "depth": 2
         }
       ]
-    }, {
-      "type": "file",
-      "data": {
-        "language": {
-          "nameMatchers": [".js"],
-          "pygmentsLexer": "javascript",
-          "multiLineComment": ["/**", "*", "*/"],
-          "singleLineComment": ["//"],
-          "ignorePrefix": "}",
-          "foldPrefix": "^",
-          "name": "JavaScript"
-        },
-        "sourcePath": "/Users/thom/work/interpol/lib/express.js",
-        "projectPath": "lib/express.js",
-        "targetPath": "express",
-        "pageTitle": "express",
-        "title": "express"
-      },
-      "depth": 1,
-      "outline": []
     }, {
       "type": "file",
       "data": {

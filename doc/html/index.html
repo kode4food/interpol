@@ -155,16 +155,6 @@ end
 <pre><code class="javascript">var interpol = require('interpol');
 </code></pre>
 
-<h2 id="inclusion-in-express">Inclusion in Express</h2>
-
-<p>A basic View Engine for <a href="http://expressjs.com/">Express</a> is supported.  To set a development instance as the default engine, you can do the following:</p>
-
-<pre><code class="javascript">app.engine('int', require('interpol').__express);
-app.set('view engine', 'int');
-</code></pre>
-
-<p>If Express is started in development mode, the view engine will monitor the <code>./views</code> directory and continuously reload any modified files ending in <code>.int</code>.  Otherwise, the engine will expect to see pre-parsed files ending in <code>.int.json</code> and will <em>not</em> monitor the directory for changes.</p>
-
 <h2 id="inclusion-in-a-browser">Inclusion in a Browser</h2>
 
 <p>There are two ways to include Interpol templates in a browser-based application.  One is to parse/compile raw templates using the PEG.js parser.  Another is to compile the templates from pre-parsed JSON output.  The PEG.js parser is <em>massive</em> and slower than parsing JSON, but it may be necessary if you want to compile ad-hoc templates.</p>

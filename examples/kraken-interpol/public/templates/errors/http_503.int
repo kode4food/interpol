@@ -1,2 +1,0 @@
-from errors import render
-render(503, url, err)
