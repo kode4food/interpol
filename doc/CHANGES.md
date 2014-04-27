@@ -1,7 +1,7 @@
 # Change History
 
 ## Version 0.3.8 - Basic Guard Support
-The ability to define a guard clause using the `when` keyword has been added to Partial Definitions.  This allows Partial Definitions to be 're-opened' with additional conditions, but only those that are defined in the immediate scope.
+The ability to define a guard clause using the `when` keyword has been added to Partial Definitions.  This allows Partial Definitions to be 're-opened' with additional conditions.
 
 ```python
 def renderList(people)
