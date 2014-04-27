@@ -2,12 +2,6 @@
 renderList(people)
 
 def renderList(people)
-when people.length == 0
-  # will only be called if people.length == 0
-  <b>"There are no people!"</b>
-end
-
-def renderList(people)
   # otherwise will fall through to this
   "There are %length stooges" % people
   <ul>
@@ -15,6 +9,12 @@ def renderList(people)
     renderItem(person.name, brother)
   end
   </ul>
+end
+
+def renderList(people)
+when people.length == 0
+  # will only be called if people.length == 0
+  <b>"There are no people!"</b>
 end
 
 def renderItem(name, brother)

@@ -170,7 +170,15 @@ Object.</p>
     <span class="p">,</span> <span class="nx">lineInfo</span> <span class="o">=</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="nx">err</span><span class="p">.</span><span class="nx">line</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="nx">err</span><span class="p">.</span><span class="nx">column</span><span class="p">;</span>
 
   <span class="k">return</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">((</span><span class="nx">filePath</span> <span class="o">||</span> <span class="s1">&#39;string&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="nx">lineInfo</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="nx">errString</span><span class="p">);</span>
-<span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><h2 id="function-invocation">Function Invocation</h2></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p>'bless' a Function as being Interpol-compatible.  This essentially means
+<span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><h2 id="function-invocation">Function Invocation</h2></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p>Returns whether or not a Function is 'blessed' as Interpol-compatible.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><strong>func must be a Function.</strong><br/>(the Function to check)</li>
+</ul></div></div><div class="code"><div class="wrapper"><span class="kd">function</span> <span class="nx">isInterpolFunction</span><span class="p">(</span><span class="nx">func</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="k">typeof</span> <span class="nx">func</span> <span class="o">===</span> <span class="s1">&#39;function&#39;</span> <span class="o">&amp;&amp;</span> <span class="nx">func</span><span class="p">.</span><span class="nx">__interpolFunction</span><span class="p">;</span>
+<span class="p">}</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p>'bless' a Function as being Interpol-compatible.  This essentially means
 that the Function must accept a Writer instance as the first argument, as
 a writer will be passed to it by the compiled template.</p>
 
@@ -227,5 +235,6 @@ that aren't required.</p>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">escapeContent</span> <span class="o">=</span> <span class="nx">escapeContent</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">stringify</span> <span class="o">=</span> <span class="nx">stringify</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">formatSyntaxError</span> <span class="o">=</span> <span class="nx">formatSyntaxError</span><span class="p">;</span>
+<span class="nx">exports</span><span class="p">.</span><span class="nx">isInterpolFunction</span> <span class="o">=</span> <span class="nx">isInterpolFunction</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">bless</span> <span class="o">=</span> <span class="nx">bless</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">configure</span> <span class="o">=</span> <span class="nx">configure</span><span class="p">;</span></div></div></div></div></body></html>

@@ -58,14 +58,14 @@ exports.partials = nodeunit.testCase({
 
     var script3 = "test(10)\n" +
                   "if true\n" +
-                  "  def test(value)\n" +
+                  "  def test(value) when value == 10\n" +
                   "    'first'\n" +
                   "  end\n" +
                   "end\n" +
-                  "def test(value) when value == 10\n" +
+                  "def test(value)\n" +
                   "  'second'\n" +
                   "end\n" +
-                  "test()";
+                  "test(10)";
 
     test.equal(eval(script1), "Hello, Bob!\n\n");
 
@@ -74,6 +74,26 @@ exports.partials = nodeunit.testCase({
     });
 
     test.equal(eval(script3), "second\n\nfirst\n");
+
+    test.done();
+  },
+
+  "Guard Clauses": function (test) {
+    var script = "partialCall(value)\n" +
+                 "def partialCall(val)\n" +
+                 "  'first %val'\n" +
+                 "end\n" +
+                 "def partialCall(val) when val == 10\n\n" +
+                 "  'second %val'\n" +
+                 "end\n" +
+                 "def partialCall(val) when extern\n" +
+                 "  'third %val'\n" +
+                 "end";
+
+    test.equal(eval(script, { value: 20 }), "first 20\n\n");
+    test.equal(eval(script, { value: 10 }), "second 10\n\n");
+    test.equal(eval(script, { value: 20, extern: true }), "third 20\n\n");
+    test.equal(eval(script, { value: 10, extern: true }), "third 10\n\n");
 
     test.done();
   }

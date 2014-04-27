@@ -58,19 +58,43 @@ end
 ## Statements
 
 ### Partial Definitions
-Partials are reusable procedures that can be applied in a variety of contexts, such as in loops and conditionals.  For example, one might write a partial to render a single item in a list:
+Partials are reusable procedures that can be applied in a variety of contexts, such as in loops and conditionals.  For example, one might write a partial to render a list of items:
 
 ```python
-def renderItem(person, brother)
-  <li>
-    "% is the brother of %" % (brother, person.name)
-  </li>
+def renderItem(items)
+  <ul>
+    for item in items
+    <li>
+      "%name is the name of the item" % item
+    </li>
+    end
+  </ul>
 end
 ```
 
+The definition of a partial can also be 're-opened' to apply guard clauses, or to shadow the partial if no guard clause is provided.  The order in which partials are defined determines the order in which the guard clauses are evaluated, where the most recently defined will be evaluated first.  For example:
+
+```python
+def renderList(people)
+  <ul>
+  for person in people, sibling in person.siblings
+    renderItem(person.name, sibling)
+  end
+  </ul>
+end
+
+def renderList(people) when people.length == 0
+  <b>"There are no people to render!"</b>
+end
+
+renderList(people)
+```
+
+In this case, if `people` was an empty array, the second variation of renderList would be executed.  Otherwise control would fall-through to the first.  If the unguarded version of renderList had been defined last, it would shadow the previous definition, thus short-circuiting its possible evaluation.
+
 Partials are first-class elements of Interpol, meaning they can be passed around and assigned to variables.  In certain situations, they are also hoisted to the top of their scope, so you can call them in your code even before they've been defined.
 
-*Note:* When invoked, a partials always return `undefined`.
+*Note:* When invoked, a partial always returns `undefined`.
 
 ### Importing
 Importing partials and variables in Interpol is similar to Python.  One can either import an entire module as a single variable, or can cherry-pick individual properties.  In all cases, the imported items can be aliased locally.
