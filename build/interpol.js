@@ -196,12 +196,13 @@ var isArray = util.isArray
   , bless = util.bless
   , extendContext = util.extendContext
   , freezeObject = util.freezeObject
+  , isInterpolFunction = util.isInterpolFunction
   , createStaticMixin = util.createStaticMixin
   , isInterpolJSON = util.isInterpolJSON
   , stringify = util.stringify
   , buildTemplate = format.buildTemplate;
 
-var CURRENT_VERSION = "0.3.6"
+var CURRENT_VERSION = "0.3.8"
   , TemplateCacheMax = 256
   , globalOptions = { writer: null, errorCallback: null }
   , globalContext = {}
@@ -638,28 +639,88 @@ function compile(parseOutput, localOptions) {
     }
   }
 
+  function isInterpolPartial(func) {
+    return typeof func === 'function' && func.__interpolPartial;
+  }
+
   // generate an evaluator to represent a partial and its associated closure
-  function createPartialEvaluator(nameLiteral, paramDefs, statementNodes) {
+  function createPartialEvaluator(nameLiteral, paramDefs,
+                                  statementNodes, guardNode) {
     var name = lits[nameLiteral]
       , params = [null].concat(expandLiterals(paramDefs))
       , plen = params.length
-      , statements = createStatementsEvaluator(statementNodes);
+      , statements = createStatementsEvaluator(statementNodes)
+      , guard = guardNode ? createEvaluator(guardNode) : null;
 
-    return closureEvaluator;
+    return guard ? guardedClosureEvaluator : unguardedClosureEvaluator;
 
-    function closureEvaluator(ctx /*, writer */) {
-      // just assign the closure to a local variable
-      bodyEvaluator.__interpolFunction = true;
-      ctx[name] = bodyEvaluator;
+    // an unguarded closure evaluator simply shadows variable by its name
+    // since an unguarded partial won't be chaining back to anyone
+    function unguardedClosureEvaluator(ctx /*, writer */) {
+      ctx[name] = callEvaluator;
+      callEvaluator.__interpolFunction = true;
+      callEvaluator.__interpolPartial = true;
+      callEvaluator.__interpolBodyEvaluator = unguardedBodyEvaluator;
 
-      // the function that will be called
-      function bodyEvaluator(writer) {
+      // don't even bother calling the body evaluator, just inline it and
+      // make a version of it available to any potential chains
+      function callEvaluator(writer) {
         var newCtx = extendContext(ctx);
-        newCtx[name] = bodyEvaluator;
+        newCtx[name] = callEvaluator;
         for ( var i = 1; i < plen; i++ ) {
           newCtx[params[i]] = arguments[i];
         }
-        return statements(newCtx, writer);
+        statements(newCtx, writer);
+      }
+
+      function unguardedBodyEvaluator(ctx, writer) {
+        statements(ctx, writer);
+        return true;
+      }
+    }
+
+    // if a partial is already defined, then we need to chain it,
+    // otherwise just shadow whatever was there.
+    function guardedClosureEvaluator(ctx /*, writer */) {
+      var existingValue = ctx[name]
+        , bodyEvaluator, oldEvaluator, newEvaluator;
+
+      if ( !existingValue || !isInterpolPartial(existingValue) ) {
+        bodyEvaluator = guardedBodyEvaluator;
+      }
+      else {
+        oldEvaluator = existingValue.__interpolBodyEvaluator;
+        bodyEvaluator = branchedBodyEvaluator;
+        newEvaluator = guardedBodyEvaluator;
+      }
+
+      ctx[name] = callEvaluator;
+      callEvaluator.__interpolFunction = true;
+      callEvaluator.__interpolPartial = true;
+      callEvaluator.__interpolBodyEvaluator = bodyEvaluator;
+
+      function callEvaluator(writer) {
+        var newCtx = extendContext(ctx);
+        newCtx[name] = callEvaluator;
+        for ( var i = 1; i < plen; i++ ) {
+          newCtx[params[i]] = arguments[i];
+        }
+        bodyEvaluator(newCtx, writer);
+      }
+
+      function guardedBodyEvaluator(ctx, writer) {
+        if ( !guard(ctx, writer) ) {
+          return false;
+        }
+        statements(ctx, writer);
+        return true;
+      }
+
+      function branchedBodyEvaluator(ctx, writer) {
+        if ( !newEvaluator(ctx, writer) ) {
+          return oldEvaluator(ctx, writer);
+        }
+        return true;
       }
     }
   }
@@ -679,7 +740,7 @@ function compile(parseOutput, localOptions) {
     function callEvaluator(ctx, writer) {
       var func = member(ctx, writer);
 
-      if ( typeof func !== 'function' || !func.__interpolFunction ) {
+      if ( !isInterpolFunction(func) ) {
         if ( ctx.__interpolExports ) {
           return;
         }
@@ -1405,7 +1466,6 @@ var util = require('../../util')
 
 // `first(value)` returns the first item of the provided array (or `null` if
 // the array is empty).
-
 function first(writer, value) {
   if ( !isArray(value) ) {
     return value;
@@ -1416,7 +1476,6 @@ function first(writer, value) {
 // `join(value, delim)` returns the result of joining the elements of the
 // provided array. Each element will be concatenated into a string separated
 // by the specified delimiter (or ' ').
-
 function join(writer, value, delim) {
   if ( isArray(value) ) {
     return value.join(delim || ' ');
@@ -1426,7 +1485,6 @@ function join(writer, value, delim) {
 
 // `last(value)` returns the last item of the provided array (or `null` if
 // the array is empty).
-
 function last(writer, value) {
   if ( !isArray(value) ) {
     return value;
@@ -1437,14 +1495,12 @@ function last(writer, value) {
 
 // `length(value)` if it is an array, returns the length of the provided
 // value (otherwise `0`).
-
 function length(writer, value) {
   return isArray(value) ? value.length : 0;
 }
 
 // `empty(value)` returns true or false depending on whether or not the
 // provided array is empty.
-
 function empty(writer, value) {
   return !value || !value.length;
 }
@@ -1885,6 +1941,15 @@ function formatSyntaxError(err, filePath) {
 // ## Function Invocation
 
 /**
+ * Returns whether or not a Function is 'blessed' as Interpol-compatible.
+ *
+ * @param {Function} func the Function to check
+ */
+function isInterpolFunction(func) {
+  return typeof func === 'function' && func.__interpolFunction;
+}
+
+/**
  * 'bless' a Function as being Interpol-compatible.  This essentially means
  * that the Function must accept a Writer instance as the first argument, as
  * a writer will be passed to it by the compiled template.
@@ -1946,6 +2011,7 @@ exports.escapeAttribute = escapeAttribute;
 exports.escapeContent = escapeContent;
 exports.stringify = stringify;
 exports.formatSyntaxError = formatSyntaxError;
+exports.isInterpolFunction = isInterpolFunction;
 exports.bless = bless;
 exports.configure = configure;
 
