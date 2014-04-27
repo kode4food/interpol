@@ -56,7 +56,7 @@ exports.partials = nodeunit.testCase({
                   "  'Hello, %name!'\n" +
                   "end";
 
-    var script3 = "test()\n" +
+    var script3 = "test(10)\n" +
                   "if true\n" +
                   "  def test(value)\n" +
                   "    'first'\n" +
@@ -73,8 +73,7 @@ exports.partials = nodeunit.testCase({
       eval(script2);
     });
 
-    // second is guarded, so won't evaluate
-    test.equal(eval(script3), "\nfirst\n");
+    test.equal(eval(script3), "second\n\nfirst\n");
 
     test.done();
   }
