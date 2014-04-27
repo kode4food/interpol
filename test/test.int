@@ -1,13 +1,20 @@
 <h2>title</h2>
-"There are %length stooges" % people
 renderList(people)
 
 def renderList(people)
+when people.length == 0
+  # will only be called if people.length == 0
+  <b>"There are no people!"</b>
+end
+
+def renderList(people)
+  # otherwise will fall through to this
+  "There are %length stooges" % people
   <ul>
   for person in people, brother in person.brothers
     renderItem(person.name, brother)
   end
-  </ul> # this is a comment
+  </ul>
 end
 
 def renderItem(name, brother)

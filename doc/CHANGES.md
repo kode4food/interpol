@@ -1,5 +1,24 @@
 # Change History
 
+## Version 0.3.8 - Basic Guard Support
+The ability to define a guard clause using the `when` keyword has been added to Partial Definitions.  This also allows Partial Definitions to be 're-opened' with additional conditions, but only those that are defined in the immediate scope.
+
+```python
+def renderList(people) when people.length == 0
+  <b>"There are no people to render!"</b>
+end
+
+def renderList(people)
+  <ul>
+  for person in people, sibling in person.siblings
+    renderItem(person.name, sibling)
+  end
+  </ul>
+end
+```
+
+*Note:* The order in which partials are defined determines the order in which the guard clauses are evaluated.  If the unguarded version of renderList had been defined first, it would effectively short-circuit any subsequent evaluation.
+
 ## Version 0.3.7 - Extracted Express/Kraken Support
 Support for Express and Kraken have been extracted from Interpol-proper and now exist in a separate project called `interpol-express`.  This project can be installed using npm like so:
 
