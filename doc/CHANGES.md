@@ -1,5 +1,8 @@
 # Change History
 
+## Version 0.3.9 - Basic Guard Support Again
+Version 0.3.8 failed to publish build artifacts.  This version corrects that issue.
+
 ## Version 0.3.8 - Basic Guard Support
 The ability to define a guard clause using the `when` keyword has been added to Partial Definitions.  This allows Partial Definitions to be 're-opened' with additional conditions.
 
