@@ -2,7 +2,7 @@
   "name": "interpol",
   "description": "Templates Sans Facial Hair",
   "author": "Thomas S. Bradford",
-  "version": "0.3.9",
+  "version": "0.3.10",
   "license": "MIT",
   "homepage": "http://www.interpoljs.io/",
   "main": "index.js",
