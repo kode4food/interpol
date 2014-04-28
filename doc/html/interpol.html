@@ -23,7 +23,7 @@
   <span class="p">,</span> <span class="nx">stringify</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">stringify</span>
   <span class="p">,</span> <span class="nx">buildTemplate</span> <span class="o">=</span> <span class="nx">format</span><span class="p">.</span><span class="nx">buildTemplate</span><span class="p">;</span>
 
-<span class="kd">var</span> <span class="nx">CURRENT_VERSION</span> <span class="o">=</span> <span class="s2">&quot;0.3.9&quot;</span>
+<span class="kd">var</span> <span class="nx">CURRENT_VERSION</span> <span class="o">=</span> <span class="s2">&quot;0.3.7&quot;</span>
   <span class="p">,</span> <span class="nx">TemplateCacheMax</span> <span class="o">=</span> <span class="mi">256</span>
   <span class="p">,</span> <span class="nx">globalOptions</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">writer</span><span class="o">:</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">errorCallback</span><span class="o">:</span> <span class="kc">null</span> <span class="p">}</span>
   <span class="p">,</span> <span class="nx">globalContext</span> <span class="o">=</span> <span class="p">{}</span>
@@ -94,6 +94,7 @@ to work.</p>
     <span class="p">,</span> <span class="nx">NullWriter</span> <span class="o">=</span> <span class="nx">interpol</span><span class="p">.</span><span class="nx">createNullWriter</span><span class="p">();</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>A lookup table of code-path generators</p></div></div><div class="code"><div class="wrapper">  <span class="kd">var</span> <span class="nx">Evaluators</span> <span class="o">=</span> <span class="nx">freezeObject</span><span class="p">({</span>
     <span class="nx">im</span><span class="o">:</span> <span class="nx">createImportEvaluator</span><span class="p">,</span>
     <span class="nx">de</span><span class="o">:</span> <span class="nx">createPartialEvaluator</span><span class="p">,</span>
+    <span class="nx">bi</span><span class="o">:</span> <span class="nx">createBindEvaluator</span><span class="p">,</span>
     <span class="nx">ca</span><span class="o">:</span> <span class="nx">createCallEvaluator</span><span class="p">,</span>
     <span class="nx">as</span><span class="o">:</span> <span class="nx">createAssignEvaluator</span><span class="p">,</span>
     <span class="nx">op</span><span class="o">:</span> <span class="nx">createOpenTagEvaluator</span><span class="p">,</span>
@@ -182,12 +183,12 @@ this method still have access to the global context.</p></div></div><div class="
   <span class="kd">function</span> <span class="nx">templateExports</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span> <span class="nx">exportedContext</span> <span class="p">)</span> <span class="p">{</span>
       <span class="k">return</span> <span class="nx">exportedContext</span><span class="p">;</span>
-    <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p><code>__interpolExports</code> is an indicator to evaluators that we're
-processing exports and so they can be a bit lax about reporting
-errors or resolving imports</p></div></div><div class="code"><div class="wrapper">    <span class="nx">exportedContext</span> <span class="o">=</span> <span class="nx">extendContext</span><span class="p">(</span><span class="nx">globalContext</span><span class="p">);</span>
-    <span class="nx">exportedContext</span><span class="p">.</span><span class="nx">__interpolExports</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p><code>__intExports</code> is an indicator to evaluators that we're processing
+exports and so they can be a bit lax about reporting errors or 
+resolving imports</p></div></div><div class="code"><div class="wrapper">    <span class="nx">exportedContext</span> <span class="o">=</span> <span class="nx">extendContext</span><span class="p">(</span><span class="nx">globalContext</span><span class="p">);</span>
+    <span class="nx">exportedContext</span><span class="p">.</span><span class="nx">__intExports</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
     <span class="nx">evaluator</span><span class="p">(</span><span class="nx">exportedContext</span><span class="p">,</span> <span class="nx">NullWriter</span><span class="p">);</span>
-    <span class="k">delete</span> <span class="nx">exportedContext</span><span class="p">.</span><span class="nx">__interpolExports</span><span class="p">;</span>
+    <span class="k">delete</span> <span class="nx">exportedContext</span><span class="p">.</span><span class="nx">__intExports</span><span class="p">;</span>
 
     <span class="k">return</span> <span class="nx">exportedContext</span><span class="p">;</span>
   <span class="p">}</span>
@@ -336,7 +337,7 @@ evaluating an operator.  0=both are literals, 1=left is a function,
     <span class="kd">function</span> <span class="nx">importEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>have to call it like this because we can't override importEvaluator
 after it has been returned to a parent evaluator</p></div></div><div class="code"><div class="wrapper">      <span class="nx">evaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">);</span>
     <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>if moduleCaching is on, we use the cachable form of the evaluator</p></div></div><div class="code"><div class="wrapper">    <span class="kd">function</span> <span class="nx">cacheableEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">if</span> <span class="p">(</span> <span class="nx">ctx</span><span class="p">.</span><span class="nx">__interpolExports</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span> <span class="nx">ctx</span><span class="p">.</span><span class="nx">__intExports</span> <span class="p">)</span> <span class="p">{</span>
         <span class="nx">dynamicEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">);</span>
         <span class="k">return</span><span class="p">;</span>
       <span class="p">}</span>
@@ -382,7 +383,7 @@ of yielding its exports</p></div></div><div class="code"><div class="wrapper">  
   <span class="p">}</span>
 
   <span class="kd">function</span> <span class="nx">isInterpolPartial</span><span class="p">(</span><span class="nx">func</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="k">typeof</span> <span class="nx">func</span> <span class="o">===</span> <span class="s1">&#39;function&#39;</span> <span class="o">&amp;&amp;</span> <span class="nx">func</span><span class="p">.</span><span class="nx">__interpolPartial</span><span class="p">;</span>
+    <span class="k">return</span> <span class="k">typeof</span> <span class="nx">func</span> <span class="o">===</span> <span class="s1">&#39;function&#39;</span> <span class="o">&amp;&amp;</span> <span class="nx">func</span><span class="p">.</span><span class="nx">__intFunction</span> <span class="o">===</span> <span class="s1">&#39;part&#39;</span><span class="p">;</span>
   <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>generate an evaluator to represent a partial and its associated closure</p></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">createPartialEvaluator</span><span class="p">(</span><span class="nx">nameLiteral</span><span class="p">,</span> <span class="nx">paramDefs</span><span class="p">,</span>
                                   <span class="nx">statementNodes</span><span class="p">,</span> <span class="nx">guardNode</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">name</span> <span class="o">=</span> <span class="nx">lits</span><span class="p">[</span><span class="nx">nameLiteral</span><span class="p">]</span>
@@ -391,13 +392,14 @@ of yielding its exports</p></div></div><div class="code"><div class="wrapper">  
       <span class="p">,</span> <span class="nx">statements</span> <span class="o">=</span> <span class="nx">createStatementsEvaluator</span><span class="p">(</span><span class="nx">statementNodes</span><span class="p">)</span>
       <span class="p">,</span> <span class="nx">guard</span> <span class="o">=</span> <span class="nx">guardNode</span> <span class="o">?</span> <span class="nx">createEvaluator</span><span class="p">(</span><span class="nx">guardNode</span><span class="p">)</span> <span class="o">:</span> <span class="kc">null</span><span class="p">;</span>
 
-    <span class="k">return</span> <span class="nx">guard</span> <span class="o">?</span> <span class="nx">guardedClosureEvaluator</span> <span class="o">:</span> <span class="nx">unguardedClosureEvaluator</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>an unguarded closure evaluator simply shadows variable by its name
-since an unguarded partial won't be chaining back to anyone</p></div></div><div class="code"><div class="wrapper">    <span class="kd">function</span> <span class="nx">unguardedClosureEvaluator</span><span class="p">(</span><span class="nx">ctx</span> <span class="cm">/*, writer */</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">guard</span> <span class="o">?</span> <span class="nx">guardedClosureEvaluator</span> <span class="o">:</span> <span class="nx">unguardedClosureEvaluator</span><span class="p">;</span>
+
+    <span class="kd">function</span> <span class="nx">unguardedClosureEvaluator</span><span class="p">(</span><span class="nx">ctx</span> <span class="cm">/*, writer */</span><span class="p">)</span> <span class="p">{</span>
       <span class="nx">ctx</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="nx">callEvaluator</span><span class="p">;</span>
-      <span class="nx">callEvaluator</span><span class="p">.</span><span class="nx">__interpolFunction</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
-      <span class="nx">callEvaluator</span><span class="p">.</span><span class="nx">__interpolPartial</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
-      <span class="nx">callEvaluator</span><span class="p">.</span><span class="nx">__interpolBodyEvaluator</span> <span class="o">=</span> <span class="nx">unguardedBodyEvaluator</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>don't even bother calling the body evaluator, just inline it and
-make a version of it available to any potential chains</p></div></div><div class="code"><div class="wrapper">      <span class="kd">function</span> <span class="nx">callEvaluator</span><span class="p">(</span><span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">callEvaluator</span><span class="p">.</span><span class="nx">__intFunction</span> <span class="o">=</span> <span class="s1">&#39;part&#39;</span><span class="p">;</span>
+      <span class="nx">callEvaluator</span><span class="p">.</span><span class="nx">__intEvaluator</span> <span class="o">=</span> <span class="nx">unguardedBodyEvaluator</span><span class="p">;</span>
+
+      <span class="kd">function</span> <span class="nx">callEvaluator</span><span class="p">(</span><span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">var</span> <span class="nx">newCtx</span> <span class="o">=</span> <span class="nx">extendContext</span><span class="p">(</span><span class="nx">ctx</span><span class="p">);</span>
         <span class="nx">newCtx</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="nx">callEvaluator</span><span class="p">;</span>
         <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">plen</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
@@ -410,24 +412,21 @@ make a version of it available to any potential chains</p></div></div><div class
         <span class="nx">statements</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">);</span>
         <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
       <span class="p">}</span>
-    <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>if a partial is already defined, then we need to chain it,
-otherwise just shadow whatever was there.</p></div></div><div class="code"><div class="wrapper">    <span class="kd">function</span> <span class="nx">guardedClosureEvaluator</span><span class="p">(</span><span class="nx">ctx</span> <span class="cm">/*, writer */</span><span class="p">)</span> <span class="p">{</span>
-      <span class="kd">var</span> <span class="nx">existingValue</span> <span class="o">=</span> <span class="nx">ctx</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span>
-        <span class="p">,</span> <span class="nx">bodyEvaluator</span><span class="p">,</span> <span class="nx">oldEvaluator</span><span class="p">,</span> <span class="nx">newEvaluator</span><span class="p">;</span>
+    <span class="p">}</span>
 
-      <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">existingValue</span> <span class="o">||</span> <span class="o">!</span><span class="nx">isInterpolPartial</span><span class="p">(</span><span class="nx">existingValue</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="kd">function</span> <span class="nx">guardedClosureEvaluator</span><span class="p">(</span><span class="nx">ctx</span> <span class="cm">/*, writer */</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">bodyEvaluator</span><span class="p">,</span> <span class="nx">oldEvaluator</span><span class="p">,</span> <span class="nx">newEvaluator</span><span class="p">;</span>
+      <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">ctx</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="o">||</span> <span class="o">!</span><span class="nx">isInterpolPartial</span><span class="p">(</span><span class="nx">ctx</span><span class="p">[</span><span class="nx">name</span><span class="p">])</span> <span class="p">)</span> <span class="p">{</span>
         <span class="nx">bodyEvaluator</span> <span class="o">=</span> <span class="nx">guardedBodyEvaluator</span><span class="p">;</span>
       <span class="p">}</span>
       <span class="k">else</span> <span class="p">{</span>
-        <span class="nx">oldEvaluator</span> <span class="o">=</span> <span class="nx">existingValue</span><span class="p">.</span><span class="nx">__interpolBodyEvaluator</span><span class="p">;</span>
+        <span class="nx">oldEvaluator</span> <span class="o">=</span> <span class="nx">ctx</span><span class="p">[</span><span class="nx">name</span><span class="p">].</span><span class="nx">__intEvaluator</span><span class="p">;</span>
         <span class="nx">bodyEvaluator</span> <span class="o">=</span> <span class="nx">branchedBodyEvaluator</span><span class="p">;</span>
         <span class="nx">newEvaluator</span> <span class="o">=</span> <span class="nx">guardedBodyEvaluator</span><span class="p">;</span>
       <span class="p">}</span>
-
       <span class="nx">ctx</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="nx">callEvaluator</span><span class="p">;</span>
-      <span class="nx">callEvaluator</span><span class="p">.</span><span class="nx">__interpolFunction</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
-      <span class="nx">callEvaluator</span><span class="p">.</span><span class="nx">__interpolPartial</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
-      <span class="nx">callEvaluator</span><span class="p">.</span><span class="nx">__interpolBodyEvaluator</span> <span class="o">=</span> <span class="nx">bodyEvaluator</span><span class="p">;</span>
+      <span class="nx">callEvaluator</span><span class="p">.</span><span class="nx">__intFunction</span> <span class="o">=</span> <span class="s1">&#39;part&#39;</span><span class="p">;</span>
+      <span class="nx">callEvaluator</span><span class="p">.</span><span class="nx">__intEvaluator</span> <span class="o">=</span> <span class="nx">bodyEvaluator</span><span class="p">;</span>
 
       <span class="kd">function</span> <span class="nx">callEvaluator</span><span class="p">(</span><span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">var</span> <span class="nx">newCtx</span> <span class="o">=</span> <span class="nx">extendContext</span><span class="p">(</span><span class="nx">ctx</span><span class="p">);</span>
@@ -439,19 +438,41 @@ otherwise just shadow whatever was there.</p></div></div><div class="code"><div 
       <span class="p">}</span>
 
       <span class="kd">function</span> <span class="nx">guardedBodyEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">guard</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
-          <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span> <span class="nx">guard</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+          <span class="nx">statements</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">);</span>
+          <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
         <span class="p">}</span>
-        <span class="nx">statements</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">);</span>
-        <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
       <span class="p">}</span>
 
       <span class="kd">function</span> <span class="nx">branchedBodyEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">newEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
-          <span class="k">return</span> <span class="nx">oldEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">);</span>
-        <span class="p">}</span>
-        <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="k">return</span> <span class="nx">newEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="o">||</span> <span class="nx">oldEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">);</span>
       <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>generate a bound call evaluator</p></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">createBindEvaluator</span><span class="p">(</span><span class="nx">memberNode</span><span class="p">,</span> <span class="nx">argNodes</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">member</span> <span class="o">=</span> <span class="nx">createEvaluator</span><span class="p">(</span><span class="nx">memberNode</span><span class="p">)</span>
+      <span class="p">,</span> <span class="nx">args</span> <span class="o">=</span> <span class="nx">wrapArrayEvaluators</span><span class="p">(</span><span class="nx">argNodes</span><span class="p">)</span>
+      <span class="p">,</span> <span class="nx">alen</span> <span class="o">=</span> <span class="nx">args</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="nx">bindEvaluator</span><span class="p">;</span>
+
+    <span class="kd">function</span> <span class="nx">bindEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">func</span> <span class="o">=</span> <span class="nx">member</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">);</span>
+
+      <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isInterpolFunction</span><span class="p">(</span><span class="nx">func</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span> <span class="nx">ctx</span><span class="p">.</span><span class="nx">__intExports</span> <span class="p">)</span> <span class="p">{</span>
+          <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s2">&quot;Attempting to bind an unblessed function&quot;</span><span class="p">);</span>
+      <span class="p">}</span>
+
+      <span class="kd">var</span> <span class="nx">callArgs</span> <span class="o">=</span> <span class="p">[];</span>
+      <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">alen</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="nx">callArgs</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="nx">args</span><span class="p">[</span><span class="nx">i</span><span class="p">](</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">);</span>
+      <span class="p">}</span>
+
+      <span class="kd">var</span> <span class="nx">bound</span> <span class="o">=</span> <span class="nx">configure</span><span class="p">(</span><span class="nx">func</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">callArgs</span><span class="p">);</span>
+      <span class="nx">bound</span><span class="p">.</span><span class="nx">__intFunction</span> <span class="o">=</span> <span class="nx">func</span><span class="p">.</span><span class="nx">__intFunction</span><span class="p">;</span>
+      <span class="k">return</span> <span class="nx">bound</span><span class="p">;</span>
     <span class="p">}</span>
   <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>generate an evaluator to perform a function or partial call</p></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">createCallEvaluator</span><span class="p">(</span><span class="nx">memberNode</span><span class="p">,</span> <span class="nx">argNodes</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">member</span> <span class="o">=</span> <span class="nx">createEvaluator</span><span class="p">(</span><span class="nx">memberNode</span><span class="p">)</span>
@@ -465,7 +486,7 @@ top-level export context anyway</p></div></div><div class="code"><div class="wra
       <span class="kd">var</span> <span class="nx">func</span> <span class="o">=</span> <span class="nx">member</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">);</span>
 
       <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isInterpolFunction</span><span class="p">(</span><span class="nx">func</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="p">(</span> <span class="nx">ctx</span><span class="p">.</span><span class="nx">__interpolExports</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span> <span class="nx">ctx</span><span class="p">.</span><span class="nx">__intExports</span> <span class="p">)</span> <span class="p">{</span>
           <span class="k">return</span><span class="p">;</span>
         <span class="p">}</span>
         <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s2">&quot;Attempting to call an unblessed function&quot;</span><span class="p">);</span>

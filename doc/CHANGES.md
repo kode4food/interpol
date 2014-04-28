@@ -1,5 +1,24 @@
 # Change History
 
+## Version 0.3.10 - Function and Partial Binding
+A new binding operator (@) is now supported, replacing the `.configure()` method.  While `configure()` against system functions was only useful for currying, binding against partials is useful when you want to pass the partial around for later invocation.  For example:
+
+```python
+from layouts import mainLayout
+from partials import renderList
+let renderItems = @renderList(items)
+mainLayout("A Title", renderItems)
+```
+
+Now, if mainLayout invokes `renderItems()` with no parameters, the bound list in `items` will be rendered.  As a result of the general-purpose nature of this operator, if you use it for functions that will be curried into a pipeline, those functions will now require a placeholder as the first argument:
+
+```python
+from array import join
+let j = @join(nil, " -- ")
+let a = ('joined','with','dashes')
+"Result is %a|j"
+```
+
 ## Version 0.3.9 - Basic Guard Support Again
 Version 0.3.8 failed to publish build artifacts.  This version corrects that issue.
 

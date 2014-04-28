@@ -58,10 +58,10 @@ exports.imports = nodeunit.testCase({
     test.done();
   },
 
-  "Configurable System Import": function (test) {
+  "Bound System Import": function (test) {
     var script = "from array import join\n" +
                  "let a = ('this', 'is', 'an', 'array')\n" +
-                 "let j = join.configure('///')\n" +
+                 "let j = @join(nil, '///')\n" +
                  "a | j";
 
     test.equal(eval(script), "this///is///an///array");

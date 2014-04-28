@@ -177,7 +177,7 @@ Object.</p>
 <ul>
 <li><strong>func must be a Function.</strong><br/>(the Function to check)</li>
 </ul></div></div><div class="code"><div class="wrapper"><span class="kd">function</span> <span class="nx">isInterpolFunction</span><span class="p">(</span><span class="nx">func</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="k">typeof</span> <span class="nx">func</span> <span class="o">===</span> <span class="s1">&#39;function&#39;</span> <span class="o">&amp;&amp;</span> <span class="nx">func</span><span class="p">.</span><span class="nx">__interpolFunction</span><span class="p">;</span>
+  <span class="k">return</span> <span class="k">typeof</span> <span class="nx">func</span> <span class="o">===</span> <span class="s1">&#39;function&#39;</span> <span class="o">&amp;&amp;</span> <span class="nx">func</span><span class="p">.</span><span class="nx">__intFunction</span><span class="p">;</span>
 <span class="p">}</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p>'bless' a Function as being Interpol-compatible.  This essentially means
 that the Function must accept a Writer instance as the first argument, as
 a writer will be passed to it by the compiled template.</p>
@@ -191,11 +191,11 @@ a writer will be passed to it by the compiled template.</p>
     <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s2">&quot;Argument to bless must be a Function&quot;</span><span class="p">);</span>
   <span class="p">}</span>
 
-  <span class="k">if</span> <span class="p">(</span> <span class="nx">func</span><span class="p">.</span><span class="nx">__interpolFunction</span> <span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="nx">func</span><span class="p">.</span><span class="nx">__intFunction</span> <span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">func</span><span class="p">;</span>
   <span class="p">}</span>
 
-  <span class="nx">blessedWrapper</span><span class="p">.</span><span class="nx">__interpolFunction</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+  <span class="nx">blessedWrapper</span><span class="p">.</span><span class="nx">__intFunction</span> <span class="o">=</span> <span class="s1">&#39;wrap&#39;</span><span class="p">;</span>
   <span class="k">return</span> <span class="nx">blessedWrapper</span><span class="p">;</span>
 
   <span class="kd">function</span> <span class="nx">blessedWrapper</span><span class="p">()</span> <span class="p">{</span>
@@ -203,7 +203,7 @@ a writer will be passed to it by the compiled template.</p>
     <span class="k">return</span> <span class="nx">func</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
   <span class="p">}</span>
 <span class="p">}</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p>Returns a 'configured' version of the provided function.  By configured,
-this means that the wrapper will provide default values for any arguments
+this means that the wrapper can provide default values for any arguments
 that aren't required.</p>
 
 <p>Parameters:</p>

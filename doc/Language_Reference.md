@@ -323,8 +323,31 @@ myObject.someProperty
 myObject['someProperty']
 ```
 
-### Partial Calls
-Like a function call in JavaScript, except that most of the time you can't rely on the return value to be anything useful.
+### Function and Partial Binding
+Interpol supports a binding operator `@`.  This is a unary operator that allows you to perform argument binding on both functions and partials.  This is useful against functions for currying in piped calls.  For Example:
+
+```python
+from array import join
+let j = @join(nil, " -- ")
+let a = ('joined','with','dashes')
+"Result is %a|j"
+```
+
+*Note:* For currying, we use a nil placeholder for the first (piped) argument since that will be overridden by the pipe `|` operator.
+
+Binding is also useful against partials when you want to pass them around for later invocation:
+
+```python
+from layouts import mainLayout
+from partials import renderList
+let renderItems = @renderList(items)
+mainLayout("A Title", renderItems)
+```
+
+Now, if mainLayout invokes `renderItems()` with no parameters, the bound list in `items` will be rendered.
+
+### Function and Partial Calls
+Like a function call in JavaScript.  A library function will either produce some template output or return a value, depending on its purpose.  A partial will aways returned `undefined`.
 
 ```python
 for item in list
