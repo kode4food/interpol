@@ -36,6 +36,7 @@ require('../lib/writers/dom');
 "use strict";
 
 var util = require('./util')
+  , isInterpolFunction = util.isInterpolFunction
   , stringify = util.stringify;
 
 var nullWriter;
@@ -159,8 +160,8 @@ function buildTemplate(formatStr) {
           type = typeof func;
         }
 
-        if ( type !== 'function' || !func.__interpolFunction ) {
-          if ( ctx.__interpolExports ) {
+        if ( !isInterpolFunction(func) ) {
+          if ( ctx.__intExports ) {
             continue;
           }
           throw new Error("Attempting to call an unblessed function");
@@ -202,7 +203,7 @@ var isArray = util.isArray
   , stringify = util.stringify
   , buildTemplate = format.buildTemplate;
 
-var CURRENT_VERSION = "0.3.9"
+var CURRENT_VERSION = "0.3.7"
   , TemplateCacheMax = 256
   , globalOptions = { writer: null, errorCallback: null }
   , globalContext = {}
@@ -294,6 +295,7 @@ function compile(parseOutput, localOptions) {
   var Evaluators = freezeObject({
     im: createImportEvaluator,
     de: createPartialEvaluator,
+    bi: createBindEvaluator,
     ca: createCallEvaluator,
     as: createAssignEvaluator,
     op: createOpenTagEvaluator,
@@ -401,14 +403,14 @@ function compile(parseOutput, localOptions) {
       return exportedContext;
     }
 
-    // `__interpolExports` is an indicator to evaluators that we're
-    // processing exports and so they can be a bit lax about reporting
-    // errors or resolving imports
+    // `__intExports` is an indicator to evaluators that we're processing
+    // exports and so they can be a bit lax about reporting errors or 
+    // resolving imports
 
     exportedContext = extendContext(globalContext);
-    exportedContext.__interpolExports = true;
+    exportedContext.__intExports = true;
     evaluator(exportedContext, NullWriter);
-    delete exportedContext.__interpolExports;
+    delete exportedContext.__intExports;
 
     return exportedContext;
   }
@@ -588,7 +590,7 @@ function compile(parseOutput, localOptions) {
 
     // if moduleCaching is on, we use the cachable form of the evaluator
     function cacheableEvaluator(ctx, writer) {
-      if ( ctx.__interpolExports ) {
+      if ( ctx.__intExports ) {
         dynamicEvaluator(ctx, writer);
         return;
       }
@@ -640,7 +642,7 @@ function compile(parseOutput, localOptions) {
   }
 
   function isInterpolPartial(func) {
-    return typeof func === 'function' && func.__interpolPartial;
+    return typeof func === 'function' && func.__intFunction === 'part';
   }
 
   // generate an evaluator to represent a partial and its associated closure
@@ -654,16 +656,11 @@ function compile(parseOutput, localOptions) {
 
     return guard ? guardedClosureEvaluator : unguardedClosureEvaluator;
 
-    // an unguarded closure evaluator simply shadows variable by its name
-    // since an unguarded partial won't be chaining back to anyone
     function unguardedClosureEvaluator(ctx /*, writer */) {
       ctx[name] = callEvaluator;
-      callEvaluator.__interpolFunction = true;
-      callEvaluator.__interpolPartial = true;
-      callEvaluator.__interpolBodyEvaluator = unguardedBodyEvaluator;
+      callEvaluator.__intFunction = 'part';
+      callEvaluator.__intEvaluator = unguardedBodyEvaluator;
 
-      // don't even bother calling the body evaluator, just inline it and
-      // make a version of it available to any potential chains
       function callEvaluator(writer) {
         var newCtx = extendContext(ctx);
         newCtx[name] = callEvaluator;
@@ -679,25 +676,19 @@ function compile(parseOutput, localOptions) {
       }
     }
 
-    // if a partial is already defined, then we need to chain it,
-    // otherwise just shadow whatever was there.
     function guardedClosureEvaluator(ctx /*, writer */) {
-      var existingValue = ctx[name]
-        , bodyEvaluator, oldEvaluator, newEvaluator;
-
-      if ( !existingValue || !isInterpolPartial(existingValue) ) {
+      var bodyEvaluator, oldEvaluator, newEvaluator;
+      if ( !ctx.hasOwnProperty(name) || !isInterpolPartial(ctx[name]) ) {
         bodyEvaluator = guardedBodyEvaluator;
       }
       else {
-        oldEvaluator = existingValue.__interpolBodyEvaluator;
+        oldEvaluator = ctx[name].__intEvaluator;
         bodyEvaluator = branchedBodyEvaluator;
         newEvaluator = guardedBodyEvaluator;
       }
-
       ctx[name] = callEvaluator;
-      callEvaluator.__interpolFunction = true;
-      callEvaluator.__interpolPartial = true;
-      callEvaluator.__interpolBodyEvaluator = bodyEvaluator;
+      callEvaluator.__intFunction = 'part';
+      callEvaluator.__intEvaluator = bodyEvaluator;
 
       function callEvaluator(writer) {
         var newCtx = extendContext(ctx);
@@ -709,19 +700,44 @@ function compile(parseOutput, localOptions) {
       }
 
       function guardedBodyEvaluator(ctx, writer) {
-        if ( !guard(ctx, writer) ) {
-          return false;
+        if ( guard(ctx, writer) ) {
+          statements(ctx, writer);
+          return true;
         }
-        statements(ctx, writer);
-        return true;
       }
 
       function branchedBodyEvaluator(ctx, writer) {
-        if ( !newEvaluator(ctx, writer) ) {
-          return oldEvaluator(ctx, writer);
-        }
-        return true;
+        return newEvaluator(ctx, writer) || oldEvaluator(ctx, writer);
       }
+    }
+  }
+
+  // generate a bound call evaluator
+  function createBindEvaluator(memberNode, argNodes) {
+    var member = createEvaluator(memberNode)
+      , args = wrapArrayEvaluators(argNodes)
+      , alen = args.length;
+
+    return bindEvaluator;
+
+    function bindEvaluator(ctx, writer) {
+      var func = member(ctx, writer);
+
+      if ( !isInterpolFunction(func) ) {
+        if ( ctx.__intExports ) {
+          return;
+        }
+        throw new Error("Attempting to bind an unblessed function");
+      }
+
+      var callArgs = [];
+      for ( var i = 0; i < alen; i++ ) {
+        callArgs[i] = args[i](ctx, writer);
+      }
+
+      var bound = configure(func, 1, callArgs);
+      bound.__intFunction = func.__intFunction;
+      return bound;
     }
   }
 
@@ -741,7 +757,7 @@ function compile(parseOutput, localOptions) {
       var func = member(ctx, writer);
 
       if ( !isInterpolFunction(func) ) {
-        if ( ctx.__interpolExports ) {
+        if ( ctx.__intExports ) {
           return;
         }
         throw new Error("Attempting to call an unblessed function");
@@ -1308,8 +1324,7 @@ var interpol = require('../interpol')
 var slice = Array.prototype.slice
   , isArray = util.isArray
   , isInterpolJSON = util.isInterpolJSON
-  , bless = util.bless
-  , configure = util.configure;
+  , bless = util.bless;
 
 /**
  * Creates a new Memory Resolver.  As its name implies, this resolver
@@ -1404,35 +1419,13 @@ function blessModule(module) {
   for ( var key in module ) {
     var value = module[key];
     if ( typeof value === 'function') {
-      result[key] = configurable(bless(value));
+      result[key] = bless(value);
     }
     else {
       result[key] = value;
     }
   }
   return result;
-}
-
-/**
- * Attaches a Function called `configure` to the provided Function.  This
- * attached Function allows one to configure defaults for calls to the
- * owning Function.  The result is that any function imported into an
- * Interpol template can be configured for easy re-use and piping.
- *
- * @param {Function} func the Function to make configurable
- */
-
-function configurable(func) {
-  blessedConfigure.__interpolFunction = true;
-  func.configure = blessedConfigure;
-  return func;
-
-  function blessedConfigure(writer) {
-    // writer, value are always passed to configurables, hence the '2'
-    var configured = configure(func, 2, slice.call(arguments, 1));
-    configured.__interpolFunction = true;
-    return configured;
-  }
 }
 
 function normalizeModuleName(name) {
@@ -1946,7 +1939,7 @@ function formatSyntaxError(err, filePath) {
  * @param {Function} func the Function to check
  */
 function isInterpolFunction(func) {
-  return typeof func === 'function' && func.__interpolFunction;
+  return typeof func === 'function' && func.__intFunction;
 }
 
 /**
@@ -1962,11 +1955,11 @@ function bless(func) {
     throw new Error("Argument to bless must be a Function");
   }
 
-  if ( func.__interpolFunction ) {
+  if ( func.__intFunction ) {
     return func;
   }
 
-  blessedWrapper.__interpolFunction = true;
+  blessedWrapper.__intFunction = 'wrap';
   return blessedWrapper;
 
   function blessedWrapper() {
@@ -1977,7 +1970,7 @@ function bless(func) {
 
 /**
  * Returns a 'configured' version of the provided function.  By configured,
- * this means that the wrapper will provide default values for any arguments
+ * this means that the wrapper can provide default values for any arguments
  * that aren't required.
  *
  * @param {Function} func the Function to configure
