@@ -203,7 +203,7 @@ var isArray = util.isArray
   , stringify = util.stringify
   , buildTemplate = format.buildTemplate;
 
-var CURRENT_VERSION = "0.3.10"
+var CURRENT_VERSION = "0.3.11"
   , TemplateCacheMax = 256
   , globalOptions = { writer: null, errorCallback: null }
   , globalContext = {}
@@ -659,19 +659,14 @@ function compile(parseOutput, localOptions) {
     function unguardedClosureEvaluator(ctx /*, writer */) {
       ctx[name] = callEvaluator;
       callEvaluator.__intFunction = 'part';
-      callEvaluator.__intEvaluator = unguardedBodyEvaluator;
+      callEvaluator.__intEvaluator = bodyEvaluator;
 
       function callEvaluator(writer) {
-        var newCtx = extendContext(ctx);
-        newCtx[name] = callEvaluator;
-        for ( var i = 1; i < plen; i++ ) {
-          newCtx[params[i]] = arguments[i];
-        }
-        statements(newCtx, writer);
+        statements(createCallContext(ctx, callEvaluator, arguments), writer);
       }
 
-      function unguardedBodyEvaluator(ctx, writer) {
-        statements(ctx, writer);
+      function bodyEvaluator(writer) {
+        statements(createCallContext(ctx, callEvaluator, arguments), writer);
         return true;
       }
     }
@@ -690,25 +685,34 @@ function compile(parseOutput, localOptions) {
       callEvaluator.__intFunction = 'part';
       callEvaluator.__intEvaluator = bodyEvaluator;
 
-      function callEvaluator(writer) {
-        var newCtx = extendContext(ctx);
-        newCtx[name] = callEvaluator;
-        for ( var i = 1; i < plen; i++ ) {
-          newCtx[params[i]] = arguments[i];
-        }
-        bodyEvaluator(newCtx, writer);
+      function callEvaluator() {
+        /* jshint validthis:true */
+        bodyEvaluator.apply(this, arguments);
       }
 
-      function guardedBodyEvaluator(ctx, writer) {
-        if ( guard(ctx, writer) ) {
-          statements(ctx, writer);
+      function guardedBodyEvaluator(writer) {
+        var newCtx = createCallContext(ctx, callEvaluator, arguments);
+        if ( guard(newCtx, writer) ) {
+          statements(newCtx, writer);
           return true;
         }
       }
 
-      function branchedBodyEvaluator(ctx, writer) {
-        return newEvaluator(ctx, writer) || oldEvaluator(ctx, writer);
+      function branchedBodyEvaluator() {
+        /* jshint validthis:true */
+        return newEvaluator.apply(this, arguments) ||
+               oldEvaluator.apply(this, arguments);
       }
+    }
+
+    // Creates a new calling context and stores its locals from arguments
+    function createCallContext(parentCtx, callEvaluator, args) {
+      var newCtx = extendContext(parentCtx);
+      newCtx[name] = callEvaluator;
+      for ( var i = 1; i < plen; i++ ) {
+        newCtx[params[i]] = args[i];
+      }
+      return newCtx;
     }
   }
 

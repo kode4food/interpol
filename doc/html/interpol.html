@@ -23,7 +23,7 @@
   <span class="p">,</span> <span class="nx">stringify</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">stringify</span>
   <span class="p">,</span> <span class="nx">buildTemplate</span> <span class="o">=</span> <span class="nx">format</span><span class="p">.</span><span class="nx">buildTemplate</span><span class="p">;</span>
 
-<span class="kd">var</span> <span class="nx">CURRENT_VERSION</span> <span class="o">=</span> <span class="s2">&quot;0.3.10&quot;</span>
+<span class="kd">var</span> <span class="nx">CURRENT_VERSION</span> <span class="o">=</span> <span class="s2">&quot;0.3.11&quot;</span>
   <span class="p">,</span> <span class="nx">TemplateCacheMax</span> <span class="o">=</span> <span class="mi">256</span>
   <span class="p">,</span> <span class="nx">globalOptions</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">writer</span><span class="o">:</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">errorCallback</span><span class="o">:</span> <span class="kc">null</span> <span class="p">}</span>
   <span class="p">,</span> <span class="nx">globalContext</span> <span class="o">=</span> <span class="p">{}</span>
@@ -397,19 +397,14 @@ of yielding its exports</p></div></div><div class="code"><div class="wrapper">  
     <span class="kd">function</span> <span class="nx">unguardedClosureEvaluator</span><span class="p">(</span><span class="nx">ctx</span> <span class="cm">/*, writer */</span><span class="p">)</span> <span class="p">{</span>
       <span class="nx">ctx</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="nx">callEvaluator</span><span class="p">;</span>
       <span class="nx">callEvaluator</span><span class="p">.</span><span class="nx">__intFunction</span> <span class="o">=</span> <span class="s1">&#39;part&#39;</span><span class="p">;</span>
-      <span class="nx">callEvaluator</span><span class="p">.</span><span class="nx">__intEvaluator</span> <span class="o">=</span> <span class="nx">unguardedBodyEvaluator</span><span class="p">;</span>
+      <span class="nx">callEvaluator</span><span class="p">.</span><span class="nx">__intEvaluator</span> <span class="o">=</span> <span class="nx">bodyEvaluator</span><span class="p">;</span>
 
       <span class="kd">function</span> <span class="nx">callEvaluator</span><span class="p">(</span><span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kd">var</span> <span class="nx">newCtx</span> <span class="o">=</span> <span class="nx">extendContext</span><span class="p">(</span><span class="nx">ctx</span><span class="p">);</span>
-        <span class="nx">newCtx</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="nx">callEvaluator</span><span class="p">;</span>
-        <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">plen</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
-          <span class="nx">newCtx</span><span class="p">[</span><span class="nx">params</span><span class="p">[</span><span class="nx">i</span><span class="p">]]</span> <span class="o">=</span> <span class="nx">arguments</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
-        <span class="p">}</span>
-        <span class="nx">statements</span><span class="p">(</span><span class="nx">newCtx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">);</span>
+        <span class="nx">statements</span><span class="p">(</span><span class="nx">createCallContext</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">callEvaluator</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">),</span> <span class="nx">writer</span><span class="p">);</span>
       <span class="p">}</span>
 
-      <span class="kd">function</span> <span class="nx">unguardedBodyEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">statements</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">);</span>
+      <span class="kd">function</span> <span class="nx">bodyEvaluator</span><span class="p">(</span><span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">statements</span><span class="p">(</span><span class="nx">createCallContext</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">callEvaluator</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">),</span> <span class="nx">writer</span><span class="p">);</span>
         <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
       <span class="p">}</span>
     <span class="p">}</span>
@@ -428,25 +423,31 @@ of yielding its exports</p></div></div><div class="code"><div class="wrapper">  
       <span class="nx">callEvaluator</span><span class="p">.</span><span class="nx">__intFunction</span> <span class="o">=</span> <span class="s1">&#39;part&#39;</span><span class="p">;</span>
       <span class="nx">callEvaluator</span><span class="p">.</span><span class="nx">__intEvaluator</span> <span class="o">=</span> <span class="nx">bodyEvaluator</span><span class="p">;</span>
 
-      <span class="kd">function</span> <span class="nx">callEvaluator</span><span class="p">(</span><span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kd">var</span> <span class="nx">newCtx</span> <span class="o">=</span> <span class="nx">extendContext</span><span class="p">(</span><span class="nx">ctx</span><span class="p">);</span>
-        <span class="nx">newCtx</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="nx">callEvaluator</span><span class="p">;</span>
-        <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">plen</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
-          <span class="nx">newCtx</span><span class="p">[</span><span class="nx">params</span><span class="p">[</span><span class="nx">i</span><span class="p">]]</span> <span class="o">=</span> <span class="nx">arguments</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
-        <span class="p">}</span>
-        <span class="nx">bodyEvaluator</span><span class="p">(</span><span class="nx">newCtx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">);</span>
+      <span class="kd">function</span> <span class="nx">callEvaluator</span><span class="p">()</span> <span class="p">{</span>
+        <span class="cm">/* jshint validthis:true */</span>
+        <span class="nx">bodyEvaluator</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
       <span class="p">}</span>
 
-      <span class="kd">function</span> <span class="nx">guardedBodyEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="p">(</span> <span class="nx">guard</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
-          <span class="nx">statements</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">);</span>
+      <span class="kd">function</span> <span class="nx">guardedBodyEvaluator</span><span class="p">(</span><span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">newCtx</span> <span class="o">=</span> <span class="nx">createCallContext</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">callEvaluator</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span> <span class="nx">guard</span><span class="p">(</span><span class="nx">newCtx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+          <span class="nx">statements</span><span class="p">(</span><span class="nx">newCtx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">);</span>
           <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
         <span class="p">}</span>
       <span class="p">}</span>
 
-      <span class="kd">function</span> <span class="nx">branchedBodyEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="nx">newEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="o">||</span> <span class="nx">oldEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">);</span>
+      <span class="kd">function</span> <span class="nx">branchedBodyEvaluator</span><span class="p">()</span> <span class="p">{</span>
+        <span class="cm">/* jshint validthis:true */</span>
+        <span class="k">return</span> <span class="nx">newEvaluator</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">)</span> <span class="o">||</span>
+               <span class="nx">oldEvaluator</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
       <span class="p">}</span>
+    <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Creates a new calling context and stores its locals from arguments</p></div></div><div class="code"><div class="wrapper">    <span class="kd">function</span> <span class="nx">createCallContext</span><span class="p">(</span><span class="nx">parentCtx</span><span class="p">,</span> <span class="nx">callEvaluator</span><span class="p">,</span> <span class="nx">args</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">newCtx</span> <span class="o">=</span> <span class="nx">extendContext</span><span class="p">(</span><span class="nx">parentCtx</span><span class="p">);</span>
+      <span class="nx">newCtx</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="nx">callEvaluator</span><span class="p">;</span>
+      <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">plen</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="nx">newCtx</span><span class="p">[</span><span class="nx">params</span><span class="p">[</span><span class="nx">i</span><span class="p">]]</span> <span class="o">=</span> <span class="nx">args</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+      <span class="p">}</span>
+      <span class="k">return</span> <span class="nx">newCtx</span><span class="p">;</span>
     <span class="p">}</span>
   <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>generate a bound call evaluator</p></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">createBindEvaluator</span><span class="p">(</span><span class="nx">memberNode</span><span class="p">,</span> <span class="nx">argNodes</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">member</span> <span class="o">=</span> <span class="nx">createEvaluator</span><span class="p">(</span><span class="nx">memberNode</span><span class="p">)</span>

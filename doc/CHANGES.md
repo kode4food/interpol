@@ -1,5 +1,8 @@
 # Change History
 
+## Version 0.3.11 - Guard Fixes
+If the argument names for partials with extended guards differed, the context passed between the partials would contain invalid entries.  This has been corrected.
+
 ## Version 0.3.10 - Function and Partial Binding
 A new binding operator (@) is now supported, replacing the `.configure()` method.  While `configure()` against system functions was only useful for currying, binding against partials is useful when you want to pass the partial around for later invocation.  For example:
 
