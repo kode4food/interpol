@@ -51,10 +51,10 @@ exports.partials = nodeunit.testCase({
                   "end";
 
     var script2 = "partialCall('Bob')\n" +
-                  "let partialCall = 50\n" +
                   "def partialCall(name)\n" +
                   "  'Hello, %name!'\n" +
-                  "end";
+                  "end" +
+                  "let partialCall = 50\n";
 
     var script3 = "test(10)\n" +
                   "if true\n" +
@@ -68,12 +68,8 @@ exports.partials = nodeunit.testCase({
                   "test(10)";
 
     test.equal(eval(script1), "Hello, Bob!\n\n");
-
-    test.throws(function () {
-      eval(script2);
-    });
-
-    test.equal(eval(script3), "second\n\nfirst\n");
+    test.throws(function () { eval(script2); });
+    test.throws(function () { eval(script3); });
 
     test.done();
   },

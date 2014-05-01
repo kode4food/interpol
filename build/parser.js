@@ -6714,29 +6714,37 @@ module.exports = (function() {
         return isArray(statement) && isOperator(statement[0], 'as');
       }
 
+      // Hoisting *only* occurs when the following condition is met:
+      //
+      //   (!partial_definition)+
+      //   partial_definition+
+      //
+      // meaning that partial definitions can't be interspersed with
+      // regular statements.  In that case, the logic is assumed too
+      // complex to make a responsible guess as to the developer's
+      // intentions.
+
       function hoistPartials(statements) {
-        var encountered = {}
-          , partials = []
+        var partials = []
           , others = [];
 
         for ( var i = 0, ilen = statements.length; i < ilen; i++ ) {
           var statement = statements[i];
           if ( isPartialDef(statement) ) {
-            var name = statement[1].value;
-            if ( !encountered[name] ) {
-              partials.push(statement);
-              continue;
+            if ( !others.length ) {
+              // Short-circuit.  We're either all partials or we don't
+              // meet the conditions for hoisting
+              return statements;
             }
+            partials.push(statement);
           }
-          else if ( isAssignStatement(statement) ) {
-            var assignments = statement[1];
-            for ( var j = assignments.length; j--; ) {
-              var assignment = assignments[j]
-                , name = assignment[0].value;
-              encountered[name] = true;
+          else {
+            if ( partials.length ) {
+              // Short-circuit. we don't hoist under these conditions
+              return statements;
             }
+            others.push(statement);
           }
-          others.push(statement);
         }
         return partials.concat(others);
       }

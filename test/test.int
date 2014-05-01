@@ -1,4 +1,6 @@
 <h2>title</h2>
+let defaultRenderList = @renderList(people)
+defaultRenderList()
 
 def renderList(people)
   # otherwise will fall through to this
@@ -23,6 +25,3 @@ end
 def renderTest(name)
   "Hello %name"
 end
-
-let defaultRenderList = @renderList(people)
-defaultRenderList()
