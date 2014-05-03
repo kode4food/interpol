@@ -3,6 +3,6 @@
 * Improved Formatting Library
 * Basic Localization Functionality
 * Improved Test Coverage
-* Various optimizations
+* Various Optimizations
 * Good Documentation
-
+* Better Debugging Output
