@@ -6851,9 +6851,7 @@ module.exports = (function() {
               , thisGuard = definition[4];
 
             statements = [ [sym('cn'), thisGuard, theseStatements, statements] ];
-            if ( guard ) {
-              guard = [sym('or'), thisGuard, guard];
-            }
+            guard = guard && [sym('or'), thisGuard, guard];
           }
 
           firstDefinition[3] = statements;
