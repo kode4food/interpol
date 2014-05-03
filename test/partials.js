@@ -76,14 +76,14 @@ exports.partials = nodeunit.testCase({
 
   "Guard Clauses": function (test) {
     var script = "partialCall(value)\n" +
-                 "def partialCall(val1)\n" +
-                 "  'first %val1'\n" +
+                 "def partialCall(val) when val\n" +
+                 "  'first %val'\n" +
                  "end\n" +
-                 "def partialCall(val2) when val2 == 10\n\n" +
-                 "  'second %val2'\n" +
+                 "def partialCall(val) when val == 10\n\n" +
+                 "  'second %val'\n" +
                  "end\n" +
-                 "def partialCall(val3) when extern\n" +
-                 "  'third %val3'\n" +
+                 "def partialCall(val) when extern\n" +
+                 "  'third %val'\n" +
                  "end";
 
     test.equal(eval(script, { value: 20 }), "first 20\n\n");

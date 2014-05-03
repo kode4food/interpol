@@ -6734,6 +6734,7 @@ module.exports = (function() {
             if ( !others.length ) {
               // Short-circuit.  We're either all partials or we don't
               // meet the conditions for hoisting
+              // TODO: add a warning
               return statements;
             }
             partials.push(statement);
@@ -6741,6 +6742,7 @@ module.exports = (function() {
           else {
             if ( partials.length ) {
               // Short-circuit. we don't hoist under these conditions
+              // TODO: add a warning
               return statements;
             }
             others.push(statement);
@@ -6749,29 +6751,132 @@ module.exports = (function() {
         return partials.concat(others);
       }
 
-      function mergeAssignments(statements) {
-        var result = []
-          , wasAssignment = false;
+      // Iterates over a set of statements and presents adjacent groups
+      // to the groupCallback function for replacement.
 
-        for ( var i = 0, ilen = statements.length; i < ilen; i++ ) {
-          var statement = statements[i]
-            , isAssignment = isAssignStatement(statement);
-
-          if ( isAssignment && wasAssignment ) {
-            var target = result[result.length - 1]
-            target[1] = target[1].concat(statement[1]);
+      function processStatementGroups(statements, op, groupCallback) {
+        statements = statements.slice(0);  // take a copy
+        var wasMatch = false, start = 0;
+        for ( var i = 0, len = statements.length; i < len; i++ ) {
+          var statement = statements[i];
+          if ( isArray(statement) && isOperator(statement[0], op) ) {
+            if ( !wasMatch ) {
+              start = i;
+              wasMatch = true;
+            }
           }
           else {
-            result.push(statement);
+            if ( !wasMatch ) { continue; }
+            wasMatch = false;
+            processGroup(start, i);
           }
-          wasAssignment = isAssignment;
         }
-        return result;
+        if ( wasMatch ) { processGroup(start, i); }
+        return statements;
+
+        function processGroup(start, end) {
+          var len = end - start;
+          if ( len === 1 ) { return; }
+
+          var subset = statements.slice(start, end)
+            , args = [start, len].concat(groupCallback(subset));
+          statements.splice.apply(statements, args);
+        }
+      }
+
+      function mergeAssignments(statements) {
+        return processStatementGroups(statements, 'as', processGroup);
+
+        function processGroup(assignStatements) {
+          var target = assignStatements[0];
+          for ( var i = 1, len = assignStatements.length; i < len; i++ ) {
+            target[1] = target[1].concat(assignStatements[i][1]);
+          }
+          return [target];
+        }
+      }
+
+      function mergePartials(statements) {
+        return processStatementGroups(statements, 'de', processGroup);
+
+        function processGroup(defStatements) {
+          var namedDefinitions = {};
+          for ( var i = 0, len = defStatements.length; i < len; i++ ) {
+            var statement = defStatements[i]
+              , name = statement[1].value
+              , group = namedDefinitions[name] || ( namedDefinitions[name] = [] );
+
+            if ( !statement[4] ) {
+              // if we see an unguarded, blow away previous definitions
+              // TODO: add a warning
+              group.length = 0;
+            }
+
+            group.push(statement);
+          }
+
+          var result = [];
+          for ( var key in namedDefinitions ) {
+            var definitions = namedDefinitions[key];
+            if ( definitions.length === 1 ) {
+              result.push(definitions[0]);
+              continue;
+            }
+            result = result.concat(mergeDefinitions(definitions));
+          }
+          return result;
+        }
+
+        function mergeDefinitions(definitions) {
+          var firstDefinition = definitions[0]
+            , originalArgs = argumentsSignature(firstDefinition[2])
+            , statements = firstDefinition[3]
+            , guard = firstDefinition[4];
+
+          if ( guard ) {
+            statements = [ [sym('cn'), guard, statements, [sym(null)]] ];
+          }
+
+          for ( var i = 1, len = definitions.length; i < len; i++ ) {
+            var definition = definitions[i]
+              , theseArgs = argumentsSignature(definition[2]);
+
+            if ( theseArgs !== originalArgs ) {
+              // Short-circuit, won't make assumptions about local names
+              // TODO: add a warning
+              return definitions;
+            }
+
+            var theseStatements = definition[3]
+              , thisGuard = definition[4];
+
+            statements = [ [sym('cn'), thisGuard, theseStatements, statements] ];
+            if ( guard ) {
+              guard = [sym('or'), thisGuard, guard];
+            }
+          }
+
+          firstDefinition[3] = statements;
+          if ( guard ) {
+            firstDefinition[4] = guard;
+          }
+          return [firstDefinition];
+        }
+
+        function argumentsSignature(argNames) {
+          if ( !argNames || !argNames.length ) { return ''; }
+          var result = [];
+          for ( var i = 0, len = argNames.length; i < len; i++ ) {
+            result.push(argNames[i].value);
+          }
+          return result.join(',')
+        }
       }
 
       function rewriteStatements(statements) {
         statements = hoistPartials(statements);
         statements = mergeAssignments(statements);
+        statements = mergePartials(statements);
         return statements;
       }
 
