@@ -238,7 +238,7 @@ module.exports = (function() {
                   results.push([sym('ou'), sym(ws)]);
                 }
               }
-              return rewriteStatements(results);
+              return stmts(results);
             },
         peg$c176 = function(s, ws) {
               return [[s], ws];
@@ -6632,6 +6632,8 @@ module.exports = (function() {
       var ParamContextCheck = /(^|[^%])%[$_a-zA-Z][$_a-zA-Z0-9]*/m;
 
       var toString = Object.prototype.toString;
+      var slice = Array.prototype.slice;
+
       var isArray = Array.isArray;
       if ( !isArray ) {
         isArray = (function () {
@@ -6641,24 +6643,141 @@ module.exports = (function() {
         })();
       }
 
-      function sym(value, type) {
-        type = type || 'op';
-        return { value: value, type: type };
-      }
-
       function constructModule(module) {
-        var lits = [], reverseLits = {};
-        replaceSymbols(module);
-        return { i: 'interpol', v: -1, l: lits, n: module };
+        var lits = [], reverseLits = {}, warnings = [];
+        module = replaceSymbols(rewriteStatements(module));
+        return { i: 'interpol', v: -1, l: lits, n: module, e: warnings };
 
-        function lit(value) {
-          var idx = reverseLits[value];
-          if ( typeof idx === 'number' ) {
-            return idx;
+        function rewriteStatements(node) {
+          if ( !isArray(node) ) {
+            if ( isStatements(node) ) {
+              var statements = rewriteStatements(node.stmts);
+              statements = hoistPartials(statements);
+              statements = mergeAssignments(statements);
+              statements = mergePartials(statements);
+              return statements;
+            }
+            return node;
           }
-          idx = lits.push(value) - 1;
-          reverseLits[value] = idx;
-          return idx;
+          for ( var i = 0, len = node.length; i < len; i++ ) {
+            node[i] = rewriteStatements(node[i]);
+          }
+          return node;
+        }
+
+        // Hoisting *only* occurs when the following condition is met:
+        //
+        //   (!partial_definition)+
+        //   partial_definition+
+        //
+        // meaning that partial definitions can't be interspersed with
+        // regular statements.  In that case, the logic is assumed too
+        // complex to make a responsible guess as to the developer's
+        // intentions.
+
+        function hoistPartials(statements) {
+          var partials = []
+            , others = [];
+
+          for ( var i = 0, ilen = statements.length; i < ilen; i++ ) {
+            var statement = statements[i];
+            if ( isPartialDef(statement) ) {
+              if ( !others.length ) {
+                // Short-circuit.  We're either all partials or we don't
+                // meet the conditions for hoisting
+                return statements;
+              }
+              partials.push(statement);
+            }
+            else {
+              if ( partials.length ) {
+                // Short-circuit. we don't hoist under these conditions
+                return statements;
+              }
+              others.push(statement);
+            }
+          }
+          return partials.concat(others);
+        }
+
+        function mergeAssignments(statements) {
+          return processStatementGroups(statements, 'as', processGroup);
+
+          function processGroup(assignStatements) {
+            var target = assignStatements[0];
+            for ( var i = 1, len = assignStatements.length; i < len; i++ ) {
+              target[1] = target[1].concat(assignStatements[i][1]);
+            }
+            return [target];
+          }
+        }
+
+        function mergePartials(statements) {
+          return processStatementGroups(statements, 'de', processGroup);
+
+          function processGroup(defStatements) {
+            var namedDefs = {};
+            for ( var i = 0, len = defStatements.length; i < len; i++ ) {
+              var statement = defStatements[i]
+                , name = statement[1].value
+                , group = namedDefs[name] || ( namedDefs[name] = [] );
+
+              if ( !statement[4] && group.length ) {
+                // if we see an unguarded, blow away previous definitions
+                warnings.push("Previous version of partial '" + name +
+                              "' will be shadowed by unguarded version");
+                group.length = 0;
+              }
+
+              group.push(statement);
+            }
+
+            var result = [];
+            for ( var key in namedDefs ) {
+              var definitions = namedDefs[key];
+              if ( definitions.length === 1 ) {
+                result.push(definitions[0]);
+                continue;
+              }
+              result = result.concat(mergeDefinitions(key, definitions));
+            }
+            return result;
+          }
+
+          function mergeDefinitions(name, definitions) {
+            var firstDefinition = definitions[0]
+              , originalArgs = argumentsSignature(firstDefinition[2])
+              , statements = firstDefinition[3]
+              , guard = firstDefinition[4];
+
+            if ( guard ) {
+              statements = [ [sym('cn'), guard, statements, [sym(null)]] ];
+            }
+
+            for ( var i = 1, len = definitions.length; i < len; i++ ) {
+              var definition = definitions[i]
+                , theseArgs = argumentsSignature(definition[2]);
+
+              if ( theseArgs !== originalArgs ) {
+                // Short-circuit, won't make assumptions about local names
+                warnings.push("Can't coalesce partial '" + name +
+                              "' with inconsistent argument names");
+                return definitions;
+              }
+
+              var theseStatements = definition[3]
+                , thisGuard = definition[4];
+
+              statements = [ [sym('cn'), thisGuard, theseStatements, statements] ];
+              guard = guard && [sym('or'), thisGuard, guard];
+            }
+
+            firstDefinition[3] = statements;
+            if ( guard ) {
+              firstDefinition[4] = guard;
+            }
+            return [firstDefinition];
+          }
         }
 
         function replaceSymbols(node) {
@@ -6673,82 +6792,16 @@ module.exports = (function() {
           }
           return node;
         }
-      }
 
-      function isSymbol(symbol) {
-        return symbol != null
-            && typeof symbol === 'object'
-            && typeof symbol.value !== 'undefined'
-            && typeof symbol.type !== 'undefined';
-      }
-
-      function isOperator(symbol, operator) {
-        return isSymbol(symbol)
-            && symbol.type === 'op'
-            && symbol.value === operator;
-      }
-
-      function isString(symbol) {
-        return isSymbol(symbol)
-            && symbol.type === 'lit'
-            && typeof symbol.value === 'string';
-      }
-
-      function buildBinaryChain(head, tail) {
-        if ( !tail || !tail.length ) {
-          return head;
-        }
-
-        for ( var i = 0, len = tail.length; i < len; i++ ) {
-          var item = tail[i];
-          head = [ item[0], head, item[1] ];
-        }
-        return head;
-      }
-
-      function isPartialDef(statement) {
-        return isArray(statement) && isOperator(statement[0], 'de');
-      }
-
-      function isAssignStatement(statement) {
-        return isArray(statement) && isOperator(statement[0], 'as');
-      }
-
-      // Hoisting *only* occurs when the following condition is met:
-      //
-      //   (!partial_definition)+
-      //   partial_definition+
-      //
-      // meaning that partial definitions can't be interspersed with
-      // regular statements.  In that case, the logic is assumed too
-      // complex to make a responsible guess as to the developer's
-      // intentions.
-
-      function hoistPartials(statements) {
-        var partials = []
-          , others = [];
-
-        for ( var i = 0, ilen = statements.length; i < ilen; i++ ) {
-          var statement = statements[i];
-          if ( isPartialDef(statement) ) {
-            if ( !others.length ) {
-              // Short-circuit.  We're either all partials or we don't
-              // meet the conditions for hoisting
-              // TODO: add a warning
-              return statements;
-            }
-            partials.push(statement);
+        function lit(value) {
+          var idx = reverseLits[value];
+          if ( typeof idx === 'number' ) {
+            return idx;
           }
-          else {
-            if ( partials.length ) {
-              // Short-circuit. we don't hoist under these conditions
-              // TODO: add a warning
-              return statements;
-            }
-            others.push(statement);
-          }
+          idx = lits.push(value) - 1;
+          reverseLits[value] = idx;
+          return idx;
         }
-        return partials.concat(others);
       }
 
       // Iterates over a set of statements and presents adjacent groups
@@ -6784,98 +6837,64 @@ module.exports = (function() {
         }
       }
 
-      function mergeAssignments(statements) {
-        return processStatementGroups(statements, 'as', processGroup);
-
-        function processGroup(assignStatements) {
-          var target = assignStatements[0];
-          for ( var i = 1, len = assignStatements.length; i < len; i++ ) {
-            target[1] = target[1].concat(assignStatements[i][1]);
-          }
-          return [target];
-        }
+      function sym(value, type) {
+        type = type || 'op';
+        return { value: value, type: type };
       }
 
-      function mergePartials(statements) {
-        return processStatementGroups(statements, 'de', processGroup);
-
-        function processGroup(defStatements) {
-          var namedDefinitions = {};
-          for ( var i = 0, len = defStatements.length; i < len; i++ ) {
-            var statement = defStatements[i]
-              , name = statement[1].value
-              , group = namedDefinitions[name] || ( namedDefinitions[name] = [] );
-
-            if ( !statement[4] ) {
-              // if we see an unguarded, blow away previous definitions
-              // TODO: add a warning
-              group.length = 0;
-            }
-
-            group.push(statement);
-          }
-
-          var result = [];
-          for ( var key in namedDefinitions ) {
-            var definitions = namedDefinitions[key];
-            if ( definitions.length === 1 ) {
-              result.push(definitions[0]);
-              continue;
-            }
-            result = result.concat(mergeDefinitions(definitions));
-          }
-          return result;
-        }
-
-        function mergeDefinitions(definitions) {
-          var firstDefinition = definitions[0]
-            , originalArgs = argumentsSignature(firstDefinition[2])
-            , statements = firstDefinition[3]
-            , guard = firstDefinition[4];
-
-          if ( guard ) {
-            statements = [ [sym('cn'), guard, statements, [sym(null)]] ];
-          }
-
-          for ( var i = 1, len = definitions.length; i < len; i++ ) {
-            var definition = definitions[i]
-              , theseArgs = argumentsSignature(definition[2]);
-
-            if ( theseArgs !== originalArgs ) {
-              // Short-circuit, won't make assumptions about local names
-              // TODO: add a warning
-              return definitions;
-            }
-
-            var theseStatements = definition[3]
-              , thisGuard = definition[4];
-
-            statements = [ [sym('cn'), thisGuard, theseStatements, statements] ];
-            guard = guard && [sym('or'), thisGuard, guard];
-          }
-
-          firstDefinition[3] = statements;
-          if ( guard ) {
-            firstDefinition[4] = guard;
-          }
-          return [firstDefinition];
-        }
-
-        function argumentsSignature(argNames) {
-          if ( !argNames || !argNames.length ) { return ''; }
-          var result = [];
-          for ( var i = 0, len = argNames.length; i < len; i++ ) {
-            result.push(argNames[i].value);
-          }
-          return result.join(',')
-        }
+      function stmts(statements) {
+        return { stmts: statements, type: 'stmts' };
       }
 
-      function rewriteStatements(statements) {
-        statements = hoistPartials(statements);
-        statements = mergeAssignments(statements);
-        statements = mergePartials(statements);
-        return statements;
+      function isSymbol(node) {
+        return node != null
+            && typeof node === 'object'
+            && typeof node.value !== 'undefined'
+            && typeof node.type !== 'undefined';
+      }
+
+      function isStatements(node) {
+        return node != null
+            && typeof node === 'object'
+            && typeof node.stmts !== 'undefined'
+            && node.type === 'stmts';
+      }
+
+      function isOperator(node, operator) {
+        return isSymbol(node)
+            && node.type === 'op'
+            && node.value === operator;
+      }
+
+      function isString(node) {
+        return isSymbol(node)
+            && node.type === 'lit'
+            && typeof node.value === 'string';
+      }
+
+      function isPartialDef(statement) {
+        return isArray(statement) && isOperator(statement[0], 'de');
+      }
+
+      function argumentsSignature(argNames) {
+        if ( !argNames || !argNames.length ) { return ''; }
+        var result = [];
+        for ( var i = 0, len = argNames.length; i < len; i++ ) {
+          result.push(argNames[i].value);
+        }
+        return result.join(',');
+      }
+
+      function buildBinaryChain(head, tail) {
+        if ( !tail || !tail.length ) {
+          return head;
+        }
+
+        for ( var i = 0, len = tail.length; i < len; i++ ) {
+          var item = tail[i];
+          head = [ item[0], head, item[1] ];
+        }
+        return head;
       }
 
 

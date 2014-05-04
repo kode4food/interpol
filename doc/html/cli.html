@@ -54,7 +54,10 @@ script is called directly.</p>
     <span class="p">,</span> <span class="nx">pattern</span> <span class="o">=</span> <span class="nx">getValueArg</span><span class="p">(</span><span class="s1">&#39;files&#39;</span><span class="p">)</span> <span class="o">||</span> <span class="s1">&#39;**/*.int&#39;</span>
     <span class="p">,</span> <span class="nx">ext</span> <span class="o">=</span> <span class="nx">getValueArg</span><span class="p">(</span><span class="s1">&#39;ext&#39;</span><span class="p">)</span> <span class="o">||</span> <span class="s1">&#39;.json&#39;</span>
     <span class="p">,</span> <span class="nx">success</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="p">,</span> <span class="nx">errors</span> <span class="o">=</span> <span class="p">[];</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Iterate over the <code>-in</code> directories</p></div></div><div class="code"><div class="wrapper">  <span class="nx">processDirectories</span><span class="p">();</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Display the results</p></div></div><div class="code"><div class="wrapper">  <span class="nx">processResults</span><span class="p">();</span>
+    <span class="p">,</span> <span class="nx">errors</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="p">,</span> <span class="nx">warnings</span> <span class="o">=</span> <span class="p">[];</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Iterate over the <code>-in</code> directories</p></div></div><div class="code"><div class="wrapper">  <span class="nx">processDirectories</span><span class="p">();</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Display the results</p></div></div><div class="code"><div class="wrapper">  <span class="nx">processResults</span><span class="p">();</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="nx">warnings</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>If there are any warnings, display them</p></div></div><div class="code"><div class="wrapper">    <span class="nx">processWarnings</span><span class="p">();</span>
+  <span class="p">}</span>
   <span class="k">if</span> <span class="p">(</span> <span class="nx">errors</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>If there are any errors, display them</p></div></div><div class="code"><div class="wrapper">    <span class="nx">processErrors</span><span class="p">();</span>
   <span class="p">}</span>
   <span class="k">else</span> <span class="k">if</span> <span class="p">(</span> <span class="nx">appFile</span> <span class="o">||</span> <span class="nx">jsonFile</span> <span class="p">)</span> <span class="p">{</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Otherwise generate a bundle if requested</p></div></div><div class="code"><div class="wrapper">    <span class="nx">processBundle</span><span class="p">();</span>
@@ -62,7 +65,7 @@ script is called directly.</p>
 
   <span class="kd">function</span> <span class="nx">processDirectories</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">inDirs</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
-      <span class="nx">processDirectory</span><span class="p">(</span><span class="nx">inDirs</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span>
+      <span class="nx">processDirectory</span><span class="p">(</span><span class="nx">inDirs</span><span class="p">[</span><span class="nx">i</span><span class="p">]);</span>
     <span class="p">}</span>
   <span class="p">}</span>
 
@@ -75,13 +78,21 @@ script is called directly.</p>
       <span class="k">return</span><span class="p">;</span>
     <span class="p">}</span>
 
-    <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">files</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">ilen</span> <span class="o">=</span> <span class="nx">files</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">ilen</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
       <span class="kd">var</span> <span class="nx">file</span> <span class="o">=</span> <span class="nx">files</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
         <span class="p">,</span> <span class="nx">moduleName</span> <span class="o">=</span> <span class="nx">getModuleName</span><span class="p">(</span><span class="nx">file</span><span class="p">)</span>
         <span class="p">,</span> <span class="nx">inputPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">inDir</span><span class="p">,</span> <span class="nx">file</span><span class="p">);</span>
 
       <span class="k">try</span> <span class="p">{</span>
-        <span class="kd">var</span> <span class="nx">json</span> <span class="o">=</span> <span class="nx">parseInputTemplate</span><span class="p">(</span><span class="nx">inputPath</span><span class="p">);</span>
+        <span class="kd">var</span> <span class="nx">json</span> <span class="o">=</span> <span class="nx">parseInputTemplate</span><span class="p">(</span><span class="nx">inputPath</span><span class="p">)</span>
+          <span class="p">,</span> <span class="nx">jsonWarnings</span> <span class="o">=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">e</span> <span class="o">||</span> <span class="p">[];</span>
+
+        <span class="k">if</span> <span class="p">(</span> <span class="nx">jsonWarnings</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span>
+          <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">jlen</span> <span class="o">=</span> <span class="nx">jsonWarnings</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">j</span> <span class="o">&lt;</span> <span class="nx">jlen</span><span class="p">;</span> <span class="nx">j</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
+            <span class="nx">warnings</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="nx">filePath</span><span class="o">:</span> <span class="nx">inputPath</span><span class="p">,</span> <span class="nx">err</span><span class="o">:</span> <span class="nx">jsonWarnings</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="p">});</span>
+          <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">delete</span> <span class="nx">json</span><span class="p">.</span><span class="nx">e</span><span class="p">;</span> <span class="c1">// not needed</span>
 
         <span class="k">if</span> <span class="p">(</span> <span class="nx">skipWrite</span> <span class="p">)</span> <span class="p">{</span>
           <span class="nx">appModules</span><span class="p">[</span><span class="nx">moduleName</span><span class="p">]</span> <span class="o">=</span> <span class="nx">json</span><span class="p">;</span>
@@ -102,12 +113,27 @@ script is called directly.</p>
     <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;Interpol Parsing Complete&quot;</span><span class="p">);</span>
     <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">);</span>
     <span class="k">if</span> <span class="p">(</span> <span class="nx">success</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span>
-      <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;  Success: &quot;</span> <span class="o">+</span> <span class="nx">success</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;   Success: &quot;</span> <span class="o">+</span> <span class="nx">success</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="nx">warnings</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;  Warnings: &quot;</span> <span class="o">+</span> <span class="nx">warnings</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
     <span class="p">}</span>
     <span class="k">if</span> <span class="p">(</span> <span class="nx">errors</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span>
-      <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;  Failure: &quot;</span> <span class="o">+</span> <span class="nx">errors</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;  Failures: &quot;</span> <span class="o">+</span> <span class="nx">errors</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
     <span class="p">}</span>
     <span class="nx">console</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">function</span> <span class="nx">processWarnings</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="s2">&quot;Parser Warnings&quot;</span><span class="p">);</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="s2">&quot;===============&quot;</span><span class="p">);</span>
+    <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">warnings</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">warning</span> <span class="o">=</span> <span class="nx">warnings</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
+        <span class="p">,</span> <span class="nx">filePath</span> <span class="o">=</span> <span class="nx">warning</span><span class="p">.</span><span class="nx">filePath</span>
+        <span class="p">,</span> <span class="nx">warningString</span> <span class="o">=</span> <span class="nx">warning</span><span class="p">.</span><span class="nx">err</span><span class="p">;</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">warn</span><span class="p">((</span><span class="nx">filePath</span> <span class="o">||</span> <span class="s1">&#39;string&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="nx">warningString</span><span class="p">);</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">);</span>
+    <span class="p">}</span>
   <span class="p">}</span>
 
   <span class="kd">function</span> <span class="nx">processErrors</span><span class="p">()</span> <span class="p">{</span>

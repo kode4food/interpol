@@ -3,6 +3,10 @@ let defaultRenderList = @renderList(people)
 defaultRenderList()
 
 def renderList(people)
+  # will be shadowed
+end
+
+def renderList(people)
   # otherwise will fall through to this
   "There are %length stooges" % people
   <ul>
