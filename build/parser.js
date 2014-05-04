@@ -6645,7 +6645,8 @@ module.exports = (function() {
 
       function constructModule(module) {
         var lits = [], reverseLits = {}, warnings = [];
-        module = replaceSymbols(rewriteStatements(module));
+        module = rewriteStatements(module);
+        module = replaceSymbols(module);
         return { i: 'interpol', v: -1, l: lits, n: module, e: warnings };
 
         function rewriteStatements(node) {
@@ -6724,8 +6725,12 @@ module.exports = (function() {
 
               if ( !statement[4] && group.length ) {
                 // if we see an unguarded, blow away previous definitions
-                warnings.push("Previous version of partial '" + name +
-                              "' will be shadowed by unguarded version");
+                warnings.push({
+                  line: statement[0].line,
+                  column: statement[0].column,
+                  message: "Previous version of partial '" + name +
+                           "' will be shadowed by unguarded version"
+                });
                 group.length = 0;
               }
 
@@ -6760,8 +6765,12 @@ module.exports = (function() {
 
               if ( theseArgs !== originalArgs ) {
                 // Short-circuit, won't make assumptions about local names
-                warnings.push("Can't coalesce partial '" + name +
-                              "' with inconsistent argument names");
+                warnings.push({
+                  line: definition[0].line,
+                  column: definition[0].column,
+                  message: "Can't coalesce partial '" + name +
+                           "' with inconsistent argument names"
+                });
                 return definitions;
               }
 
@@ -6839,7 +6848,7 @@ module.exports = (function() {
 
       function sym(value, type) {
         type = type || 'op';
-        return { value: value, type: type };
+        return { value: value, type: type, line: line(), column: column() };
       }
 
       function stmts(statements) {
