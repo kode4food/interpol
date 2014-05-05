@@ -170,6 +170,14 @@ Object.</p>
     <span class="p">,</span> <span class="nx">lineInfo</span> <span class="o">=</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="nx">err</span><span class="p">.</span><span class="nx">line</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="nx">err</span><span class="p">.</span><span class="nx">column</span><span class="p">;</span>
 
   <span class="k">return</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">((</span><span class="nx">filePath</span> <span class="o">||</span> <span class="s1">&#39;string&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="nx">lineInfo</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="nx">errString</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kd">function</span> <span class="nx">formatWarning</span><span class="p">(</span><span class="nx">warning</span><span class="p">,</span> <span class="nx">filePath</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">lineInfo</span> <span class="o">=</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="nx">warning</span><span class="p">.</span><span class="nx">line</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="nx">warning</span><span class="p">.</span><span class="nx">column</span>
+    <span class="p">,</span> <span class="nx">warningString</span> <span class="o">=</span> <span class="nx">warning</span><span class="p">.</span><span class="nx">message</span><span class="p">;</span>
+
+  <span class="nx">filePath</span> <span class="o">=</span> <span class="nx">filePath</span> <span class="o">||</span> <span class="nx">warning</span><span class="p">.</span><span class="nx">filePath</span> <span class="o">||</span> <span class="s1">&#39;string&#39;</span><span class="p">;</span>
+  <span class="k">return</span> <span class="nx">filePath</span> <span class="o">+</span> <span class="nx">lineInfo</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="nx">warningString</span><span class="p">;</span>
 <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><h2 id="function-invocation">Function Invocation</h2></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p>Returns whether or not a Function is 'blessed' as Interpol-compatible.</p>
 
 <p>Parameters:</p>
@@ -235,6 +243,7 @@ that aren't required.</p>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">escapeContent</span> <span class="o">=</span> <span class="nx">escapeContent</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">stringify</span> <span class="o">=</span> <span class="nx">stringify</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">formatSyntaxError</span> <span class="o">=</span> <span class="nx">formatSyntaxError</span><span class="p">;</span>
+<span class="nx">exports</span><span class="p">.</span><span class="nx">formatWarning</span> <span class="o">=</span> <span class="nx">formatWarning</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">isInterpolFunction</span> <span class="o">=</span> <span class="nx">isInterpolFunction</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">bless</span> <span class="o">=</span> <span class="nx">bless</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">configure</span> <span class="o">=</span> <span class="nx">configure</span><span class="p">;</span></div></div></div></div></body></html>

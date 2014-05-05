@@ -1935,6 +1935,14 @@ function formatSyntaxError(err, filePath) {
   return new Error((filePath || 'string') + lineInfo + ": " + errString);
 }
 
+function formatWarning(warning, filePath) {
+  var lineInfo = ":" + warning.line + ":" + warning.column
+    , warningString = warning.message;
+
+  filePath = filePath || warning.filePath || 'string';
+  return filePath + lineInfo + ": " + warningString;
+}
+
 // ## Function Invocation
 
 /**
@@ -2008,6 +2016,7 @@ exports.escapeAttribute = escapeAttribute;
 exports.escapeContent = escapeContent;
 exports.stringify = stringify;
 exports.formatSyntaxError = formatSyntaxError;
+exports.formatWarning = formatWarning;
 exports.isInterpolFunction = isInterpolFunction;
 exports.bless = bless;
 exports.configure = configure;
