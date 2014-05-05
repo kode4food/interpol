@@ -6686,6 +6686,7 @@ module.exports = (function() {
               if ( !others.length ) {
                 // Short-circuit.  We're either all partials or we don't
                 // meet the conditions for hoisting
+                issueWarning(statement);
                 return statements;
               }
               partials.push(statement);
@@ -6693,12 +6694,22 @@ module.exports = (function() {
             else {
               if ( partials.length ) {
                 // Short-circuit. we don't hoist under these conditions
+                issueWarning(partials[partials.length - 1]);
                 return statements;
               }
               others.push(statement);
             }
           }
           return partials.concat(others);
+        }
+
+        function issueWarning(statement) {
+          warnings.push({
+            line: statement[0].line,
+            column: statement[0].column,
+            message: "Will only perform 'hoisting' if all partials are placed " +
+                     "after other statements"
+          });
         }
 
         function mergeAssignments(statements) {
@@ -6728,8 +6739,8 @@ module.exports = (function() {
                 warnings.push({
                   line: statement[0].line,
                   column: statement[0].column,
-                  message: "Previous version of partial '" + name +
-                           "' will be shadowed by unguarded version"
+                  message: "The unguarded Partial '" + name + "' will replace " +
+                           "the previous definition"
                 });
                 group.length = 0;
               }
@@ -6768,8 +6779,8 @@ module.exports = (function() {
                 warnings.push({
                   line: definition[0].line,
                   column: definition[0].column,
-                  message: "Can't coalesce partial '" + name +
-                           "' with inconsistent argument names"
+                  message: "Partial '" + name + "' has different argument " +
+                           "names than previous definitions"
                 });
                 return definitions;
               }

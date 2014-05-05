@@ -1,5 +1,6 @@
 <h2>title</h2>
 let defaultRenderList = @renderList(people)
+
 defaultRenderList()
 
 def renderList(people)

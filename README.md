@@ -1,5 +1,4 @@
 # Interpol (Templates Sans Facial Hair)
-[![GitHub version](https://badge.fury.io/gh/kode4food%2Finterpol.png)](http://badge.fury.io/gh/kode4food%2Finterpol) [![Build Status](https://travis-ci.org/kode4food/interpol.png?branch=master)](https://travis-ci.org/kode4food/interpol)
 
 ## Introduction
 
