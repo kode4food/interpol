@@ -4,7 +4,7 @@
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
- * @author Thom Bradford (github/kode4food)
+ * @author Thomas S. Bradford (kode4food.it)
  */
 
 "use strict";
@@ -30,7 +30,7 @@ require('../lib/writers/dom');
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
- * @author Thom Bradford (github/kode4food)
+ * @author Thomas S. Bradford (kode4food.it)
  */
 
 "use strict";
@@ -183,7 +183,7 @@ exports.buildTemplate = buildTemplate;
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
- * @author Thom Bradford (github/kode4food)
+ * @author Thomas S. Bradford (kode4food.it)
  */
 
 "use strict";
@@ -1317,7 +1317,7 @@ module.exports = interpol;
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
- * @author Thom Bradford (github/kode4food)
+ * @author Thomas S. Bradford (kode4food.it)
  */
 
 "use strict";
@@ -1453,7 +1453,7 @@ interpol.createMemoryResolver = createMemoryResolver;
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
- * @author Thom Bradford (github/kode4food)
+ * @author Thomas S. Bradford (kode4food.it)
  */
 
 "use strict";
@@ -1515,7 +1515,7 @@ exports.empty = empty;
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
- * @author Thom Bradford (github/kode4food)
+ * @author Thomas S. Bradford (kode4food.it)
  */
 
 "use strict";
@@ -1533,7 +1533,7 @@ defaultMemoryResolver.registerModule('string', require('./string'));
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
- * @author Thom Bradford (github/kode4food)
+ * @author Thomas S. Bradford (kode4food.it)
  */
 
 "use strict";
@@ -1664,7 +1664,7 @@ exports.sum = sum;
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
- * @author Thom Bradford (github/kode4food)
+ * @author Thomas S. Bradford (kode4food.it)
  */
 
 "use strict";
@@ -1718,7 +1718,7 @@ exports.upper = upper;
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
- * @author Thom Bradford (github/kode4food)
+ * @author Thomas S. Bradford (kode4food.it)
  */
 
 "use strict";
@@ -1746,7 +1746,7 @@ module.exports = wrap;
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
- * @author Thom Bradford (github/kode4food)
+ * @author Thomas S. Bradford (kode4food.it)
  */
 
 "use strict";
@@ -2027,7 +2027,7 @@ exports.configure = configure;
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
- * @author Thom Bradford (github/kode4food)
+ * @author Thomas S. Bradford (kode4food.it)
  */
 
 "use strict";
@@ -2120,7 +2120,7 @@ interpol.createArrayWriter = createArrayWriter;
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
- * @author Thom Bradford (github/kode4food)
+ * @author Thomas S. Bradford (kode4food.it)
  */
 
 "use strict";
@@ -2204,7 +2204,7 @@ interpol.createDOMWriter = createDOMWriter;
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
- * @author Thom Bradford (github/kode4food)
+ * @author Thomas S. Bradford (kode4food.it)
  */
 
 "use strict";
