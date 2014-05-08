@@ -391,10 +391,14 @@ The and `and` operator performs a boolean *and* between the two operands, short 
 The or `or` operator performs a boolean *or* between the two operands, short circuiting if the left operand evaluates to JavaScript *truthy*.
 
 ### Conditional (Ternary)
-The conditional or ternary operator `?:` works just as you would expect from JavaScript or C.  It will evaluate the first operand, and depending on whether that evaluation is JavaScript *truthy* it will return the evaluation of the second or third operand.
+The conditional or ternary operator works just as you would expect from Python.  It will evaluate the first operand if the condition is met (or not met in the case of `unless`), otherwise it will return the evaluation of the third operand.
 
-```javascript
-happy ? "you are happy!" : "awwwwwww"
+```python
+# <true_value> if <condition> else <false_value>
+"you are happy!" if happy else "awwwwwww"
+
+# <false_value> unless <condition> else <true_value>
+"awwwwwww" unless happy else "you are happy!"
 ```
 
 ### Interpolation

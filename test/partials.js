@@ -36,7 +36,7 @@ exports.partials = nodeunit.testCase({
                   "def v2(arg1)\n" +
                   "  'Goodbye %arg1'\n" +
                   "end\n" +
-                  "(coming ? v1 : v2)('Interpol')";
+                  "(v1 if coming else v2)('Interpol')";
 
     test.equal(eval(script1), "Hello Interpol\n");
     test.equal(eval(script2, { coming: true }), "Hello Interpol\n");

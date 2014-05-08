@@ -98,5 +98,17 @@ exports.basics = nodeunit.testCase({
     test.equal(eval("bogusValue != nil"), "false");
     test.equal(eval("bogusValue == nil"), "true");
     test.done();
+  },
+
+  "Conditional Evaluation": function (test) {
+    var script = "'cond1' if cond1 else " +
+                 "'cond2' if cond2 else " +
+                 "'cond4' unless cond3 else 'cond3'";
+
+    test.equal(eval(script, {cond1: true}), "cond1");
+    test.equal(eval(script, {cond2: true}), "cond2");
+    test.equal(eval(script, {cond3: true}), "cond3");
+    test.equal(eval(script), "cond4");
+    test.done();
   }
 });

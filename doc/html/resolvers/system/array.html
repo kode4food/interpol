@@ -9,6 +9,7 @@
 <span class="s2">&quot;use strict&quot;</span><span class="p">;</span>
 
 <span class="kd">var</span> <span class="nx">util</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../../util&#39;</span><span class="p">)</span>
+  <span class="p">,</span> <span class="nx">objectKeys</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">objectKeys</span>
   <span class="p">,</span> <span class="nx">isArray</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">isArray</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p><code>first(value)</code> returns the first item of the provided array (or <code>null</code> if
 the array is empty).</p></div></div><div class="code"><div class="wrapper"><span class="kd">function</span> <span class="nx">first</span><span class="p">(</span><span class="nx">writer</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
@@ -35,8 +36,13 @@ value (otherwise <code>0</code>).</p></div></div><div class="code"><div class="w
 <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p><code>empty(value)</code> returns true or false depending on whether or not the
 provided array is empty.</p></div></div><div class="code"><div class="wrapper"><span class="kd">function</span> <span class="nx">empty</span><span class="p">(</span><span class="nx">writer</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">return</span> <span class="o">!</span><span class="nx">value</span> <span class="o">||</span> <span class="o">!</span><span class="nx">value</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+<span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p><code>keys(value)</code> returns the keys of the Object or indexes of the Array
+passed to it.  If the Array is sparse (has gaps) it will only return
+the indexes with assigned values.</p></div></div><div class="code"><div class="wrapper"><span class="kd">function</span> <span class="nx">keys</span><span class="p">(</span><span class="nx">writer</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="k">typeof</span> <span class="nx">value</span> <span class="o">===</span> <span class="s1">&#39;object&#39;</span> <span class="o">?</span> <span class="nx">objectKeys</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="o">:</span> <span class="kc">null</span><span class="p">;</span>
 <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Exports</p></div></div><div class="code"><div class="wrapper"><span class="nx">exports</span><span class="p">.</span><span class="nx">first</span> <span class="o">=</span> <span class="nx">first</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">join</span> <span class="o">=</span> <span class="nx">join</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">last</span> <span class="o">=</span> <span class="nx">last</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">length</span> <span class="o">=</span> <span class="nx">length</span><span class="p">;</span>
-<span class="nx">exports</span><span class="p">.</span><span class="nx">empty</span> <span class="o">=</span> <span class="nx">empty</span><span class="p">;</span></div></div></div></div></body></html>
+<span class="nx">exports</span><span class="p">.</span><span class="nx">empty</span> <span class="o">=</span> <span class="nx">empty</span><span class="p">;</span>
+<span class="nx">exports</span><span class="p">.</span><span class="nx">keys</span> <span class="o">=</span> <span class="nx">keys</span><span class="p">;</span></div></div></div></div></body></html>

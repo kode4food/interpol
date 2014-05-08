@@ -1,6 +1,7 @@
 # Change History
 
-## Version 0.3.12 -
+## Version 0.3.12 - Conditional Operator
+
 
 ## Version 0.3.11 - Guard Fixes
 If the argument names for partials with extended guards differed, the context passed between the partials would contain invalid entries.  This has been corrected.
