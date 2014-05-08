@@ -1459,6 +1459,7 @@ interpol.createMemoryResolver = createMemoryResolver;
 "use strict";
 
 var util = require('../../util')
+  , objectKeys = util.objectKeys
   , isArray = util.isArray;
 
 // `first(value)` returns the first item of the provided array (or `null` if
@@ -1502,13 +1503,20 @@ function empty(writer, value) {
   return !value || !value.length;
 }
 
+// `keys(value)` returns the keys of the Object or indexes of the Array
+// passed to it.  If the Array is sparse (has gaps) it will only return
+// the indexes with assigned values.
+function keys(writer, value) {
+  return typeof value === 'object' ? objectKeys(value) : null;
+}
+
 // Exports
 exports.first = first;
 exports.join = join;
 exports.last = last;
 exports.length = length;
 exports.empty = empty;
-
+exports.keys = keys;
 },{"../../util":10}],6:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
