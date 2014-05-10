@@ -192,15 +192,15 @@ HTMLish elements allow HTML tags to be constructed using inlined expressions.  T
 This seems like raw HTML, but in fact both id and class are evaluating expressions for their values.  It just so happens that double and single-quoted strings are valid expressions in Interpol, so everything works out great.  But what if you want to augment the class attribute dynamically?
 
 ```
-<div id="parent" class="listItem " + otherClasses>
+<div id="parent" class="listItem %otherClasses">
 ```
 
-In this case, the value of the class attribute will be computed dynamically from the expression `"listItem " + otherClasses`.
+In this case, the value of the class attribute will be computed dynamically from the expression `"listItem %otherClasses"`.
 
 You can also compute the name of a tag or attribute dynamically by enclosing the expression in a single-element tuple).  For example:
 
 ```
-<(theTagName) id="parent" (theAttrName or "class")="listItem " + otherClasses>
+<(theTagName) id="parent" (theAttrName or "class")="listItem %otherClasses">
 ```
 
 HTMLish elements *do not* create nested scopes and are not paired semantically into single statement blocks.  In fact, a closing element is not required at all.  Therefore, code like this will yield incorrect results:
@@ -365,11 +365,11 @@ classes | join | title
 ```
 
 ### Unary Operators
-Only two unary operators are supported.  They are `-` for numeric negation, and `!` for boolean *not* negation.
+Only two unary operators are supported.  They are `-` for numeric negation, and `not` for boolean *not* negation.
 
-```javascript
+```python
 -transactionAmount
-!happy
+not happy
 ```
 
 ### Multiplicative
@@ -493,6 +493,9 @@ Return the result of joining the elements of the provided array.  Each element w
 
 #### empty(array)
 Returns true or false depending on whether or not the provided array is empty.
+
+#### keys(value)
+Returns the keys of the Object or indexes of the Array passed to it.  If the Array is sparse (has gaps) it will only return the indexes with assigned values.
 
 ### string
 Provides functionality for manipulating strings.

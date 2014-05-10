@@ -18,7 +18,7 @@ def renderList(people)
 end
 
 def renderList(people)
-when !people.length
+when not people.length
   # will be called if people is not defined or is empty
   <b>"There are no people!"</b>
 end

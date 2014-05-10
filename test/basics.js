@@ -82,12 +82,12 @@ exports.basics = nodeunit.testCase({
 
   "Unary Evaluation": function (test) {
     test.equal(eval("-1"), "-1");
-    test.equal(eval("!false"), "true");
-    test.equal(eval("!true"), "false");
-    test.equal(eval("!(----10 - 10)"), "true");
+    test.equal(eval("not false"), "true");
+    test.equal(eval("not true"), "false");
+    test.equal(eval("not (----10 - 10)"), "true");
     test.equal(eval("-people[0].age", this.data), "-50");
     test.equal(eval("-people[0].age + 10", this.data), "-40");
-    test.equal(eval("!(people[0].age == 25)", this.data), "true");
+    test.equal(eval("not (people[0].age == 25)", this.data), "true");
     test.done();
   },
 

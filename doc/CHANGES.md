@@ -1,7 +1,17 @@
 # Change History
 
 ## Version 0.3.12 - Conditional Operator
+* To better support the parse-tree rewriting that is now taking place, moved most of the parser support code into parser.js rather than the PEG.js code.
+* The logical negation `!` operator has been renamed `not`.
+* The conditional operator is now pythonesque rather than derived from C.
 
+```python
+# <true_value> if <condition> else <false_value>
+"you are happy!" if happy else "awwwwwww"
+
+# <false_value> unless <condition> else <true_value>
+"awwwwwww" unless happy else "you are happy!"
+```
 
 ## Version 0.3.11 - Guard Fixes
 If the argument names for partials with extended guards differed, the context passed between the partials would contain invalid entries.  This has been corrected.

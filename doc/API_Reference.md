@@ -21,7 +21,7 @@ There are several support structures and functions attached to the `$interpol()`
   * `resolvers[]` - Global Resolver Instances (overridden at compile-time)
   * `bless()` - Blesses a Function as being Interpol-safe
 
-Each compiled closure also attaches additional functions, the most important being called `exports()`.  This function is used by resolvers to retrieve partials and variables when the compiled closure is loaded as a module.
+Each compiled closure also attaches additional functions, the most important being called `resolveExports()`.  This function is used by resolvers to retrieve partials and variables when the compiled closure is loaded as a module.
 
 ## Resolvers (interpol/resolvers)
 A resolver is an interface used by Interpol to resolve an imported module.  There are two available for developer use, and one automatically registered for apps bundled by the command-line interface.
