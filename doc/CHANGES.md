@@ -1,6 +1,7 @@
 # Change History
 
 ## Version 0.3.13 - Simplifying Interpolation
+Automatic Interpolation was a pain in the ass when you didn't want it to happen, requiring you to escape all of your percent signs `%`.  Now it will only occur against double quoted strings containing named indexes.  Single quoted strings will be treated as literals.
 
 ## Version 0.3.12 - Conditional Operator
 * To better support the parse-tree rewriting that is now taking place, moved most of the parser support code into parser.js rather than the PEG.js code.
