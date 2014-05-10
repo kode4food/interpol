@@ -324,7 +324,7 @@ myObject['someProperty']
 ```
 
 ### Function and Partial Binding
-Interpol supports a binding operator `@`.  This is a unary operator that allows you to perform argument binding on both functions and partials.  This is useful against functions for currying in piped calls.  For Example:
+Interpol supports a binding operator `@`.  This is a special unary operator that allows you to perform argument binding on both functions and partials.  This is useful against functions for currying in piped calls.  For Example:
 
 ```python
 from array import join
@@ -365,7 +365,7 @@ classes | join | title
 ```
 
 ### Unary Operators
-Only two unary operators are supported.  They are `-` for numeric negation, and `not` for boolean *not* negation.
+Only two traditional unary operators are supported.  They are `-` for numeric negation, and `not` for boolean *not* negation.
 
 ```python
 -transactionAmount
