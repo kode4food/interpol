@@ -77,6 +77,10 @@ exports.basics = nodeunit.testCase({
     test.equal(eval("'yep' and people[0].age * 2", this.data), "100");
     test.equal(eval("'yep' or people[0].age * 2", this.data), "yep");
     test.equal(eval("false or people[0].age * 2", this.data), "100");
+    test.equal(eval("not true and not false"), "false");
+    test.equal(eval("not(true or false)"), "false");
+    test.equal(eval("not true or not false"), "true");
+    test.equal(eval("not(true and false)"), "true");
     test.done();
   },
 
