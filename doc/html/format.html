@@ -16,8 +16,8 @@
 
 <span class="kd">var</span> <span class="nx">Digits</span> <span class="o">=</span> <span class="s2">&quot;[1-9][0-9]*&quot;</span>
   <span class="p">,</span> <span class="nx">Ident</span> <span class="o">=</span> <span class="s2">&quot;[$_a-zA-Z][$_a-zA-Z0-9]*&quot;</span>
-  <span class="p">,</span> <span class="nx">Params</span> <span class="o">=</span> <span class="s2">&quot;(.?)%((&quot;</span><span class="o">+</span><span class="nx">Digits</span><span class="o">+</span><span class="s2">&quot;)|(&quot;</span><span class="o">+</span><span class="nx">Ident</span><span class="o">+</span><span class="s2">&quot;))?(([|]&quot;</span><span class="o">+</span><span class="nx">Ident</span><span class="o">+</span><span class="s2">&quot;)*)?&quot;</span><span class="p">;</span>
-             <span class="cm">/* &quot;%&quot; ( digits | identifier )? ( &quot;|&quot; identifier )* */</span>
+  <span class="p">,</span> <span class="nx">Params</span> <span class="o">=</span> <span class="s2">&quot;%((%)|(&quot;</span><span class="o">+</span><span class="nx">Digits</span><span class="o">+</span><span class="s2">&quot;)|(&quot;</span><span class="o">+</span><span class="nx">Ident</span><span class="o">+</span><span class="s2">&quot;))?(([|]&quot;</span><span class="o">+</span><span class="nx">Ident</span><span class="o">+</span><span class="s2">&quot;)*)?&quot;</span><span class="p">;</span>
+             <span class="cm">/* &quot;%&quot; ( &quot;%&quot; | digits | identifier )? ( &quot;|&quot; identifier )* */</span>
 
 <span class="kd">var</span> <span class="nx">ParamRegex</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="nx">Params</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">);</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p>Builds a closure that will be used internally to support Interpol's
 interpolation operations.  The returned closure may attach a flag
@@ -42,17 +42,17 @@ pipe <code>|</code> operator is used.</p>
     <span class="p">}</span>
 
     <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="nx">paramMatch</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-      <span class="p">,</span> <span class="nx">matchIdx</span> <span class="o">=</span> <span class="nx">paramMatch</span><span class="p">.</span><span class="nx">index</span> <span class="o">+</span> <span class="nx">paramMatch</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">length</span>
-      <span class="p">,</span> <span class="nx">matchLen</span> <span class="o">=</span> <span class="nx">match</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="nx">paramMatch</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">length</span><span class="p">;</span>
-
-    <span class="k">if</span> <span class="p">(</span> <span class="nx">paramMatch</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">===</span> <span class="s1">&#39;%&#39;</span> <span class="p">)</span> <span class="p">{</span>
-      <span class="nx">funcs</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">createLiteralFunction</span><span class="p">(</span><span class="nx">formatStr</span><span class="p">.</span><span class="nx">substring</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nx">matchIdx</span><span class="p">)));</span>
-      <span class="nx">formatStr</span> <span class="o">=</span> <span class="nx">formatStr</span><span class="p">.</span><span class="nx">substring</span><span class="p">(</span><span class="nx">matchIdx</span> <span class="o">+</span> <span class="nx">matchLen</span><span class="p">);</span>
-      <span class="k">continue</span><span class="p">;</span>
-    <span class="p">}</span>
+      <span class="p">,</span> <span class="nx">matchIdx</span> <span class="o">=</span> <span class="nx">paramMatch</span><span class="p">.</span><span class="nx">index</span>
+      <span class="p">,</span> <span class="nx">matchLen</span> <span class="o">=</span> <span class="nx">match</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
 
     <span class="k">if</span> <span class="p">(</span> <span class="nx">matchIdx</span> <span class="p">)</span> <span class="p">{</span>
       <span class="nx">funcs</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">createLiteralFunction</span><span class="p">(</span><span class="nx">formatStr</span><span class="p">.</span><span class="nx">substring</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nx">matchIdx</span><span class="p">)));</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span> <span class="nx">paramMatch</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">===</span> <span class="s1">&#39;%&#39;</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="nx">funcs</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">createLiteralFunction</span><span class="p">(</span><span class="s1">&#39;%&#39;</span><span class="p">));</span>
+      <span class="nx">formatStr</span> <span class="o">=</span> <span class="nx">formatStr</span><span class="p">.</span><span class="nx">substring</span><span class="p">(</span><span class="nx">matchIdx</span> <span class="o">+</span> <span class="nx">matchLen</span><span class="p">);</span>
+      <span class="k">continue</span><span class="p">;</span>
     <span class="p">}</span>
 
     <span class="kd">var</span> <span class="nx">idx</span> <span class="o">=</span> <span class="nx">autoIdx</span><span class="o">++</span><span class="p">;</span>

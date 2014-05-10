@@ -1,5 +1,7 @@
 # Change History
 
+## Version 0.3.13 - Simplifying Interpolation
+
 ## Version 0.3.12 - Conditional Operator
 * To better support the parse-tree rewriting that is now taking place, moved most of the parser support code into parser.js rather than the PEG.js code.
 * The logical negation `!` operator has been renamed `not`.

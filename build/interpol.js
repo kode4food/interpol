@@ -43,8 +43,8 @@ var nullWriter;
 
 var Digits = "[1-9][0-9]*"
   , Ident = "[$_a-zA-Z][$_a-zA-Z0-9]*"
-  , Params = "(.?)%(("+Digits+")|("+Ident+"))?(([|]"+Ident+")*)?";
-             /* "%" ( digits | identifier )? ( "|" identifier )* */
+  , Params = "%((%)|("+Digits+")|("+Ident+"))?(([|]"+Ident+")*)?";
+             /* "%" ( "%" | digits | identifier )? ( "|" identifier )* */
 
 var ParamRegex = new RegExp(Params, "m");
 
@@ -71,17 +71,17 @@ function buildTemplate(formatStr) {
     }
 
     var match = paramMatch[0]
-      , matchIdx = paramMatch.index + paramMatch[1].length
-      , matchLen = match.length - paramMatch[1].length;
-
-    if ( paramMatch[1] === '%' ) {
-      funcs.push(createLiteralFunction(formatStr.substring(0, matchIdx)));
-      formatStr = formatStr.substring(matchIdx + matchLen);
-      continue;
-    }
+      , matchIdx = paramMatch.index
+      , matchLen = match.length;
 
     if ( matchIdx ) {
       funcs.push(createLiteralFunction(formatStr.substring(0, matchIdx)));
+    }
+
+    if ( paramMatch[2] === '%' ) {
+      funcs.push(createLiteralFunction('%'));
+      formatStr = formatStr.substring(matchIdx + matchLen);
+      continue;
     }
 
     var idx = autoIdx++;
@@ -203,7 +203,7 @@ var isArray = util.isArray
   , stringify = util.stringify
   , buildTemplate = format.buildTemplate;
 
-var CURRENT_VERSION = "0.3.12"
+var CURRENT_VERSION = "0.3.13"
   , TemplateCacheMax = 256
   , globalOptions = { writer: null, errorCallback: null }
   , globalContext = {}

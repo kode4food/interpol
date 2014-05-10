@@ -423,10 +423,10 @@ In truth, the implicit approach is rather limited, particularly since you could 
 ```python
 let str = (
   en=(
-    stooge_summary="There are % stooges, and % is the best"
+    stooge_summary='There are % stooges, and % is the best'
   ),
   de=(
-    stooge_summary="Es gibt % Stooges und % ist die beste"
+    stooge_summary='Es gibt % Stooges und % ist die beste'
   )
 )
 ```
@@ -442,10 +442,10 @@ If your parameters always appear in the same order, then the simple `%` characte
 ```python
 let str = (
   en=(
-    stooge_summary="%2 is the best of the %1 Stooges"
+    stooge_summary='%2 is the best of the %1 Stooges'
   ),
   de=(
-    stooge_summary="Es gibt %1 Stooges und %2 ist die beste"
+    stooge_summary='Es gibt %1 Stooges und %2 ist die beste'
   )
 )
 ```
@@ -460,7 +460,9 @@ Rather than simple values or tuples, an object can be passed to the right side o
 Here, the `length` property of `people` will be interpolated into the resulting string.
 
 #### Automatic Interpolation
-Automatic Interpolation is supported for literal strings containing named indexing.  The value used in this interpolation is retrieved from the current scope.  So for example, if there is a variable called `name` in the current scope, you can expose it as follows:
+Automatic Interpolation is supported for double-quoted literal strings containing named indexing.  If a string has single quotes or does not perform named interpolation, it will be treated as a literal.
+
+The value used in this interpolation is retrieved from the current scope.  So for example, if there is a variable called `name` in the current scope, you can expose it as follows:
 
 ```python
 "User Profile - %name"
