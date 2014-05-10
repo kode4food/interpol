@@ -1,0 +1,10 @@
+patternTest(true, "hello", "there")
+patternTest(false, "goodbye", "now")
+
+def patternTest(true, arg1, arg2)
+  "Came in with true and %arg1 - %arg2"
+end
+
+def patternTest(false, arg1, arg2)
+  "Came in with false and %arg1 - %arg2"
+end
