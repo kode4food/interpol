@@ -1,5 +1,11 @@
+let a = "hello"
 patternTest(true, "hello", "there")
 patternTest(false, "goodbye", "now")
+patternTest("hello", "really", "i mean it")
+
+def patternTest((a), arg1, arg2)
+  "Came in with 'hello' and %arg1 - %arg2"
+end
 
 def patternTest(true, arg1, arg2)
   "Came in with true and %arg1 - %arg2"

@@ -339,7 +339,7 @@ module.exports = (function() {
                 }
                 var idSym = sym(i, 'lit');
                 ids.push(idSym);
-                guards.push([sym('eq'), [sym('id'), idSym], item]);
+                guards.push([sym('ma'), [sym('id'), idSym], item]);
               }
               return { ids: ids, guards: guards };
             },

@@ -1,5 +1,8 @@
 # Change History
 
+## Version 0.3.14 - Pattern Matching
+Added *very basic* pattern matching capability to Partial Definitions.
+
 ## Version 0.3.13 - Simplifying Interpolation
 Automatic Interpolation was a pain in the ass when you didn't want it to happen, requiring you to escape all of your percent signs `%`.  Now it will only occur against double quoted strings containing named indexes.  Single quoted strings will be treated as literals.
 

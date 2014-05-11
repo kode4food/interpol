@@ -199,6 +199,7 @@ var isArray = util.isArray
   , freezeObject = util.freezeObject
   , isInterpolFunction = util.isInterpolFunction
   , createStaticMixin = util.createStaticMixin
+  , isMatchingObject = util.isMatchingObject
   , isInterpolJSON = util.isInterpolJSON
   , stringify = util.stringify
   , buildTemplate = format.buildTemplate;
@@ -308,6 +309,7 @@ function compile(parseOutput, localOptions) {
     or: createOrEvaluator,
     an: createAndEvaluator,
     eq: createEqEvaluator,
+    ma: createMatchEvaluator,
     nq: createNeqEvaluator,
     gt: createGtEvaluator,
     lt: createLtEvaluator,
@@ -1010,6 +1012,19 @@ function compile(parseOutput, localOptions) {
     function eqLeft(c, w) { return $1(c, w) == $2; }
     function eqRight(c, w) { return $1 == $2(c, w); }
     function eqBoth(c, w) { return $1(c, w) == $2(c, w); }
+  }
+
+  // generate a match evaluator
+  function createMatchEvaluator(leftNode, rightNode) {
+    var $1 = createEvaluator(leftNode)
+      , $2 = createEvaluator(rightNode)
+      , type = getBinaryType($1, $2);
+
+     return [null, maLeft, maRight, maBoth][type] || isMatchingObject($1, $2);
+
+    function maLeft(c, w) { return isMatchingObject($1(c, w), $2); }
+    function maRight(c, w) { return isMatchingObject($1, $2(c, w)); }
+    function maBoth(c, w) { return isMatchingObject($1(c, w), $2(c, w)); }
   }
 
   // generate an inequality evaluator
@@ -1846,6 +1861,39 @@ function createStaticMixin(obj) {
   }
 }
 
+/** 
+ * Crude Object Matcher - Will eventually be replaced by a 
+ * compiled Matcher
+ *
+ * @param {Mixed} template the Template to match against
+ * @param {Mixed} obj the Object being inspected
+ */
+
+function isMatchingObject(template, obj) {
+  if ( typeof template !== 'object' ) {
+    return template === obj;
+  }
+
+  if ( isArray(template) ) {
+    if ( !isArray(obj) || template.length !== obj.length ) {
+      return false;
+    }
+    for ( var i = 0, len = template.length; i < len; i++ ) {
+      if ( !isMatchingObject(template[i], obj[i]) ) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  for ( var key in template ) {
+    if ( !isMatchingObject(template[key], obj[key]) ) {
+      return false;
+    }
+  }
+  return true;
+}
+
 /**
  * Checks whether or not the provided value is an Interpol Pre-Parsed JSON
  * Object.
@@ -2019,6 +2067,7 @@ exports.freezeObject = freezeObject;
 exports.objectKeys = objectKeys;
 exports.mixin = mixin;
 exports.createStaticMixin = createStaticMixin;
+exports.isMatchingObject = isMatchingObject;
 exports.isInterpolJSON = isInterpolJSON;
 exports.escapeAttribute = escapeAttribute;
 exports.escapeContent = escapeContent;
