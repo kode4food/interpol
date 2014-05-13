@@ -50,7 +50,7 @@ exports.interpolation = nodeunit.testCase({
 
   "Piped Interpolation": function (test ) {
     var script1 = 'from string import title\n' +
-                  'from array import join\n' +
+                  'from list import join\n' +
                   '"Result is %some_array|join|title"';
 
     var script2 = 'from string import upper\n' +

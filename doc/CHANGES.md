@@ -1,6 +1,8 @@
 # Change History
 
 ## Version 0.3.14 - Feature Complete
+* The 'array' module has been renamed to 'list'.  The Tuple, Array, and Dictionary distinction is confusing, and completely unnecessary.  So the term 'List' is now preferred.
+
 * For Loops have been extended to support range guards as well as an `else` clause.  You can define an `else` clause for those cases where the for loop finds no matches:
 
 ```python
@@ -82,7 +84,7 @@ mainLayout("A Title", renderItems)
 Now, if mainLayout invokes `renderItems()` with no parameters, the bound list in `items` will be rendered.  As a result of the general-purpose nature of this operator, if you use it for functions that will be curried into a pipeline, those functions will now require a placeholder as the first argument:
 
 ```python
-from array import join
+from list import join
 let j = @join(nil, " -- ")
 let a = ('joined','with','dashes')
 "Result is %a|j"
@@ -141,8 +143,8 @@ Also, if you plan to use Interpol as your default view engine, you can configure
 
 *Note:* Be aware that Interpol template filenames must contain valid Interpol identifers, so filenames like `errors/400.dust` will have to become something like `errors/http_400.int`.
 
-## Version 0.3.5 - Extended Tuples
-Tuples now allow name/value pairs as well as the ability to force a single-element tuple (rather than treating the parentheses as a precedence operator).  Name/Value Tuples are always exposed as a Dictionary.  The name must be a valid identifier, while the value is any valid expression.
+## Version 0.3.5 - Extended lists
+lists now allow name/value pairs as well as the ability to force a single-element list (rather than treating the parentheses as a precedence operator).  Name/Value lists are always exposed as a Dictionary.  The name must be a valid identifier, while the value is any valid expression.
 
 ```python
 (
@@ -152,7 +154,7 @@ Tuples now allow name/value pairs as well as the ability to force a single-eleme
 # Treated like a dictionary { theMachine: 'Deep Thought', theAnswer: 42 }
 ```
 
-Forcing a single-element tuple is performed as it would be in Python, by ending the tuple with a comma `,`.  See [the Language Reference](Language_Reference.md) for more information.
+Forcing a single-element list is performed as it would be in Python, by ending the list with a comma `,`.  See [the Language Reference](Language_Reference.md) for more information.
 
 ## Version 0.3.4 - Consolidated Resolvers
 The Helper and System Resolvers have been merged into the Memory Resolver since it's all in memory anyway.  The default Memory Resolver's register/unregister functions are now exposed from the `interpol()` function , so registering a module of JavaScript helpers is easy:
@@ -174,7 +176,7 @@ See [the API Reference](API_Reference.md) for more information.
 Modules exposed by the system resolver now allow their functions to be configured.  This enables the developer to generate pre-configured pipeline functions.  For example:
 
 ```python
-from array import join
+from list import join
 let j = join.configure(" -- ")
 let a = ('joined','with','dashes')
 "Result is %a|j"
@@ -201,7 +203,7 @@ Piped interpolation can now retrieve functions from the local scope if they're n
 Basic Piped Calls are now supported.  This is useful to create filtering and formatting chains against helper functions.  For example:
 
 ```python
-from array import join
+from list import join
 from string import title
 ('single', 'title', 'cased', 'string') | join | title
 ```

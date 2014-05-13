@@ -24,7 +24,7 @@ require('../lib/writers/null');
 require('../lib/writers/array');
 require('../lib/writers/dom');
 
-},{"../lib/interpol":3,"../lib/resolvers/memory":5,"../lib/resolvers/system":7,"../lib/writers/array":12,"../lib/writers/dom":13,"../lib/writers/null":14}],2:[function(require,module,exports){
+},{"../lib/interpol":3,"../lib/resolvers/memory":5,"../lib/resolvers/system":6,"../lib/writers/array":12,"../lib/writers/dom":13,"../lib/writers/null":14}],2:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1548,6 +1548,24 @@ interpol.createMemoryResolver = createMemoryResolver;
 
 "use strict";
 
+var memory = require('../memory')
+  , defaultMemoryResolver = memory.defaultMemoryResolver;
+
+defaultMemoryResolver.registerModule('math', require('./math'));
+defaultMemoryResolver.registerModule('list', require('./list'));
+defaultMemoryResolver.registerModule('string', require('./string'));
+
+},{"../memory":5,"./list":7,"./math":8,"./string":9}],7:[function(require,module,exports){
+/*
+ * Interpol (Templates Sans Facial Hair)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thomas S. Bradford (kode4food.it)
+ */
+
+"use strict";
+
 var util = require('../../util')
   , objectKeys = util.objectKeys
   , isArray = util.isArray;
@@ -1607,25 +1625,8 @@ exports.last = last;
 exports.length = length;
 exports.empty = empty;
 exports.keys = keys;
-},{"../../util":11}],7:[function(require,module,exports){
-/*
- * Interpol (Templates Sans Facial Hair)
- * Licensed under the MIT License
- * see doc/LICENSE.md
- *
- * @author Thomas S. Bradford (kode4food.it)
- */
 
-"use strict";
-
-var memory = require('../memory')
-  , defaultMemoryResolver = memory.defaultMemoryResolver;
-
-defaultMemoryResolver.registerModule('math', require('./math'));
-defaultMemoryResolver.registerModule('array', require('./array'));
-defaultMemoryResolver.registerModule('string', require('./string'));
-
-},{"../memory":5,"./array":6,"./math":8,"./string":9}],8:[function(require,module,exports){
+},{"../../util":11}],8:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License

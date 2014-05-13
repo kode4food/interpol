@@ -394,11 +394,11 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
                   "foldPrefix": "^",
                   "name": "JavaScript"
                 },
-                "sourcePath": "/Users/thom/work/interpol/lib/resolvers/system/array.js",
-                "projectPath": "lib/resolvers/system/array.js",
-                "targetPath": "resolvers/system/array",
-                "pageTitle": "resolvers/system/array",
-                "title": "array"
+                "sourcePath": "/Users/thom/work/interpol/lib/resolvers/system/list.js",
+                "projectPath": "lib/resolvers/system/list.js",
+                "targetPath": "resolvers/system/list",
+                "pageTitle": "resolvers/system/list",
+                "title": "list"
               },
               "depth": 3,
               "outline": []

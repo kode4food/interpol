@@ -218,7 +218,7 @@ This seems like raw HTML, but in fact both id and class are evaluating expressio
 
 In this case, the value of the class attribute will be computed dynamically from the expression `"listItem %otherClasses"`.
 
-You can also compute the name of a tag or attribute dynamically by enclosing the expression in a single-element tuple).  For example:
+You can also compute the name of a tag or attribute dynamically by enclosing the expression in a single-element list).  For example:
 
 ```
 <(theTagName) id="parent" (theAttrName or "class")="listItem %otherClasses">
@@ -311,11 +311,11 @@ _my_id_
 
 There are two special identifiers.  The first is called `self` and it returns the current evaluation context.  The second is called `nil` and I think you can guess what that returns.
 
-### Tuples
-Tuples are a sequence of like elements.  Unlike in Python, they *must* be surrounded by parentheses `()`.  The elements therein are either all individual expressions or all name/value pairs.  Tuples created in Interpol are immutable.
+### Lists
+Lists are a sequence of like elements surrounded by parentheses `()` and separated by commas `,`.  The elements therein are either all individual expressions or all name/value pairs.  Lists created in Interpol are immutable.
 
 #### Expressions
-An expression tuple with only a single element is treated simply as a precedence override and is exposed as the enclosed expression.  A tuple with more than one element is exposed as an Array.  Fortunately, Interpolation (their primary use case) doesn't care about the difference.  You can force a single element Array by ending your tuple definition with a comma:
+An expression list with only a single element is treated simply as a precedence override and is exposed as the enclosed expression.  A list with more than one element is exposed as an Array.  Fortunately, Interpolation (their primary use case) doesn't care about the difference.  You can force a single element Array by ending your list definition with a comma:
 
 ```python
 (1 + 8)      # this is treated just like the literal number 9
@@ -324,7 +324,7 @@ An expression tuple with only a single element is treated simply as a precedence
 ```
 
 #### Name/Value Pairs
-Name/Value Tuples are always exposed as a Dictionary.  The name must be a valid identifier, while the value is any valid expression.
+Name/Value Lists are always exposed as a Dictionary.  The name must be a valid identifier, while the value is any valid expression.
 
 ```python
 (
@@ -348,7 +348,7 @@ myObject['someProperty']
 Interpol supports a binding operator `@`.  This is a special unary operator that allows you to perform argument binding on both functions and partials.  This is useful against functions for currying in piped calls.  For Example:
 
 ```python
-from array import join
+from list import join
 let j = @join(nil, " -- ")
 let a = ('joined','with','dashes')
 "Result is %a|j"
@@ -380,7 +380,7 @@ end
 A piped call is an operator where the left operand is passed as the sole argument to the right operand.  The right operand must evaluate to a callable function.  These calls can be chained from left to right, where the result of each call is passed into the next right-hand operand.
 
 ```python
-from array import join
+from list import join
 from string import title
 classes | join | title
 ```
@@ -436,7 +436,7 @@ In its most basic form, you'd be merging a single parameter into a string.  This
 "There are % stooges" % people.length
 ```
 
-If you have more than one parameter, you need to provide a tuple to the right side of the operator:
+If you have more than one parameter, you need to provide a list to the right side of the operator:
 
 ```python
 "There are % stooges, and % is the best" % (people.length, people.best)
@@ -476,7 +476,7 @@ let str = (
 ```
 
 #### Named Interpolation
-Rather than simple values or tuples, an object can be passed to the right side of the interpolation operator.  This will allow you to interpolate its properties by name.  To do this, follow the embedded `%` by a valid Interpol identifier:
+Rather than simple values or lists, an object can be passed to the right side of the interpolation operator.  This will allow you to interpolate its properties by name.  To do this, follow the embedded `%` by a valid Interpol identifier:
 
 ```python
 "There are %length stooges" % people
@@ -503,8 +503,8 @@ from string import title
 
 ## System Modules
 
-### array
-Provides functionality for manipulating arrays and tuples.
+### list
+Provides functionality for manipulating lists.
 
 #### first(array)
 Returns the first item of the provided array (or `null` if the array is empty).

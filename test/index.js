@@ -4,4 +4,4 @@ exports.imports = require('./imports').imports;
 exports.interpolation = require('./interpolation').interpolation;
 exports.partials = require('./partials').partials;
 exports.scope = require('./scope').scope;
-exports.tuples = require('./tuples').tuples;
+exports.lists = require('./lists').lists;

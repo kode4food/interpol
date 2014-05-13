@@ -6310,7 +6310,7 @@ module.exports = (function() {
       var s0, s1, s2, s3, s4, s5;
 
       s0 = peg$currPos;
-      s1 = peg$parsetuple();
+      s1 = peg$parselist();
       if (s1 !== peg$FAILED) {
         s2 = [];
         s3 = peg$currPos;
@@ -6447,7 +6447,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parsetuple() {
+    function peg$parselist() {
       var s0, s1, s2, s3, s4, s5, s6, s7;
 
       s0 = peg$currPos;
