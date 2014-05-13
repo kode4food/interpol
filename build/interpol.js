@@ -24,7 +24,7 @@ require('../lib/writers/null');
 require('../lib/writers/array');
 require('../lib/writers/dom');
 
-},{"../lib/interpol":3,"../lib/resolvers/memory":4,"../lib/resolvers/system":6,"../lib/writers/array":11,"../lib/writers/dom":12,"../lib/writers/null":13}],2:[function(require,module,exports){
+},{"../lib/interpol":3,"../lib/resolvers/memory":5,"../lib/resolvers/system":7,"../lib/writers/array":12,"../lib/writers/dom":13,"../lib/writers/null":14}],2:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -177,7 +177,7 @@ function buildTemplate(formatStr) {
 // Exported Functions
 exports.buildTemplate = buildTemplate;
 
-},{"./util":10,"./writers/null":13}],3:[function(require,module,exports){
+},{"./util":11,"./writers/null":14}],3:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -189,7 +189,8 @@ exports.buildTemplate = buildTemplate;
 "use strict";
 
 var util = require('./util')
-  , format = require('./format');
+  , format = require('./format')
+  , match = require('./match');
 
 var isArray = util.isArray
   , mixin = util.mixin
@@ -199,12 +200,12 @@ var isArray = util.isArray
   , freezeObject = util.freezeObject
   , isInterpolFunction = util.isInterpolFunction
   , createStaticMixin = util.createStaticMixin
-  , isMatchingObject = util.isMatchingObject
   , isInterpolJSON = util.isInterpolJSON
   , stringify = util.stringify
-  , buildTemplate = format.buildTemplate;
+  , buildTemplate = format.buildTemplate
+  , isMatchingObject = match.isMatchingObject;
 
-var CURRENT_VERSION = "0.3.13"
+var CURRENT_VERSION = "0.3.14"
   , TemplateCacheMax = 256
   , globalOptions = { writer: null, errorCallback: null }
   , globalContext = {}
@@ -654,7 +655,7 @@ function compile(parseOutput, localOptions) {
       , params = [null].concat(expandLiterals(paramDefs))
       , plen = params.length
       , statements = createStatementsEvaluator(statementNodes)
-      , guard = guardNode ? createEvaluator(guardNode) : null;
+      , guard = guardNode && createEvaluator(guardNode);
 
     return guard ? guardedClosureEvaluator : unguardedClosureEvaluator;
 
@@ -904,22 +905,39 @@ function compile(parseOutput, localOptions) {
   }
 
   // generate an evaluator that performs for looping over ranges
-  function createForEvaluator(rangeNodes, statementNodes) {
-    var ranges = wrapAssignmentEvaluators(rangeNodes).reverse()
-      , rlen = ranges.length
-      , statements = createStatementsEvaluator(statementNodes);
+  function createForEvaluator(rangeNodes, statementNodes, elseNodes) {
+    var ranges = []
+      , rlen = rangeNodes.length
+      , statements = createStatementsEvaluator(statementNodes)
+      , elseStatements = elseNodes && createStatementsEvaluator(elseNodes);
+
+    for ( var i = 0, len = rangeNodes.length; i < len; i++ ) {
+      var rangeNode = rangeNodes[i];
+      ranges[i] = [
+        lits[rangeNode[0]],
+        wrapLiteral(createEvaluator(rangeNode[1])),
+        rangeNode[2] && wrapLiteral(createEvaluator(rangeNode[2]))
+      ];
+    }
+    ranges.reverse();
 
     return forEvaluator;
 
     function forEvaluator(ctx, writer) {
       // The entire for loop is only a single nested context
-      var newCtx = extendContext(ctx);
+      var newCtx = extendContext(ctx)
+        , statementsEvaluated = false;
+
       processRange(rlen - 1);
+      if ( !statementsEvaluated && elseStatements ) {
+        elseStatements(ctx, writer);
+      }
 
       function processRange(idx) {
         var range = ranges[idx]
           , name = range[0]
-          , collection = range[1](newCtx, writer);
+          , collection = range[1](newCtx, writer)
+          , guard = range[2];
 
         if ( !isArray(collection) ) {
           return;
@@ -927,11 +945,15 @@ function compile(parseOutput, localOptions) {
 
         for ( var i = 0, len = collection.length; i < len; i++ ) {
           newCtx[name] = collection[i];
+          if ( guard && !guard(newCtx, writer) ) {
+            continue;
+          }
           if ( idx ) {
             processRange(idx - 1);
           }
           else {
             statements(newCtx, writer);
+            statementsEvaluated = true;
           }
         }
       }
@@ -1001,6 +1023,19 @@ function compile(parseOutput, localOptions) {
     }
   }
 
+  // generate a match evaluator
+  function createMatchEvaluator(leftNode, rightNode) {
+    var $1 = createEvaluator(leftNode)
+      , $2 = createEvaluator(rightNode)
+      , type = getBinaryType($1, $2);
+
+     return [null, maLeft, maRight, maBoth][type] || isMatchingObject($2, $1);
+
+    function maLeft(c, w) { return isMatchingObject($2, $1(c, w)); }
+    function maRight(c, w) { return isMatchingObject($2(c, w), $1); }
+    function maBoth(c, w) { return isMatchingObject($2(c, w), $1(c, w)); }
+  }
+
   // generate an equality evaluator
   function createEqEvaluator(leftNode, rightNode) {
     var $1 = createEvaluator(leftNode)
@@ -1012,19 +1047,6 @@ function compile(parseOutput, localOptions) {
     function eqLeft(c, w) { return $1(c, w) == $2; }
     function eqRight(c, w) { return $1 == $2(c, w); }
     function eqBoth(c, w) { return $1(c, w) == $2(c, w); }
-  }
-
-  // generate a match evaluator
-  function createMatchEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode)
-      , $2 = createEvaluator(rightNode)
-      , type = getBinaryType($1, $2);
-
-     return [null, maLeft, maRight, maBoth][type] || isMatchingObject($1, $2);
-
-    function maLeft(c, w) { return isMatchingObject($1(c, w), $2); }
-    function maRight(c, w) { return isMatchingObject($1, $2(c, w)); }
-    function maBoth(c, w) { return isMatchingObject($1(c, w), $2(c, w)); }
   }
 
   // generate an inequality evaluator
@@ -1326,7 +1348,60 @@ function compile(parseOutput, localOptions) {
 // Exported Functions
 module.exports = interpol;
 
-},{"./format":2,"./util":10}],4:[function(require,module,exports){
+},{"./format":2,"./match":4,"./util":11}],4:[function(require,module,exports){
+/*
+ * Interpol (Templates Sans Facial Hair)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thomas S. Bradford (kode4food.it)
+ */
+
+"use strict";
+
+var util = require('./util')
+  , isArray = util.isArray;
+
+/** 
+ * Basic Object Matcher to support the `like` operator.
+ *
+ * @param {Mixed} template the Template to match against
+ * @param {Mixed} obj the Object being inspected
+ */
+
+function isMatchingObject(template, obj) {
+  if ( template === obj ) {
+    return true;
+  }
+  
+  if ( typeof template !== 'object' || template === null ) {
+    return template == obj;
+  }
+
+  if ( isArray(template) ) {
+    if ( !isArray(obj) || template.length !== obj.length ) { return false; }
+    for ( var i = 0, len = template.length; i < len; i++ ) {
+      if ( !isMatchingObject(template[i], obj[i]) ) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  if ( typeof obj !== 'object' || obj === null ) { return false; }
+
+  for ( var key in template ) {
+    if ( !isMatchingObject(template[key], obj[key]) ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// Exported Functions
+exports.isMatchingObject = isMatchingObject;
+
+},{"./util":11}],5:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1462,7 +1537,7 @@ exports.defaultMemoryResolver = defaultMemoryResolver;
 exports.createMemoryResolver = createMemoryResolver;
 interpol.createMemoryResolver = createMemoryResolver;
 
-},{"../interpol":3,"../util":10}],5:[function(require,module,exports){
+},{"../interpol":3,"../util":11}],6:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1532,7 +1607,7 @@ exports.last = last;
 exports.length = length;
 exports.empty = empty;
 exports.keys = keys;
-},{"../../util":10}],6:[function(require,module,exports){
+},{"../../util":11}],7:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1550,7 +1625,7 @@ defaultMemoryResolver.registerModule('math', require('./math'));
 defaultMemoryResolver.registerModule('array', require('./array'));
 defaultMemoryResolver.registerModule('string', require('./string'));
 
-},{"../memory":4,"./array":5,"./math":7,"./string":8}],7:[function(require,module,exports){
+},{"../memory":5,"./array":6,"./math":8,"./string":9}],8:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1681,7 +1756,7 @@ exports.median = median;
 exports.min = min;
 exports.sum = sum;
 
-},{"../../util":10,"./wrap":9}],8:[function(require,module,exports){
+},{"../../util":11,"./wrap":10}],9:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1735,7 +1810,7 @@ exports.split = split;
 exports.title = title;
 exports.upper = upper;
 
-},{"../../util":10,"./wrap":9}],9:[function(require,module,exports){
+},{"../../util":11,"./wrap":10}],10:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1763,7 +1838,7 @@ function wrap(func) {
 // Exported Functions
 module.exports = wrap;
 
-},{"../../util":10}],10:[function(require,module,exports){
+},{"../../util":11}],11:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1859,39 +1934,6 @@ function createStaticMixin(obj) {
     }
     return target;
   }
-}
-
-/** 
- * Crude Object Matcher - Will eventually be replaced by a 
- * compiled Matcher
- *
- * @param {Mixed} template the Template to match against
- * @param {Mixed} obj the Object being inspected
- */
-
-function isMatchingObject(template, obj) {
-  if ( typeof template !== 'object' ) {
-    return template === obj;
-  }
-
-  if ( isArray(template) ) {
-    if ( !isArray(obj) || template.length !== obj.length ) {
-      return false;
-    }
-    for ( var i = 0, len = template.length; i < len; i++ ) {
-      if ( !isMatchingObject(template[i], obj[i]) ) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  for ( var key in template ) {
-    if ( !isMatchingObject(template[key], obj[key]) ) {
-      return false;
-    }
-  }
-  return true;
 }
 
 /**
@@ -2067,7 +2109,6 @@ exports.freezeObject = freezeObject;
 exports.objectKeys = objectKeys;
 exports.mixin = mixin;
 exports.createStaticMixin = createStaticMixin;
-exports.isMatchingObject = isMatchingObject;
 exports.isInterpolJSON = isInterpolJSON;
 exports.escapeAttribute = escapeAttribute;
 exports.escapeContent = escapeContent;
@@ -2078,7 +2119,7 @@ exports.isInterpolFunction = isInterpolFunction;
 exports.bless = bless;
 exports.configure = configure;
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -2171,7 +2212,7 @@ function createArrayWriter(arr) {
 exports.createArrayWriter = createArrayWriter;
 interpol.createArrayWriter = createArrayWriter;
 
-},{"../interpol":3,"../util":10}],12:[function(require,module,exports){
+},{"../interpol":3,"../util":11}],13:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -2255,7 +2296,7 @@ function createDOMWriter(parentElement, renderMode) {
 exports.createDOMWriter = createDOMWriter;
 interpol.createDOMWriter = createDOMWriter;
 
-},{"../interpol":3,"../util":10,"./array":11}],13:[function(require,module,exports){
+},{"../interpol":3,"../util":11,"./array":12}],14:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -2297,4 +2338,4 @@ function createNullWriter() {
 exports.createNullWriter = createNullWriter;
 interpol.createNullWriter = createNullWriter;
 
-},{"../interpol":3,"../util":10}]},{},[1])
+},{"../interpol":3,"../util":11}]},{},[1])
