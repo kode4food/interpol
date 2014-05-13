@@ -149,6 +149,27 @@ for person in people, brother in person.brothers: renderItem(person, brother)
 
 In both cases, the outer loop iterates over all elements in `people`, assigning the identifier `person` to each element.  For each `person` item, an inner loop is executed that iterates over the person's `brothers` property, assigning the identifier `brother` to each element.  You'll notice that `person` is available in the inner loop's scope and that both identifiers are available in the statement block.
 
+You can also define an `else` clause for those cases where the for loop finds no matches:
+
+```python
+for person in people, brother in person.brothers
+  renderItem(person, brother)
+else
+  "I got nothin'!"
+end
+```
+
+This becomes especially important if you apply guards to your ranges:
+
+```python
+for person in people when person.type == 'stooge',
+    brother in person.brothers when brother.living
+  renderItem(person, brother)
+else
+  "I got nothin'!"
+end
+```
+
 ### If / Else Branching
 Like in most programming languages, Interpol supports conditional branching in the form of If/Else statements.  In its simplest form, it wouldn't include an `else` block and might look like this:
 
@@ -382,7 +403,11 @@ The additive operators are `+` and `-`.
 The relational operators are `lt` (less than), `le` (less than or equal), `gt` (greater than), and `ge` (greater than or equal).  Sorry, I would have allowed the traditional characters (`<`, `>` and so on) but the parser would have to be far more clever in order to deal with HTMLish Statements.
 
 ### Equality
-The equality operators are `==` (equal to) and `!=` (not equal to).
+The three equality operators are `==` (equal to), `!=` (not equal to) and `like` (compatible with).
+
+The `like` operator was introduced to support inline guards, but is generally useful.  Like will perform a deep comparison of values to determine whether the left operand is 'compatible' with the template on the right.
+
+Compatibility is mostly as you would expect, with one exception.  If the template contains an Object, only the properties defined in that Object are checked.  If the left operand has additional properties, those are ignored.
 
 ### And
 The and `and` operator performs a boolean *and* between the two operands, short circuiting if the left operand does not evaluate to JavaScript *truthy*.

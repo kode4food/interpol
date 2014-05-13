@@ -307,6 +307,26 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
         }
       ]
     }, {
+      "type": "file",
+      "data": {
+        "language": {
+          "nameMatchers": [".js"],
+          "pygmentsLexer": "javascript",
+          "multiLineComment": ["/**", "*", "*/"],
+          "singleLineComment": ["//"],
+          "ignorePrefix": "}",
+          "foldPrefix": "^",
+          "name": "JavaScript"
+        },
+        "sourcePath": "/Users/thom/work/interpol/lib/match.js",
+        "projectPath": "lib/match.js",
+        "targetPath": "match",
+        "pageTitle": "match",
+        "title": "match"
+      },
+      "depth": 1,
+      "outline": []
+    }, {
       "type": "folder",
       "data": {
         "path": "resolvers",

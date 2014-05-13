@@ -1,7 +1,28 @@
 # Change History
 
-## Version 0.3.14 - Inline Guards
-Added *very crude* pattern matching capability to Partial Definitions in order to facilitate what are essentially inline-guards.  For example:
+## Version 0.3.14 - Feature Complete
+* For Loops have been extended to support range guards as well as an `else` clause.  You can define an `else` clause for those cases where the for loop finds no matches:
+
+```python
+for person in people, brother in person.brothers
+  renderItem(person, brother)
+else
+  "I got nothin'!"
+end
+```
+
+This becomes especially important if you apply guards to your ranges:
+
+```python
+for person in people when person.type == 'stooge',
+    brother in person.brothers when brother.living
+  renderItem(person, brother)
+else
+  "I got nothin'!"
+end
+```
+
+* Added *very crude* pattern matching capability to Partial Definitions in order to facilitate what are essentially inline-guards.  For example:
 
 ```python
 def renderItem(type, name)
@@ -16,6 +37,18 @@ def renderItem("developer", name)
   <b>"Developers rock! Especially %name"</b>
 end
 ```
+
+In this case, no local argument name is bound to the value.  You can simply treat it as discarded.  Under the hood, what is actually happening is something like this:
+
+```python
+def renderItem(self[0], name) when self[0] like "developer"
+  <b>"Developers rock! Especially %name"</b>
+end
+```
+
+* The `like` operator was introduced to support inline guards.  Like will perform a deep comparison of values to determine whether the left operand is 'compatible' with the template on the right.
+
+Compatibility is mostly as you would expect, with one exception.  If the template is an Object, only the properties defined in that Object are checked.  If the left operand has additional properties, those are ignored.
 
 ## Version 0.3.13 - Simplifying Interpolation
 Automatic Interpolation was a pain in the ass when you didn't want it to happen, requiring you to escape all of your percent signs `%`.  Now it will only occur against double quoted strings containing named indexes.  Single quoted strings will be treated as literals.

@@ -87,37 +87,6 @@ properties into a target provided to the closure.</p>
     <span class="p">}</span>
     <span class="k">return</span> <span class="nx">target</span><span class="p">;</span>
   <span class="p">}</span>
-<span class="p">}</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p>Crude Object Matcher - Will eventually be replaced by a 
-compiled Matcher</p>
-
-<p>Parameters:</p>
-
-<ul>
-<li><p><strong>template can be of any type.</strong><br/>(the Template to match against)</p></li>
-<li><p><strong>obj can be of any type.</strong><br/>(the Object being inspected)</p></li>
-</ul></div></div><div class="code"><div class="wrapper"><span class="kd">function</span> <span class="nx">isMatchingObject</span><span class="p">(</span><span class="nx">template</span><span class="p">,</span> <span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">template</span> <span class="o">!==</span> <span class="s1">&#39;object&#39;</span> <span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">template</span> <span class="o">===</span> <span class="nx">obj</span><span class="p">;</span>
-  <span class="p">}</span>
-
-  <span class="k">if</span> <span class="p">(</span> <span class="nx">isArray</span><span class="p">(</span><span class="nx">template</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="o">||</span> <span class="nx">template</span><span class="p">.</span><span class="nx">length</span> <span class="o">!==</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span>
-      <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">template</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
-      <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isMatchingObject</span><span class="p">(</span><span class="nx">template</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="nx">obj</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span> <span class="p">)</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
-      <span class="p">}</span>
-    <span class="p">}</span>
-    <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
-  <span class="p">}</span>
-
-  <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">key</span> <span class="k">in</span> <span class="nx">template</span> <span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isMatchingObject</span><span class="p">(</span><span class="nx">template</span><span class="p">[</span><span class="nx">key</span><span class="p">],</span> <span class="nx">obj</span><span class="p">[</span><span class="nx">key</span><span class="p">])</span> <span class="p">)</span> <span class="p">{</span>
-      <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-  <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
 <span class="p">}</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p>Checks whether or not the provided value is an Interpol Pre-Parsed JSON
 Object.</p>
 
@@ -269,7 +238,6 @@ that aren't required.</p>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">objectKeys</span> <span class="o">=</span> <span class="nx">objectKeys</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">mixin</span> <span class="o">=</span> <span class="nx">mixin</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">createStaticMixin</span> <span class="o">=</span> <span class="nx">createStaticMixin</span><span class="p">;</span>
-<span class="nx">exports</span><span class="p">.</span><span class="nx">isMatchingObject</span> <span class="o">=</span> <span class="nx">isMatchingObject</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">isInterpolJSON</span> <span class="o">=</span> <span class="nx">isInterpolJSON</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">escapeAttribute</span> <span class="o">=</span> <span class="nx">escapeAttribute</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">escapeContent</span> <span class="o">=</span> <span class="nx">escapeContent</span><span class="p">;</span>
