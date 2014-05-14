@@ -151,13 +151,11 @@ function buildTemplate(formatStr) {
       var value = data[idx];
       for ( var i = flen; i >= 0; i-- ) {
         var funcName = funcs[i]
-          , func = data[funcName]
-          , type = typeof func;
+          , func = data[funcName];
 
-        if ( type === 'undefined' && ctx ) {
+        if ( func === undefined && ctx ) {
           // Only fall back to context if func is not in data at all
           func = ctx[funcName];
-          type = typeof func;
         }
 
         if ( !isInterpolFunction(func) ) {
@@ -500,7 +498,7 @@ function compile(parseOutput, localOptions) {
 
   function createEvaluator(node) {
     if ( !isArray(node) ) {
-      if ( typeof node === 'undefined' || node === null ) {
+      if ( node === undefined || node === null ) {
         return null;
       }
       return lits[node];
@@ -831,7 +829,7 @@ function compile(parseOutput, localOptions) {
 
         if ( typeof key === 'function' ) {
           key = key(ctx, writer);
-          if ( typeof key === 'undefined' || key === null ) {
+          if ( key === undefined || key === null ) {
             continue;
           }
           key = stringify(key);
@@ -1265,7 +1263,7 @@ function compile(parseOutput, localOptions) {
 
     // do this if the left operand is a literal, though it shouldn't be
     if ( ( type === 0 || type === 2 ) &&
-         ( typeof $1 === 'undefined' || $1 === null ) ) {
+         ( $1 === undefined || $1 === null ) ) {
       return null;
     }
 
@@ -1273,7 +1271,7 @@ function compile(parseOutput, localOptions) {
 
     function memLeft(c, w) {
       var parent = $1(c, w);
-      if ( typeof parent === 'undefined' || parent === null ) {
+      if ( parent === undefined || parent === null ) {
         return null;
       }
       return parent[$2];
@@ -1285,7 +1283,7 @@ function compile(parseOutput, localOptions) {
 
     function memBoth(c, w) {
       var parent = $1(c, w);
-      if ( typeof parent === 'undefined' || parent === null ) {
+      if ( parent === undefined || parent === null ) {
         return null;
       }
       return parent[$2(c, w)];
@@ -1784,7 +1782,7 @@ function lower(writer, value) {
 // result.
 function split(writer, value, delim, idx) {
   var val = stringify(value).split(delim || ' \n\r\t');
-  return typeof idx !== 'undefined' ? val[idx] : val;
+  return idx !== undefined ? val[idx] : val;
 }
 
 // `title(value)` converts the provided string to title-case and returns
