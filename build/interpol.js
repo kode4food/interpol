@@ -196,6 +196,7 @@ var isArray = util.isArray
   , bless = util.bless
   , extendContext = util.extendContext
   , freezeObject = util.freezeObject
+  , objectKeys = util.objectKeys
   , isInterpolFunction = util.isInterpolFunction
   , createStaticMixin = util.createStaticMixin
   , isInterpolJSON = util.isInterpolJSON
@@ -934,15 +935,25 @@ function compile(parseOutput, localOptions) {
       function processRange(idx) {
         var range = ranges[idx]
           , name = range[0]
-          , collection = range[1](newCtx, writer)
-          , guard = range[2];
+          , data = range[1](newCtx, writer)
+          , guard = range[2]
+          , items = data;
 
-        if ( !isArray(collection) ) {
+        if ( typeof data !== 'object') {
           return;
         }
 
-        for ( var i = 0, len = collection.length; i < len; i++ ) {
-          newCtx[name] = collection[i];
+        var createItem;
+        if ( isArray(data) ) {
+          createItem = createArrayItem;
+        }
+        else {
+          items = objectKeys(data);
+          createItem = createObjectItem;
+        }
+
+        for ( var i = 0, len = items.length; i < len; i++ ) {
+          newCtx[name] = createItem(i);
           if ( guard && !guard(newCtx, writer) ) {
             continue;
           }
@@ -953,6 +964,15 @@ function compile(parseOutput, localOptions) {
             statements(newCtx, writer);
             statementsEvaluated = true;
           }
+        }
+
+        function createArrayItem() {
+          return data[i];
+        }
+
+        function createObjectItem() {
+          var name = items[i];
+          return { name: name, value: data[name] };
         }
       }
     }

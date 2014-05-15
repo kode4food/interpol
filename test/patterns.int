@@ -5,6 +5,10 @@ let b = (
   occupation = 'coder'
 )
 
+for item in b
+  <b>"-- %name -- = -- %value --" % item</b>
+end
+
 let c = ('red', 'green', 'blue')
 for color in c when color != 'green'
   <b>color</b>
