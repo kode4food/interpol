@@ -524,6 +524,9 @@ Returns true or false depending on whether or not the provided array is empty.
 #### keys(value)
 Returns the keys of the Object or indexes of the Array passed to it.  If the Array is sparse (has gaps) it will only return the indexes with assigned values.
 
+#### values(value)
+Returns the values of the Object or Array passed to it.  If the array is sparse (has gaps) it will only return the assigned values.
+
 ### string
 Provides functionality for manipulating strings.
 
