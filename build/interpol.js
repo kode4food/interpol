@@ -187,15 +187,11 @@ exports.buildTemplate = buildTemplate;
 "use strict";
 
 var util = require('./util')
-  , format = require('./format')
-  , match = require('./match')
   , runtime = require('./runtime');
 
 var isArray = util.isArray
   , bless = util.bless
-  , freezeObject = util.freezeObject
   , isInterpolJSON = util.isInterpolJSON
-  , stringify = util.stringify
   , buildRuntime = runtime.buildRuntime;
 
 var CURRENT_VERSION = "0.3.14"
@@ -271,7 +267,7 @@ function compile(template) {
 // Exported Functions
 module.exports = interpol;
 
-},{"./format":2,"./match":4,"./runtime":11,"./util":12}],4:[function(require,module,exports){
+},{"./runtime":11,"./util":12}],4:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
