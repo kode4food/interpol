@@ -72,16 +72,16 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
                   "type": "heading",
                   "data": {
                     "level": 3,
-                    "title": "Compiling Pre-Parsed JSON",
-                    "slug": "compiling-pre-parsed-json"
+                    "title": "Loading Pre-Compiled JSON",
+                    "slug": "loading-pre-compiled-json"
                   },
                   "depth": 3
                 }, {
                   "type": "heading",
                   "data": {
                     "level": 3,
-                    "title": "Including the PEG.js Parser",
-                    "slug": "including-the-pegjs-parser"
+                    "title": "Including the PEG.js Compiler",
+                    "slug": "including-the-pegjs-compiler"
                   },
                   "depth": 3
                 }
@@ -154,16 +154,16 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
               "type": "heading",
               "data": {
                 "level": 3,
-                "title": "Compiling Pre-Parsed JSON",
-                "slug": "compiling-pre-parsed-json"
+                "title": "Loading Pre-Compiled JSON",
+                "slug": "loading-pre-compiled-json"
               },
               "depth": 3
             }, {
               "type": "heading",
               "data": {
                 "level": 3,
-                "title": "Including the PEG.js Parser",
-                "slug": "including-the-pegjs-parser"
+                "title": "Including the PEG.js Compiler",
+                "slug": "including-the-pegjs-compiler"
               },
               "depth": 3
             }
@@ -244,6 +244,26 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
           "foldPrefix": "^",
           "name": "JavaScript"
         },
+        "sourcePath": "/home/thom/work/interpol/lib/compiler.js",
+        "projectPath": "lib/compiler.js",
+        "targetPath": "compiler",
+        "pageTitle": "compiler",
+        "title": "compiler"
+      },
+      "depth": 1,
+      "outline": []
+    }, {
+      "type": "file",
+      "data": {
+        "language": {
+          "nameMatchers": [".js"],
+          "pygmentsLexer": "javascript",
+          "multiLineComment": ["/**", "*", "*/"],
+          "singleLineComment": ["//"],
+          "ignorePrefix": "}",
+          "foldPrefix": "^",
+          "name": "JavaScript"
+        },
         "sourcePath": "/home/thom/work/interpol/lib/format.js",
         "projectPath": "lib/format.js",
         "targetPath": "format",
@@ -286,22 +306,6 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
             "level": 2,
             "title": "Core Interpol Implementation",
             "slug": "core-interpol-implementation"
-          },
-          "depth": 2
-        }, {
-          "type": "heading",
-          "data": {
-            "level": 2,
-            "title": "Evaluator Generation Utilities",
-            "slug": "evaluator-generation-utilities"
-          },
-          "depth": 2
-        }, {
-          "type": "heading",
-          "data": {
-            "level": 2,
-            "title": "Evaluator Generation",
-            "slug": "evaluator-generation"
           },
           "depth": 2
         }
@@ -482,6 +486,44 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
               "outline": []
             }
           ]
+        }
+      ]
+    }, {
+      "type": "file",
+      "data": {
+        "language": {
+          "nameMatchers": [".js"],
+          "pygmentsLexer": "javascript",
+          "multiLineComment": ["/**", "*", "*/"],
+          "singleLineComment": ["//"],
+          "ignorePrefix": "}",
+          "foldPrefix": "^",
+          "name": "JavaScript"
+        },
+        "sourcePath": "/home/thom/work/interpol/lib/runtime.js",
+        "projectPath": "lib/runtime.js",
+        "targetPath": "runtime",
+        "pageTitle": "runtime",
+        "title": "runtime"
+      },
+      "depth": 1,
+      "outline": [
+        {
+          "type": "heading",
+          "data": {
+            "level": 2,
+            "title": "Evaluator Generation Utilities",
+            "slug": "evaluator-generation-utilities"
+          },
+          "depth": 2
+        }, {
+          "type": "heading",
+          "data": {
+            "level": 2,
+            "title": "Evaluator Generation",
+            "slug": "evaluator-generation"
+          },
+          "depth": 2
         }
       ]
     }, {

@@ -1,7 +1,7 @@
 # Interpol API Reference
 
 ## Interpol Core (interpol/interpol.js)
-The Interpol core is a single JavaScript module that exposes a single Function.  This function is named `$interpol()` in the browser, but can be named explicitly in Node.js.  The purpose of this function is to compile template strings, or to load pre-parsed JSON templates.  You can call it like so:
+The Interpol core is a single JavaScript module that exposes a single Function.  This function is named `$interpol()` in the browser, but can be named explicitly in Node.js.  The purpose of this function is to compile template strings, or to load pre-compiled JSON templates.  You can call it like so:
 
 ```javascript
 var $interpol = require('interpol');
@@ -14,8 +14,8 @@ There are several support structures and functions attached to the `$interpol()`
 
   * `VERSION` - The current version of Interpol, represented as a String.
   * `parser` - The Interpol PEG.js Parser Object.
-  * `parse()` - parses a string template, return a JSON object that can be stored or passed to the `compile()` function.
-  * `compile()` - converts a pre-parsed JSON object to an Interpol compiled closure.
+  * `compile()` - compiles a string template, return a JSON object that can be stored or passed to the `runtime()` function.
+  * `runtime()` - converts a pre-compiled JSON object to an Interpol runtime closure.
   * `options{}` - Global Options Object (overridden when calling a compiled tempalte)
   * `globals{}` - Global Variable Context (available to all compiled templates)
   * `resolvers[]` - Global Resolver Instances (overridden at compile-time)
@@ -27,7 +27,7 @@ Each compiled closure also attaches additional functions, the most important bei
 A resolver is an interface used by Interpol to resolve an imported module.  There are two available for developer use, and one automatically registered for apps bundled by the command-line interface.
 
 ### Memory
-A memory resolver allows you to register templates as named modules.  These templates can be strings to be compiled, pre-parsed JSON, compiled closures or Objects containing JavaScript functions.  An instance of this resolver is registered by default, and is also used to export Interpol's system modules.  It can be accessed like so:
+A memory resolver allows you to register templates as named modules.  These templates can be strings to be compiled, pre-compiled JSON, runtime closures or Objects containing JavaScript functions.  An instance of this resolver is registered by default, and is also used to export Interpol's system modules.  It can be accessed like so:
 
 ```javascript
 $interpol.registerModule('myModule',

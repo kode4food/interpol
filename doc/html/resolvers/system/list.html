@@ -40,9 +40,22 @@ provided array is empty.</p></div></div><div class="code"><div class="wrapper"><
 passed to it.  If the Array is sparse (has gaps) it will only return
 the indexes with assigned values.</p></div></div><div class="code"><div class="wrapper"><span class="kd">function</span> <span class="nx">keys</span><span class="p">(</span><span class="nx">writer</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">return</span> <span class="k">typeof</span> <span class="nx">value</span> <span class="o">===</span> <span class="s1">&#39;object&#39;</span> <span class="o">?</span> <span class="nx">objectKeys</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="o">:</span> <span class="kc">null</span><span class="p">;</span>
+<span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>values(value)` returns the values of the Object or Array passed to
+it.  If the array is sparse (has gaps) it will only return the
+assigned values.</p></div></div><div class="code"><div class="wrapper"><span class="kd">function</span> <span class="nx">values</span><span class="p">(</span><span class="nx">writer</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">value</span> <span class="o">!==</span> <span class="s1">&#39;object&#39;</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="kd">var</span> <span class="nx">keys</span> <span class="o">=</span> <span class="nx">objectKeys</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span>
+    <span class="p">,</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">[];</span>
+  <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">keys</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="nx">result</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="nx">value</span><span class="p">[</span><span class="nx">keys</span><span class="p">[</span><span class="nx">i</span><span class="p">]];</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
 <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Exports</p></div></div><div class="code"><div class="wrapper"><span class="nx">exports</span><span class="p">.</span><span class="nx">first</span> <span class="o">=</span> <span class="nx">first</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">join</span> <span class="o">=</span> <span class="nx">join</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">last</span> <span class="o">=</span> <span class="nx">last</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">length</span> <span class="o">=</span> <span class="nx">length</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">empty</span> <span class="o">=</span> <span class="nx">empty</span><span class="p">;</span>
-<span class="nx">exports</span><span class="p">.</span><span class="nx">keys</span> <span class="o">=</span> <span class="nx">keys</span><span class="p">;</span></div></div></div></div></body></html>
+<span class="nx">exports</span><span class="p">.</span><span class="nx">keys</span> <span class="o">=</span> <span class="nx">keys</span><span class="p">;</span>
+<span class="nx">exports</span><span class="p">.</span><span class="nx">values</span> <span class="o">=</span> <span class="nx">values</span><span class="p">;</span></div></div></div></div></body></html>
