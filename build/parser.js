@@ -298,6 +298,7 @@ module.exports = (function() {
             },
         peg$c213 = function(g) { return g; },
         peg$c214 = function(op, id, params, guard, stmts) {
+              params = params || {};
               var guards = params.guards || [];
               if ( guards.length ) {
                 if ( guard ) { guards.push(guard); }
