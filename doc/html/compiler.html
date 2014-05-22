@@ -15,14 +15,15 @@
 <span class="kd">var</span> <span class="nx">parseTemplate</span> <span class="o">=</span> <span class="nx">parser</span><span class="p">.</span><span class="nx">parseTemplate</span><span class="p">;</span>
 
 <span class="kd">var</span> <span class="nx">isArray</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">isArray</span>
-  <span class="p">,</span> <span class="nx">freezeObject</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">freezeObject</span><span class="p">;</span>
+  <span class="p">,</span> <span class="nx">freezeObject</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">freezeObject</span>
+  <span class="p">,</span> <span class="nx">stringify</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">stringify</span><span class="p">;</span>
 
 <span class="kd">var</span> <span class="nx">sym</span> <span class="o">=</span> <span class="nx">parser</span><span class="p">.</span><span class="nx">sym</span>
   <span class="p">,</span> <span class="nx">isSymbol</span> <span class="o">=</span> <span class="nx">parser</span><span class="p">.</span><span class="nx">isSymbol</span>
   <span class="p">,</span> <span class="nx">isStatements</span> <span class="o">=</span> <span class="nx">parser</span><span class="p">.</span><span class="nx">isStatements</span>
-  <span class="p">,</span> <span class="nx">isOperator</span> <span class="o">=</span> <span class="nx">parser</span><span class="p">.</span><span class="nx">isOperator</span>
-  <span class="p">,</span> <span class="nx">isPartialDef</span> <span class="o">=</span> <span class="nx">parser</span><span class="p">.</span><span class="nx">isPartialDef</span>
-  <span class="p">,</span> <span class="nx">isForLoop</span> <span class="o">=</span> <span class="nx">parser</span><span class="p">.</span><span class="nx">isForLoop</span><span class="p">;</span>
+  <span class="p">,</span> <span class="nx">isStatementOperator</span> <span class="o">=</span> <span class="nx">parser</span><span class="p">.</span><span class="nx">isStatementOperator</span>
+  <span class="p">,</span> <span class="nx">isIdentifier</span> <span class="o">=</span> <span class="nx">parser</span><span class="p">.</span><span class="nx">isIdentifier</span>
+  <span class="p">,</span> <span class="nx">isLiteral</span> <span class="o">=</span> <span class="nx">parser</span><span class="p">.</span><span class="nx">isLiteral</span><span class="p">;</span>
 
 <span class="kd">var</span> <span class="nx">inverseOperators</span> <span class="o">=</span> <span class="nx">freezeObject</span><span class="p">({</span>
   <span class="s1">&#39;eq&#39;</span><span class="o">:</span> <span class="s1">&#39;nq&#39;</span><span class="p">,</span> <span class="s1">&#39;nq&#39;</span><span class="o">:</span> <span class="s1">&#39;eq&#39;</span><span class="p">,</span>
@@ -47,17 +48,18 @@
       <span class="nx">statements</span> <span class="o">=</span> <span class="nx">mergeAssignments</span><span class="p">(</span><span class="nx">statements</span><span class="p">);</span>
       <span class="nx">statements</span> <span class="o">=</span> <span class="nx">mergePartials</span><span class="p">(</span><span class="nx">statements</span><span class="p">);</span>
       <span class="nx">statements</span> <span class="o">=</span> <span class="nx">rollupForLoops</span><span class="p">(</span><span class="nx">statements</span><span class="p">);</span>
+      <span class="nx">statements</span> <span class="o">=</span> <span class="nx">promoteRawLiteralOutput</span><span class="p">(</span><span class="nx">statements</span><span class="p">);</span>
+      <span class="nx">statements</span> <span class="o">=</span> <span class="nx">convertLiteralHTML</span><span class="p">(</span><span class="nx">statements</span><span class="p">);</span>
       <span class="nx">statements</span> <span class="o">=</span> <span class="nx">mergeRawLiteralOutput</span><span class="p">(</span><span class="nx">statements</span><span class="p">);</span>
       <span class="k">return</span> <span class="nx">statements</span><span class="p">;</span>
     <span class="p">}</span>
     <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">node</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
       <span class="nx">node</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="nx">rewriteParseTree</span><span class="p">(</span><span class="nx">node</span><span class="p">[</span><span class="nx">i</span><span class="p">]);</span>
     <span class="p">}</span>
-    <span class="k">if</span> <span class="p">(</span> <span class="nx">isOperator</span><span class="p">(</span><span class="nx">node</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="nx">isStatementOperator</span><span class="p">(</span><span class="nx">node</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
       <span class="nx">node</span> <span class="o">=</span> <span class="nx">flipConditionals</span><span class="p">(</span><span class="nx">node</span><span class="p">);</span>
       <span class="nx">node</span> <span class="o">=</span> <span class="nx">flipEquality</span><span class="p">(</span><span class="nx">node</span><span class="p">);</span>
       <span class="nx">node</span> <span class="o">=</span> <span class="nx">promoteNot</span><span class="p">(</span><span class="nx">node</span><span class="p">);</span>
-      <span class="nx">node</span> <span class="o">=</span> <span class="nx">convertLiteralHTML</span><span class="p">(</span><span class="nx">node</span><span class="p">);</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="nx">node</span><span class="p">;</span>
   <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Hoisting <em>only</em> occurs when the following condition is met:
@@ -72,7 +74,7 @@ intentions.</p></div></div><div class="code"><div class="wrapper">  <span class=
 
     <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">ilen</span> <span class="o">=</span> <span class="nx">statements</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">ilen</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
       <span class="kd">var</span> <span class="nx">statement</span> <span class="o">=</span> <span class="nx">statements</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
-      <span class="k">if</span> <span class="p">(</span> <span class="nx">isPartialDef</span><span class="p">(</span><span class="nx">statement</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span> <span class="nx">isStatementOperator</span><span class="p">(</span><span class="nx">statement</span><span class="p">,</span> <span class="s1">&#39;de&#39;</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
         <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">others</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Short-circuit.  We're either all partials or we don't
 meet the conditions for hoisting</p></div></div><div class="code"><div class="wrapper">          <span class="nx">issueWarning</span><span class="p">(</span><span class="nx">statement</span><span class="p">);</span>
           <span class="k">return</span> <span class="nx">statements</span><span class="p">;</span>
@@ -140,7 +142,9 @@ single branched partial</p></div></div><div class="code"><div class="wrapper">  
         <span class="p">,</span> <span class="nx">guard</span> <span class="o">=</span> <span class="nx">firstDefinition</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
 
       <span class="k">if</span> <span class="p">(</span> <span class="nx">guard</span> <span class="p">)</span> <span class="p">{</span>
-        <span class="nx">statements</span> <span class="o">=</span> <span class="p">[</span> <span class="p">[</span><span class="nx">sym</span><span class="p">(</span><span class="s1">&#39;cn&#39;</span><span class="p">),</span> <span class="nx">guard</span><span class="p">,</span> <span class="nx">statements</span><span class="p">,</span> <span class="p">[</span><span class="nx">sym</span><span class="p">(</span><span class="kc">null</span><span class="p">)]]</span> <span class="p">];</span>
+        <span class="nx">statements</span> <span class="o">=</span> <span class="p">[</span>
+          <span class="p">[</span><span class="nx">sym</span><span class="p">(</span><span class="s1">&#39;cn&#39;</span><span class="p">),</span> <span class="nx">guard</span><span class="p">,</span> <span class="nx">statements</span><span class="p">,</span> <span class="p">[</span><span class="nx">sym</span><span class="p">(</span><span class="kc">null</span><span class="p">)]]</span>
+        <span class="p">];</span>
       <span class="p">}</span>
 
       <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">definitions</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
@@ -159,7 +163,9 @@ single branched partial</p></div></div><div class="code"><div class="wrapper">  
         <span class="kd">var</span> <span class="nx">theseStatements</span> <span class="o">=</span> <span class="nx">definition</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
           <span class="p">,</span> <span class="nx">thisGuard</span> <span class="o">=</span> <span class="nx">definition</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
 
-        <span class="nx">statements</span> <span class="o">=</span> <span class="p">[</span> <span class="p">[</span><span class="nx">sym</span><span class="p">(</span><span class="s1">&#39;cn&#39;</span><span class="p">),</span> <span class="nx">thisGuard</span><span class="p">,</span> <span class="nx">theseStatements</span><span class="p">,</span> <span class="nx">statements</span><span class="p">]</span> <span class="p">];</span>
+        <span class="nx">statements</span> <span class="o">=</span> <span class="p">[</span>
+          <span class="p">[</span><span class="nx">sym</span><span class="p">(</span><span class="s1">&#39;cn&#39;</span><span class="p">),</span> <span class="nx">thisGuard</span><span class="p">,</span> <span class="nx">theseStatements</span><span class="p">,</span> <span class="nx">statements</span><span class="p">]</span>
+        <span class="p">];</span>
         <span class="nx">guard</span> <span class="o">=</span> <span class="nx">guard</span> <span class="o">&amp;&amp;</span> <span class="p">[</span><span class="nx">sym</span><span class="p">(</span><span class="s1">&#39;or&#39;</span><span class="p">),</span> <span class="nx">thisGuard</span><span class="p">,</span> <span class="nx">guard</span><span class="p">];</span>
       <span class="p">}</span>
 
@@ -169,14 +175,98 @@ single branched partial</p></div></div><div class="code"><div class="wrapper">  
       <span class="p">}</span>
       <span class="k">return</span> <span class="p">[</span><span class="nx">firstDefinition</span><span class="p">];</span>
     <span class="p">}</span>
+  <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>We can convert escaped output of literals to raw output that
+is pre-escaped</p></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">promoteRawLiteralOutput</span><span class="p">(</span><span class="nx">statements</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">statements</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">statement</span> <span class="o">=</span> <span class="nx">statements</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+      <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isStatementOperator</span><span class="p">(</span><span class="nx">statement</span><span class="p">,</span> <span class="s1">&#39;ou&#39;</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="k">continue</span><span class="p">;</span>
+      <span class="p">}</span>
+      <span class="kd">var</span> <span class="nx">output</span> <span class="o">=</span> <span class="nx">statement</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+      <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isLiteral</span><span class="p">(</span><span class="nx">output</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="k">continue</span><span class="p">;</span>
+      <span class="p">}</span>
+      <span class="nx">statements</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nx">sym</span><span class="p">(</span><span class="s1">&#39;ra&#39;</span><span class="p">),</span> <span class="nx">sym</span><span class="p">(</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">output</span><span class="p">.</span><span class="nx">value</span><span class="p">),</span> <span class="s1">&#39;lit&#39;</span><span class="p">)];</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">statements</span><span class="p">;</span>
+  <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>If we're an HTML tag with only literal content then we can be
+converted to a raw output</p></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">convertLiteralHTML</span><span class="p">(</span><span class="nx">statements</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">statements</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">statement</span> <span class="o">=</span> <span class="nx">statements</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
+        <span class="p">,</span> <span class="nx">op</span> <span class="o">=</span> <span class="nx">isStatementOperator</span><span class="p">(</span><span class="nx">statement</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;op&#39;</span><span class="p">,</span> <span class="s1">&#39;cl&#39;</span><span class="p">]);</span>
+      <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">op</span> <span class="o">||</span> <span class="o">!</span><span class="nx">isIdentifier</span><span class="p">(</span><span class="nx">statement</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="k">continue</span><span class="p">;</span>
+      <span class="p">}</span>
+      <span class="kd">var</span> <span class="nx">tag</span> <span class="o">=</span> <span class="nx">createTag</span><span class="p">(</span><span class="nx">op</span><span class="p">,</span> <span class="nx">statement</span><span class="p">);</span>
+      <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">tag</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="k">continue</span><span class="p">;</span>
+      <span class="p">}</span>
+      <span class="nx">statements</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nx">sym</span><span class="p">(</span><span class="s1">&#39;ra&#39;</span><span class="p">),</span> <span class="nx">sym</span><span class="p">(</span><span class="nx">tag</span><span class="p">,</span> <span class="s1">&#39;lit&#39;</span><span class="p">)];</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">statements</span><span class="p">;</span>
+
+    <span class="kd">function</span> <span class="nx">createTag</span><span class="p">(</span><span class="nx">op</span><span class="p">,</span> <span class="nx">statement</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">tag</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&lt;&#39;</span><span class="p">];</span>
+      <span class="k">if</span> <span class="p">(</span> <span class="nx">op</span> <span class="o">===</span> <span class="s1">&#39;cl&#39;</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="nx">tag</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="nx">tag</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">statement</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">value</span><span class="p">);</span>
+
+      <span class="kd">var</span> <span class="nx">attrs</span> <span class="o">=</span> <span class="nx">statement</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+      <span class="k">if</span> <span class="p">(</span> <span class="nx">attrs</span> <span class="o">&amp;&amp;</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="nx">tag</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">);</span>
+        <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
+          <span class="k">if</span> <span class="p">(</span> <span class="nx">i</span> <span class="p">)</span> <span class="p">{</span> <span class="nx">tag</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">);</span> <span class="p">}</span>
+          <span class="kd">var</span> <span class="nx">attr</span> <span class="o">=</span> <span class="nx">attrs</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+          <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isIdentifier</span><span class="p">(</span><span class="nx">attr</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">||</span> <span class="o">!</span><span class="nx">isLiteral</span><span class="p">(</span><span class="nx">attr</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span><span class="p">;</span>
+          <span class="p">}</span>
+          <span class="nx">tag</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">attr</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span><span class="p">,</span> <span class="s1">&#39;=&quot;&#39;</span><span class="p">);</span>
+          <span class="nx">tag</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">attr</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">value</span><span class="p">));</span>
+          <span class="nx">tag</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">);</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+
+      <span class="k">if</span> <span class="p">(</span> <span class="nx">statement</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="nx">tag</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s1">&#39; /&#39;</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="nx">tag</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s1">&#39;&gt;&#39;</span><span class="p">);</span>
+      <span class="k">return</span> <span class="nx">tag</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">);</span>
+    <span class="p">}</span>
   <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>We can combine sequences of raw output so long as they're
 encapsulating literal values</p></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">mergeRawLiteralOutput</span><span class="p">(</span><span class="nx">statements</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">statements</span><span class="p">;</span>
+    <span class="k">return</span> <span class="nx">processStatementGroups</span><span class="p">(</span><span class="nx">statements</span><span class="p">,</span> <span class="s1">&#39;ra&#39;</span><span class="p">,</span> <span class="nx">processGroup</span><span class="p">);</span>
+
+    <span class="kd">function</span> <span class="nx">processGroup</span><span class="p">(</span><span class="nx">raStatements</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="p">,</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">[];</span>
+      <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">raStatements</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">statement</span> <span class="o">=</span> <span class="nx">raStatements</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
+          <span class="p">,</span> <span class="nx">output</span> <span class="o">=</span> <span class="nx">statement</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+        <span class="k">if</span> <span class="p">(</span> <span class="nx">isLiteral</span><span class="p">(</span><span class="nx">output</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+          <span class="nx">buffer</span> <span class="o">=</span> <span class="nx">buffer</span> <span class="o">+</span> <span class="nx">stringify</span><span class="p">(</span><span class="nx">output</span><span class="p">.</span><span class="nx">value</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">else</span> <span class="p">{</span>
+          <span class="nx">processBuffer</span><span class="p">();</span>
+          <span class="nx">result</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">statement</span><span class="p">);</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+      <span class="nx">processBuffer</span><span class="p">();</span>
+      <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+
+      <span class="kd">function</span> <span class="nx">processBuffer</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">buffer</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span>
+          <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">push</span><span class="p">([</span><span class="nx">sym</span><span class="p">(</span><span class="s1">&#39;ra&#39;</span><span class="p">),</span> <span class="nx">sym</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="s1">&#39;lit&#39;</span><span class="p">)]);</span>
+        <span class="nx">buffer</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
   <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>We can roll up a single nested for loop into a containing for
 loop so that they share the same context</p></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">rollupForLoops</span><span class="p">(</span><span class="nx">statements</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">statements</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
       <span class="kd">var</span> <span class="nx">statement</span> <span class="o">=</span> <span class="nx">statements</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
-      <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isForLoop</span><span class="p">(</span><span class="nx">statement</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isStatementOperator</span><span class="p">(</span><span class="nx">statement</span><span class="p">,</span> <span class="s1">&#39;fr&#39;</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
         <span class="k">continue</span><span class="p">;</span>
       <span class="p">}</span>
 
@@ -187,7 +277,7 @@ loop so that they share the same context</p></div></div><div class="code"><div c
       <span class="p">}</span>
 
       <span class="kd">var</span> <span class="nx">nested</span> <span class="o">=</span> <span class="nx">forStatements</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
-      <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isForLoop</span><span class="p">(</span><span class="nx">nested</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isStatementOperator</span><span class="p">(</span><span class="nx">nested</span><span class="p">,</span> <span class="s1">&#39;fr&#39;</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
         <span class="k">continue</span><span class="p">;</span>
       <span class="p">}</span>
 
@@ -200,11 +290,11 @@ loop so that they share the same context</p></div></div><div class="code"><div c
     <span class="k">return</span> <span class="nx">statements</span><span class="p">;</span>
   <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>If the condition is 'not' we can roll up its argument
 and flip the branches.</p></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">flipConditionals</span><span class="p">(</span><span class="nx">node</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isOperator</span><span class="p">(</span><span class="nx">node</span><span class="p">,</span> <span class="s1">&#39;cn&#39;</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isStatementOperator</span><span class="p">(</span><span class="nx">node</span><span class="p">,</span> <span class="s1">&#39;cn&#39;</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
       <span class="k">return</span> <span class="nx">node</span><span class="p">;</span>
     <span class="p">}</span>
     <span class="kd">var</span> <span class="nx">cond</span> <span class="o">=</span> <span class="nx">node</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
-    <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isOperator</span><span class="p">(</span><span class="nx">cond</span><span class="p">,</span> <span class="s1">&#39;no&#39;</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isStatementOperator</span><span class="p">(</span><span class="nx">cond</span><span class="p">,</span> <span class="s1">&#39;no&#39;</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
       <span class="k">return</span> <span class="nx">node</span><span class="p">;</span>
     <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Make it so</p></div></div><div class="code"><div class="wrapper">    <span class="nx">node</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nx">cond</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
     <span class="kd">var</span> <span class="nx">tmp</span> <span class="o">=</span> <span class="nx">node</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
@@ -213,12 +303,12 @@ and flip the branches.</p></div></div><div class="code"><div class="wrapper">  <
     <span class="k">return</span> <span class="nx">node</span><span class="p">;</span>
   <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>if the operator is 'not' and it contains an equality,
 then we can flip the equality operator and roll it up</p></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">flipEquality</span><span class="p">(</span><span class="nx">node</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isOperator</span><span class="p">(</span><span class="nx">node</span><span class="p">,</span> <span class="s1">&#39;no&#39;</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isStatementOperator</span><span class="p">(</span><span class="nx">node</span><span class="p">,</span> <span class="s1">&#39;no&#39;</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
       <span class="k">return</span> <span class="nx">node</span><span class="p">;</span>
     <span class="p">}</span>
 
     <span class="kd">var</span> <span class="nx">child</span> <span class="o">=</span> <span class="nx">node</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-      <span class="p">,</span> <span class="nx">op</span> <span class="o">=</span> <span class="nx">isOperator</span><span class="p">(</span><span class="nx">child</span><span class="p">)</span>
+      <span class="p">,</span> <span class="nx">op</span> <span class="o">=</span> <span class="nx">isStatementOperator</span><span class="p">(</span><span class="nx">child</span><span class="p">)</span>
       <span class="p">,</span> <span class="nx">newOp</span> <span class="o">=</span> <span class="nx">inverseOperators</span><span class="p">[</span><span class="nx">op</span><span class="p">];</span>
 
     <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">op</span> <span class="o">||</span> <span class="o">!</span><span class="nx">newOp</span> <span class="p">)</span> <span class="p">{</span>
@@ -230,15 +320,15 @@ then we can flip the equality operator and roll it up</p></div></div><div class=
   <span class="p">}</span>
 
   <span class="kd">function</span> <span class="nx">promoteNot</span><span class="p">(</span><span class="nx">node</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">op</span> <span class="o">=</span> <span class="nx">isOperator</span><span class="p">(</span><span class="nx">node</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;an&#39;</span><span class="p">,</span> <span class="s1">&#39;or&#39;</span><span class="p">]);</span>
+    <span class="kd">var</span> <span class="nx">op</span> <span class="o">=</span> <span class="nx">isStatementOperator</span><span class="p">(</span><span class="nx">node</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;an&#39;</span><span class="p">,</span> <span class="s1">&#39;or&#39;</span><span class="p">]);</span>
     <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">op</span> <span class="p">)</span> <span class="p">{</span>
       <span class="k">return</span> <span class="nx">node</span><span class="p">;</span>
     <span class="p">}</span>
 
     <span class="kd">var</span> <span class="nx">left</span> <span class="o">=</span> <span class="nx">node</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-      <span class="p">,</span> <span class="nx">leftOp</span> <span class="o">=</span> <span class="nx">isOperator</span><span class="p">(</span><span class="nx">left</span><span class="p">,</span> <span class="s1">&#39;no&#39;</span><span class="p">)</span>
+      <span class="p">,</span> <span class="nx">leftOp</span> <span class="o">=</span> <span class="nx">isStatementOperator</span><span class="p">(</span><span class="nx">left</span><span class="p">,</span> <span class="s1">&#39;no&#39;</span><span class="p">)</span>
       <span class="p">,</span> <span class="nx">right</span> <span class="o">=</span> <span class="nx">node</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-      <span class="p">,</span> <span class="nx">rightOp</span> <span class="o">=</span> <span class="nx">isOperator</span><span class="p">(</span><span class="nx">right</span><span class="p">,</span> <span class="s1">&#39;no&#39;</span><span class="p">);</span>
+      <span class="p">,</span> <span class="nx">rightOp</span> <span class="o">=</span> <span class="nx">isStatementOperator</span><span class="p">(</span><span class="nx">right</span><span class="p">,</span> <span class="s1">&#39;no&#39;</span><span class="p">);</span>
 
     <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">leftOp</span> <span class="o">||</span> <span class="o">!</span><span class="nx">rightOp</span> <span class="p">)</span> <span class="p">{</span>
       <span class="k">return</span> <span class="nx">node</span><span class="p">;</span>
@@ -246,9 +336,6 @@ then we can flip the equality operator and roll it up</p></div></div><div class=
 
     <span class="kd">var</span> <span class="nx">newOp</span> <span class="o">=</span> <span class="nx">op</span> <span class="o">===</span> <span class="s1">&#39;an&#39;</span> <span class="o">&amp;&amp;</span> <span class="s1">&#39;or&#39;</span> <span class="o">||</span> <span class="s1">&#39;an&#39;</span><span class="p">;</span>
     <span class="k">return</span> <span class="p">[</span> <span class="nx">sym</span><span class="p">(</span><span class="s1">&#39;no&#39;</span><span class="p">,</span> <span class="nx">left</span><span class="p">),</span> <span class="p">[</span><span class="nx">sym</span><span class="p">(</span><span class="nx">newOp</span><span class="p">,</span> <span class="nx">node</span><span class="p">),</span> <span class="nx">left</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nx">right</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="p">];</span>
-  <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>If we're an HTML tag with only literal content then we can be
-converted to a raw output</p></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">convertLiteralHTML</span><span class="p">(</span><span class="nx">node</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">node</span><span class="p">;</span>
   <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>convert all symbol placeholders into symbol table entries for the
 resulting output JSON</p></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">replaceSymbols</span><span class="p">(</span><span class="nx">node</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">node</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
@@ -287,24 +374,30 @@ to the groupCallback function for replacement.</p></div></div><div class="code">
   <span class="kd">var</span> <span class="nx">wasMatch</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">start</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
   <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">statements</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">statement</span> <span class="o">=</span> <span class="nx">statements</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
-    <span class="k">if</span> <span class="p">(</span> <span class="nx">isOperator</span><span class="p">(</span><span class="nx">statement</span><span class="p">,</span> <span class="nx">op</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="nx">isStatementOperator</span><span class="p">(</span><span class="nx">statement</span><span class="p">,</span> <span class="nx">op</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
       <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">wasMatch</span> <span class="p">)</span> <span class="p">{</span>
         <span class="nx">start</span> <span class="o">=</span> <span class="nx">i</span><span class="p">;</span>
         <span class="nx">wasMatch</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
       <span class="p">}</span>
     <span class="p">}</span>
     <span class="k">else</span> <span class="p">{</span>
-      <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">wasMatch</span> <span class="p">)</span> <span class="p">{</span> <span class="k">continue</span><span class="p">;</span> <span class="p">}</span>
+      <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">wasMatch</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="k">continue</span><span class="p">;</span>
+      <span class="p">}</span>
       <span class="nx">wasMatch</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
       <span class="nx">processGroup</span><span class="p">(</span><span class="nx">start</span><span class="p">,</span> <span class="nx">i</span><span class="p">);</span>
     <span class="p">}</span>
   <span class="p">}</span>
-  <span class="k">if</span> <span class="p">(</span> <span class="nx">wasMatch</span> <span class="p">)</span> <span class="p">{</span> <span class="nx">processGroup</span><span class="p">(</span><span class="nx">start</span><span class="p">,</span> <span class="nx">i</span><span class="p">);</span> <span class="p">}</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="nx">wasMatch</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="nx">processGroup</span><span class="p">(</span><span class="nx">start</span><span class="p">,</span> <span class="nx">i</span><span class="p">);</span>
+  <span class="p">}</span>
   <span class="k">return</span> <span class="nx">statements</span><span class="p">;</span>
 
   <span class="kd">function</span> <span class="nx">processGroup</span><span class="p">(</span><span class="nx">start</span><span class="p">,</span> <span class="nx">end</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">end</span> <span class="o">-</span> <span class="nx">start</span><span class="p">;</span>
-    <span class="k">if</span> <span class="p">(</span> <span class="nx">len</span> <span class="o">===</span> <span class="mi">1</span> <span class="p">)</span> <span class="p">{</span> <span class="k">return</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="nx">len</span> <span class="o">===</span> <span class="mi">1</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
 
     <span class="kd">var</span> <span class="nx">subset</span> <span class="o">=</span> <span class="nx">statements</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="nx">start</span><span class="p">,</span> <span class="nx">end</span><span class="p">)</span>
       <span class="p">,</span> <span class="nx">args</span> <span class="o">=</span> <span class="p">[</span><span class="nx">start</span><span class="p">,</span> <span class="nx">len</span><span class="p">].</span><span class="nx">concat</span><span class="p">(</span><span class="nx">groupCallback</span><span class="p">(</span><span class="nx">subset</span><span class="p">));</span>
@@ -313,7 +406,9 @@ to the groupCallback function for replacement.</p></div></div><div class="code">
 <span class="p">}</span>
 
 <span class="kd">function</span> <span class="nx">argumentsSignature</span><span class="p">(</span><span class="nx">argNames</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">argNames</span> <span class="o">||</span> <span class="o">!</span><span class="nx">argNames</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="p">;</span> <span class="p">}</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">argNames</span> <span class="o">||</span> <span class="o">!</span><span class="nx">argNames</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
+  <span class="p">}</span>
   <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">[];</span>
   <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">argNames</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
     <span class="nx">result</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">argNames</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">value</span><span class="p">);</span>

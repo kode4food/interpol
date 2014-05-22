@@ -159,7 +159,7 @@ module.exports = (function() {
         peg$c112 = { type: "literal", value: "\"\"\"", description: "\"\\\"\\\"\\\"\"" },
         peg$c113 = function(c) { return c; },
         peg$c114 = function(chars) {
-              return sym(chars.join(''), 'auto');
+              return symAutoInterpolate(chars.join(''));
             },
         peg$c115 = "'''",
         peg$c116 = { type: "literal", value: "'''", description: "\"'''\"" },
@@ -171,7 +171,7 @@ module.exports = (function() {
         peg$c120 = function() { return sym('', 'lit'); },
         peg$c121 = "'",
         peg$c122 = { type: "literal", value: "'", description: "\"'\"" },
-        peg$c123 = function(c) { return sym(c.join(''), 'auto'); },
+        peg$c123 = function(c) { return symAutoInterpolate(c.join('')); },
         peg$c124 = function(c) { return sym(c.join(''), 'lit'); },
         peg$c125 = /^[^"\\]/,
         peg$c126 = { type: "class", value: "[^\"\\\\]", description: "[^\"\\\\]" },
@@ -239,7 +239,7 @@ module.exports = (function() {
                 results.push.apply(results, statements[i][0]);
                 var ws = statements[i][1];
                 if ( ws ) {
-                  results.push([sym('ou'), sym(ws)]);
+                  results.push([sym('ou'), sym(ws, 'lit')]);
                 }
               }
               return stmts(results);
@@ -6837,6 +6837,7 @@ module.exports = (function() {
 
       var parser = require('../lib/parser')
         , buildBinaryChain = parser.buildBinaryChain
+        , symAutoInterpolate = parser.symAutoInterpolate
         , isAutoInterpolated = parser.isAutoInterpolated
         , isIdentifier = parser.isIdentifier
         , sym = parser.sym
