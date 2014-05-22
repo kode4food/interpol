@@ -259,7 +259,7 @@ module.exports = (function() {
         peg$c185 = "-->",
         peg$c186 = { type: "literal", value: "-->", description: "\"-->\"" },
         peg$c187 = function(comment) {
-              return [sym('ct'), sym(comment.join(''))];
+              return [sym('ct'), sym(comment.join(''), 'lit')];
             },
         peg$c188 = "<!",
         peg$c189 = { type: "literal", value: "<!", description: "\"<!\"" },
