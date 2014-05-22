@@ -221,9 +221,7 @@ that aren't required.</p>
 <li><p><strong>requiredCount must be a Number.</strong><br/>(the number of arguments that are required)</p></li>
 <li><p><strong>defaultArgs must be an Array.</strong><br/>(default values for the rest of the arguments)</p></li>
 </ul></div></div><div class="code"><div class="wrapper"><span class="kd">function</span> <span class="nx">configure</span><span class="p">(</span><span class="nx">func</span><span class="p">,</span> <span class="nx">requiredCount</span><span class="p">,</span> <span class="nx">defaultArgs</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">required</span> <span class="o">=</span> <span class="p">[];</span>
-  <span class="nx">required</span><span class="p">.</span><span class="nx">length</span> <span class="o">=</span> <span class="nx">requiredCount</span><span class="p">;</span>
-  <span class="kd">var</span> <span class="nx">argTemplate</span> <span class="o">=</span> <span class="nx">required</span><span class="p">.</span><span class="nx">concat</span><span class="p">(</span><span class="nx">defaultArgs</span><span class="p">);</span>
+  <span class="kd">var</span> <span class="nx">argTemplate</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="nx">requiredCount</span><span class="p">).</span><span class="nx">concat</span><span class="p">(</span><span class="nx">defaultArgs</span><span class="p">);</span>
   <span class="k">return</span> <span class="nx">configuredWrapper</span><span class="p">;</span>
 
   <span class="kd">function</span> <span class="nx">configuredWrapper</span><span class="p">()</span> <span class="p">{</span>

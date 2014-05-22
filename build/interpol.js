@@ -2186,9 +2186,7 @@ function bless(func) {
  */
 
 function configure(func, requiredCount, defaultArgs) {
-  var required = [];
-  required.length = requiredCount;
-  var argTemplate = required.concat(defaultArgs);
+  var argTemplate = new Array(requiredCount).concat(defaultArgs);
   return configuredWrapper;
 
   function configuredWrapper() {
