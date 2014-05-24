@@ -6840,7 +6840,6 @@ module.exports = (function() {
         , symAutoInterpolate = parser.symAutoInterpolate
         , isAutoInterpolated = parser.isAutoInterpolated
         , isIdentifier = parser.isIdentifier
-        , sym = parser.sym
         , stmts = parser.stmts;
 
       function sym(value, type) {
