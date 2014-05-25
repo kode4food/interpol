@@ -279,7 +279,8 @@ module.exports = interpol;
 "use strict";
 
 var util = require('./util')
-  , isArray = util.isArray;
+  , isArray = util.isArray
+  , objectKeys = util.objectKeys;
 
 /** 
  * Basic Object Matcher to support the `like` operator.
@@ -317,9 +318,72 @@ function isMatchingObject(template, obj) {
   return true;
 }
 
+/**
+ * Compiled matcher, for when the template has been defined as a literal.
+ *
+ * @param {Mixed} template the Template to match against
+ */
+
+function buildMatcher(template) {
+  if ( typeof template !== 'object' || template === null ) {
+    return valueMatcher;
+  }
+  if ( isArray(template) ) {
+    return buildArrayMatcher(template);
+  }
+  return buildObjectMatcher(template);
+
+  function valueMatcher(obj) {
+    return template == obj;
+  }
+}
+
+function buildArrayMatcher(template) {
+  var matchers = []
+    , mlen = template.length;
+
+  for ( var i = 0; i < mlen; i++ ) {
+    matchers.push(buildMatcher(template[i]));
+  }
+  return arrayMatcher;
+
+  function arrayMatcher(obj) {
+    if ( template === obj ) { return true; }
+    if ( !isArray(obj) || mlen !== obj.length ) { return false; }
+    for ( var i = 0; i < mlen; i++ ) {
+      if ( !matchers[i](obj[i]) ) {
+        return false;
+      }
+    }
+    return true;
+  }
+}
+
+function buildObjectMatcher(template) {
+  var matchers = []
+    , keys = objectKeys(template)
+    , mlen = keys.length;
+
+  for ( var i = 0; i < mlen; i++ ) {
+    matchers.push(buildMatcher(template[keys[i]]));
+  }
+  return objectMatcher;
+
+  function objectMatcher(obj) {
+    if ( template === obj ) { return true; }
+    if ( typeof obj !== 'object' || obj === null ) { return false; }
+    for ( var i = 0; i < mlen; i++ ) {
+      if ( !matchers[i](obj[keys[i]]) ) {
+        return false;
+      }
+    }
+    return true;
+  }
+}
+
 // Exported Functions
 exports.isMatchingObject = isMatchingObject;
-
+exports.buildMatcher = buildMatcher;
 },{"./util":12}],5:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
@@ -802,7 +866,8 @@ var isArray = util.isArray
   , createStaticMixin = util.createStaticMixin
   , stringify = util.stringify
   , buildTemplate = format.buildTemplate
-  , isMatchingObject = match.isMatchingObject;
+  , isMatchingObject = match.isMatchingObject
+  , buildMatcher = match.buildMatcher;
 
 var TemplateCacheMax = 256;
 
@@ -1594,12 +1659,16 @@ function buildRuntime(parseOutput, localOptions) {
   // generate a match evaluator
   function createMatchEvaluator(leftNode, rightNode) {
     var $1 = createEvaluator(leftNode)
-      , $2 = createEvaluator(rightNode)
-      , type = getBinaryType($1, $2);
+      , $2 = createEvaluator(rightNode);
 
-     return [null, maLeft, maRight, maBoth][type] || isMatchingObject($2, $1);
+    switch ( getBinaryType($1, $2) ) {
+      case 0: return isMatchingObject($2, $1);
+      case 1: $2 = buildMatcher($2); return maLeft;
+      case 2: return maRight;
+      case 3: return maBoth;
+    }
 
-    function maLeft(c, w) { return isMatchingObject($2, $1(c, w)); }
+    function maLeft(c, w) { return $2($1(c, w)); }
     function maRight(c, w) { return isMatchingObject($2(c, w), $1); }
     function maBoth(c, w) { return isMatchingObject($2(c, w), $1(c, w)); }
   }
