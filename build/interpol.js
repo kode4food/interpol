@@ -384,6 +384,7 @@ function buildObjectMatcher(template) {
 // Exported Functions
 exports.isMatchingObject = isMatchingObject;
 exports.buildMatcher = buildMatcher;
+
 },{"./util":12}],5:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
@@ -904,6 +905,7 @@ function buildRuntime(parseOutput, localOptions) {
     ou: createOutputEvaluator,
     ra: createRawOutputEvaluator,
     fr: createForEvaluator,
+    us: createUsingEvaluator,
     cn: createConditionalEvaluator,
     or: createOrEvaluator,
     an: createAndEvaluator,
@@ -1590,6 +1592,20 @@ function buildRuntime(parseOutput, localOptions) {
           return { name: name, value: data[name] };
         }
       }
+    }
+  }
+
+  // generate an evaluator that borrows the specified expression
+  // as the block's new context for locals (remaining immutable)
+  function createUsingEvaluator(exprNode, statementNodes) {
+    var $1 = createEvaluator(exprNode)
+      , $2 = createStatementsEvaluator(statementNodes);
+
+    return usingEvaluator;
+
+    function usingEvaluator(ctx, writer) {
+      var newCtx = mixin(extendContext(ctx), $1(ctx, writer));
+      $2(newCtx, writer);
     }
   }
 

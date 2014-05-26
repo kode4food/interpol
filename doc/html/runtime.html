@@ -58,6 +58,7 @@
     <span class="nx">ou</span><span class="o">:</span> <span class="nx">createOutputEvaluator</span><span class="p">,</span>
     <span class="nx">ra</span><span class="o">:</span> <span class="nx">createRawOutputEvaluator</span><span class="p">,</span>
     <span class="nx">fr</span><span class="o">:</span> <span class="nx">createForEvaluator</span><span class="p">,</span>
+    <span class="nx">us</span><span class="o">:</span> <span class="nx">createUsingEvaluator</span><span class="p">,</span>
     <span class="nx">cn</span><span class="o">:</span> <span class="nx">createConditionalEvaluator</span><span class="p">,</span>
     <span class="nx">or</span><span class="o">:</span> <span class="nx">createOrEvaluator</span><span class="p">,</span>
     <span class="nx">an</span><span class="o">:</span> <span class="nx">createAndEvaluator</span><span class="p">,</span>
@@ -643,6 +644,17 @@ expression without escaping</p></div></div><div class="code"><div class="wrapper
           <span class="k">return</span> <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">value</span><span class="o">:</span> <span class="nx">data</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="p">};</span>
         <span class="p">}</span>
       <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>generate an evaluator that borrows the specified expression
+as the block's new context for locals (remaining immutable)</p></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">createUsingEvaluator</span><span class="p">(</span><span class="nx">exprNode</span><span class="p">,</span> <span class="nx">statementNodes</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">$1</span> <span class="o">=</span> <span class="nx">createEvaluator</span><span class="p">(</span><span class="nx">exprNode</span><span class="p">)</span>
+      <span class="p">,</span> <span class="nx">$2</span> <span class="o">=</span> <span class="nx">createStatementsEvaluator</span><span class="p">(</span><span class="nx">statementNodes</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="nx">usingEvaluator</span><span class="p">;</span>
+
+    <span class="kd">function</span> <span class="nx">usingEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">newCtx</span> <span class="o">=</span> <span class="nx">mixin</span><span class="p">(</span><span class="nx">extendContext</span><span class="p">(</span><span class="nx">ctx</span><span class="p">),</span> <span class="nx">$1</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">));</span>
+      <span class="nx">$2</span><span class="p">(</span><span class="nx">newCtx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">);</span>
     <span class="p">}</span>
   <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>generate a conditional evaluator (if/else or ternary)</p></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">createConditionalEvaluator</span><span class="p">(</span><span class="nx">conditionNode</span><span class="p">,</span> <span class="nx">trueNodes</span><span class="p">,</span> <span class="nx">falseNodes</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">$1</span> <span class="o">=</span> <span class="nx">createEvaluator</span><span class="p">(</span><span class="nx">conditionNode</span><span class="p">)</span>
