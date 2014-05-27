@@ -377,8 +377,8 @@ module.exports = (function() {
               }
               return [path];
             },
-        peg$c238 = function(op, expr, stmts) {
-              return [sym(op), expr, stmts];
+        peg$c238 = function(op, exprs, stmts) {
+              return [sym(op), exprs, stmts];
             },
         peg$c239 = function(op, ranges, stmt) {
               return [sym(op), ranges, stmts];
@@ -4697,7 +4697,7 @@ module.exports = (function() {
       if (s1 !== peg$FAILED) {
         s2 = peg$parse_();
         if (s2 !== peg$FAILED) {
-          s3 = peg$parseinterpolation();
+          s3 = peg$parseelemList();
           if (s3 !== peg$FAILED) {
             s4 = peg$parsestatementsTail();
             if (s4 !== peg$FAILED) {

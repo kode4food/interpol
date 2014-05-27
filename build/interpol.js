@@ -1597,15 +1597,23 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate an evaluator that borrows the specified expression
   // as the block's new context for locals (remaining immutable)
-  function createUsingEvaluator(exprNode, statementNodes) {
-    var $1 = createEvaluator(exprNode)
-      , $2 = createStatementsEvaluator(statementNodes);
+  function createUsingEvaluator(exprsNode, statementNodes) {
+    var exprs = [createSelfEvaluator()].concat(wrapArrayEvaluators(exprsNode))
+      , elen = exprs.length
+      , statements = createStatementsEvaluator(statementNodes);
 
     return usingEvaluator;
 
     function usingEvaluator(ctx, writer) {
-      var newCtx = mixin(extendContext(ctx), $1(ctx, writer));
-      $2(newCtx, writer);
+      var newCtx = extendContext(ctx)
+        , args = [];
+
+      for ( var i = 0; i < elen; i++ ) {
+        args[i] = exprs[i](newCtx, writer);
+      }
+
+      mixin.apply(null, args);
+      statements(newCtx, writer);
     }
   }
 
