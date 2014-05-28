@@ -1595,22 +1595,17 @@ function buildRuntime(parseOutput, localOptions) {
     }
   }
 
-  // generate an evaluator that borrows the specified expression
+  // generate an evaluator that borrows the specified expressions
   // as the block's new context for locals (remaining immutable)
   function createUsingEvaluator(exprsNode, statementNodes) {
-    var exprs = [createSelfEvaluator()].concat(wrapArrayEvaluators(exprsNode))
-      , elen = exprs.length
+    var exprs = createArrayEvaluator(exprsNode)
       , statements = createStatementsEvaluator(statementNodes);
 
     return usingEvaluator;
 
     function usingEvaluator(ctx, writer) {
       var newCtx = extendContext(ctx)
-        , args = [];
-
-      for ( var i = 0; i < elen; i++ ) {
-        args[i] = exprs[i](newCtx, writer);
-      }
+        , args = [newCtx].concat(exprs(newCtx, writer));
 
       mixin.apply(null, args);
       statements(newCtx, writer);
