@@ -230,7 +230,7 @@ end
 *Note:* The `unless` keyword is syntactic sugar that can be used in place of `if not`.  Its purpose is to implicitly negate the condition.  So `if not happy` becomes `unless happy`.
 
 ### The 'Using' Statement
-* The 'using' statement creates a new scope where the properties of any specified expressions are mixed in and made available as local variables.  The provided expressions are evaluated from left to right.  Any properties introduced will clobber identically named ones in previous expressions.
+The 'using' statement creates a new scope where the properties of any specified expressions are mixed in and made available as local variables.  The provided expressions are evaluated from left to right.  Any properties introduced will clobber identically named ones in previous expressions.
 
 For example, `name` and `age` may be taken from the `person` instance, while summary might be taken from the `profile` instance:
 
@@ -453,10 +453,10 @@ The `like` operator was introduced to support inline guards, but is generally us
 Compatibility is mostly as you would expect, with one exception.  If the template contains an Object, only the properties defined in that Object are checked.  If the left operand has additional properties, those are ignored.
 
 ### And
-The and `and` operator performs a boolean *and* between the two operands, short circuiting if the left operand does not evaluate to JavaScript *truthy*.
+The `and` operator performs a boolean *and* between the two operands, short circuiting if the left operand does not evaluate to JavaScript *truthy*.
 
 ### Or
-The or `or` operator performs a boolean *or* between the two operands, short circuiting if the left operand evaluates to JavaScript *truthy*.
+The `or` operator performs a boolean *or* between the two operands, short circuiting if the left operand evaluates to JavaScript *truthy*.
 
 ### Conditional (Ternary)
 The conditional or ternary operator works just as you would expect from Python.  It will evaluate the first operand if the condition is met (or not met in the case of `unless`), otherwise it will return the evaluation of the third operand.
