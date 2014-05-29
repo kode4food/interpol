@@ -1,5 +1,8 @@
 # Change History
 
+## Version 0.3.16 - HTML Attributes
+* Now dealing with HTML Attributes in a more HTML5-friendly way.  If the value is a boolean, either render the attribute name or omit it completely.
+
 ## Version 0.3.15 - Browserify Fix
 * Browserify version wasn't being built correctly.
 

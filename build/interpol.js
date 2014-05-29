@@ -194,7 +194,7 @@ var isArray = util.isArray
   , isInterpolJSON = util.isInterpolJSON
   , buildRuntime = runtime.buildRuntime;
 
-var CURRENT_VERSION = "0.3.15"
+var CURRENT_VERSION = "0.3.16"
   , compileModule = null;
 
 var slice = Array.prototype.slice;
@@ -865,7 +865,6 @@ var isArray = util.isArray
   , objectKeys = util.objectKeys
   , isInterpolFunction = util.isInterpolFunction
   , createStaticMixin = util.createStaticMixin
-  , stringify = util.stringify
   , buildTemplate = format.buildTemplate
   , isMatchingObject = match.isMatchingObject
   , buildMatcher = match.buildMatcher;
@@ -1406,13 +1405,11 @@ function buildRuntime(parseOutput, localOptions) {
     return selfClose ? selfCloseLiteralEvaluator : openTagLiteralEvaluator;
 
     function selfCloseFuncEvaluator(ctx, writer) {
-      var tagName = stringify(name(ctx, writer));
-      writer.selfCloseElement(tagName, getAttributes(ctx, writer));
+      writer.selfCloseElement(name(ctx, writer), getAttributes(ctx, writer));
     }
 
     function openTagFuncEvaluator(ctx, writer) {
-      var tagName = stringify(name(ctx, writer));
-      writer.startElement(tagName, getAttributes(ctx, writer));
+      writer.startElement(name(ctx, writer), getAttributes(ctx, writer));
     }
 
     function selfCloseLiteralEvaluator(ctx, writer) {
@@ -1434,14 +1431,13 @@ function buildRuntime(parseOutput, localOptions) {
           if ( key === undefined || key === null ) {
             continue;
           }
-          key = stringify(key);
         }
 
         var val = attribute[1];
         if ( typeof val === 'function' ) {
           val = val(ctx, writer);
         }
-        result[key] = stringify(val);
+        result[key] = val;
       }
       return freezeObject(result);
     }
@@ -1455,7 +1451,7 @@ function buildRuntime(parseOutput, localOptions) {
     return name_func ? closeFuncEvaluator : closeLiteralEvaluator;
 
     function closeFuncEvaluator(ctx, writer) {
-      writer.endElement(stringify(name(ctx, writer)));
+      writer.endElement(name(ctx, writer));
     }
 
     function closeLiteralEvaluator(ctx, writer) {
@@ -1489,14 +1485,10 @@ function buildRuntime(parseOutput, localOptions) {
   function createOutputEvaluator(exprNode) {
     var $1 = createEvaluator(exprNode);
 
-    if ( typeof $1 !== 'function' ) {
-      $1 = stringify($1);
-      return outputLiteral;
-    }
-    return outputEvaluator;
+    return typeof $1 !== 'function' ? outputLiteral : outputEvaluator;
 
     function outputEvaluator(ctx, writer) {
-      writer.content(stringify($1(ctx, writer)));
+      writer.content($1(ctx, writer));
     }
 
     function outputLiteral(ctx, writer) {
@@ -2318,6 +2310,7 @@ var interpol = require('../interpol')
   , util = require('../util');
 
 var freezeObject = util.freezeObject
+  , stringify = util.stringify
   , escapeAttribute = util.escapeAttribute
   , escapeContent = util.escapeContent;
 
@@ -2353,24 +2346,32 @@ function createArrayWriter(arr) {
 
   function writeAttributes(attributes) {
     for ( var key in attributes ) {
-      arr.push(" ", key, "=\"", escapeAttribute(attributes[key]), "\"");
+      var val = attributes[key];
+      if ( typeof val !== 'boolean' ) {
+        arr.push(" ", stringify(key), "=\"",
+                 escapeAttribute(stringify(val)), "\"");
+        continue;
+      }
+      if ( val ) {
+        arr.push(" ", stringify(key));
+      }
     }
   }
 
   function startElement(tagName, attributes) {
-    arr.push("<", tagName);
+    arr.push("<", stringify(tagName));
     writeAttributes(attributes);
     arr.push(">");
   }
 
   function selfCloseElement(tagName, attributes) {
-    arr.push("<", tagName);
+    arr.push("<", stringify(tagName));
     writeAttributes(attributes);
     arr.push(" />");
   }
 
   function endElement(tagName) {
-    arr.push("</", tagName, ">");
+    arr.push("</", stringify(tagName), ">");
   }
 
   function comment(content) {
@@ -2378,12 +2379,12 @@ function createArrayWriter(arr) {
   }
 
   function docType(rootElement) {
-    arr.push("<!DOCTYPE ", rootElement, ">");
+    arr.push("<!DOCTYPE ", stringify(rootElement), ">");
   }
 
   function content() {
     for ( var i = 0, len = arguments.length; i < len; i++ ) {
-      arr.push(escapeContent(arguments[i]));
+      arr.push(escapeContent(stringify(arguments[i])));
     }
   }
 

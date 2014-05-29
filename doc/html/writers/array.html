@@ -12,6 +12,7 @@
   <span class="p">,</span> <span class="nx">util</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../util&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">freezeObject</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">freezeObject</span>
+  <span class="p">,</span> <span class="nx">stringify</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">stringify</span>
   <span class="p">,</span> <span class="nx">escapeAttribute</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">escapeAttribute</span>
   <span class="p">,</span> <span class="nx">escapeContent</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">escapeContent</span><span class="p">;</span>
 
@@ -45,24 +46,32 @@ returned when the <code>endRender()</code> function is called.</p>
 
   <span class="kd">function</span> <span class="nx">writeAttributes</span><span class="p">(</span><span class="nx">attributes</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">key</span> <span class="k">in</span> <span class="nx">attributes</span> <span class="p">)</span> <span class="p">{</span>
-      <span class="nx">arr</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="nx">key</span><span class="p">,</span> <span class="s2">&quot;=\&quot;&quot;</span><span class="p">,</span> <span class="nx">escapeAttribute</span><span class="p">(</span><span class="nx">attributes</span><span class="p">[</span><span class="nx">key</span><span class="p">]),</span> <span class="s2">&quot;\&quot;&quot;</span><span class="p">);</span>
+      <span class="kd">var</span> <span class="nx">val</span> <span class="o">=</span> <span class="nx">attributes</span><span class="p">[</span><span class="nx">key</span><span class="p">];</span>
+      <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">val</span> <span class="o">!==</span> <span class="s1">&#39;boolean&#39;</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="nx">arr</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="nx">stringify</span><span class="p">(</span><span class="nx">key</span><span class="p">),</span> <span class="s2">&quot;=\&quot;&quot;</span><span class="p">,</span>
+                 <span class="nx">escapeAttribute</span><span class="p">(</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">val</span><span class="p">)),</span> <span class="s2">&quot;\&quot;&quot;</span><span class="p">);</span>
+        <span class="k">continue</span><span class="p">;</span>
+      <span class="p">}</span>
+      <span class="k">if</span> <span class="p">(</span> <span class="nx">val</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="nx">arr</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="nx">stringify</span><span class="p">(</span><span class="nx">key</span><span class="p">));</span>
+      <span class="p">}</span>
     <span class="p">}</span>
   <span class="p">}</span>
 
   <span class="kd">function</span> <span class="nx">startElement</span><span class="p">(</span><span class="nx">tagName</span><span class="p">,</span> <span class="nx">attributes</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">arr</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="nx">tagName</span><span class="p">);</span>
+    <span class="nx">arr</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="nx">stringify</span><span class="p">(</span><span class="nx">tagName</span><span class="p">));</span>
     <span class="nx">writeAttributes</span><span class="p">(</span><span class="nx">attributes</span><span class="p">);</span>
     <span class="nx">arr</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s2">&quot;&gt;&quot;</span><span class="p">);</span>
   <span class="p">}</span>
 
   <span class="kd">function</span> <span class="nx">selfCloseElement</span><span class="p">(</span><span class="nx">tagName</span><span class="p">,</span> <span class="nx">attributes</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">arr</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="nx">tagName</span><span class="p">);</span>
+    <span class="nx">arr</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="nx">stringify</span><span class="p">(</span><span class="nx">tagName</span><span class="p">));</span>
     <span class="nx">writeAttributes</span><span class="p">(</span><span class="nx">attributes</span><span class="p">);</span>
     <span class="nx">arr</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s2">&quot; /&gt;&quot;</span><span class="p">);</span>
   <span class="p">}</span>
 
   <span class="kd">function</span> <span class="nx">endElement</span><span class="p">(</span><span class="nx">tagName</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">arr</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s2">&quot;&lt;/&quot;</span><span class="p">,</span> <span class="nx">tagName</span><span class="p">,</span> <span class="s2">&quot;&gt;&quot;</span><span class="p">);</span>
+    <span class="nx">arr</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s2">&quot;&lt;/&quot;</span><span class="p">,</span> <span class="nx">stringify</span><span class="p">(</span><span class="nx">tagName</span><span class="p">),</span> <span class="s2">&quot;&gt;&quot;</span><span class="p">);</span>
   <span class="p">}</span>
 
   <span class="kd">function</span> <span class="nx">comment</span><span class="p">(</span><span class="nx">content</span><span class="p">)</span> <span class="p">{</span>
@@ -70,12 +79,12 @@ returned when the <code>endRender()</code> function is called.</p>
   <span class="p">}</span>
 
   <span class="kd">function</span> <span class="nx">docType</span><span class="p">(</span><span class="nx">rootElement</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">arr</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s2">&quot;&lt;!DOCTYPE &quot;</span><span class="p">,</span> <span class="nx">rootElement</span><span class="p">,</span> <span class="s2">&quot;&gt;&quot;</span><span class="p">);</span>
+    <span class="nx">arr</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s2">&quot;&lt;!DOCTYPE &quot;</span><span class="p">,</span> <span class="nx">stringify</span><span class="p">(</span><span class="nx">rootElement</span><span class="p">),</span> <span class="s2">&quot;&gt;&quot;</span><span class="p">);</span>
   <span class="p">}</span>
 
   <span class="kd">function</span> <span class="nx">content</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
-      <span class="nx">arr</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">escapeContent</span><span class="p">(</span><span class="nx">arguments</span><span class="p">[</span><span class="nx">i</span><span class="p">]));</span>
+      <span class="nx">arr</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">escapeContent</span><span class="p">(</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">arguments</span><span class="p">[</span><span class="nx">i</span><span class="p">])));</span>
     <span class="p">}</span>
   <span class="p">}</span>
 

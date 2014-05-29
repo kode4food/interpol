@@ -23,7 +23,6 @@
   <span class="p">,</span> <span class="nx">objectKeys</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">objectKeys</span>
   <span class="p">,</span> <span class="nx">isInterpolFunction</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">isInterpolFunction</span>
   <span class="p">,</span> <span class="nx">createStaticMixin</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">createStaticMixin</span>
-  <span class="p">,</span> <span class="nx">stringify</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">stringify</span>
   <span class="p">,</span> <span class="nx">buildTemplate</span> <span class="o">=</span> <span class="nx">format</span><span class="p">.</span><span class="nx">buildTemplate</span>
   <span class="p">,</span> <span class="nx">isMatchingObject</span> <span class="o">=</span> <span class="nx">match</span><span class="p">.</span><span class="nx">isMatchingObject</span>
   <span class="p">,</span> <span class="nx">buildMatcher</span> <span class="o">=</span> <span class="nx">match</span><span class="p">.</span><span class="nx">buildMatcher</span><span class="p">;</span>
@@ -478,13 +477,11 @@ top-level export context anyway</p></div></div><div class="code"><div class="wra
     <span class="k">return</span> <span class="nx">selfClose</span> <span class="o">?</span> <span class="nx">selfCloseLiteralEvaluator</span> <span class="o">:</span> <span class="nx">openTagLiteralEvaluator</span><span class="p">;</span>
 
     <span class="kd">function</span> <span class="nx">selfCloseFuncEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
-      <span class="kd">var</span> <span class="nx">tagName</span> <span class="o">=</span> <span class="nx">stringify</span><span class="p">(</span><span class="nx">name</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">));</span>
-      <span class="nx">writer</span><span class="p">.</span><span class="nx">selfCloseElement</span><span class="p">(</span><span class="nx">tagName</span><span class="p">,</span> <span class="nx">getAttributes</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">));</span>
+      <span class="nx">writer</span><span class="p">.</span><span class="nx">selfCloseElement</span><span class="p">(</span><span class="nx">name</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">),</span> <span class="nx">getAttributes</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">));</span>
     <span class="p">}</span>
 
     <span class="kd">function</span> <span class="nx">openTagFuncEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
-      <span class="kd">var</span> <span class="nx">tagName</span> <span class="o">=</span> <span class="nx">stringify</span><span class="p">(</span><span class="nx">name</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">));</span>
-      <span class="nx">writer</span><span class="p">.</span><span class="nx">startElement</span><span class="p">(</span><span class="nx">tagName</span><span class="p">,</span> <span class="nx">getAttributes</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">));</span>
+      <span class="nx">writer</span><span class="p">.</span><span class="nx">startElement</span><span class="p">(</span><span class="nx">name</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">),</span> <span class="nx">getAttributes</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">));</span>
     <span class="p">}</span>
 
     <span class="kd">function</span> <span class="nx">selfCloseLiteralEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
@@ -506,14 +503,13 @@ top-level export context anyway</p></div></div><div class="code"><div class="wra
           <span class="k">if</span> <span class="p">(</span> <span class="nx">key</span> <span class="o">===</span> <span class="kc">undefined</span> <span class="o">||</span> <span class="nx">key</span> <span class="o">===</span> <span class="kc">null</span> <span class="p">)</span> <span class="p">{</span>
             <span class="k">continue</span><span class="p">;</span>
           <span class="p">}</span>
-          <span class="nx">key</span> <span class="o">=</span> <span class="nx">stringify</span><span class="p">(</span><span class="nx">key</span><span class="p">);</span>
         <span class="p">}</span>
 
         <span class="kd">var</span> <span class="nx">val</span> <span class="o">=</span> <span class="nx">attribute</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
         <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">val</span> <span class="o">===</span> <span class="s1">&#39;function&#39;</span> <span class="p">)</span> <span class="p">{</span>
           <span class="nx">val</span> <span class="o">=</span> <span class="nx">val</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">);</span>
         <span class="p">}</span>
-        <span class="nx">result</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">=</span> <span class="nx">stringify</span><span class="p">(</span><span class="nx">val</span><span class="p">);</span>
+        <span class="nx">result</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">=</span> <span class="nx">val</span><span class="p">;</span>
       <span class="p">}</span>
       <span class="k">return</span> <span class="nx">freezeObject</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span>
     <span class="p">}</span>
@@ -524,7 +520,7 @@ top-level export context anyway</p></div></div><div class="code"><div class="wra
     <span class="k">return</span> <span class="nx">name_func</span> <span class="o">?</span> <span class="nx">closeFuncEvaluator</span> <span class="o">:</span> <span class="nx">closeLiteralEvaluator</span><span class="p">;</span>
 
     <span class="kd">function</span> <span class="nx">closeFuncEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nx">writer</span><span class="p">.</span><span class="nx">endElement</span><span class="p">(</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">name</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)));</span>
+      <span class="nx">writer</span><span class="p">.</span><span class="nx">endElement</span><span class="p">(</span><span class="nx">name</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">));</span>
     <span class="p">}</span>
 
     <span class="kd">function</span> <span class="nx">closeLiteralEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
@@ -549,14 +545,10 @@ top-level export context anyway</p></div></div><div class="code"><div class="wra
   <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>generate an evaluator that writes the result of an expression</p></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">createOutputEvaluator</span><span class="p">(</span><span class="nx">exprNode</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">$1</span> <span class="o">=</span> <span class="nx">createEvaluator</span><span class="p">(</span><span class="nx">exprNode</span><span class="p">);</span>
 
-    <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">$1</span> <span class="o">!==</span> <span class="s1">&#39;function&#39;</span> <span class="p">)</span> <span class="p">{</span>
-      <span class="nx">$1</span> <span class="o">=</span> <span class="nx">stringify</span><span class="p">(</span><span class="nx">$1</span><span class="p">);</span>
-      <span class="k">return</span> <span class="nx">outputLiteral</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="k">return</span> <span class="nx">outputEvaluator</span><span class="p">;</span>
+    <span class="k">return</span> <span class="k">typeof</span> <span class="nx">$1</span> <span class="o">!==</span> <span class="s1">&#39;function&#39;</span> <span class="o">?</span> <span class="nx">outputLiteral</span> <span class="o">:</span> <span class="nx">outputEvaluator</span><span class="p">;</span>
 
     <span class="kd">function</span> <span class="nx">outputEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nx">writer</span><span class="p">.</span><span class="nx">content</span><span class="p">(</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">$1</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)));</span>
+      <span class="nx">writer</span><span class="p">.</span><span class="nx">content</span><span class="p">(</span><span class="nx">$1</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">));</span>
     <span class="p">}</span>
 
     <span class="kd">function</span> <span class="nx">outputLiteral</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
