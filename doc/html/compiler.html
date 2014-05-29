@@ -77,6 +77,10 @@ meaning that partial definitions can't be interspersed with
 regular statements.  In that case, the logic is assumed too
 complex to make a responsible guess as to the developer's
 intentions.</p></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">hoistPartials</span><span class="p">(</span><span class="nx">statements</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="nx">statements</span><span class="p">.</span><span class="nx">length</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="nx">statements</span><span class="p">;</span>
+    <span class="p">}</span>
+
     <span class="kd">var</span> <span class="nx">partials</span> <span class="o">=</span> <span class="p">[]</span>
       <span class="p">,</span> <span class="nx">others</span> <span class="o">=</span> <span class="p">[];</span>
 
