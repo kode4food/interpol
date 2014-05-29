@@ -1,5 +1,8 @@
 # Change History
 
+## Version 0.3.15 - Browserify Fix
+* Browserify version wasn't being built correctly.
+
 ## Version 0.3.14 - Feature Complete
 * Refactored the parser/compiler and began to introduce optimizations to the JSON representation that is generated.
 

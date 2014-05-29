@@ -12,4 +12,4 @@
 // Browserify build.  It's of no interest to Node.js
 
 require('./standard');
-require('../lib/parser');
+require('../lib/compiler');
