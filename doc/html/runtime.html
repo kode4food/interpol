@@ -647,14 +647,19 @@ expression without escaping</p></div></div><div class="code"><div class="wrapper
     <span class="p">}</span>
   <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>generate an evaluator that borrows the specified expressions
 as the block's new context for locals (remaining immutable)</p></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">createUsingEvaluator</span><span class="p">(</span><span class="nx">exprsNode</span><span class="p">,</span> <span class="nx">statementNodes</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">exprs</span> <span class="o">=</span> <span class="nx">createArrayEvaluator</span><span class="p">(</span><span class="nx">exprsNode</span><span class="p">)</span>
+    <span class="kd">var</span> <span class="nx">exprs</span> <span class="o">=</span> <span class="p">[</span><span class="nx">createSelfEvaluator</span><span class="p">()].</span><span class="nx">concat</span><span class="p">(</span><span class="nx">wrapArrayEvaluators</span><span class="p">(</span><span class="nx">exprsNode</span><span class="p">))</span>
+      <span class="p">,</span> <span class="nx">elen</span> <span class="o">=</span> <span class="nx">exprs</span><span class="p">.</span><span class="nx">length</span>
       <span class="p">,</span> <span class="nx">statements</span> <span class="o">=</span> <span class="nx">createStatementsEvaluator</span><span class="p">(</span><span class="nx">statementNodes</span><span class="p">);</span>
 
     <span class="k">return</span> <span class="nx">usingEvaluator</span><span class="p">;</span>
 
     <span class="kd">function</span> <span class="nx">usingEvaluator</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">)</span> <span class="p">{</span>
       <span class="kd">var</span> <span class="nx">newCtx</span> <span class="o">=</span> <span class="nx">extendContext</span><span class="p">(</span><span class="nx">ctx</span><span class="p">)</span>
-        <span class="p">,</span> <span class="nx">args</span> <span class="o">=</span> <span class="p">[</span><span class="nx">newCtx</span><span class="p">].</span><span class="nx">concat</span><span class="p">(</span><span class="nx">exprs</span><span class="p">(</span><span class="nx">newCtx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">));</span>
+        <span class="p">,</span> <span class="nx">args</span> <span class="o">=</span> <span class="p">[];</span>
+
+      <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">elen</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="nx">args</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="nx">exprs</span><span class="p">[</span><span class="nx">i</span><span class="p">](</span><span class="nx">newCtx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">);</span>
+      <span class="p">}</span>
 
       <span class="nx">mixin</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">args</span><span class="p">);</span>
       <span class="nx">statements</span><span class="p">(</span><span class="nx">newCtx</span><span class="p">,</span> <span class="nx">writer</span><span class="p">);</span>
