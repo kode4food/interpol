@@ -72,6 +72,11 @@ def renderItem(items)
 end
 ```
 
+Partials are first-class elements of Interpol, meaning they can be passed around and assigned to variables.  In certain situations, they are also hoisted to the top of their scope, so you can call them in your code even before they've been defined.
+
+*Note:* When invoked, a partial always returns `undefined`.
+
+#### Guarded Partials
 The definition of a partial can also be 're-opened' to apply guard clauses, or to shadow the partial if no guard clause is provided.  The order in which partials are defined determines the order in which the guard clauses are evaluated, where the most recently defined will be evaluated first.  For example:
 
 ```python
@@ -83,7 +88,7 @@ def renderList(people)
   </ul>
 end
 
-def renderList(people) when !people.length
+def renderList(people) when not people.length
   <b>"There are no people to render!"</b>
 end
 
@@ -92,9 +97,30 @@ renderList(people)
 
 In this case, if `people` was an empty array, the second variation of renderList would be executed.  Otherwise control would fall-through to the first.  If the unguarded version of renderList had been defined last, it would shadow the previous definition, thus short-circuiting its possible evaluation.
 
-Partials are first-class elements of Interpol, meaning they can be passed around and assigned to variables.  In certain situations, they are also hoisted to the top of their scope, so you can call them in your code even before they've been defined.
+#### Inline-Guards
+Interpol supports *very crude* pattern matching capability in Partial Definitions.  This facilitates what are essentially inline-guards.  For example:
 
-*Note:* When invoked, a partial always returns `undefined`.
+```python
+def renderItem(type, name)
+  "This is a %type named %name"
+end
+```
+
+This partial can be extended to deal with specific type values:
+
+```python
+def renderItem("developer", name)
+  <b>"Developers rock! Especially %name"</b>
+end
+```
+
+In this case, no local argument name is bound to the value.  You can simply treat it as discarded.  Under the hood, what is actually happening is something like this:
+
+```python
+def renderItem(self[0], name) when self[0] like "developer"
+  <b>"Developers rock! Especially %name"</b>
+end
+```
 
 ### Importing
 Importing partials and variables in Interpol is similar to Python.  One can either import an entire module as a single variable, or can cherry-pick individual properties.  In all cases, the imported items can be aliased locally.
@@ -201,7 +227,24 @@ else
 end
 ```
 
-*Note:* The `unless` keyword is syntactic sugar that can be used in place of `if !`.  Its purpose is to implicitly negate the condition.  So `if !happy` becomes `unless happy`.
+*Note:* The `unless` keyword is syntactic sugar that can be used in place of `if not`.  Its purpose is to implicitly negate the condition.  So `if not happy` becomes `unless happy`.
+
+### The 'Using' Statement
+* The 'using' statement creates a new scope where the properties of any specified expressions are mixed in and made available as local variables.  The provided expressions are evaluated from left to right.  Any properties introduced will clobber identically named ones in previous expressions.
+
+For example, `name` and `age` may be taken from the `person` instance, while summary might be taken from the `profile` instance:
+
+```python
+def renderPerson(person, profile)
+  using person, profile
+    <div>name</div>
+    <div>age</div>
+    <div>summary</div>
+  end
+end
+```
+
+The 'using' statement may be considered similar to JavaScript's 'with' operator, except for the fact that any `let` assignments within its scope *will not* find their way out of that scope.
 
 ### HTMLish Elements
 HTMLish elements allow HTML tags to be constructed using inlined expressions.  The nicest thing about this is that in many cases, these expressions end up looking *exactly* like normal HTML.  For example:

@@ -1,6 +1,20 @@
 # Change History
 
 ## Version 0.3.14 - Feature Complete
+* Refactored the parser/compiler and began to introduce optimizations to the JSON representation that is generated.
+
+* The 'using' statement has been introduced.  It creates a new scope where the properties of any specified expressions are mixed in and made available as local variables.  For example, `name` and `age` may be taken from the `person` instance, while summary might be taken from the `profile` instance.
+
+```python
+def renderPerson(person, profile)
+  using person, profile
+    <div>name</div>
+    <div>age</div>
+    <div>summary</div>
+  end
+end
+```
+ 
 * The 'array' module has been renamed to 'list'.  The Tuple, Array, and Dictionary distinction is confusing, and completely unnecessary.  So the term 'List' is now preferred.
 
 * For Loops have been extended to support range guards as well as an `else` clause.  You can define an `else` clause for those cases where the for loop finds no matches:

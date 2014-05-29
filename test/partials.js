@@ -92,5 +92,23 @@ exports.partials = nodeunit.testCase({
     test.equal(eval(script, { value: 10, extern: true }), "third 10\n\n");
 
     test.done();
+  },
+
+  "Inline Guards": function (test) {
+    var script = 'partialCall(type, name)\n' +
+                 'def partialCall(type, name)\n' +
+                 '  "%name is a %type"\n' +
+                 'end\n' +
+                 'def partialCall("developer", name)\n' +
+                 '  "%name is awesome!"\n' +
+                 'end';
+
+    test.equal(eval(script, { type: "manager", name: "Bill" }),
+               "Bill is a manager\n\n");
+
+    test.equal(eval(script, { type: "developer", name: "Alice" }),
+               "Alice is awesome!\n\n");
+
+    test.done();
   }
 });
