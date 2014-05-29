@@ -302,7 +302,7 @@ module.exports = (function() {
         peg$c216 = { type: "literal", value: "=", description: "\"=\"" },
         peg$c217 = function(e) { return e; },
         peg$c218 = function(name, value) {
-              return [name, value === null ? sym(null) : value];
+              return [name, value === null ? sym(true, 'lit') : value];
             },
         peg$c219 = "</",
         peg$c220 = { type: "literal", value: "</", description: "\"</\"" },
@@ -405,9 +405,9 @@ module.exports = (function() {
             },
         peg$c249 = function(op, expr, stmt) {
               if ( !op ) {
-                return [sym('cn'), expr, [sym(null)], [stmt]];
+                return [sym('cn'), expr, [sym(null, 'lit')], [stmt]];
               }
-              return [sym('cn'), expr, [stmt], [sym(null)]];
+              return [sym('cn'), expr, [stmt], [sym(null, 'lit')]];
             },
         peg$c250 = function(op, expr, stmts, tail) {
               if ( !op ) {
@@ -422,7 +422,7 @@ module.exports = (function() {
               return [i];
             },
         peg$c253 = function() {
-              return [sym(null)];
+              return [sym(null, 'lit')];
             },
         peg$c254 = function(op, a) {
             return [sym(op), a];
