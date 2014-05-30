@@ -1,7 +1,6 @@
 # Interpol (Templates Sans Facial Hair)
 
 ## Introduction
-
 There are a lot of templating systems out there and they're all similar.  In truth, Interpol isn't so different, which might beg the question:
 
     Why the hell another templating system?
@@ -18,124 +17,121 @@ Its goals *are not* to participate in the member-measuring and micro-optimizatio
   * No desire to be the 'smallest' minified footprint
   * No desire to be the 'fastest' template processor
 
-Interpol will be as *small* and *fast* as possible, but no more, especially if those considerations detract from the aforementioned goal of providing *meaning*.
+Interpol will be as *small* and *fast* as possible, but no more, especially if those considerations would require compromising the aforementioned goal of providing *meaning*.
+
+## We Seek 'Meaning'
+Stuff you write should 'mean' something.  Not only at the time it's written, but years later.  It should also mean something to new eyes.  The arguments for terseness haven't flown since we stopped using punchcards.  So, assuming you know some HTML, take a look at this template and tell me if you can discern its meaning:
 
 ```html
-from string import title
 <html>
-  <head>
-    <title>"a static title"</title>
-  </head>
   <body>
-    "this is a list with %length items" % list
-    <ul>
-    for item in list
-      <li class=item.type id="id-%id" % item>
-        item.name | title
-      </li>
-    end
-    </ul>
+  for person in people when person.active
+    <div class="person">
+      <div class="name"> person.name </div>
+      <div class="address"> person.address </div>
+      <div class="telephone"> person.telephone </div>
+    </div>
+  else
+    <div class="empty">
+      "Nobody to render!"
+    </div>
+  end
   </body>
 </html>
 ```
 
-The only static element on this page was its title, and usually even that isn't static.  So what did we do to escape *it* for static rendering?  We wrapped it in quotes.  The rest of the page was a clean mixture of HTMLish elements and dynamic content.
+In looking at this, you can probably understand why "Nobody to render!" must be quoted.  It's because Interpol focuses on producing the structure and content of dynamic HTML documents.  It's a "path of least resistance" approach that forgoes static content 'escaping' methods such as `{`braces`}`.  Static content is becoming less frequent in a world of localized web apps, so Interpol chooses to shift the resistance in that direction.
 
-I say 'HTMLish' because it's not pure HTML.  The values of attributes are also evaluated.  For example:
-
-```html
-<li class=item.type id="id-%id" % item>
-```
-
-`class=item.type` outputs a class attribute whose value is taken from the item.type property.  `id="id-%" % item.id` outputs an id attribute whose value is interpolated from the item.id property.
-
-That's all well and good, but what about the ability to reuse templates?  Well, to do that you define partials:
+This template is actually completely dynamic, including the HTML tags and attributes. It just so happens that these tags consist of literals, but you could also generate tags based on variables.  For example:
 
 ```html
-from string import title as titleCase
-
-page("a dynamic title", myContent)
-
-def page(title, content)
-  <html>
-    <head>
-      <title>title | titleCase</title>
-    </head>
-    <body>
-      content()
-    </body>
-  </html>
-end
-
-def myContent
-  "this is a list with %length items" % list
-  renderList(list)
-end
-
-def renderList(list)
-  <ul>
-  for item in list
-    renderItem(item)
+<div class="person">
+  for field in ('name', 'address', 'telephone')
+    <div class=field> person[field] </div>
   end
-  </ul>
-end
-
-def renderItem(item)
-  <li class=item.type id="id-%id" % item>
-    item.name | titleCase
-  </li>
-end
+</div>
 ```
 
-What if you use these partials in multiple templates?  Then you can move them out into their own modules, maybe called `layout.int` and `lists.int`.
+Here the `class` attribute of the second div, rather than being a literal string, is retrieved from the field names that are processed.
+
+## Don't Repeat Yourself
+What if you find that you need to the ability to re-use the rendering of people?  Both groups and individuals?  You can break them out into partials:
 
 ```html
-# this is layout.int
-from string import title as titleCase
+<html>
+  <body>
+    renderPeople(people)
+  </body>
+</html>
 
-def page(title, content)
-  <html>
-    <head>
-      <title>title | titleCase</title>
-    </head>
-    <body>
-      content()
-    </body>
-  </html>
-end
-```
-
-```html
-# this is lists.int
-from string import title as titleCase
-
-def renderList(list)
-  <ul>
-  for item in list
-    renderItem(item)
+def renderPeople(people)
+  for person in people when person.active
+    renderPerson(person)
+  else
+    <div class="empty">
+      "Nobody to render!"
+    </div>
   end
-  </ul>
 end
 
-def renderItem(item)
-  <li class=item.type id="id-%id" % item>
-    item.name | titleCase
-  </li>
+def renderPerson(person)
+  <div class="person">
+    for field in ('name', 'address', 'telephone')
+      <div class=field> person[field] </div>
+    end
+  </div>
+end
+```
+
+What if you need to do a special rendering for people who don't want their demographic data presented?  You can add a guarded version of the partial:
+
+```html
+def renderPerson(person) when person.likesPrivacy
+  <div class="person">
+    <div class="name"> person.name </div>
+  </div>
+end
+```
+
+## No, Really, Don't Repeat Yourself
+What if you use these partials in multiple templates?  Then you can move them out into their own module, maybe called `people.int`.
+
+```html
+# this is people.int
+def renderPeople(people)
+  for person in people when person.active
+    renderPerson(person)
+  else
+    <div class="empty">
+      "Nobody to render!"
+    </div>
+  end
+end
+
+def renderPerson(person)
+  <div class="person">
+    for field in ('name', 'address', 'telephone')
+      <div class=field> person[field] </div>
+    end
+  </div>
+end
+
+def renderPerson(person) when person.likesPrivacy
+  <div class="person">
+    <div class="name"> person.name </div>
+  </div>
 end
 ```
 
 And import them like so:
 
 ```html
-from layout import page
-from lists import renderList
-
-page("a dynamic title", myContent)
-
-def myContent
-  "this is a list with %length items" % list
-  renderList(list)
-end
+from people import renderPeople
+<html>
+  <body>
+    renderPeople(people)
+  </body>
+</html>
 ```
 
 Easy as pie!  And your primary template gets right to the point.
