@@ -6,15 +6,19 @@ There are a lot of templating systems out there and they're all similar.  In tru
 
     Why the hell another templating system?
 
-The answer is simple.  I'm sick of looking at a template and feeling as though coding takes a back-seat to presentation.  The two roles seem to have blurred completely in recent years, so why the distinction?  I'm also sick of looking at a template and being unable to read the thing, even if it's one that I wrote yesterday.  That's why I developed Interpol.
+The answer is simple.  I'm sick of looking at a template and being unable to read the thing, even if I wrote it yesterday.  That's why I developed Interpol.
 
 That said, Interpol's goals are modest:
 
-  * Provide easy to read/write templates that operate against JSON data
+  * Provide a templating system where *meaning* takes a front seat
   * Work well in both Node.js and the Browser
-  * Focus on an experience that favors dynamic content creation
 
-This last goal is important because the templates we're creating are often devoid of static content.  So why must we 'escape' into a dynamic content mode using braces or processing instructions?  Why don't we just start in that mode and stay there?
+Its goals *are not* to participate in the member-measuring and micro-optimization that seem to be so important to some developers.  These include:
+
+  * No desire to be the 'smallest' minified footprint
+  * No desire to be the 'fastest' template processor
+
+Interpol will be as *small* and *fast* as possible, but no more, especially if those considerations detract from the aforementioned goal of providing *meaning*.
 
 ```html
 from string import title
