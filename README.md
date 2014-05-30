@@ -10,7 +10,7 @@ The answer is simple.  I'm sick of looking at a template and being unable to rea
 
 That said, Interpol's goals are modest:
 
-  * Provide a templating system where *meaning* takes a front seat
+  * Provide templates where *meaning* takes a front seat
   * Work well in both Node.js and the Browser
 
 Its goals *are not* to participate in the member-measuring and micro-optimization that seem to be so important to some developers.  These include:
