@@ -20,7 +20,7 @@ Also, it *will not* participate in the member-measuring and micro-optimization t
 Interpol will be as *small* and *fast* as possible, but no more, especially if those considerations would require compromising the aforementioned goal of providing *meaning*.
 
 ## We Seek 'Meaning'
-Stuff you write should 'mean' something.  Not only at the time it's written, but years later.  It should also mean something to new eyes.  The arguments for terseness haven't flown since we stopped using punch cards.  So, assuming you know some HTML, take a look at this template and tell me if you can discern its meaning:
+Stuff you write should 'mean' something.  Not only at the time it's written, but years later.  It should also mean something to new eyes.  The arguments for terseness haven't flown since we stopped using punch cards.  So, assuming you know some HTML, take a look at this Interpol template to understand what we suggest by *meaning*:
 
 ```html
 <html>
