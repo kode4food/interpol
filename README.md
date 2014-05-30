@@ -40,7 +40,7 @@ Stuff you write should 'mean' something.  Not only at the time it's written, but
 </html>
 ```
 
-In looking at this, you can probably understand why "Nobody to render!" must be quoted.  It's because Interpol focuses on producing the structure and content of dynamic HTML documents.  It's a "path of least resistance" approach that forgoes static content 'escaping' methods such as `{`braces`}`.  Static content is becoming less frequent in a world of localized web apps, so Interpol chooses to shift the resistance in that direction.
+In looking at this, you can probably understand why "Nobody to render!" must be quoted.  It's because Interpol focuses on producing the structure and content of dynamic HTML documents.  It's a "path of least resistance" approach that forgoes static content 'escaping' methods such as `{` braces `}`.  Static content is becoming less frequent in a world of localized web apps, so Interpol chooses to shift the resistance in that direction.
 
 This template is actually completely dynamic, including the HTML tags and attributes. It just so happens that these tags consist of literals, but you could also generate tags based on variables.  For example:
 
