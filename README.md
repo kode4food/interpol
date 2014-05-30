@@ -12,15 +12,15 @@ That said, Interpol's goals are modest:
   * Provide templates where *meaning* takes a front seat
   * Work well in both Node.js and the Browser
 
-Its goals *are not* to participate in the member-measuring and micro-optimization that seem to be so important to some developers.  These include:
+Also, it *will not* participate in the member-measuring and micro-optimization that seem to be so important to some developers.  Specifically, Interpol has:
 
-  * No desire to be the 'smallest' minified footprint
+  * No desire to have the 'smallest' minified footprint
   * No desire to be the 'fastest' template processor
 
 Interpol will be as *small* and *fast* as possible, but no more, especially if those considerations would require compromising the aforementioned goal of providing *meaning*.
 
 ## We Seek 'Meaning'
-Stuff you write should 'mean' something.  Not only at the time it's written, but years later.  It should also mean something to new eyes.  The arguments for terseness haven't flown since we stopped using punchcards.  So, assuming you know some HTML, take a look at this template and tell me if you can discern its meaning:
+Stuff you write should 'mean' something.  Not only at the time it's written, but years later.  It should also mean something to new eyes.  The arguments for terseness haven't flown since we stopped using punch cards.  So, assuming you know some HTML, take a look at this template and tell me if you can discern its meaning:
 
 ```html
 <html>
