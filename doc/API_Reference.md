@@ -10,10 +10,9 @@ var template = $interpol("'Hello, %!' % name");
 template({ name: 'World' }); //-> Hello, World!
 ```
 
-There are several support structures and functions attached to the `$interpol()` function.  Be default, they are as follows:
+There are several support structures and functions attached to the `$interpol()` function.  By default, they are as follows:
 
   * `VERSION` - The current version of Interpol, represented as a String.
-  * `parser` - The Interpol PEG.js Parser Object.
   * `compile()` - compiles a string template, return a JSON object that can be stored or passed to the `runtime()` function.
   * `runtime()` - converts a pre-compiled JSON object to an Interpol runtime closure.
   * `options{}` - Global Options Object (overridden when calling a compiled tempalte)
