@@ -306,7 +306,7 @@ Expressions are the building blocks of Interpol statements.  This section outlin
 ### Literals
 
 #### Strings
-Interpol provides two string types: Simple Strings and Multi-Line Strings.  Simple Strings are like what you've come to expect in JavaScript.  Multi-Line Strings are an idea taken from Python.  All strings can be delimited using either single `'` or double `"` quotes.
+Interpol provides two string types: Simple Strings and Multi-Line Strings.  Simple Strings are like what you've come to expect in JavaScript.  Multi-Line Strings are an idea taken from Python.  All strings can be delimited using either single `'` or double `"` quotes.  Double-quoted strings are subject to Automatic Interpolation.
 
 ##### Simple Strings
 Simple Strings are a sequence of characters surrounded by either a set of single quotes or a set of double quotes.  Simple strings may not contain NewLines:
@@ -388,7 +388,7 @@ myObject['someProperty']
 ```
 
 ### Function and Partial Binding
-Interpol supports a binding operator `@`.  This is a special unary operator that allows you to perform argument binding on both functions and partials.  This is useful against functions for currying in piped calls.  For Example:
+Interpol supports a binding operator `@`.  This is a special unary operator that allows you to perform argument binding on both functions and partials.  This is useful against functions for construcing piped calls.  For Example:
 
 ```python
 from list import join
@@ -397,7 +397,7 @@ let a = ('joined','with','dashes')
 "Result is %a|j"
 ```
 
-*Note:* For currying, we use a nil placeholder for the first (piped) argument since that will be overridden by the pipe `|` operator.
+*Note:* For piped calls, we use a nil placeholder for the first (piped) argument since that will be overridden by the pipe `|` operator.
 
 Binding is also useful against partials when you want to pass them around for later invocation:
 
