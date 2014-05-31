@@ -55,7 +55,7 @@ This template is actually completely dynamic, including the HTML tags and attrib
 Here the `class` attribute of the second div, rather than being a literal string, is retrieved from the field names that are processed.
 
 ## Don't Repeat Yourself
-What if you find that you need to the ability to re-use the rendering of people?  Both groups and individuals?  You can break them out into partials:
+What if you find that you need the ability to re-use the rendering of people?  Both groups and individuals?  You can break them out into partials:
 
 ```html
 <html>
