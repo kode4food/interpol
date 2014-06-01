@@ -2,7 +2,7 @@
   "name": "interpol",
   "description": "Templates Sans Facial Hair",
   "authors": ["Thomas S. Bradford"],
-  "version": "0.3.16",
+  "version": "0.3.17",
   "main": "build/interpol.min.js",
   "license": "MIT",
   "homepage": "http://www.interpoljs.io/",
@@ -20,7 +20,8 @@
     "bower.json",
     "index.js",
     "package.json",
-    "README.md"
+    "README.md",
+    "build/interpol-debug.js"
   ],
   "dependencies": { },
   "devDependencies": { }

@@ -7,128 +7,134 @@
 <pre><code>Why the hell another templating system?
 </code></pre>
 
-<p>The answer is simple.  I'm sick of looking at a template and feeling as though coding takes a back-seat to presentation.  The two roles seem to have blurred completely in recent years, so why the distinction?  I'm also sick of looking at a template and being unable to read the thing, even if it's one that I wrote yesterday.  That's why I developed Interpol.</p>
+<p>The answer is simple.  I'm sick of looking at a template and being unable to read the thing, even if I wrote it yesterday.  That's why I developed Interpol.</p>
 
-<p>That said, Interpol's goals are modest:</p>
+<p>That said, Interpol's goals are modest.  It should:</p>
 
 <ul>
-<li>Provide easy to read/write templates that operate against JSON data</li>
+<li>Provide templates where <em>meaning</em> takes a front seat</li>
 <li>Work well in both Node.js and the Browser</li>
-<li>Focus on an experience that favors dynamic content creation</li>
 </ul>
 
-<p>This last goal is important because the templates we're creating are often devoid of static content.  So why must we 'escape' into a dynamic content mode using braces or processing instructions?  Why don't we just start in that mode and stay there?</p>
+<p>Also, it <em>will not</em> participate in the member-measuring and micro-optimization that seem to be so important to some developers.  Specifically, Interpol has:</p>
 
-<pre><code class="html">from string import title
-&lt;html&gt;
-  &lt;head&gt;
-    &lt;title&gt;"a static title"&lt;/title&gt;
-  &lt;/head&gt;
+<ul>
+<li>No desire to have the 'smallest' minified footprint</li>
+<li>No desire to be the 'fastest' template processor</li>
+</ul>
+
+<p>Interpol will be as <em>small</em> and <em>fast</em> as possible, but no more, especially if those considerations would require compromising the aforementioned goal of providing <em>meaning</em>.</p>
+
+<h2 id="interpol-seeks-meaning">Interpol Seeks 'Meaning'</h2>
+
+<p>Stuff you write should 'mean' something.  Not only at the time it's written, but years later.  It should also mean something to new eyes.  The arguments for terseness haven't flown since we stopped using punch cards.  So, assuming you know some HTML, take a look at this Interpol template to understand what I suggest by <em>meaning</em>:</p>
+
+<pre><code class="html">&lt;html&gt;
   &lt;body&gt;
-    "this is a list with %length items" % list
-    &lt;ul&gt;
-    for item in list
-      &lt;li class=item.type id="id-%id" % item&gt;
-        item.name | title
-      &lt;/li&gt;
-    end
-    &lt;/ul&gt;
+  for person in people when person.active
+    &lt;div class="person"&gt;
+      &lt;div class="name"&gt; person.name &lt;/div&gt;
+      &lt;div class="address"&gt; person.address &lt;/div&gt;
+      &lt;div class="telephone"&gt; person.telephone &lt;/div&gt;
+    &lt;/div&gt;
+  else
+    &lt;div class="empty"&gt;
+      "Nobody to render!"
+    &lt;/div&gt;
+  end
   &lt;/body&gt;
 &lt;/html&gt;
 </code></pre>
 
-<p>The only static element on this page was its title, and usually even that isn't static.  So what did we do to escape <em>it</em> for static rendering?  We wrapped it in quotes.  The rest of the page was a clean mixture of HTMLish elements and dynamic content.</p>
+<p>In looking at this, you can probably understand why "Nobody to render!" must be quoted.  It's because Interpol focuses on producing the structure and content of dynamic HTML documents.  It's a "path of least resistance" approach that forgoes static content 'escaping' methods such as <code>{</code> braces <code>}</code>.  Static content is becoming less frequent in a world of localized web apps, so Interpol chooses to shift the resistance in that direction.</p>
 
-<p>I say 'HTMLish' because it's not pure HTML.  The values of attributes are also evaluated.  For example:</p>
+<p>This template is actually completely dynamic, including the HTML tags and attributes. It just so happens that these tags consist of literals, but you could also generate tags based on variables.  For example:</p>
 
-<pre><code class="html">&lt;li class=item.type id="id-%id" % item&gt;
-</code></pre>
-
-<p><code>class=item.type</code> outputs a class attribute whose value is taken from the item.type property.  <code>id="id-%" % item.id</code> outputs an id attribute whose value is interpolated from the item.id property.</p>
-
-<p>That's all well and good, but what about the ability to reuse templates?  Well, to do that you define partials:</p>
-
-<pre><code class="html">from string import title as titleCase
-
-page("a dynamic title", myContent)
-
-def page(title, content)
-  &lt;html&gt;
-    &lt;head&gt;
-      &lt;title&gt;title | titleCase&lt;/title&gt;
-    &lt;/head&gt;
-    &lt;body&gt;
-      content()
-    &lt;/body&gt;
-  &lt;/html&gt;
-end
-
-def myContent
-  "this is a list with %length items" % list
-  renderList(list)
-end
-
-def renderList(list)
-  &lt;ul&gt;
-  for item in list
-    renderItem(item)
+<pre><code class="html">&lt;div class="person"&gt;
+  for field in ('name', 'address', 'telephone')
+    &lt;div class=field&gt; person[field] &lt;/div&gt;
   end
-  &lt;/ul&gt;
-end
-
-def renderItem(item)
-  &lt;li class=item.type id="id-%id" % item&gt;
-    item.name | titleCase
-  &lt;/li&gt;
-end
+&lt;/div&gt;
 </code></pre>
 
-<p>What if you use these partials in multiple templates?  Then you can move them out into their own modules, maybe called <code>layout.int</code> and <code>lists.int</code>.</p>
+<p>Here the <code>class</code> attribute of the second div, rather than being a literal string, is retrieved from the field names that are processed.</p>
 
-<pre><code class="html"># this is layout.int
-from string import title as titleCase
+<h2 id="dont-repeat-yourself">Don't Repeat Yourself</h2>
 
-def page(title, content)
-  &lt;html&gt;
-    &lt;head&gt;
-      &lt;title&gt;title | titleCase&lt;/title&gt;
-    &lt;/head&gt;
-    &lt;body&gt;
-      content()
-    &lt;/body&gt;
-  &lt;/html&gt;
-end
-</code></pre>
+<p>What if you find that you need the ability to re-use the rendering of people?  Both groups and individuals?  You can break them out into partials:</p>
 
-<pre><code class="html"># this is lists.int
-from string import title as titleCase
+<pre><code class="html">&lt;html&gt;
+  &lt;body&gt;
+    renderPeople(people)
+  &lt;/body&gt;
+&lt;/html&gt;
 
-def renderList(list)
-  &lt;ul&gt;
-  for item in list
-    renderItem(item)
+def renderPeople(people)
+  for person in people when person.active
+    renderPerson(person)
+  else
+    &lt;div class="empty"&gt;
+      "Nobody to render!"
+    &lt;/div&gt;
   end
-  &lt;/ul&gt;
 end
 
-def renderItem(item)
-  &lt;li class=item.type id="id-%id" % item&gt;
-    item.name | titleCase
-  &lt;/li&gt;
+def renderPerson(person)
+  &lt;div class="person"&gt;
+    for field in ('name', 'address', 'telephone')
+      &lt;div class=field&gt; person[field] &lt;/div&gt;
+    end
+  &lt;/div&gt;
+end
+</code></pre>
+
+<p>What if you need to do a special rendering for people who don't want their demographic data presented?  You can add a guarded version of the partial:</p>
+
+<pre><code class="html">def renderPerson(person) when person.likesPrivacy
+  &lt;div class="person"&gt;
+    &lt;div class="name"&gt; person.name &lt;/div&gt;
+  &lt;/div&gt;
+end
+</code></pre>
+
+<h2 id="no-really-dont-repeat-yourself">No, Really, Don't Repeat Yourself</h2>
+
+<p>What if you use these partials in multiple templates?  Then you can move them out into their own module, maybe called <code>people.int</code>.</p>
+
+<pre><code class="html"># this is people.int
+def renderPeople(people)
+  for person in people when person.active
+    renderPerson(person)
+  else
+    &lt;div class="empty"&gt;
+      "Nobody to render!"
+    &lt;/div&gt;
+  end
+end
+
+def renderPerson(person)
+  &lt;div class="person"&gt;
+    for field in ('name', 'address', 'telephone')
+      &lt;div class=field&gt; person[field] &lt;/div&gt;
+    end
+  &lt;/div&gt;
+end
+
+def renderPerson(person) when person.likesPrivacy
+  &lt;div class="person"&gt;
+    &lt;div class="name"&gt; person.name &lt;/div&gt;
+  &lt;/div&gt;
 end
 </code></pre>
 
 <p>And import them like so:</p>
 
-<pre><code class="html">from layout import page
-from lists import renderList
-
-page("a dynamic title", myContent)
-
-def myContent
-  "this is a list with %length items" % list
-  renderList(list)
-end
+<pre><code class="html">from people import renderPeople
+&lt;html&gt;
+  &lt;body&gt;
+    renderPeople(people)
+  &lt;/body&gt;
+&lt;/html&gt;
 </code></pre>
 
 <p>Easy as pie!  And your primary template gets right to the point.</p>

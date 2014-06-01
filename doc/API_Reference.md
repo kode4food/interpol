@@ -13,9 +13,10 @@ template({ name: 'World' }); //-> Hello, World!
 There are several support structures and functions attached to the `$interpol()` function.  By default, they are as follows:
 
   * `VERSION` - The current version of Interpol, represented as a String.
-  * `compile()` - compiles a string template, returning a JSON object that can be stored or passed to the `runtime()` function.
-  * `runtime()` - converts a pre-compiled JSON object to an Interpol runtime closure.
-  * `bless()` - Blesses a Function as being Interpol-safe
+  * `evaluate(source, obj, options)` - Compiles and evaluates the specified source against the provided context object.
+  * `compile(source)` - compiles a string template, returning a JSON object that can be stored or passed to the `runtime()` function.
+  * `runtime(json)` - converts a pre-compiled JSON object to an Interpol runtime closure.
+  * `bless(function)` - Blesses a Function as being Interpol-safe
   * `options() -> {}` - Global Options Object (overridden when calling a compiled template)
   * `globals() -> {}` - Global Variable Context (available to all compiled templates)
   * `resolvers() -> []` - Global Resolver Instances (overridden at compile-time)

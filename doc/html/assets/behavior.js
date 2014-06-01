@@ -39,6 +39,30 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
               "type": "heading",
               "data": {
                 "level": 2,
+                "title": "Interpol Seeks 'Meaning'",
+                "slug": "interpol-seeks-meaning"
+              },
+              "depth": 2
+            }, {
+              "type": "heading",
+              "data": {
+                "level": 2,
+                "title": "Don't Repeat Yourself",
+                "slug": "dont-repeat-yourself"
+              },
+              "depth": 2
+            }, {
+              "type": "heading",
+              "data": {
+                "level": 2,
+                "title": "No, Really, Don't Repeat Yourself",
+                "slug": "no-really-dont-repeat-yourself"
+              },
+              "depth": 2
+            }, {
+              "type": "heading",
+              "data": {
+                "level": 2,
                 "title": "Current Status",
                 "slug": "current-status"
               },
@@ -115,6 +139,30 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
             "level": 2,
             "title": "Introduction",
             "slug": "introduction"
+          },
+          "depth": 2
+        }, {
+          "type": "heading",
+          "data": {
+            "level": 2,
+            "title": "Interpol Seeks 'Meaning'",
+            "slug": "interpol-seeks-meaning"
+          },
+          "depth": 2
+        }, {
+          "type": "heading",
+          "data": {
+            "level": 2,
+            "title": "Don't Repeat Yourself",
+            "slug": "dont-repeat-yourself"
+          },
+          "depth": 2
+        }, {
+          "type": "heading",
+          "data": {
+            "level": 2,
+            "title": "No, Really, Don't Repeat Yourself",
+            "slug": "no-really-dont-repeat-yourself"
           },
           "depth": 2
         }, {
