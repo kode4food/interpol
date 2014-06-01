@@ -1,7 +1,11 @@
 # Change History
 
-## Version 0.3.17 - Bower Support
-Adding Bower Support.
+## Version 0.3.17 to 0.3.20 - Bower Support
+Adding Bower Support.  Because we're hosting at BitBucket, you'll have to install directly from our repository, like so:
+
+```bash
+bower install https://bitbucket.org/kode4food/interpol.git
+```
 
 ## Version 0.3.16 - HTML Attributes
 * Now dealing with HTML Attributes in a more HTML5-friendly way.  If the value is a boolean, either render the attribute name or omit it completely.
