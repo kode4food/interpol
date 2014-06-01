@@ -7,7 +7,7 @@ There are a lot of templating systems out there and they're all similar.  In tru
 
 The answer is simple.  I'm sick of looking at a template and being unable to read the thing, even if I wrote it yesterday.  That's why I developed Interpol.
 
-That said, Interpol's goals are modest:
+That said, Interpol's goals are modest.  It should:
 
   * Provide templates where *meaning* takes a front seat
   * Work well in both Node.js and the Browser
