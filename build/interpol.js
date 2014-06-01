@@ -194,7 +194,7 @@ var isArray = util.isArray
   , isInterpolJSON = util.isInterpolJSON
   , buildRuntime = runtime.buildRuntime;
 
-var CURRENT_VERSION = "0.3.17"
+var CURRENT_VERSION = "0.3.19"
   , compileModule = null;
 
 var slice = Array.prototype.slice;

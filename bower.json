@@ -2,14 +2,14 @@
   "name": "interpol",
   "description": "Templates Sans Facial Hair",
   "authors": ["Thomas S. Bradford"],
-  "version": "0.3.18",
+  "version": "0.3.19",
   "main": "build/interpol.min.js",
   "license": "MIT",
   "homepage": "http://www.interpoljs.io/",
   "keywords": ["javascript", "html", "nodejs", "browser", "templates"],
   "repository": {
     "type": "https",
-    "url": "bitbucket.org/kode4food/interpol.git"
+    "url": "https://bitbucket.org/kode4food/interpol.git"
   },
   "ignore": [
     "browserify",
