@@ -291,8 +291,8 @@ module.exports = (function() {
         peg$c207 = { type: "literal", value: "(", description: "\"(\"" },
         peg$c208 = ")",
         peg$c209 = { type: "literal", value: ")", description: "\")\"" },
-        peg$c210 = function(e) {
-              return e;
+        peg$c210 = function(expr) {
+              return expr;
             },
         peg$c211 = "/>",
         peg$c212 = { type: "literal", value: "/>", description: "\"/>\"" },
@@ -446,7 +446,7 @@ module.exports = (function() {
         peg$c255 = function(id, expr) {
               return [id, expr];
             },
-        peg$c256 = function(e) { return [sym('ou'), e]; },
+        peg$c256 = function(expr) { return [sym('ou'), expr]; },
         peg$c257 = "%",
         peg$c258 = { type: "literal", value: "%", description: "\"%\"" },
         peg$c259 = function(r) { return [sym('fm'), r]; },
