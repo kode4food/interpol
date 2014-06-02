@@ -1,5 +1,7 @@
 # Change History
 
+## Version 1.0 -
+
 ## Version 0.3.17 to 0.3.20 - Bower Support
 Adding Bower Support.  Because we're hosting at BitBucket, you'll have to install directly from our repository, like so:
 
