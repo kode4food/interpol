@@ -38,15 +38,8 @@ exports.using = nodeunit.testCase({
                   '  end\n' +
                   'end';
 
-    var script3 = 'let b = (name = "Doggy")\n' +
-                  'test(b)\n' +
-                  'def test(using d)\n' +
-                  '  "Hello, %name!"\n' +
-                  'end';
-
     test.equal(eval(script1), "Hello, Frog!\n");
     test.equal(eval(script2), "Hello, Doggy!\n\n");
-    test.equal(eval(script3), "Hello, Doggy!\n\n");
     test.done();
   }
 });

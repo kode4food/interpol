@@ -54,7 +54,6 @@
       <span class="nx">statements</span> <span class="o">=</span> <span class="nx">mergeAssignments</span><span class="p">(</span><span class="nx">statements</span><span class="p">);</span>
       <span class="nx">statements</span> <span class="o">=</span> <span class="nx">mergePartials</span><span class="p">(</span><span class="nx">statements</span><span class="p">);</span>
       <span class="nx">statements</span> <span class="o">=</span> <span class="nx">rollupForLoops</span><span class="p">(</span><span class="nx">statements</span><span class="p">);</span>
-      <span class="nx">statements</span> <span class="o">=</span> <span class="nx">rollupUsingStatements</span><span class="p">(</span><span class="nx">statements</span><span class="p">);</span>
       <span class="nx">statements</span> <span class="o">=</span> <span class="nx">promoteRawLiteralOutput</span><span class="p">(</span><span class="nx">statements</span><span class="p">);</span>
       <span class="nx">statements</span> <span class="o">=</span> <span class="nx">convertLiteralHTML</span><span class="p">(</span><span class="nx">statements</span><span class="p">);</span>
       <span class="nx">statements</span> <span class="o">=</span> <span class="nx">mergeRawLiteralOutput</span><span class="p">(</span><span class="nx">statements</span><span class="p">);</span>
@@ -257,22 +256,6 @@ loop so that they share the same context</p></div></div><div class="code"><div c
     <span class="kd">function</span> <span class="nx">processStatement</span><span class="p">(</span><span class="nx">statement</span><span class="p">)</span> <span class="p">{</span>
       <span class="kd">var</span> <span class="nx">forStatements</span> <span class="o">=</span> <span class="nx">statement</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
         <span class="p">,</span> <span class="nx">nested</span> <span class="o">=</span> <span class="nx">forStatements</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
-
-      <span class="nx">statement</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nx">statement</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">concat</span><span class="p">(</span><span class="nx">nested</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
-      <span class="nx">statement</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nx">nested</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
-      <span class="k">return</span> <span class="nx">statement</span><span class="p">;</span>
-    <span class="p">}</span>
-  <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>We can roll up a single nested 'using' statements</p></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">rollupUsingStatements</span><span class="p">(</span><span class="nx">statements</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">match</span><span class="p">(</span><span class="nx">statements</span><span class="p">,</span> <span class="nx">matcher</span><span class="p">,</span> <span class="nx">processStatement</span><span class="p">);</span>
-
-    <span class="kd">function</span> <span class="nx">matcher</span><span class="p">(</span><span class="nx">statement</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">return</span> <span class="nx">hasOperator</span><span class="p">(</span><span class="nx">statement</span><span class="p">,</span> <span class="s1">&#39;us&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span>      <span class="c1">// is a using stmt</span>
-             <span class="nx">statement</span><span class="p">[</span><span class="mi">2</span><span class="p">].</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">1</span> <span class="o">&amp;&amp;</span>         <span class="c1">// one child</span>
-             <span class="nx">hasOperator</span><span class="p">(</span><span class="nx">statement</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;us&#39;</span><span class="p">);</span>  <span class="c1">// nested using stmt</span>
-    <span class="p">}</span>
-
-    <span class="kd">function</span> <span class="nx">processStatement</span><span class="p">(</span><span class="nx">statement</span><span class="p">)</span> <span class="p">{</span>
-      <span class="kd">var</span> <span class="nx">nested</span> <span class="o">=</span> <span class="nx">statement</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">];</span>
 
       <span class="nx">statement</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nx">statement</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">concat</span><span class="p">(</span><span class="nx">nested</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
       <span class="nx">statement</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nx">nested</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>

@@ -244,15 +244,7 @@ def renderPerson(person, profile)
 end
 ```
 
-The 'using' keyword can also be applied to parameters of a partial definition.  This is a shorthand for creating an immediately nested using statement.
-
-```python
-def renderPerson(using person, using profile)
-  <div>name</div>
-  <div>age</div>
-  <div>summary</div>
-end
-```
+It's important to understand that the expressions in the 'using' statement are evaluated against their original scope, with their results being placed in the new one.  This means an expression cannot draw from properties introduced by a previous expression in the same 'using' statement.  So in the previous example, even if `person` introduced a `profile` property, the original `profile` property would be evaluated for the subsequent expression.
 
 The 'using' statement may be considered similar to JavaScript's 'with' operator, except for the fact that any `let` assignments within its scope *will not* find their way out of that scope.
 
