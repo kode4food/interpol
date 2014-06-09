@@ -860,7 +860,7 @@ var arrayWriter = require('./writers/array')
 var isArray = util.isArray
   , mixin = util.mixin
   , configure = util.configure
-  , extendContext = util.extendContext
+  , extendObject = util.extendObject
   , freezeObject = util.freezeObject
   , objectKeys = util.objectKeys
   , isInterpolFunction = util.isInterpolFunction
@@ -959,7 +959,7 @@ function buildRuntime(parseOutput, localOptions) {
    */
 
   function runtimeTemplate(obj, localOptions) {
-    var ctx = mixin(extendContext(globalContext), obj)
+    var ctx = mixin(extendObject(globalContext), obj)
       , processingOptions = mixin({}, globalOptions, localOptions);
 
     // If no Writer is provided, create a throw-away Array Writer
@@ -1009,7 +1009,7 @@ function buildRuntime(parseOutput, localOptions) {
     // exports and so they can be a bit lax about reporting errors or
     // resolving imports
 
-    exportedContext = extendContext(globalContext);
+    exportedContext = extendObject(globalContext);
     exportedContext.__intExports = true;
     evaluator(exportedContext, NullWriter);
     delete exportedContext.__intExports;
@@ -1309,7 +1309,7 @@ function buildRuntime(parseOutput, localOptions) {
 
     // Creates a new calling context and stores its locals from arguments
     function createCallContext(parentCtx, callEvaluator, args) {
-      var newCtx = extendContext(parentCtx);
+      var newCtx = extendObject(parentCtx);
       newCtx[name] = callEvaluator;
       for ( var i = 1; i < plen; i++ ) {
         newCtx[params[i]] = args[i];
@@ -1533,7 +1533,7 @@ function buildRuntime(parseOutput, localOptions) {
 
     function forEvaluator(ctx, writer) {
       // The entire for loop is only a single nested context
-      var newCtx = extendContext(ctx)
+      var newCtx = extendObject(ctx)
         , statementsEvaluated = false;
 
       processRange(rlen - 1);
@@ -1597,7 +1597,7 @@ function buildRuntime(parseOutput, localOptions) {
     return usingEvaluator;
 
     function usingEvaluator(ctx, writer) {
-      var newCtx = extendContext(ctx)
+      var newCtx = extendObject(ctx)
         , args = [newCtx];
 
       for ( var i = 1; i < elen; i++ ) {
@@ -2041,9 +2041,9 @@ if ( !isArray ) {
   })();
 }
 
-var extendContext = Object.create;
-if ( !extendContext ) {
-  extendContext = (function () {
+var extendObject = Object.create;
+if ( !extendObject ) {
+  extendObject = (function () {
     function FakeConstructor() {}
 
     return function _extendContext(obj) {
@@ -2280,7 +2280,7 @@ function configure(func, requiredCount, defaultArgs) {
 
 // Exported Functions
 exports.isArray = isArray;
-exports.extendContext = extendContext;
+exports.extendObject = extendObject;
 exports.freezeObject = freezeObject;
 exports.objectKeys = objectKeys;
 exports.mixin = mixin;

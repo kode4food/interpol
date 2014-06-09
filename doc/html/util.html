@@ -18,9 +18,9 @@
   <span class="p">})();</span>
 <span class="p">}</span>
 
-<span class="kd">var</span> <span class="nx">extendContext</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">create</span><span class="p">;</span>
-<span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">extendContext</span> <span class="p">)</span> <span class="p">{</span>
-  <span class="nx">extendContext</span> <span class="o">=</span> <span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+<span class="kd">var</span> <span class="nx">extendObject</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">create</span><span class="p">;</span>
+<span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">extendObject</span> <span class="p">)</span> <span class="p">{</span>
+  <span class="nx">extendObject</span> <span class="o">=</span> <span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
     <span class="kd">function</span> <span class="nx">FakeConstructor</span><span class="p">()</span> <span class="p">{}</span>
 
     <span class="k">return</span> <span class="kd">function</span> <span class="nx">_extendContext</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
@@ -231,7 +231,7 @@ that aren't required.</p>
     <span class="k">return</span> <span class="nx">func</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">applyArgs</span><span class="p">);</span>
   <span class="p">}</span>
 <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Exported Functions</p></div></div><div class="code"><div class="wrapper"><span class="nx">exports</span><span class="p">.</span><span class="nx">isArray</span> <span class="o">=</span> <span class="nx">isArray</span><span class="p">;</span>
-<span class="nx">exports</span><span class="p">.</span><span class="nx">extendContext</span> <span class="o">=</span> <span class="nx">extendContext</span><span class="p">;</span>
+<span class="nx">exports</span><span class="p">.</span><span class="nx">extendObject</span> <span class="o">=</span> <span class="nx">extendObject</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">freezeObject</span> <span class="o">=</span> <span class="nx">freezeObject</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">objectKeys</span> <span class="o">=</span> <span class="nx">objectKeys</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">mixin</span> <span class="o">=</span> <span class="nx">mixin</span><span class="p">;</span>

@@ -167,13 +167,7 @@ for person in people, brother in person.brothers
 end
 ```
 
-Since there is only one statement in the block, this could have also been written:
-
-```python
-for person in people, brother in person.brothers: renderItem(person, brother)
-```
-
-In both cases, the outer loop iterates over all elements in `people`, assigning the identifier `person` to each element.  For each `person` item, an inner loop is executed that iterates over the person's `brothers` property, assigning the identifier `brother` to each element.  You'll notice that `person` is available in the inner loop's scope and that both identifiers are available in the statement block.
+In this example, the outer loop iterates over all elements in `people`, assigning the identifier `person` to each element.  For each `person` item, an inner loop is executed that iterates over the person's `brothers` property, assigning the identifier `brother` to each element.  You'll notice that `person` is available in the inner loop's scope and that both identifiers are available in the statement block.
 
 You can also define an `else` clause for those cases where the for loop finds no matches:
 
@@ -269,19 +263,7 @@ You can also compute the name of a tag or attribute dynamically by enclosing the
 <(theTagName) id="parent" (theAttrName or "class")="listItem %otherClasses">
 ```
 
-HTMLish elements *do not* create nested scopes and are not paired semantically into single statement blocks.  In fact, a closing element is not required at all.  Therefore, code like this will yield incorrect results:
-
-```python
-if person.name == 'Curly': <strong>"Curly is awesome!"</strong>
-```
-
-Interpol will only treat the initial `<strong>` tag as part of the `if` statement.  Instead, the statement would have to be formed as follows:
-
-```python
-if person.name == 'Curly'
-  <strong>"Curly is awesome!"</strong>
-end
-```
+HTMLish elements *do not* create nested scopes and are not paired semantically into single statement blocks.  In fact, a closing element is not required at all.
 
 ### Expression Statements
 Any expression that is not evaluated in the context of another statement, such as in a For loop or If / Else statement, is considered to be an Expression Statement.  It will be evaluated and its result will be streamed to the template's output.  For example:
