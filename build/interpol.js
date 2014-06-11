@@ -1277,6 +1277,7 @@ function buildRuntime(parseOutput, localOptions) {
 
       function callEvaluator(writer) {
         statements(createCallContext(ctx, callEvaluator, arguments), writer);
+        return null;
       }
 
       function bodyEvaluator(writer) {
@@ -1302,6 +1303,7 @@ function buildRuntime(parseOutput, localOptions) {
       function callEvaluator() {
         /* jshint validthis:true */
         bodyEvaluator.apply(this, arguments);
+        return null;
       }
 
       function guardedBodyEvaluator(writer) {
@@ -1343,7 +1345,7 @@ function buildRuntime(parseOutput, localOptions) {
 
       if ( !isInterpolFunction(func) ) {
         if ( ctx.__intExports ) {
-          return;
+          return null;
         }
         throw new Error("Attempting to bind an unblessed function");
       }
@@ -1376,7 +1378,7 @@ function buildRuntime(parseOutput, localOptions) {
 
       if ( !isInterpolFunction(func) ) {
         if ( ctx.__intExports ) {
-          return;
+          return null;
         }
         throw new Error("Attempting to call an unblessed function");
       }
@@ -1440,7 +1442,7 @@ function buildRuntime(parseOutput, localOptions) {
 
         if ( typeof key === 'function' ) {
           key = key(ctx, writer);
-          if ( key === null || key === undefined ) {
+          if ( key === null ) {
             continue;
           }
         }
@@ -1937,7 +1939,7 @@ function buildRuntime(parseOutput, localOptions) {
   function createMemberEvaluator(parentNode, elemNode) {
     var $1 = createEvaluator(parentNode);
 
-    if ( $1 === null || $1 === undefined ) {
+    if ( $1 === null ) {
       return null;
     }
 
