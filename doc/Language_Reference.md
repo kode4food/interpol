@@ -88,7 +88,7 @@ def renderList(people)
   </ul>
 end
 
-def renderList(people) when not people.length
+def renderList(people) when not people
   <b>"There are no people to render!"</b>
 end
 

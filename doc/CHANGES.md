@@ -147,7 +147,7 @@ def renderList(people)
   </ul>
 end
 
-def renderList(people) when people.length == 0
+def renderList(people) when not people
   <b>"There are no people to render!"</b>
 end
 ```

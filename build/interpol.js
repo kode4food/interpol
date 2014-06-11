@@ -1918,10 +1918,10 @@ function buildRuntime(parseOutput, localOptions) {
   // generate a logical 'not' evaluator
   function createNotEvaluator(node) {
     var $1 = createEvaluator(node);
-    return typeof $1 === 'function' ? notEvaluator : !$1;
+    return typeof $1 === 'function' ? notEvaluator : !isTruthy($1);
 
     function notEvaluator(ctx, writer) {
-      return !$1(ctx, writer);
+      return !isTruthy($1(ctx, writer));
     }
   }
 
@@ -2154,6 +2154,13 @@ function isInterpolJSON(value) {
     isArray(value.n);
 }
 
+/**
+ * Checks whether or not the provided value is *truthy* by Interpol's
+ * standards.
+ *
+ * @param {Mixed} value the value to test
+ * @returns {boolean} if the value constitutes a *truthy* one
+ */
 function isTruthy(value) {
   if ( !value ) {
     return false;
