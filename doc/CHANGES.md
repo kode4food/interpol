@@ -1,7 +1,19 @@
 # Change History
 
-## Version 1.0 -
+## Version 0.4 -
 * Removed single-line `:` syntax for statements.  It would be more of a source of confusion than a useful feature.
+
+* Both JavaScript `null` and `undefined` now resolve to Interpol's `Nil`.
+
+* All equality comparisons now use the strict `===` and `!==` operators.  Meaning you can no longer compare the values 1 and "1" and expect a `true` result.  JSON differentiates between Strings and Numbers.  So does Interpol.
+
+* Conditionals operators (if/unless/when) now follow a strict definition of 'truthy' rather than JavaScript's.  In Interpol 'truthy' is any value that matches the following criteria:
+
+  * Arrays with at least one element
+  * Strings with at least one character
+  * The boolean 'true'
+  * Non-Zero Numbers
+  * Objects
 
 ## Version 0.3.17 to 0.3.20 - Bower Support
 Adding Bower Support.  Because we're hosting at BitBucket, you'll have to install directly from our repository, like so:

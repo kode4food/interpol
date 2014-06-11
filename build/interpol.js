@@ -194,7 +194,7 @@ var isArray = util.isArray
   , isInterpolJSON = util.isInterpolJSON
   , buildRuntime = runtime.buildRuntime;
 
-var CURRENT_VERSION = "0.3.20"
+var CURRENT_VERSION = "0.4.0"
   , compileModule = null;
 
 var slice = Array.prototype.slice;
@@ -293,9 +293,13 @@ function isMatchingObject(template, obj) {
   if ( template === obj ) {
     return true;
   }
-  
-  if ( typeof template !== 'object' || template === null ) {
-    return template == obj;
+
+  if ( template === null || template === undefined ) {
+    return obj === null || obj === undefined;
+  }
+
+  if ( typeof template !== 'object' ) {
+    return template === obj;
   }
 
   if ( isArray(template) ) {
@@ -325,7 +329,10 @@ function isMatchingObject(template, obj) {
  */
 
 function buildMatcher(template) {
-  if ( typeof template !== 'object' || template === null ) {
+  if ( template === null || template === undefined ) {
+    return nullMatcher;
+  }
+  if ( typeof template !== 'object' ) {
     return valueMatcher;
   }
   if ( isArray(template) ) {
@@ -333,8 +340,12 @@ function buildMatcher(template) {
   }
   return buildObjectMatcher(template);
 
+  function nullMatcher(obj) {
+    return obj === null || obj === undefined;
+  }
+
   function valueMatcher(obj) {
-    return template == obj;
+    return template === obj;
   }
 }
 
@@ -859,6 +870,7 @@ var arrayWriter = require('./writers/array')
 
 var isArray = util.isArray
   , mixin = util.mixin
+  , isTruthy = util.isTruthy
   , configure = util.configure
   , extendObject = util.extendObject
   , freezeObject = util.freezeObject
@@ -1099,7 +1111,7 @@ function buildRuntime(parseOutput, localOptions) {
 
   function createEvaluator(node) {
     if ( !isArray(node) ) {
-      if ( node === undefined || node === null ) {
+      if ( node === null || node === undefined ) {
         return null;
       }
       return lits[node];
@@ -1428,7 +1440,7 @@ function buildRuntime(parseOutput, localOptions) {
 
         if ( typeof key === 'function' ) {
           key = key(ctx, writer);
-          if ( key === undefined || key === null ) {
+          if ( key === null || key === undefined ) {
             continue;
           }
         }
@@ -1616,16 +1628,27 @@ function buildRuntime(parseOutput, localOptions) {
       , $3 = createStatementsEvaluator(falseNodes);
 
     if ( typeof $1 !== 'function' ) {
-      return $1 ? $2 : $3;
+      return isTruthy($1) ? $2 : $3;
     }
 
     var type = getBinaryType($2, $3);
     return [condLiteral, condTrue, condFalse, condBoth][type];
 
-    function condLiteral(c, w) { return $1(c, w) ? $2 : $3; }
-    function condTrue(c, w) { return $1(c, w) ? $2(c, w) : $3; }
-    function condFalse(c, w) { return $1(c, w) ? $2 : $3(c, w); }
-    function condBoth(c, w) { return $1(c, w) ? $2(c, w) : $3(c, w); }
+    function condLiteral(c, w) {
+      return isTruthy($1(c, w)) ? $2 : $3;
+    }
+
+    function condTrue(c, w) {
+      return isTruthy($1(c, w)) ? $2(c, w) : $3;
+    }
+
+    function condFalse(c, w) {
+      return isTruthy($1(c, w)) ? $2 : $3(c, w);
+    }
+
+    function condBoth(c, w) {
+      return isTruthy($1(c, w)) ? $2(c, w) : $3(c, w);
+    }
   }
 
   // generate an 'or' evaluator, including short circuiting
@@ -1634,19 +1657,19 @@ function buildRuntime(parseOutput, localOptions) {
       , $2 = createEvaluator(rightNode);
 
     if ( typeof $1 !== 'function' ) {
-      return $1 || $2;
+      return isTruthy($1) ? $1 : $2;
     }
 
     return typeof $2 === 'function' ? orFuncEvaluator : orLiteralEvaluator;
 
     function orFuncEvaluator(ctx, writer) {
       var lval = $1(ctx, writer);
-      return lval ? lval : $2(ctx, writer);
+      return isTruthy(lval) ? lval : $2(ctx, writer);
     }
 
     function orLiteralEvaluator(ctx, writer) {
       var lval = $1(ctx, writer);
-      return lval ? lval : $2;
+      return isTruthy(lval) ? lval : $2;
     }
   }
 
@@ -1656,19 +1679,19 @@ function buildRuntime(parseOutput, localOptions) {
       , $2 = createEvaluator(rightNode);
 
     if ( typeof $1 !== 'function' ) {
-      return $1 && $2;
+      return isTruthy($1) ? $2 : $1;
     }
 
     return typeof $2 === 'function' ? andFuncEvaluator : andLiteralEvaluator;
 
     function andFuncEvaluator(ctx, writer) {
       var lval = $1(ctx, writer);
-      return lval ? $2(ctx, writer) : lval;
+      return isTruthy(lval) ? $2(ctx, writer) : lval;
     }
 
     function andLiteralEvaluator(ctx, writer) {
       var lval = $1(ctx, writer);
-      return lval ? $2 : lval;
+      return isTruthy(lval) ? $2 : lval;
     }
   }
 
@@ -1695,11 +1718,11 @@ function buildRuntime(parseOutput, localOptions) {
       , $2 = createEvaluator(rightNode)
       , type = getBinaryType($1, $2);
 
-     return [null, eqLeft, eqRight, eqBoth][type] || ($1 == $2);
+    return [null, eqLeft, eqRight, eqBoth][type] || ($1 === $2);
 
-    function eqLeft(c, w) { return $1(c, w) == $2; }
-    function eqRight(c, w) { return $1 == $2(c, w); }
-    function eqBoth(c, w) { return $1(c, w) == $2(c, w); }
+    function eqLeft(c, w) { return $1(c, w) === $2; }
+    function eqRight(c, w) { return $1 === $2(c, w); }
+    function eqBoth(c, w) { return $1(c, w) === $2(c, w); }
   }
 
   // generate an inequality evaluator
@@ -1708,11 +1731,11 @@ function buildRuntime(parseOutput, localOptions) {
       , $2 = createEvaluator(rightNode)
       , type = getBinaryType($1, $2);
 
-    return [null, neqLeft, neqRight, neqBoth][type] || ($1 != $2);
+    return [null, neqLeft, neqRight, neqBoth][type] || ($1 !== $2);
 
-    function neqLeft(c, w) { return $1(c, w) != $2; }
-    function neqRight(c, w) { return $1 != $2(c, w); }
-    function neqBoth(c, w) { return $1(c, w) != $2(c, w); }
+    function neqLeft(c, w) { return $1(c, w) !== $2; }
+    function neqRight(c, w) { return $1 !== $2(c, w); }
+    function neqBoth(c, w) { return $1(c, w) !== $2(c, w); }
   }
 
   // generate a greater-than evaluator
@@ -1912,36 +1935,33 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate an array or object member access evaluator
   function createMemberEvaluator(parentNode, elemNode) {
-    var $1 = createEvaluator(parentNode)
-      , $2 = createEvaluator(elemNode)
-      , type = getBinaryType($1, $2);
+    var $1 = createEvaluator(parentNode);
 
-    // do this if the left operand is a literal, though it shouldn't be
-    if ( ( type === 0 || type === 2 ) &&
-         ( $1 === undefined || $1 === null ) ) {
+    if ( $1 === null || $1 === undefined ) {
       return null;
     }
 
-    return [null, memLeft, memRight, memBoth][type] || ($1[$2]);
+    var $2 = createEvaluator(elemNode)
+      , type = getBinaryType($1, $2);
+
+    return [null, memLeft, null, memBoth][type] || ($1[$2]);
 
     function memLeft(c, w) {
       var parent = $1(c, w);
-      if ( parent === undefined || parent === null ) {
+      if ( parent === null ) {
         return null;
       }
-      return parent[$2];
-    }
-
-    function memRight(c, w) {
-      return $1[$2(c, w)];
+      var result = parent[$2];
+      return result === undefined ? null : result;
     }
 
     function memBoth(c, w) {
       var parent = $1(c, w);
-      if ( parent === undefined || parent === null ) {
+      if ( parent === null ) {
         return null;
       }
-      return parent[$2(c, w)];
+      var result = parent[$2(c, w)];
+      return result === undefined ? null : result;
     }
   }
 
@@ -1984,7 +2004,8 @@ function buildRuntime(parseOutput, localOptions) {
     return idEvaluator;
 
     function idEvaluator(ctx, writer) {
-      return ctx[name];
+      var result = ctx[name];
+      return result === undefined ? null : result;
     }
   }
 
@@ -2129,6 +2150,16 @@ function isInterpolJSON(value) {
     !isArray(value) &&
     isArray(value.l) &&
     isArray(value.n);
+}
+
+function isTruthy(value) {
+  if ( !value ) {
+    return false;
+  }
+  if ( isArray(value) ) {
+    return value.length > 0;
+  }
+  return true;
 }
 
 // ## String Handling
@@ -2286,6 +2317,7 @@ exports.objectKeys = objectKeys;
 exports.mixin = mixin;
 exports.createStaticMixin = createStaticMixin;
 exports.isInterpolJSON = isInterpolJSON;
+exports.isTruthy = isTruthy;
 exports.escapeAttribute = escapeAttribute;
 exports.escapeContent = escapeContent;
 exports.stringify = stringify;

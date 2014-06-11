@@ -21,9 +21,13 @@
   <span class="k">if</span> <span class="p">(</span> <span class="nx">template</span> <span class="o">===</span> <span class="nx">obj</span> <span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
   <span class="p">}</span>
-  
-  <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">template</span> <span class="o">!==</span> <span class="s1">&#39;object&#39;</span> <span class="o">||</span> <span class="nx">template</span> <span class="o">===</span> <span class="kc">null</span> <span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">template</span> <span class="o">==</span> <span class="nx">obj</span><span class="p">;</span>
+
+  <span class="k">if</span> <span class="p">(</span> <span class="nx">template</span> <span class="o">===</span> <span class="kc">null</span> <span class="o">||</span> <span class="nx">template</span> <span class="o">===</span> <span class="kc">undefined</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">obj</span> <span class="o">===</span> <span class="kc">null</span> <span class="o">||</span> <span class="nx">obj</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">template</span> <span class="o">!==</span> <span class="s1">&#39;object&#39;</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">template</span> <span class="o">===</span> <span class="nx">obj</span><span class="p">;</span>
   <span class="p">}</span>
 
   <span class="k">if</span> <span class="p">(</span> <span class="nx">isArray</span><span class="p">(</span><span class="nx">template</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
@@ -51,7 +55,10 @@
 <ul>
 <li><strong>template can be of any type.</strong><br/>(the Template to match against)</li>
 </ul></div></div><div class="code"><div class="wrapper"><span class="kd">function</span> <span class="nx">buildMatcher</span><span class="p">(</span><span class="nx">template</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">template</span> <span class="o">!==</span> <span class="s1">&#39;object&#39;</span> <span class="o">||</span> <span class="nx">template</span> <span class="o">===</span> <span class="kc">null</span> <span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="nx">template</span> <span class="o">===</span> <span class="kc">null</span> <span class="o">||</span> <span class="nx">template</span> <span class="o">===</span> <span class="kc">undefined</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">nullMatcher</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">template</span> <span class="o">!==</span> <span class="s1">&#39;object&#39;</span> <span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">valueMatcher</span><span class="p">;</span>
   <span class="p">}</span>
   <span class="k">if</span> <span class="p">(</span> <span class="nx">isArray</span><span class="p">(</span><span class="nx">template</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
@@ -59,8 +66,12 @@
   <span class="p">}</span>
   <span class="k">return</span> <span class="nx">buildObjectMatcher</span><span class="p">(</span><span class="nx">template</span><span class="p">);</span>
 
+  <span class="kd">function</span> <span class="nx">nullMatcher</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">obj</span> <span class="o">===</span> <span class="kc">null</span> <span class="o">||</span> <span class="nx">obj</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">;</span>
+  <span class="p">}</span>
+
   <span class="kd">function</span> <span class="nx">valueMatcher</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">template</span> <span class="o">==</span> <span class="nx">obj</span><span class="p">;</span>
+    <span class="k">return</span> <span class="nx">template</span> <span class="o">===</span> <span class="nx">obj</span><span class="p">;</span>
   <span class="p">}</span>
 <span class="p">}</span>
 
