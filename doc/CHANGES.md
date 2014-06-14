@@ -1,7 +1,9 @@
 # Change History
 
-## Version 0.4 -
-* Removed single-line `:` syntax for statements.  It would be more of a source of confusion than a useful feature.
+## Version 0.4 - Stabilization
+A lot of effort has been put into stabilizing the Interpol code base.  There are no new features in this release, but some have been removed.  Also, some behaviors have been clarified.  Specifically:
+
+* Removed single-line `:` syntax for statements, so you *have* to use `end` now.  This choice was made because HTML in combination with this feature would create more confusion than benefit.
 
 * Both JavaScript `null` and `undefined` now resolve to Interpol's `Nil`.
 
@@ -13,9 +15,9 @@
   * Strings with at least one character
   * The boolean 'true'
   * Non-Zero Numbers
-  * Objects
+  * Any Object
 
-## Version 0.3.17 to 0.3.20 - Bower Support
+## Version 0.3.17 - Bower Support
 Adding Bower Support.  Because we're hosting at BitBucket, you'll have to install directly from our repository, like so:
 
 ```bash

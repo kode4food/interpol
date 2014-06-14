@@ -230,7 +230,7 @@ In Interpol 'truthy' is any value that matches the following criteria:
   * Strings with at least one character
   * The boolean 'true'
   * Non-Zero Numbers
-  * Objects
+  * Any Object
 
 Falsy is any value that is not 'truthy'.
 
