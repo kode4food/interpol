@@ -17,6 +17,8 @@ A lot of effort has been put into stabilizing the Interpol code base.  There are
   * Non-Zero Numbers
   * Any Object
 
+* The Separate Language and API References have been removed.  Instead, [The Interpol Guide](http://kode4food.bitbucket.org/interpol/guide) will serve as an ongoing source of Interpol Information.
+
 ## Version 0.3.17 - Bower Support
 Adding Bower Support.  Because we're hosting at BitBucket, you'll have to install directly from our repository, like so:
 
@@ -198,7 +200,7 @@ lists now allow name/value pairs as well as the ability to force a single-elemen
 # Treated like a dictionary { theMachine: 'Deep Thought', theAnswer: 42 }
 ```
 
-Forcing a single-element list is performed as it would be in Python, by ending the list with a comma `,`.  See [the Language Reference](Language_Reference.md) for more information.
+Forcing a single-element list is performed as it would be in Python, by ending the list with a comma `,`.  See [The Interpol Guide](http://kode4food.bitbucket.org/interpol/guide) for more information.
 
 ## Version 0.3.4 - Consolidated Resolvers
 The Helper and System Resolvers have been merged into the Memory Resolver since it's all in memory anyway.  The default Memory Resolver's register/unregister functions are now exposed from the `interpol()` function , so registering a module of JavaScript helpers is easy:
@@ -214,7 +216,7 @@ interpol.registerModule('myModule', {
 });
 ```
 
-See [the API Reference](API_Reference.md) for more information.
+See [The Interpol Guide](http://kode4food.bitbucket.org/interpol/guide) for more information.
 
 ## Version 0.3.3 - Configurable Imports
 Modules exposed by the system resolver now allow their functions to be configured.  This enables the developer to generate pre-configured pipeline functions.  For example:
@@ -346,7 +348,7 @@ Getting close to a usable system
 
 * `unless` is syntactic sugar for `if !(...)`
 
-* Importing now works against the three available resolvers: file (Node.js only), helpers, and memory.  See [the API Reference](API_Reference.md) for more information.
+* Importing now works against the three available resolvers: file (Node.js only), helpers, and memory.  See [The Interpol Guide](http://kode4food.bitbucket.org/interpol/guide) for more information.
 
 * Compiled templates now have an `exports()` function that returns functions and variables defined in their root context.  The results are evaluated against the global context *only*.
 
@@ -354,7 +356,7 @@ Getting close to a usable system
 
 * `self` refers to the variables of the current scope, and can be passed around.
 
-* Named Interpolation is now supported.  Any `%` followed by an identifier is expanded to the value of that property in the passed Object. `self` is assumed if nothing is passed.  See [the Language Reference](Language_Reference.md) for more information.
+* Named Interpolation is now supported.  Any `%` followed by an identifier is expanded to the value of that property in the passed Object. `self` is assumed if nothing is passed.  See [The Interpol Guide](http://kode4food.bitbucket.org/interpol/guide) for more information.
 
 ## Version 0.1.2 - Bug Fixes and Test
 Fixed some bugs in the PEG.js parser, including its inability to right-recurse unary and membership productions.  Also increased test coverage.
