@@ -312,7 +312,9 @@ module.exports = (function() {
         peg$c222 = function(g) { return g; },
         peg$c223 = function(op, id, params, guard, statements) {
               params = params || {};
-              var i, len, guards = params.guards || [];
+              var guards = params.guards || [];
+              var i;
+              var len;
               if ( guards.length ) {
                 if ( guard ) { guards.push(guard); }
                 guard = guards[0];
@@ -349,7 +351,8 @@ module.exports = (function() {
         peg$c228 = { type: "literal", value: ",", description: "\",\"" },
         peg$c229 = function(param) { return param; },
         peg$c230 = function(start, cont) {
-              var ids = [], guards = [];
+              var ids = [];
+              var guards = [];
               var items = [start].concat(cont);
               for ( var i = 0, len = items.length; i < len; i++ ) {
                 var item = items[i];
@@ -6896,12 +6899,12 @@ module.exports = (function() {
     }
 
 
-      var parser = require('../lib/parser')
-        , buildBinaryChain = parser.buildBinaryChain
-        , symAutoInterpolate = parser.symAutoInterpolate
-        , isAutoInterpolated = parser.isAutoInterpolated
-        , isIdentifier = parser.isIdentifier
-        , stmts = parser.stmts;
+      var parser = require('../lib/parser');
+      var buildBinaryChain = parser.buildBinaryChain;
+      var symAutoInterpolate = parser.symAutoInterpolate;
+      var isAutoInterpolated = parser.isAutoInterpolated;
+      var isIdentifier = parser.isIdentifier;
+      var stmts = parser.stmts;
 
       function sym(value, type) {
         return {

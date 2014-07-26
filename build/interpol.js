@@ -35,15 +35,15 @@ require('../lib/writers/dom');
 
 "use strict";
 
-var util = require('./util')
-  , isInterpolFunction = util.isInterpolFunction
-  , stringify = util.stringify;
+var util = require('./util');
+var isInterpolFunction = util.isInterpolFunction;
+var stringify = util.stringify;
 
 var nullWriter;
 
-var Digits = "[1-9][0-9]*"
-  , Ident = "[$_a-zA-Z][$_a-zA-Z0-9]*"
-  , Params = "%((%)|("+Digits+")|("+Ident+"))?(([|]"+Ident+")*)?";
+var Digits = "[1-9][0-9]*";
+var Ident = "[$_a-zA-Z][$_a-zA-Z0-9]*";
+var Params = "%((%)|(" + Digits + ")|(" + Ident + "))?(([|]" + Ident + ")*)?";
              /* "%" ( "%" | digits | identifier )? ( "|" identifier )* */
 
 var ParamRegex = new RegExp(Params, "m");
@@ -59,9 +59,9 @@ var ParamRegex = new RegExp(Params, "m");
  */
 
 function buildTemplate(formatStr) {
-  var funcs = []
-    , flen = 0
-    , autoIdx = 0;
+  var funcs = [];
+  var flen = 0;
+  var autoIdx = 0;
 
   while ( formatStr && formatStr.length ) {
     var paramMatch = ParamRegex.exec(formatStr);
@@ -70,9 +70,9 @@ function buildTemplate(formatStr) {
       break;
     }
 
-    var match = paramMatch[0]
-      , matchIdx = paramMatch.index
-      , matchLen = match.length;
+    var match = paramMatch[0];
+    var matchIdx = paramMatch.index;
+    var matchLen = match.length;
 
     if ( matchIdx ) {
       funcs.push(createLiteralFunction(formatStr.substring(0, matchIdx)));
@@ -137,8 +137,8 @@ function buildTemplate(formatStr) {
   }
 
   function createPipedFunction(idx, formatters) {
-    var funcs = formatters.reverse()
-      , flen = funcs.length - 1;
+    var funcs = formatters.reverse();
+    var flen = funcs.length - 1;
 
     if ( !nullWriter ) {
       var createNullWriter = require('./writers/null').createNullWriter;
@@ -150,8 +150,8 @@ function buildTemplate(formatStr) {
     function pipedFunction(data, ctx) {
       var value = data[idx];
       for ( var i = flen; i >= 0; i-- ) {
-        var funcName = funcs[i]
-          , func = data[funcName];
+        var funcName = funcs[i];
+        var func = data[funcName];
 
         if ( func === undefined && ctx ) {
           // Only fall back to context if func is not in data at all
@@ -186,16 +186,16 @@ exports.buildTemplate = buildTemplate;
 
 "use strict";
 
-var util = require('./util')
-  , runtime = require('./runtime');
+var util = require('./util');
+var runtime = require('./runtime');
 
-var isArray = util.isArray
-  , bless = util.bless
-  , isInterpolJSON = util.isInterpolJSON
-  , buildRuntime = runtime.buildRuntime;
+var isArray = util.isArray;
+var bless = util.bless;
+var isInterpolJSON = util.isInterpolJSON;
+var buildRuntime = runtime.buildRuntime;
 
-var CURRENT_VERSION = "0.4.0"
-  , compileModule = null;
+var CURRENT_VERSION = "0.4.0";
+var compileModule = null;
 
 var slice = Array.prototype.slice;
 
@@ -278,9 +278,9 @@ module.exports = interpol;
 
 "use strict";
 
-var util = require('./util')
-  , isArray = util.isArray
-  , objectKeys = util.objectKeys;
+var util = require('./util');
+var isArray = util.isArray;
+var objectKeys = util.objectKeys;
 
 /** 
  * Basic Object Matcher to support the `like` operator.
@@ -350,8 +350,8 @@ function buildMatcher(template) {
 }
 
 function buildArrayMatcher(template) {
-  var matchers = []
-    , mlen = template.length;
+  var matchers = [];
+  var mlen = template.length;
 
   for ( var i = 0; i < mlen; i++ ) {
     matchers.push(buildMatcher(template[i]));
@@ -371,9 +371,9 @@ function buildArrayMatcher(template) {
 }
 
 function buildObjectMatcher(template) {
-  var matchers = []
-    , keys = objectKeys(template)
-    , mlen = keys.length;
+  var matchers = [];
+  var keys = objectKeys(template);
+  var mlen = keys.length;
 
   for ( var i = 0; i < mlen; i++ ) {
     matchers.push(buildMatcher(template[keys[i]]));
@@ -407,13 +407,13 @@ exports.buildMatcher = buildMatcher;
 
 "use strict";
 
-var interpol = require('../interpol')
-  , util = require('../util');
+var interpol = require('../interpol');
+var util = require('../util');
 
-var slice = Array.prototype.slice
-  , isArray = util.isArray
-  , isInterpolJSON = util.isInterpolJSON
-  , bless = util.bless;
+var slice = Array.prototype.slice;
+var isArray = util.isArray;
+var isInterpolJSON = util.isInterpolJSON;
+var bless = util.bless;
 
 /**
  * Creates a new Memory Resolver.  As its name implies, this resolver
@@ -543,8 +543,8 @@ interpol.createMemoryResolver = createMemoryResolver;
 
 "use strict";
 
-var memory = require('../memory')
-  , defaultMemoryResolver = memory.defaultMemoryResolver;
+var memory = require('../memory');
+var defaultMemoryResolver = memory.defaultMemoryResolver;
 
 defaultMemoryResolver.registerModule('math', require('./math'));
 defaultMemoryResolver.registerModule('list', require('./list'));
@@ -561,9 +561,9 @@ defaultMemoryResolver.registerModule('string', require('./string'));
 
 "use strict";
 
-var util = require('../../util')
-  , objectKeys = util.objectKeys
-  , isArray = util.isArray;
+var util = require('../../util');
+var objectKeys = util.objectKeys;
+var isArray = util.isArray;
 
 // `first(value)` returns the first item of the provided array (or `null` if
 // the array is empty).
@@ -620,8 +620,8 @@ function values(writer, value) {
   if ( typeof value !== 'object' ) {
     return null;
   }
-  var keys = objectKeys(value)
-    , result = [];
+  var keys = objectKeys(value);
+  var result = [];
   for ( var i = 0, len = keys.length; i < len; i++ ) {
     result[i] = value[keys[i]];
   }
@@ -648,8 +648,8 @@ exports.values = values;
 
 "use strict";
 
-var util = require('../../util')
-  , isArray = util.isArray;
+var util = require('../../util');
+var isArray = util.isArray;
 
 var wrap = require('./wrap');
 
@@ -779,8 +779,8 @@ exports.sum = sum;
 
 "use strict";
 
-var util = require('../../util')
-  , stringify = util.stringify;
+var util = require('../../util');
+var stringify = util.stringify;
 
 var wrap = require('./wrap');
 
@@ -833,8 +833,8 @@ exports.upper = upper;
 
 "use strict";
 
-var util = require('../../util')
-  , bless = util.bless;
+var util = require('../../util');
+var bless = util.bless;
 
 var slice = Array.prototype.slice;
 
@@ -861,33 +861,33 @@ module.exports = wrap;
 
 "use strict";
 
-var util = require('./util')
-  , format = require('./format')
-  , match = require('./match');
+var util = require('./util');
+var format = require('./format');
+var match = require('./match');
 
-var arrayWriter = require('./writers/array')
-  , nullWriter = require('./writers/null');
+var arrayWriter = require('./writers/array');
+var nullWriter = require('./writers/null');
 
-var isArray = util.isArray
-  , mixin = util.mixin
-  , isTruthy = util.isTruthy
-  , configure = util.configure
-  , extendObject = util.extendObject
-  , freezeObject = util.freezeObject
-  , objectKeys = util.objectKeys
-  , isInterpolFunction = util.isInterpolFunction
-  , createStaticMixin = util.createStaticMixin
-  , buildTemplate = format.buildTemplate
-  , isMatchingObject = match.isMatchingObject
-  , buildMatcher = match.buildMatcher;
+var isArray = util.isArray;
+var mixin = util.mixin;
+var isTruthy = util.isTruthy;
+var configure = util.configure;
+var extendObject = util.extendObject;
+var freezeObject = util.freezeObject;
+var objectKeys = util.objectKeys;
+var isInterpolFunction = util.isInterpolFunction;
+var createStaticMixin = util.createStaticMixin;
+var buildTemplate = format.buildTemplate;
+var isMatchingObject = match.isMatchingObject;
+var buildMatcher = match.buildMatcher;
 
 var TemplateCacheMax = 256;
 
 var slice = Array.prototype.slice;
 
-var globalOptions = { writer: null, errorCallback: null }
-  , globalContext = {}
-  , globalResolvers = [];
+var globalOptions = { writer: null, errorCallback: null };
+var globalContext = {};
+var globalResolvers = [];
 
 /**
  * Converts a pre-compiled JSON instance to an evaluative runtime closure.
@@ -899,8 +899,8 @@ var globalOptions = { writer: null, errorCallback: null }
  */
 
 function buildRuntime(parseOutput, localOptions) {
-  var createArrayWriter = arrayWriter.createArrayWriter
-    , NullWriter = nullWriter.createNullWriter();
+  var createArrayWriter = arrayWriter.createArrayWriter;
+  var NullWriter = nullWriter.createNullWriter();
 
   // A lookup table of code-path generators
   var Evaluators = freezeObject({
@@ -947,12 +947,12 @@ function buildRuntime(parseOutput, localOptions) {
   // is simply a set of statements, we can create a statementsEvaluator and
   // call it a day.
 
-  var lits = parseOutput.l
-    , runtimeOptions = mixin({}, globalOptions, localOptions)
-    , cacheModules = runtimeOptions.cache
-    , resolvers = runtimeOptions.resolvers || globalResolvers
-    , evaluator = wrapLiteral(createStatementsEvaluator(parseOutput.n))
-    , exportedContext = null;
+  var lits = parseOutput.l;
+  var runtimeOptions = mixin({}, globalOptions, localOptions);
+  var cacheModules = runtimeOptions.cache;
+  var resolvers = runtimeOptions.resolvers || globalResolvers;
+  var evaluator = wrapLiteral(createStatementsEvaluator(parseOutput.n));
+  var exportedContext = null;
 
   runtimeTemplate.configure = configureTemplate;
   runtimeTemplate.exports = templateExports;
@@ -971,8 +971,8 @@ function buildRuntime(parseOutput, localOptions) {
    */
 
   function runtimeTemplate(obj, localOptions) {
-    var ctx = mixin(extendObject(globalContext), obj)
-      , processingOptions = mixin({}, globalOptions, localOptions);
+    var ctx = mixin(extendObject(globalContext), obj);
+    var processingOptions = mixin({}, globalOptions, localOptions);
 
     // If no Writer is provided, create a throw-away Array Writer
     var writer = processingOptions.writer || createArrayWriter();
@@ -1117,8 +1117,8 @@ function buildRuntime(parseOutput, localOptions) {
       return lits[node];
     }
 
-    var nodeType = lits[node[0]]
-      , createFunction = Evaluators[nodeType];
+    var nodeType = lits[node[0]];
+    var createFunction = Evaluators[nodeType];
 
     if ( !createFunction ) {
       throw new Error("Invalid Node in Parse Tree: " + nodeType);
@@ -1132,8 +1132,8 @@ function buildRuntime(parseOutput, localOptions) {
       return createEvaluator(statementNodes[0]);
     }
 
-    var statements = wrapArrayEvaluators(statementNodes).reverse()
-      , slen = statements.length - 1;
+    var statements = wrapArrayEvaluators(statementNodes).reverse();
+    var slen = statements.length - 1;
 
     return statementsEvaluator;
 
@@ -1155,8 +1155,8 @@ function buildRuntime(parseOutput, localOptions) {
    */
 
   function getBinaryType(left, right) {
-    var l = typeof left === 'function' ? 1 : 0
-      , r = typeof right === 'function' ? 2 : 0;
+    var l = typeof left === 'function' ? 1 : 0;
+    var r = typeof right === 'function' ? 2 : 0;
     return l | r;
   }
 
@@ -1164,23 +1164,23 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate an evaluator to deal with 'from' and 'import' statements
   function createImportEvaluator(fromNodes) {
-    var importList = []
-      , ilen = fromNodes.length - 1
-      , evaluator = cacheModules ? cacheableEvaluator : dynamicEvaluator;
+    var importList = [];
+    var ilen = fromNodes.length - 1;
+    var evaluator = cacheModules ? cacheableEvaluator : dynamicEvaluator;
 
     for ( var i = ilen; i >= 0; i-- ) {
-      var fromNode = fromNodes[i]
-        , moduleName = lits[fromNode[0]]
-        , aliases = fromNode[1]
-        , moduleAlias = null
-        , toResolve = null;
+      var fromNode = fromNodes[i];
+      var moduleName = lits[fromNode[0]];
+      var aliases = fromNode[1];
+      var moduleAlias = null;
+      var toResolve = null;
 
       if ( isArray(aliases) ) {
         toResolve = [];
         for ( var j = aliases.length - 1; j >= 0; j-- ) {
-          var importInfo = aliases[j]
-            , name = lits[importInfo[0]]
-            , alias = importInfo[1] ? lits[importInfo[1]] : name;
+          var importInfo = aliases[j];
+          var name = lits[importInfo[0]];
+          var alias = importInfo[1] ? lits[importInfo[1]] : name;
           toResolve.push([alias, name]);
         }
       }
@@ -1218,10 +1218,10 @@ function buildRuntime(parseOutput, localOptions) {
     // if moduleCaching is off, we resolve the exports every time
     function dynamicEvaluator(ctx, writer) {
       for ( var i = ilen; i >= 0; i-- ) {
-        var importItem = importList[i]
-          , moduleName = importItem[0]
-          , moduleAlias = importItem[1]
-          , toResolve = importItem[2];
+        var importItem = importList[i];
+        var moduleName = importItem[0];
+        var moduleAlias = importItem[1];
+        var toResolve = importItem[2];
 
         var moduleExports = resolveExports(moduleName, true);
 
@@ -1262,11 +1262,11 @@ function buildRuntime(parseOutput, localOptions) {
   // generate an evaluator to represent a partial and its associated closure
   function createPartialEvaluator(nameLiteral, paramDefs,
                                   statementNodes, guardNode) {
-    var name = lits[nameLiteral]
-      , params = [null].concat(expandLiterals(paramDefs))
-      , plen = params.length
-      , statements = createStatementsEvaluator(statementNodes)
-      , guard = guardNode && createEvaluator(guardNode);
+    var name = lits[nameLiteral];
+    var params = [null].concat(expandLiterals(paramDefs));
+    var plen = params.length;
+    var statements = createStatementsEvaluator(statementNodes);
+    var guard = guardNode && createEvaluator(guardNode);
 
     return guard ? guardedClosureEvaluator : unguardedClosureEvaluator;
 
@@ -1334,9 +1334,9 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate a bound call evaluator
   function createBindEvaluator(memberNode, argNodes) {
-    var member = createEvaluator(memberNode)
-      , args = wrapArrayEvaluators(argNodes)
-      , alen = args.length;
+    var member = createEvaluator(memberNode);
+    var args = wrapArrayEvaluators(argNodes);
+    var alen = args.length;
 
     return bindEvaluator;
 
@@ -1363,9 +1363,9 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate an evaluator to perform a function or partial call
   function createCallEvaluator(memberNode, argNodes) {
-    var member = createEvaluator(memberNode)
-      , args = [null].concat(wrapArrayEvaluators(argNodes))
-      , alen = args.length;
+    var member = createEvaluator(memberNode);
+    var args = [null].concat(wrapArrayEvaluators(argNodes));
+    var alen = args.length;
 
     return callEvaluator;
 
@@ -1394,8 +1394,8 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate an evaluator to perform local variable assignment
   function createAssignEvaluator(assignmentDefs) {
-    var assigns = wrapAssignmentEvaluators(assignmentDefs).reverse()
-      , alen = assigns.length - 1;
+    var assigns = wrapAssignmentEvaluators(assignmentDefs).reverse();
+    var alen = assigns.length - 1;
 
     return assignEvaluator;
 
@@ -1409,9 +1409,9 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate an evaluator to write an html opening tag
   function createOpenTagEvaluator(nameNode, attributeDefs, selfClose) {
-    var name = createEvaluator(nameNode)
-      , attributes = wrapAttributeEvaluators(attributeDefs).reverse()
-      , alen = attributes.length - 1;
+    var name = createEvaluator(nameNode);
+    var attributes = wrapAttributeEvaluators(attributeDefs).reverse();
+    var alen = attributes.length - 1;
 
     if ( typeof name === 'function' ) {
       return selfClose ? selfCloseFuncEvaluator : openTagFuncEvaluator;
@@ -1437,8 +1437,8 @@ function buildRuntime(parseOutput, localOptions) {
     function getAttributes(ctx, writer) {
       var result = {};
       for ( var i = alen; i >= 0; i-- ) {
-        var attribute = attributes[i]
-          , key = attribute[0];
+        var attribute = attributes[i];
+        var key = attribute[0];
 
         if ( typeof key === 'function' ) {
           key = key(ctx, writer);
@@ -1459,8 +1459,8 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate an evaluator to write an html closing tag
   function createCloseTagEvaluator(nameNode) {
-    var name = createEvaluator(nameNode)
-      , name_func = typeof name === 'function';
+    var name = createEvaluator(nameNode);
+    var name_func = typeof name === 'function';
 
     return name_func ? closeFuncEvaluator : closeLiteralEvaluator;
 
@@ -1528,10 +1528,10 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate an evaluator that performs for looping over ranges
   function createForEvaluator(rangeNodes, statementNodes, elseNodes) {
-    var ranges = []
-      , rlen = rangeNodes.length
-      , statements = createStatementsEvaluator(statementNodes)
-      , elseStatements = elseNodes && createStatementsEvaluator(elseNodes);
+    var ranges = [];
+    var rlen = rangeNodes.length;
+    var statements = createStatementsEvaluator(statementNodes);
+    var elseStatements = elseNodes && createStatementsEvaluator(elseNodes);
 
     for ( var i = 0, len = rangeNodes.length; i < len; i++ ) {
       var rangeNode = rangeNodes[i];
@@ -1547,8 +1547,8 @@ function buildRuntime(parseOutput, localOptions) {
 
     function forEvaluator(ctx, writer) {
       // The entire for loop is only a single nested context
-      var newCtx = extendObject(ctx)
-        , statementsEvaluated = false;
+      var newCtx = extendObject(ctx);
+      var statementsEvaluated = false;
 
       processRange(rlen - 1);
       if ( !statementsEvaluated && elseStatements ) {
@@ -1556,11 +1556,11 @@ function buildRuntime(parseOutput, localOptions) {
       }
 
       function processRange(idx) {
-        var range = ranges[idx]
-          , name = range[0]
-          , data = range[1](newCtx, writer)
-          , guard = range[2]
-          , items = data;
+        var range = ranges[idx];
+        var name = range[0];
+        var data = range[1](newCtx, writer);
+        var guard = range[2];
+        var items = data;
 
         if ( typeof data !== 'object') {
           return;
@@ -1604,15 +1604,15 @@ function buildRuntime(parseOutput, localOptions) {
   // generate an evaluator that borrows the specified expressions
   // as the block's new context for locals (remaining immutable)
   function createUsingEvaluator(exprsNode, statementNodes) {
-    var exprs = [null].concat(wrapArrayEvaluators(exprsNode))
-      , elen = exprs.length
-      , statements = createStatementsEvaluator(statementNodes);
+    var exprs = [null].concat(wrapArrayEvaluators(exprsNode));
+    var elen = exprs.length;
+    var statements = createStatementsEvaluator(statementNodes);
 
     return usingEvaluator;
 
     function usingEvaluator(ctx, writer) {
-      var newCtx = extendObject(ctx)
-        , args = [newCtx];
+      var newCtx = extendObject(ctx);
+      var args = [newCtx];
 
       for ( var i = 1; i < elen; i++ ) {
         args[i] = exprs[i](ctx, writer);
@@ -1625,9 +1625,9 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate a conditional evaluator (if/else or ternary)
   function createConditionalEvaluator(conditionNode, trueNodes, falseNodes) {
-    var $1 = createEvaluator(conditionNode)
-      , $2 = createStatementsEvaluator(trueNodes)
-      , $3 = createStatementsEvaluator(falseNodes);
+    var $1 = createEvaluator(conditionNode);
+    var $2 = createStatementsEvaluator(trueNodes);
+    var $3 = createStatementsEvaluator(falseNodes);
 
     if ( typeof $1 !== 'function' ) {
       return isTruthy($1) ? $2 : $3;
@@ -1655,8 +1655,8 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate an 'or' evaluator, including short circuiting
   function createOrEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode)
-      , $2 = createEvaluator(rightNode);
+    var $1 = createEvaluator(leftNode);
+    var $2 = createEvaluator(rightNode);
 
     if ( typeof $1 !== 'function' ) {
       return isTruthy($1) ? $1 : $2;
@@ -1677,8 +1677,8 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate an 'and' evaluator, including short circuiting
   function createAndEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode)
-      , $2 = createEvaluator(rightNode);
+    var $1 = createEvaluator(leftNode);
+    var $2 = createEvaluator(rightNode);
 
     if ( typeof $1 !== 'function' ) {
       return isTruthy($1) ? $2 : $1;
@@ -1699,8 +1699,8 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate a match evaluator
   function createMatchEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode)
-      , $2 = createEvaluator(rightNode);
+    var $1 = createEvaluator(leftNode);
+    var $2 = createEvaluator(rightNode);
 
     switch ( getBinaryType($1, $2) ) {
       case 0: return isMatchingObject($2, $1);
@@ -1716,9 +1716,9 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate an equality evaluator
   function createEqEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode)
-      , $2 = createEvaluator(rightNode)
-      , type = getBinaryType($1, $2);
+    var $1 = createEvaluator(leftNode);
+    var $2 = createEvaluator(rightNode);
+    var type = getBinaryType($1, $2);
 
     return [null, eqLeft, eqRight, eqBoth][type] || ($1 === $2);
 
@@ -1729,9 +1729,9 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate an inequality evaluator
   function createNeqEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode)
-      , $2 = createEvaluator(rightNode)
-      , type = getBinaryType($1, $2);
+    var $1 = createEvaluator(leftNode);
+    var $2 = createEvaluator(rightNode);
+    var type = getBinaryType($1, $2);
 
     return [null, neqLeft, neqRight, neqBoth][type] || ($1 !== $2);
 
@@ -1742,9 +1742,9 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate a greater-than evaluator
   function createGtEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode)
-      , $2 = createEvaluator(rightNode)
-      , type = getBinaryType($1, $2);
+    var $1 = createEvaluator(leftNode);
+    var $2 = createEvaluator(rightNode);
+    var type = getBinaryType($1, $2);
 
     return [null, gtLeft, gtRight, gtBoth][type] || ($1 > $2);
 
@@ -1755,9 +1755,9 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate a greater-than or equal to evaluator
   function createGteEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode)
-      , $2 = createEvaluator(rightNode)
-      , type = getBinaryType($1, $2);
+    var $1 = createEvaluator(leftNode);
+    var $2 = createEvaluator(rightNode);
+    var type = getBinaryType($1, $2);
 
     return [null, gteLeft, gteRight, gteBoth][type] || ($1 >= $2);
 
@@ -1768,9 +1768,9 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate a less-than evaluator
   function createLtEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode)
-      , $2 = createEvaluator(rightNode)
-      , type = getBinaryType($1, $2);
+    var $1 = createEvaluator(leftNode);
+    var $2 = createEvaluator(rightNode);
+    var type = getBinaryType($1, $2);
 
     return [null, ltLeft, ltRight, ltBoth][type] || ($1 < $2);
 
@@ -1781,9 +1781,9 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate a less-than or equal to evaluator
   function createLteEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode)
-      , $2 = createEvaluator(rightNode)
-      , type = getBinaryType($1, $2);
+    var $1 = createEvaluator(leftNode);
+    var $2 = createEvaluator(rightNode);
+    var type = getBinaryType($1, $2);
 
     return [null, lteLeft, lteRight, lteBoth][type] || ($1 <= $2);
 
@@ -1794,9 +1794,9 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate an addition evaluator
   function createAddEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode)
-      , $2 = createEvaluator(rightNode)
-      , type = getBinaryType($1, $2);
+    var $1 = createEvaluator(leftNode);
+    var $2 = createEvaluator(rightNode);
+    var type = getBinaryType($1, $2);
 
     return [null, addLeft, addRight, addBoth][type] || ($1 + $2);
 
@@ -1807,9 +1807,9 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate a subtraction evaluator
   function createSubEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode)
-      , $2 = createEvaluator(rightNode)
-      , type = getBinaryType($1, $2);
+    var $1 = createEvaluator(leftNode);
+    var $2 = createEvaluator(rightNode);
+    var type = getBinaryType($1, $2);
 
     return [null, subLeft, subRight, subBoth][type] || ($1 - $2);
 
@@ -1820,9 +1820,9 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate a multiplication evaluator
   function createMulEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode)
-      , $2 = createEvaluator(rightNode)
-      , type = getBinaryType($1, $2);
+    var $1 = createEvaluator(leftNode);
+    var $2 = createEvaluator(rightNode);
+    var type = getBinaryType($1, $2);
 
     return [null, mulLeft, mulRight, mulBoth][type] || ($1 * $2);
 
@@ -1833,9 +1833,9 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate a division evaluator
   function createDivEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode)
-      , $2 = createEvaluator(rightNode)
-      , type = getBinaryType($1, $2);
+    var $1 = createEvaluator(leftNode);
+    var $2 = createEvaluator(rightNode);
+    var type = getBinaryType($1, $2);
 
     return [null, divLeft, divRight, divBoth][type] || ($1 / $2);
 
@@ -1846,9 +1846,9 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate a remainder evaluator
   function createModEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode)
-      , $2 = createEvaluator(rightNode)
-      , type = getBinaryType($1, $2);
+    var $1 = createEvaluator(leftNode);
+    var $2 = createEvaluator(rightNode);
+    var type = getBinaryType($1, $2);
 
     return [null, modLeft, modRight, modBoth][type] || ($1 % $2);
 
@@ -1859,10 +1859,10 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate an interpolation evaluator
   function createFormatEvaluator(formatNode, exprNode) {
-    var $1 = createEvaluator(formatNode)
-      , $1_func = typeof $1 === 'function'
-      , $2 = createEvaluator(exprNode)
-      , $2_func = typeof $2 === 'function';
+    var $1 = createEvaluator(formatNode);
+    var $1_func = typeof $1 === 'function';
+    var $2 = createEvaluator(exprNode);
+    var $2_func = typeof $2 === 'function';
 
     var template = null;
     if ( !$1_func ) {
@@ -1877,8 +1877,8 @@ function buildRuntime(parseOutput, localOptions) {
       return template($2);
     }
 
-    var cache = {}
-      , cacheCount = 0;
+    var cache = {};
+    var cacheCount = 0;
 
     // otherwise, we have to evaluate the interpolation every time
     return dynamicFormatEvaluator;
@@ -1896,9 +1896,9 @@ function buildRuntime(parseOutput, localOptions) {
     // caching, we're going to start leaking memory.  So this evaluator will
     // blow away the cache and start over
     function dynamicFormatEvaluator(ctx, writer) {
-      var formatStr = $1(ctx, writer)
-        , data = $2_func ? $2(ctx, writer) : $2
-        , dynamicTemplate = cache[formatStr];
+      var formatStr = $1(ctx, writer);
+      var data = $2_func ? $2(ctx, writer) : $2;
+      var dynamicTemplate = cache[formatStr];
 
       if ( !dynamicTemplate ) {
         if ( cacheCount >= TemplateCacheMax ) {
@@ -1943,8 +1943,8 @@ function buildRuntime(parseOutput, localOptions) {
       return null;
     }
 
-    var $2 = createEvaluator(elemNode)
-      , type = getBinaryType($1, $2);
+    var $2 = createEvaluator(elemNode);
+    var type = getBinaryType($1, $2);
 
     return [null, memLeft, null, memBoth][type] || ($1[$2]);
 
@@ -1969,8 +1969,8 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate an array evaluator
   function createArrayEvaluator(elemNodes) {
-    var elems = wrapArrayEvaluators(elemNodes)
-      , elen = elems.length;
+    var elems = wrapArrayEvaluators(elemNodes);
+    var elen = elems.length;
 
     return arrayEvaluator;
 
@@ -1985,8 +1985,8 @@ function buildRuntime(parseOutput, localOptions) {
 
   // generate a dictionary evaluator
   function createDictionaryEvaluator(assignmentDefs) {
-    var assigns = wrapAssignmentEvaluators(assignmentDefs).reverse()
-      , alen = assigns.length - 1;
+    var assigns = wrapAssignmentEvaluators(assignmentDefs).reverse();
+    var alen = assigns.length - 1;
 
     return dictionaryEvaluator;
 
@@ -2052,53 +2052,56 @@ exports.resolvers = resolvers;
 
 // ## Array and Object Handling
 
-var toString = Object.prototype.toString
-  , slice = Array.prototype.slice;
+var toString = Object.prototype.toString;
+var slice = Array.prototype.slice;
 
 var isArray = Array.isArray;
 if ( !isArray ) {
-  isArray = (function () {
-    return function _isArray(obj) {
-      return obj && obj.length && toString.call(obj) === '[object Array]';
-    };
-  })();
-}
-
-var extendObject = Object.create;
-if ( !extendObject ) {
-  extendObject = (function () {
-    function FakeConstructor() {}
-
-    return function _extendContext(obj) {
-      FakeConstructor.prototype = obj;
-      return new FakeConstructor();
-    };
-  })();
-}
-
-var freezeObject = Object.freeze;
-if ( !freezeObject ) {
-  freezeObject = (function () {
-    return function _freezeObject(obj) {
-      return obj;
-    };
-  })();
+  isArray = function _isArray(obj) {
+    return obj && obj.length && toString.call(obj) === '[object Array]';
+  };
 }
 
 var objectKeys = Object.keys;
 if ( !objectKeys ) {
-  objectKeys = (function () {
-    return function _objectKeys(obj) {
-      var keys = [];
-      for ( var key in obj ) {
-        if ( obj.hasOwnProperty(key) ) {
-          keys.push(key);
-        }
+  objectKeys = function _objectKeys(obj) {
+    var keys = [];
+    for ( var key in obj ) {
+      if ( obj.hasOwnProperty(key) ) {
+        keys.push(key);
       }
-      return keys;
-    };
-  });
+    }
+    return keys;
+  };
 }
+
+var freezeObject = Object.freeze;
+if ( !freezeObject ) {
+  freezeObject = function _freezeObject(obj) {
+    return obj;
+  };
+}
+
+var extendObject;
+(function () {
+  function FakeConstructor() {}
+  var testProto = { __proto__: { works: true } };
+
+  if ( testProto.works && objectKeys(testProto).length === 0 ) {
+    extendObject = function _fastExtendObject(obj) {
+      return { __proto__: obj };
+    };
+  }
+  else if ( Object.create ) {
+    extendObject = Object.create;
+  }
+  else {
+    extendObject = function _slowExtendObject(obj) {
+      FakeConstructor.prototype = obj;
+      return new FakeConstructor();
+    };
+  }
+})();
 
 function mixin(target) {
   for ( var i = 1, ilen = arguments.length; i < ilen; i++ ) {
@@ -2123,8 +2126,8 @@ function mixin(target) {
  */
 
 function createStaticMixin(obj) {
-  var keys = objectKeys(freezeObject(obj)).reverse()
-    , klen = keys.length - 1;
+  var keys = objectKeys(freezeObject(obj)).reverse();
+  var klen = keys.length - 1;
 
   return staticMixin;
 
@@ -2195,7 +2198,7 @@ function escapeContent(str) {
 
 /**
  * Stringify the provided value for Interpol's purposes.
- * 
+ *
  * @param {Mixed} value the value to stringify
  */
 
@@ -2244,16 +2247,16 @@ function formatSyntaxError(err, filePath) {
     return err;
   }
 
-  var unexpected = err.found ? "'" + err.found + "'" : "end of file"
-    , errString = "Unexpected " + unexpected
-    , lineInfo = ":" + err.line + ":" + err.column;
+  var unexpected = err.found ? "'" + err.found + "'" : "end of file";
+  var errString = "Unexpected " + unexpected;
+  var lineInfo = ":" + err.line + ":" + err.column;
 
   return new Error((filePath || 'string') + lineInfo + ": " + errString);
 }
 
 function formatWarning(warning, filePath) {
-  var lineInfo = ":" + warning.line + ":" + warning.column
-    , warningString = warning.message;
+  var lineInfo = ":" + warning.line + ":" + warning.column;
+  var warningString = warning.message;
 
   filePath = filePath || warning.filePath || 'string';
   return filePath + lineInfo + ": " + warningString;
@@ -2312,8 +2315,8 @@ function configure(func, requiredCount, defaultArgs) {
 
   function configuredWrapper() {
     /* jshint validthis:true */
-    var args = slice.call(arguments, 0)
-      , applyArgs = args.concat(argTemplate.slice(args.length));
+    var args = slice.call(arguments, 0);
+    var applyArgs = args.concat(argTemplate.slice(args.length));
     return func.apply(this, applyArgs);
   }
 }
@@ -2347,13 +2350,13 @@ exports.configure = configure;
 
 "use strict";
 
-var interpol = require('../interpol')
-  , util = require('../util');
+var interpol = require('../interpol');
+var util = require('../util');
 
-var freezeObject = util.freezeObject
-  , stringify = util.stringify
-  , escapeAttribute = util.escapeAttribute
-  , escapeContent = util.escapeContent;
+var freezeObject = util.freezeObject;
+var stringify = util.stringify;
+var escapeAttribute = util.escapeAttribute;
+var escapeContent = util.escapeContent;
 
 function noOp() {}
 
@@ -2449,17 +2452,17 @@ interpol.createArrayWriter = createArrayWriter;
 
 "use strict";
 
-var interpol = require('../interpol')
-  , util = require('../util')
-  , array = require('./array');
+var interpol = require('../interpol');
+var util = require('../util');
+var array = require('./array');
 
-var freezeObject = util.freezeObject
-  , mixin = util.mixin
-  , createArrayWriter = array.createArrayWriter;
+var freezeObject = util.freezeObject;
+var mixin = util.mixin;
+var createArrayWriter = array.createArrayWriter;
 
-var REPLACE = createDOMWriter.REPLACE = 'replace'
-  , APPEND = createDOMWriter.APPEND = 'append'
-  , INSERT = createDOMWriter.INSERT = 'insert';
+var REPLACE = createDOMWriter.REPLACE = 'replace';
+var APPEND = createDOMWriter.APPEND = 'append';
+var INSERT = createDOMWriter.INSERT = 'insert';
 
 /**
  * Creates a DOM Writer.  A DOM Writer attaches itself to a DOM Element,
@@ -2477,9 +2480,9 @@ var REPLACE = createDOMWriter.REPLACE = 'replace'
  */
 
 function createDOMWriter(parentElement, renderMode) {
-  var arr = []
-    , writer = createArrayWriter(arr)
-    , endRender;
+  var arr = [];
+  var writer = createArrayWriter(arr);
+  var endRender;
 
   switch ( renderMode ) {
     case APPEND:  endRender = appendEndRender; break;
@@ -2533,8 +2536,8 @@ interpol.createDOMWriter = createDOMWriter;
 
 "use strict";
 
-var interpol = require('../interpol')
-  , util = require('../util');
+var interpol = require('../interpol');
+var util = require('../util');
 
 var freezeObject = util.freezeObject;
 

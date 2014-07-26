@@ -1,5 +1,5 @@
-var nodeunit = require('nodeunit')
-  , interpol = require('../lib');
+var nodeunit = require('nodeunit');
+var interpol = require('../lib');
 
 function eval(str, ctx) {
   var template = interpol(str);
@@ -43,9 +43,9 @@ exports.imports = nodeunit.testCase({
   },
 
   "File Submodule Import": function (test) {
-    var script1 = "import module1\nmodule1.test_value"
-      , script2 = "import module2\nmodule2.test_value"
-      , script3 = "import module1.index\nindex.test_value";
+    var script1 = "import module1\nmodule1.test_value";
+    var script2 = "import module2\nmodule2.test_value";
+    var script3 = "import module1.index\nindex.test_value";
 
     test.equal(eval(script1), "right!");
     test.equal(eval(script2), "right!");
