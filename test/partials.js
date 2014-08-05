@@ -110,5 +110,23 @@ exports.partials = nodeunit.testCase({
                "Alice is awesome!\n\n");
 
     test.done();
+  },
+
+  "Aliased Inline Guards": function (test) {
+    var script = 'animal(typeVal, typeName)\n' +
+                 'def animal("monkey" as type, name)\n' +
+                 '  "I am a %type named %name"\n' +
+                 'end\n' +
+                 'def animal("cricket" as type, name)\n' +
+                 '  "This is a %type named %name"\n' +
+                 'end';
+
+    test.equal(eval(script, { typeVal: "monkey", typeName: "George"}),
+               "I am a monkey named George\n\n");
+
+    test.equal(eval(script, { typeVal: "cricket", typeName: "Jim"}),
+               "This is a cricket named Jim\n\n");
+
+    test.done();
   }
 });
