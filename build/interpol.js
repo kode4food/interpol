@@ -282,7 +282,7 @@ var util = require('./util');
 var isArray = util.isArray;
 var objectKeys = util.objectKeys;
 
-/** 
+/**
  * Basic Object Matcher to support the `like` operator.
  *
  * @param {Mixed} template the Template to match against
@@ -303,7 +303,9 @@ function isMatchingObject(template, obj) {
   }
 
   if ( isArray(template) ) {
-    if ( !isArray(obj) || template.length !== obj.length ) { return false; }
+    if ( !isArray(obj) || template.length !== obj.length ) {
+      return false;
+    }
     for ( var i = 0, len = template.length; i < len; i++ ) {
       if ( !isMatchingObject(template[i], obj[i]) ) {
         return false;
@@ -312,7 +314,9 @@ function isMatchingObject(template, obj) {
     return true;
   }
 
-  if ( typeof obj !== 'object' || obj === null ) { return false; }
+  if ( typeof obj !== 'object' || obj === null ) {
+    return false;
+  }
 
   for ( var key in template ) {
     if ( !isMatchingObject(template[key], obj[key]) ) {
@@ -359,8 +363,12 @@ function buildArrayMatcher(template) {
   return arrayMatcher;
 
   function arrayMatcher(obj) {
-    if ( template === obj ) { return true; }
-    if ( !isArray(obj) || mlen !== obj.length ) { return false; }
+    if ( template === obj ) {
+      return true;
+    }
+    if ( !isArray(obj) || mlen !== obj.length ) {
+      return false;
+    }
     for ( var i = 0; i < mlen; i++ ) {
       if ( !matchers[i](obj[i]) ) {
         return false;
@@ -381,8 +389,12 @@ function buildObjectMatcher(template) {
   return objectMatcher;
 
   function objectMatcher(obj) {
-    if ( template === obj ) { return true; }
-    if ( typeof obj !== 'object' || obj === null ) { return false; }
+    if ( template === obj ) {
+      return true;
+    }
+    if ( typeof obj !== 'object' || obj === null ) {
+      return false;
+    }
     for ( var i = 0; i < mlen; i++ ) {
       if ( !matchers[i](obj[keys[i]]) ) {
         return false;
@@ -904,6 +916,7 @@ function buildRuntime(parseOutput, localOptions) {
 
   // A lookup table of code-path generators
   var Evaluators = freezeObject({
+    st: createStatementsEvaluator,
     im: createImportEvaluator,
     de: createPartialEvaluator,
     bi: createBindEvaluator,
@@ -1127,23 +1140,6 @@ function buildRuntime(parseOutput, localOptions) {
     return createFunction.apply(node, node.slice(1));
   }
 
-  function createStatementsEvaluator(statementNodes) {
-    if ( statementNodes.length === 1 ) {
-      return createEvaluator(statementNodes[0]);
-    }
-
-    var statements = wrapArrayEvaluators(statementNodes).reverse();
-    var slen = statements.length - 1;
-
-    return statementsEvaluator;
-
-    function statementsEvaluator(ctx, writer) {
-      for ( var i = slen; i >= 0; i-- ) {
-        statements[i](ctx, writer);
-      }
-    }
-  }
-
   /**
    * Depending on the value types for `left` and `right`, will return an
    * index into an Array for choosing the best code-path to take in
@@ -1161,6 +1157,23 @@ function buildRuntime(parseOutput, localOptions) {
   }
 
   // ## Evaluator Generation
+
+  function createStatementsEvaluator(statementNodes) {
+    if ( statementNodes.length === 1 ) {
+      return createEvaluator(statementNodes[0]);
+    }
+
+    var statements = wrapArrayEvaluators(statementNodes).reverse();
+    var slen = statements.length - 1;
+
+    return statementsEvaluator;
+
+    function statementsEvaluator(ctx, writer) {
+      for ( var i = slen; i >= 0; i-- ) {
+        statements[i](ctx, writer);
+      }
+    }
+  }
 
   // generate an evaluator to deal with 'from' and 'import' statements
   function createImportEvaluator(fromNodes) {
@@ -1602,11 +1615,11 @@ function buildRuntime(parseOutput, localOptions) {
   }
 
   // generate an evaluator that borrows the specified expressions
-  // as the block's new context for locals (remaining immutable)
-  function createUsingEvaluator(exprsNode, statementNodes) {
-    var exprs = [null].concat(wrapArrayEvaluators(exprsNode));
-    var elen = exprs.length;
-    var statements = createStatementsEvaluator(statementNodes);
+  // as the evaluated node's new scope for locals (remaining immutable)
+  function createUsingEvaluator(usingNode, evalNode) {
+    var usingExprs = [null].concat(wrapArrayEvaluators(usingNode));
+    var ulen = usingExprs.length;
+    var evalExpr = createEvaluator(evalNode);
 
     return usingEvaluator;
 
@@ -1614,12 +1627,12 @@ function buildRuntime(parseOutput, localOptions) {
       var newCtx = extendObject(ctx);
       var args = [newCtx];
 
-      for ( var i = 1; i < elen; i++ ) {
-        args[i] = exprs[i](ctx, writer);
+      for ( var i = 1; i < ulen; i++ ) {
+        args[i] = usingExprs[i](ctx, writer);
       }
 
       mixin.apply(null, args);
-      statements(newCtx, writer);
+      return evalExpr(newCtx, writer);
     }
   }
 

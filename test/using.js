@@ -23,7 +23,7 @@ exports.using = nodeunit.testCase({
     callback();
   },
 
-  "'Using' Evaluation": function (test) {
+  "Using Statements": function (test) {
     var script1 = 'let b = (name = "Frog")\n' +
                   'using b\n' +
                   '  "Hello, %name!"\n' +
