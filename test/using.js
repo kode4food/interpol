@@ -41,5 +41,19 @@ exports.using = nodeunit.testCase({
     test.equal(eval(script1), "Hello, Frog!\n");
     test.equal(eval(script2), "Hello, Doggy!\n\n");
     test.done();
+  },
+
+  "Using Expressions": function (test) {
+    var script1 = 'let a = (name = "Thom", age = 42)\n' +
+                  '"%name is %age" using a';
+
+    var script2 = 'let name = "Thom"\n' +
+                  'let b = (age = 42)\n' +
+                  'let c = (job = "Developer")\n' +
+                  '"%name is %age and is a %job" using b, c';
+
+    test.equal(eval(script1), "Thom is 42");
+    test.equal(eval(script2), "Thom is 42 and is a Developer");
+    test.done();
   }
 });
