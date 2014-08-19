@@ -52,8 +52,17 @@ exports.using = nodeunit.testCase({
                   'let c = (job = "Developer")\n' +
                   '"%name is %age and is a %job" using b, c';
 
+    var script3 = 'let name = "Thom"\n' +
+                  'let b = (age = 42)\n' +
+                  'let c = (job = "Developer")\n' +
+                  '("%name is %age and is a %job" using b) using c';
+
+    var script4 = '%name is %age using b using c';
+
     test.equal(eval(script1), "Thom is 42");
     test.equal(eval(script2), "Thom is 42 and is a Developer");
+    test.equal(eval(script3), "Thom is 42 and is a Developer");
+    test.throws(function () { eval(script4); });
     test.done();
   }
 });
