@@ -1,5 +1,12 @@
 # Change History
 
+## Version 0.4.1 - 'using' Expressions
+* The 'using' construct can now be applied to individual expressions.
+
+```python
+let result = "%name and %age" using person, profile
+```
+
 ## Version 0.4 - Stabilization
 A lot of effort has been put into stabilizing the Interpol code base.  There are no new features in this release, but some have been removed.  Also, some behaviors have been clarified.  Specifically:
 
@@ -17,7 +24,7 @@ A lot of effort has been put into stabilizing the Interpol code base.  There are
   * Non-Zero Numbers
   * Any Object
 
-* The Separate Language and API References have been removed.  Instead, [The Interpol Guide](http://kode4food.bitbucket.org/interpol/guide) will serve as an ongoing source of Interpol Information.
+* The Separate Language and API References will eventually be removed.  Instead, [The Interpol Guide](http://kode4food.bitbucket.org/interpol/guide) will serve as an ongoing source of Interpol Information.
 
 ## Version 0.3.17 - Bower Support
 Adding Bower Support.  Because we're hosting at BitBucket, you'll have to install directly from our repository, like so:
@@ -46,7 +53,7 @@ def renderPerson(person, profile)
   end
 end
 ```
- 
+
 * The 'array' module has been renamed to 'list'.  The Tuple, Array, and Dictionary distinction is confusing, and completely unnecessary.  So the term 'List' is now preferred.
 
 * For Loops have been extended to support range guards as well as an `else` clause.  You can define an `else` clause for those cases where the for loop finds no matches:
