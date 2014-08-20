@@ -8,17 +8,17 @@
 
 <span class="s2">&quot;use strict&quot;</span><span class="p">;</span>
 
-<span class="kd">var</span> <span class="nx">interpol</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../interpol&#39;</span><span class="p">)</span>
-  <span class="p">,</span> <span class="nx">util</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../util&#39;</span><span class="p">)</span>
-  <span class="p">,</span> <span class="nx">array</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./array&#39;</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">interpol</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../interpol&#39;</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">util</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../util&#39;</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">array</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./array&#39;</span><span class="p">);</span>
 
-<span class="kd">var</span> <span class="nx">freezeObject</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">freezeObject</span>
-  <span class="p">,</span> <span class="nx">mixin</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">mixin</span>
-  <span class="p">,</span> <span class="nx">createArrayWriter</span> <span class="o">=</span> <span class="nx">array</span><span class="p">.</span><span class="nx">createArrayWriter</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">freezeObject</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">freezeObject</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">mixin</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">mixin</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">createArrayWriter</span> <span class="o">=</span> <span class="nx">array</span><span class="p">.</span><span class="nx">createArrayWriter</span><span class="p">;</span>
 
-<span class="kd">var</span> <span class="nx">REPLACE</span> <span class="o">=</span> <span class="nx">createDOMWriter</span><span class="p">.</span><span class="nx">REPLACE</span> <span class="o">=</span> <span class="s1">&#39;replace&#39;</span>
-  <span class="p">,</span> <span class="nx">APPEND</span> <span class="o">=</span> <span class="nx">createDOMWriter</span><span class="p">.</span><span class="nx">APPEND</span> <span class="o">=</span> <span class="s1">&#39;append&#39;</span>
-  <span class="p">,</span> <span class="nx">INSERT</span> <span class="o">=</span> <span class="nx">createDOMWriter</span><span class="p">.</span><span class="nx">INSERT</span> <span class="o">=</span> <span class="s1">&#39;insert&#39;</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p>Creates a DOM Writer.  A DOM Writer attaches itself to a DOM Element,
+<span class="kd">var</span> <span class="nx">REPLACE</span> <span class="o">=</span> <span class="nx">createDOMWriter</span><span class="p">.</span><span class="nx">REPLACE</span> <span class="o">=</span> <span class="s1">&#39;replace&#39;</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">APPEND</span> <span class="o">=</span> <span class="nx">createDOMWriter</span><span class="p">.</span><span class="nx">APPEND</span> <span class="o">=</span> <span class="s1">&#39;append&#39;</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">INSERT</span> <span class="o">=</span> <span class="nx">createDOMWriter</span><span class="p">.</span><span class="nx">INSERT</span> <span class="o">=</span> <span class="s1">&#39;insert&#39;</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p>Creates a DOM Writer.  A DOM Writer attaches itself to a DOM Element,
 and will manipulate that Element's content when a template is rendered
 with it.  The writer is very simple and won't cover all use-cases, it
 also may not be the most performant approach.</p>
@@ -34,9 +34,9 @@ respectively.</p>
 <li><p><strong>parentElement must be an Element.</strong><br/>(the Element to which this DOMWriter attaches)</p></li>
 <li><p><strong>renderMode is optional and must be a String.</strong><br/>(the DOM rendering mode: REPLACE|APPEND|INSERT)</p></li>
 </ul></div></div><div class="code"><div class="wrapper"><span class="kd">function</span> <span class="nx">createDOMWriter</span><span class="p">(</span><span class="nx">parentElement</span><span class="p">,</span> <span class="nx">renderMode</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">arr</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="p">,</span> <span class="nx">writer</span> <span class="o">=</span> <span class="nx">createArrayWriter</span><span class="p">(</span><span class="nx">arr</span><span class="p">)</span>
-    <span class="p">,</span> <span class="nx">endRender</span><span class="p">;</span>
+  <span class="kd">var</span> <span class="nx">arr</span> <span class="o">=</span> <span class="p">[];</span>
+  <span class="kd">var</span> <span class="nx">writer</span> <span class="o">=</span> <span class="nx">createArrayWriter</span><span class="p">(</span><span class="nx">arr</span><span class="p">);</span>
+  <span class="kd">var</span> <span class="nx">endRender</span><span class="p">;</span>
 
   <span class="k">switch</span> <span class="p">(</span> <span class="nx">renderMode</span> <span class="p">)</span> <span class="p">{</span>
     <span class="k">case</span> <span class="nx">APPEND</span><span class="o">:</span>  <span class="nx">endRender</span> <span class="o">=</span> <span class="nx">appendEndRender</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>

@@ -6,53 +6,56 @@
 <span class="cm"> * @author Thomas S. Bradford (kode4food.it)</span>
 <span class="cm"> */</span>
 
-<span class="s2">&quot;use strict&quot;</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><h2 id="array-and-object-handling">Array and Object Handling</h2></div></div></div><div class="segment"><div class="code"><div class="wrapper"><span class="kd">var</span> <span class="nx">toString</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">toString</span>
-  <span class="p">,</span> <span class="nx">slice</span> <span class="o">=</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">slice</span><span class="p">;</span>
+<span class="s2">&quot;use strict&quot;</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><h2 id="array-and-object-handling">Array and Object Handling</h2></div></div></div><div class="segment"><div class="code"><div class="wrapper"><span class="kd">var</span> <span class="nx">toString</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">toString</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">slice</span> <span class="o">=</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">slice</span><span class="p">;</span>
 
 <span class="kd">var</span> <span class="nx">isArray</span> <span class="o">=</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">isArray</span><span class="p">;</span>
 <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isArray</span> <span class="p">)</span> <span class="p">{</span>
-  <span class="nx">isArray</span> <span class="o">=</span> <span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="kd">function</span> <span class="nx">_isArray</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">return</span> <span class="nx">obj</span> <span class="o">&amp;&amp;</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">length</span> <span class="o">&amp;&amp;</span> <span class="nx">toString</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="o">===</span> <span class="s1">&#39;[object Array]&#39;</span><span class="p">;</span>
-    <span class="p">};</span>
-  <span class="p">})();</span>
-<span class="p">}</span>
-
-<span class="kd">var</span> <span class="nx">extendObject</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">create</span><span class="p">;</span>
-<span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">extendObject</span> <span class="p">)</span> <span class="p">{</span>
-  <span class="nx">extendObject</span> <span class="o">=</span> <span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-    <span class="kd">function</span> <span class="nx">FakeConstructor</span><span class="p">()</span> <span class="p">{}</span>
-
-    <span class="k">return</span> <span class="kd">function</span> <span class="nx">_extendContext</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nx">FakeConstructor</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="nx">obj</span><span class="p">;</span>
-      <span class="k">return</span> <span class="k">new</span> <span class="nx">FakeConstructor</span><span class="p">();</span>
-    <span class="p">};</span>
-  <span class="p">})();</span>
-<span class="p">}</span>
-
-<span class="kd">var</span> <span class="nx">freezeObject</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">freeze</span><span class="p">;</span>
-<span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">freezeObject</span> <span class="p">)</span> <span class="p">{</span>
-  <span class="nx">freezeObject</span> <span class="o">=</span> <span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="kd">function</span> <span class="nx">_freezeObject</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">return</span> <span class="nx">obj</span><span class="p">;</span>
-    <span class="p">};</span>
-  <span class="p">})();</span>
+  <span class="nx">isArray</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">_isArray</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">obj</span> <span class="o">&amp;&amp;</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">length</span> <span class="o">&amp;&amp;</span> <span class="nx">toString</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="o">===</span> <span class="s1">&#39;[object Array]&#39;</span><span class="p">;</span>
+  <span class="p">};</span>
 <span class="p">}</span>
 
 <span class="kd">var</span> <span class="nx">objectKeys</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">keys</span><span class="p">;</span>
 <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">objectKeys</span> <span class="p">)</span> <span class="p">{</span>
-  <span class="nx">objectKeys</span> <span class="o">=</span> <span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="kd">function</span> <span class="nx">_objectKeys</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
-      <span class="kd">var</span> <span class="nx">keys</span> <span class="o">=</span> <span class="p">[];</span>
-      <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">key</span> <span class="k">in</span> <span class="nx">obj</span> <span class="p">)</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="p">(</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
-          <span class="nx">keys</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">key</span><span class="p">);</span>
-        <span class="p">}</span>
+  <span class="nx">objectKeys</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">_objectKeys</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">keys</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">key</span> <span class="k">in</span> <span class="nx">obj</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="nx">keys</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">key</span><span class="p">);</span>
       <span class="p">}</span>
-      <span class="k">return</span> <span class="nx">keys</span><span class="p">;</span>
-    <span class="p">};</span>
-  <span class="p">});</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">keys</span><span class="p">;</span>
+  <span class="p">};</span>
 <span class="p">}</span>
+
+<span class="kd">var</span> <span class="nx">freezeObject</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">freeze</span><span class="p">;</span>
+<span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">freezeObject</span> <span class="p">)</span> <span class="p">{</span>
+  <span class="nx">freezeObject</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">_freezeObject</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">obj</span><span class="p">;</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+
+<span class="kd">var</span> <span class="nx">extendObject</span><span class="p">;</span>
+<span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="kd">function</span> <span class="nx">FakeConstructor</span><span class="p">()</span> <span class="p">{}</span>
+  <span class="kd">var</span> <span class="nx">testProto</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">__proto__</span><span class="o">:</span> <span class="p">{</span> <span class="nx">works</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">};</span>
+
+  <span class="k">if</span> <span class="p">(</span> <span class="nx">testProto</span><span class="p">.</span><span class="nx">works</span> <span class="o">&amp;&amp;</span> <span class="nx">objectKeys</span><span class="p">(</span><span class="nx">testProto</span><span class="p">).</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">0</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="nx">extendObject</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">_fastExtendObject</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="p">{</span> <span class="nx">__proto__</span><span class="o">:</span> <span class="nx">obj</span> <span class="p">};</span>
+    <span class="p">};</span>
+  <span class="p">}</span>
+  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">create</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="nx">extendObject</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">create</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">else</span> <span class="p">{</span>
+    <span class="nx">extendObject</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">_slowExtendObject</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">FakeConstructor</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="nx">obj</span><span class="p">;</span>
+      <span class="k">return</span> <span class="k">new</span> <span class="nx">FakeConstructor</span><span class="p">();</span>
+    <span class="p">};</span>
+  <span class="p">}</span>
+<span class="p">})();</span>
 
 <span class="kd">function</span> <span class="nx">mixin</span><span class="p">(</span><span class="nx">target</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">ilen</span> <span class="o">=</span> <span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">ilen</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
@@ -75,8 +78,8 @@ properties into a target provided to the closure.</p>
 <ul>
 <li><strong>obj must be an Object.</strong><br/>(the Object to copy (will be frozen))</li>
 </ul></div></div><div class="code"><div class="wrapper"><span class="kd">function</span> <span class="nx">createStaticMixin</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">keys</span> <span class="o">=</span> <span class="nx">objectKeys</span><span class="p">(</span><span class="nx">freezeObject</span><span class="p">(</span><span class="nx">obj</span><span class="p">)).</span><span class="nx">reverse</span><span class="p">()</span>
-    <span class="p">,</span> <span class="nx">klen</span> <span class="o">=</span> <span class="nx">keys</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kd">var</span> <span class="nx">keys</span> <span class="o">=</span> <span class="nx">objectKeys</span><span class="p">(</span><span class="nx">freezeObject</span><span class="p">(</span><span class="nx">obj</span><span class="p">)).</span><span class="nx">reverse</span><span class="p">();</span>
+  <span class="kd">var</span> <span class="nx">klen</span> <span class="o">=</span> <span class="nx">keys</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
 
   <span class="k">return</span> <span class="nx">staticMixin</span><span class="p">;</span>
 
@@ -182,16 +185,16 @@ standards.</p>
     <span class="k">return</span> <span class="nx">err</span><span class="p">;</span>
   <span class="p">}</span>
 
-  <span class="kd">var</span> <span class="nx">unexpected</span> <span class="o">=</span> <span class="nx">err</span><span class="p">.</span><span class="nx">found</span> <span class="o">?</span> <span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nx">err</span><span class="p">.</span><span class="nx">found</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span> <span class="o">:</span> <span class="s2">&quot;end of file&quot;</span>
-    <span class="p">,</span> <span class="nx">errString</span> <span class="o">=</span> <span class="s2">&quot;Unexpected &quot;</span> <span class="o">+</span> <span class="nx">unexpected</span>
-    <span class="p">,</span> <span class="nx">lineInfo</span> <span class="o">=</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="nx">err</span><span class="p">.</span><span class="nx">line</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="nx">err</span><span class="p">.</span><span class="nx">column</span><span class="p">;</span>
+  <span class="kd">var</span> <span class="nx">unexpected</span> <span class="o">=</span> <span class="nx">err</span><span class="p">.</span><span class="nx">found</span> <span class="o">?</span> <span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nx">err</span><span class="p">.</span><span class="nx">found</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span> <span class="o">:</span> <span class="s2">&quot;end of file&quot;</span><span class="p">;</span>
+  <span class="kd">var</span> <span class="nx">errString</span> <span class="o">=</span> <span class="s2">&quot;Unexpected &quot;</span> <span class="o">+</span> <span class="nx">unexpected</span><span class="p">;</span>
+  <span class="kd">var</span> <span class="nx">lineInfo</span> <span class="o">=</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="nx">err</span><span class="p">.</span><span class="nx">line</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="nx">err</span><span class="p">.</span><span class="nx">column</span><span class="p">;</span>
 
   <span class="k">return</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">((</span><span class="nx">filePath</span> <span class="o">||</span> <span class="s1">&#39;string&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="nx">lineInfo</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="nx">errString</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="kd">function</span> <span class="nx">formatWarning</span><span class="p">(</span><span class="nx">warning</span><span class="p">,</span> <span class="nx">filePath</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">lineInfo</span> <span class="o">=</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="nx">warning</span><span class="p">.</span><span class="nx">line</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="nx">warning</span><span class="p">.</span><span class="nx">column</span>
-    <span class="p">,</span> <span class="nx">warningString</span> <span class="o">=</span> <span class="nx">warning</span><span class="p">.</span><span class="nx">message</span><span class="p">;</span>
+  <span class="kd">var</span> <span class="nx">lineInfo</span> <span class="o">=</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="nx">warning</span><span class="p">.</span><span class="nx">line</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="nx">warning</span><span class="p">.</span><span class="nx">column</span><span class="p">;</span>
+  <span class="kd">var</span> <span class="nx">warningString</span> <span class="o">=</span> <span class="nx">warning</span><span class="p">.</span><span class="nx">message</span><span class="p">;</span>
 
   <span class="nx">filePath</span> <span class="o">=</span> <span class="nx">filePath</span> <span class="o">||</span> <span class="nx">warning</span><span class="p">.</span><span class="nx">filePath</span> <span class="o">||</span> <span class="s1">&#39;string&#39;</span><span class="p">;</span>
   <span class="k">return</span> <span class="nx">filePath</span> <span class="o">+</span> <span class="nx">lineInfo</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="nx">warningString</span><span class="p">;</span>
@@ -243,8 +246,8 @@ that aren't required.</p>
 
   <span class="kd">function</span> <span class="nx">configuredWrapper</span><span class="p">()</span> <span class="p">{</span>
     <span class="cm">/* jshint validthis:true */</span>
-    <span class="kd">var</span> <span class="nx">args</span> <span class="o">=</span> <span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">arguments</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-      <span class="p">,</span> <span class="nx">applyArgs</span> <span class="o">=</span> <span class="nx">args</span><span class="p">.</span><span class="nx">concat</span><span class="p">(</span><span class="nx">argTemplate</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="nx">args</span><span class="p">.</span><span class="nx">length</span><span class="p">));</span>
+    <span class="kd">var</span> <span class="nx">args</span> <span class="o">=</span> <span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">arguments</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">applyArgs</span> <span class="o">=</span> <span class="nx">args</span><span class="p">.</span><span class="nx">concat</span><span class="p">(</span><span class="nx">argTemplate</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="nx">args</span><span class="p">.</span><span class="nx">length</span><span class="p">));</span>
     <span class="k">return</span> <span class="nx">func</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">applyArgs</span><span class="p">);</span>
   <span class="p">}</span>
 <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Exported Functions</p></div></div><div class="code"><div class="wrapper"><span class="nx">exports</span><span class="p">.</span><span class="nx">isArray</span> <span class="o">=</span> <span class="nx">isArray</span><span class="p">;</span>

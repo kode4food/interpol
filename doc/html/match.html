@@ -8,9 +8,9 @@
 
 <span class="s2">&quot;use strict&quot;</span><span class="p">;</span>
 
-<span class="kd">var</span> <span class="nx">util</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./util&#39;</span><span class="p">)</span>
-  <span class="p">,</span> <span class="nx">isArray</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">isArray</span>
-  <span class="p">,</span> <span class="nx">objectKeys</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">objectKeys</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p>Basic Object Matcher to support the <code>like</code> operator.</p>
+<span class="kd">var</span> <span class="nx">util</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./util&#39;</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">isArray</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">isArray</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">objectKeys</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">objectKeys</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p>Basic Object Matcher to support the <code>like</code> operator.</p>
 
 <p>Parameters:</p>
 
@@ -31,7 +31,9 @@
   <span class="p">}</span>
 
   <span class="k">if</span> <span class="p">(</span> <span class="nx">isArray</span><span class="p">(</span><span class="nx">template</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="o">||</span> <span class="nx">template</span><span class="p">.</span><span class="nx">length</span> <span class="o">!==</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="kc">false</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="o">||</span> <span class="nx">template</span><span class="p">.</span><span class="nx">length</span> <span class="o">!==</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="p">}</span>
     <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">template</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
       <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isMatchingObject</span><span class="p">(</span><span class="nx">template</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="nx">obj</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span> <span class="p">)</span> <span class="p">{</span>
         <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
@@ -40,7 +42,9 @@
     <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
   <span class="p">}</span>
 
-  <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">obj</span> <span class="o">!==</span> <span class="s1">&#39;object&#39;</span> <span class="o">||</span> <span class="nx">obj</span> <span class="o">===</span> <span class="kc">null</span> <span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="kc">false</span><span class="p">;</span> <span class="p">}</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">obj</span> <span class="o">!==</span> <span class="s1">&#39;object&#39;</span> <span class="o">||</span> <span class="nx">obj</span> <span class="o">===</span> <span class="kc">null</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+  <span class="p">}</span>
 
   <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">key</span> <span class="k">in</span> <span class="nx">template</span> <span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isMatchingObject</span><span class="p">(</span><span class="nx">template</span><span class="p">[</span><span class="nx">key</span><span class="p">],</span> <span class="nx">obj</span><span class="p">[</span><span class="nx">key</span><span class="p">])</span> <span class="p">)</span> <span class="p">{</span>
@@ -76,8 +80,8 @@
 <span class="p">}</span>
 
 <span class="kd">function</span> <span class="nx">buildArrayMatcher</span><span class="p">(</span><span class="nx">template</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">matchers</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="p">,</span> <span class="nx">mlen</span> <span class="o">=</span> <span class="nx">template</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+  <span class="kd">var</span> <span class="nx">matchers</span> <span class="o">=</span> <span class="p">[];</span>
+  <span class="kd">var</span> <span class="nx">mlen</span> <span class="o">=</span> <span class="nx">template</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
 
   <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">mlen</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
     <span class="nx">matchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">buildMatcher</span><span class="p">(</span><span class="nx">template</span><span class="p">[</span><span class="nx">i</span><span class="p">]));</span>
@@ -85,8 +89,12 @@
   <span class="k">return</span> <span class="nx">arrayMatcher</span><span class="p">;</span>
 
   <span class="kd">function</span> <span class="nx">arrayMatcher</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span> <span class="nx">template</span> <span class="o">===</span> <span class="nx">obj</span> <span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="kc">true</span><span class="p">;</span> <span class="p">}</span>
-    <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="o">||</span> <span class="nx">mlen</span> <span class="o">!==</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="kc">false</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="nx">template</span> <span class="o">===</span> <span class="nx">obj</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="o">||</span> <span class="nx">mlen</span> <span class="o">!==</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="p">}</span>
     <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">mlen</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
       <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">matchers</span><span class="p">[</span><span class="nx">i</span><span class="p">](</span><span class="nx">obj</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span> <span class="p">)</span> <span class="p">{</span>
         <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
@@ -97,9 +105,9 @@
 <span class="p">}</span>
 
 <span class="kd">function</span> <span class="nx">buildObjectMatcher</span><span class="p">(</span><span class="nx">template</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">matchers</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="p">,</span> <span class="nx">keys</span> <span class="o">=</span> <span class="nx">objectKeys</span><span class="p">(</span><span class="nx">template</span><span class="p">)</span>
-    <span class="p">,</span> <span class="nx">mlen</span> <span class="o">=</span> <span class="nx">keys</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+  <span class="kd">var</span> <span class="nx">matchers</span> <span class="o">=</span> <span class="p">[];</span>
+  <span class="kd">var</span> <span class="nx">keys</span> <span class="o">=</span> <span class="nx">objectKeys</span><span class="p">(</span><span class="nx">template</span><span class="p">);</span>
+  <span class="kd">var</span> <span class="nx">mlen</span> <span class="o">=</span> <span class="nx">keys</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
 
   <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">mlen</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
     <span class="nx">matchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">buildMatcher</span><span class="p">(</span><span class="nx">template</span><span class="p">[</span><span class="nx">keys</span><span class="p">[</span><span class="nx">i</span><span class="p">]]));</span>
@@ -107,8 +115,12 @@
   <span class="k">return</span> <span class="nx">objectMatcher</span><span class="p">;</span>
 
   <span class="kd">function</span> <span class="nx">objectMatcher</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span> <span class="nx">template</span> <span class="o">===</span> <span class="nx">obj</span> <span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="kc">true</span><span class="p">;</span> <span class="p">}</span>
-    <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">obj</span> <span class="o">!==</span> <span class="s1">&#39;object&#39;</span> <span class="o">||</span> <span class="nx">obj</span> <span class="o">===</span> <span class="kc">null</span> <span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="kc">false</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="nx">template</span> <span class="o">===</span> <span class="nx">obj</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">obj</span> <span class="o">!==</span> <span class="s1">&#39;object&#39;</span> <span class="o">||</span> <span class="nx">obj</span> <span class="o">===</span> <span class="kc">null</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="p">}</span>
     <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">mlen</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
       <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">matchers</span><span class="p">[</span><span class="nx">i</span><span class="p">](</span><span class="nx">obj</span><span class="p">[</span><span class="nx">keys</span><span class="p">[</span><span class="nx">i</span><span class="p">]])</span> <span class="p">)</span> <span class="p">{</span>
         <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>

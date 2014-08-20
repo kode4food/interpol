@@ -8,13 +8,13 @@
 
 <span class="s2">&quot;use strict&quot;</span><span class="p">;</span>
 
-<span class="kd">var</span> <span class="nx">interpol</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../interpol&#39;</span><span class="p">)</span>
-  <span class="p">,</span> <span class="nx">util</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../util&#39;</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">interpol</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../interpol&#39;</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">util</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../util&#39;</span><span class="p">);</span>
 
-<span class="kd">var</span> <span class="nx">freezeObject</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">freezeObject</span>
-  <span class="p">,</span> <span class="nx">stringify</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">stringify</span>
-  <span class="p">,</span> <span class="nx">escapeAttribute</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">escapeAttribute</span>
-  <span class="p">,</span> <span class="nx">escapeContent</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">escapeContent</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">freezeObject</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">freezeObject</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">stringify</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">stringify</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">escapeAttribute</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">escapeAttribute</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">escapeContent</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">escapeContent</span><span class="p">;</span>
 
 <span class="kd">function</span> <span class="nx">noOp</span><span class="p">()</span> <span class="p">{}</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p>Creates an Array Writer.  Interpol will create one by default if it is not
 provided as an option to a compiled template.  An Array Writer manages the
