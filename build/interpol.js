@@ -429,9 +429,9 @@ var bless = util.bless;
 
 /**
  * Creates a new Memory Resolver.  As its name implies, this resolver
- * allows one to register a module to be stored in memory.  A default 
- * instance of this resolver is used to store the System Modules.  
- * Because of its flexibility, it can also be used to store custom 
+ * allows one to register a module to be stored in memory.  A default
+ * instance of this resolver is used to store the System Modules.
+ * Because of its flexibility, it can also be used to store custom
  * modules and native JavaScript helpers.
  */
 
@@ -491,7 +491,7 @@ function createMemoryResolver(options) {
       return;
     }
 
-    // *String* - An unparsed Interpol template **or** 
+    // *String* - An unparsed Interpol template **or**
     // *Object* - A pre-compiled Interpol template
     if ( typeof module === 'string' || isInterpolJSON(module) ) {
       cache[name] = { module: interpol(module) };
@@ -499,7 +499,7 @@ function createMemoryResolver(options) {
     }
 
     // *Object* - A hash of Helpers (name->Function)
-    if ( typeof module === 'object' && !isArray(module) ) {
+    if ( typeof module === 'object' && module !== null && !isArray(module) ) {
       cache[name] = { moduleExports: blessModule(module) };
       return;
     }
@@ -622,7 +622,10 @@ function empty(writer, value) {
 // passed to it.  If the Array is sparse (has gaps) it will only return
 // the indexes with assigned values.
 function keys(writer, value) {
-  return typeof value === 'object' ? objectKeys(value) : null;
+  if ( typeof value === 'object' && value !== null ) {
+    return objectKeys(value);
+  }
+  return null;
 }
 
 // values(value)` returns the values of the Object or Array passed to
@@ -2119,7 +2122,7 @@ var extendObject;
 function mixin(target) {
   for ( var i = 1, ilen = arguments.length; i < ilen; i++ ) {
     var src = arguments[i];
-    if ( !src || typeof src !== 'object') {
+    if ( typeof src !== 'object' || src === null || isArray(target) ) {
       continue;
     }
     var keys = objectKeys(src);

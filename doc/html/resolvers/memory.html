@@ -15,9 +15,9 @@
 <span class="kd">var</span> <span class="nx">isArray</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">isArray</span><span class="p">;</span>
 <span class="kd">var</span> <span class="nx">isInterpolJSON</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">isInterpolJSON</span><span class="p">;</span>
 <span class="kd">var</span> <span class="nx">bless</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">bless</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Creates a new Memory Resolver.  As its name implies, this resolver
-allows one to register a module to be stored in memory.  A default 
-instance of this resolver is used to store the System Modules. <br />
-Because of its flexibility, it can also be used to store custom 
+allows one to register a module to be stored in memory.  A default
+instance of this resolver is used to store the System Modules.
+Because of its flexibility, it can also be used to store custom
 modules and native JavaScript helpers.</p></div></div><div class="code"><div class="wrapper"><span class="kd">function</span> <span class="nx">createMemoryResolver</span><span class="p">(</span><span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
   <span class="kd">var</span> <span class="nx">cache</span> <span class="o">=</span> <span class="p">{};</span>
 
@@ -65,11 +65,11 @@ modules and native JavaScript helpers.</p></div></div><div class="code"><div cla
          <span class="k">typeof</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">===</span> <span class="s1">&#39;function&#39;</span> <span class="p">)</span> <span class="p">{</span>
       <span class="nx">cache</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">module</span><span class="o">:</span> <span class="nx">module</span> <span class="p">};</span>
       <span class="k">return</span><span class="p">;</span>
-    <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p><em>String</em> - An unparsed Interpol template <strong>or</strong> 
+    <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p><em>String</em> - An unparsed Interpol template <strong>or</strong>
 <em>Object</em> - A pre-compiled Interpol template</p></div></div><div class="code"><div class="wrapper">    <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">module</span> <span class="o">===</span> <span class="s1">&#39;string&#39;</span> <span class="o">||</span> <span class="nx">isInterpolJSON</span><span class="p">(</span><span class="nx">module</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
       <span class="nx">cache</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">module</span><span class="o">:</span> <span class="nx">interpol</span><span class="p">(</span><span class="nx">module</span><span class="p">)</span> <span class="p">};</span>
       <span class="k">return</span><span class="p">;</span>
-    <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p><em>Object</em> - A hash of Helpers (name->Function)</p></div></div><div class="code"><div class="wrapper">    <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">module</span> <span class="o">===</span> <span class="s1">&#39;object&#39;</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">module</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p><em>Object</em> - A hash of Helpers (name->Function)</p></div></div><div class="code"><div class="wrapper">    <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">module</span> <span class="o">===</span> <span class="s1">&#39;object&#39;</span> <span class="o">&amp;&amp;</span> <span class="nx">module</span> <span class="o">!==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">module</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
       <span class="nx">cache</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">moduleExports</span><span class="o">:</span> <span class="nx">blessModule</span><span class="p">(</span><span class="nx">module</span><span class="p">)</span> <span class="p">};</span>
       <span class="k">return</span><span class="p">;</span>
     <span class="p">}</span>
