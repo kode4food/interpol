@@ -602,7 +602,7 @@ expression without escaping</p></div></div><div class="code"><div class="wrapper
         <span class="kd">var</span> <span class="nx">guard</span> <span class="o">=</span> <span class="nx">range</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
         <span class="kd">var</span> <span class="nx">items</span> <span class="o">=</span> <span class="nx">data</span><span class="p">;</span>
 
-        <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">data</span> <span class="o">!==</span> <span class="s1">&#39;object&#39;</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">data</span> <span class="o">!==</span> <span class="s1">&#39;object&#39;</span> <span class="o">||</span> <span class="nx">data</span> <span class="o">===</span> <span class="kc">null</span> <span class="p">)</span> <span class="p">{</span>
           <span class="k">return</span><span class="p">;</span>
         <span class="p">}</span>
 

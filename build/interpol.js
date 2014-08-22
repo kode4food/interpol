@@ -194,7 +194,7 @@ var bless = util.bless;
 var isInterpolJSON = util.isInterpolJSON;
 var buildRuntime = runtime.buildRuntime;
 
-var CURRENT_VERSION = "0.4.0";
+var CURRENT_VERSION = "0.4.1";
 var compileModule = null;
 
 var slice = Array.prototype.slice;
@@ -1575,7 +1575,7 @@ function buildRuntime(parseOutput, localOptions) {
         var guard = range[2];
         var items = data;
 
-        if ( typeof data !== 'object') {
+        if ( typeof data !== 'object' || data === null ) {
           return;
         }
 
