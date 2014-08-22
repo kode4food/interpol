@@ -36,7 +36,7 @@
   <span class="s1">&#39;cl&#39;</span><span class="o">:</span> <span class="nx">createCloseTag</span><span class="p">,</span>
   <span class="s1">&#39;ct&#39;</span><span class="o">:</span> <span class="nx">createCommentTag</span>
 <span class="p">});</span>
-  
+
 <span class="kd">function</span> <span class="nx">compileModule</span><span class="p">(</span><span class="nx">template</span><span class="p">)</span> <span class="p">{</span>
   <span class="kd">var</span> <span class="nx">lits</span> <span class="o">=</span> <span class="p">[];</span>
   <span class="kd">var</span> <span class="nx">reverseLits</span> <span class="o">=</span> <span class="p">{};</span>
@@ -363,7 +363,7 @@ resulting output JSON</p></div></div><div class="code"><div class="wrapper">  <s
       <span class="k">return</span> <span class="nx">idx</span><span class="p">;</span>
     <span class="p">}</span>
     <span class="nx">idx</span> <span class="o">=</span> <span class="nx">lits</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
-    <span class="nx">reverseLits</span><span class="p">[</span><span class="nx">value</span><span class="p">]</span> <span class="o">=</span> <span class="nx">idx</span><span class="p">;</span>
+    <span class="nx">reverseLits</span><span class="p">[</span><span class="nx">canonical</span><span class="p">]</span> <span class="o">=</span> <span class="nx">idx</span><span class="p">;</span>
     <span class="k">return</span> <span class="nx">idx</span><span class="p">;</span>
   <span class="p">}</span>
 
