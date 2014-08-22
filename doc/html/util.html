@@ -60,7 +60,7 @@
 <span class="kd">function</span> <span class="nx">mixin</span><span class="p">(</span><span class="nx">target</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">ilen</span> <span class="o">=</span> <span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">ilen</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">src</span> <span class="o">=</span> <span class="nx">arguments</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
-    <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">src</span> <span class="o">!==</span> <span class="s1">&#39;object&#39;</span> <span class="o">||</span> <span class="nx">src</span> <span class="o">===</span> <span class="kc">null</span> <span class="o">||</span> <span class="nx">isArray</span><span class="p">(</span><span class="nx">target</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">src</span> <span class="o">!==</span> <span class="s1">&#39;object&#39;</span> <span class="o">||</span> <span class="nx">src</span> <span class="o">===</span> <span class="kc">null</span> <span class="o">||</span> <span class="nx">isArray</span><span class="p">(</span><span class="nx">src</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
       <span class="k">continue</span><span class="p">;</span>
     <span class="p">}</span>
     <span class="kd">var</span> <span class="nx">keys</span> <span class="o">=</span> <span class="nx">objectKeys</span><span class="p">(</span><span class="nx">src</span><span class="p">);</span>
@@ -99,12 +99,12 @@ Object.</p>
 <li><strong>value must be an Object.</strong><br/>(an Object to be checked)</li>
 </ul></div></div><div class="code"><div class="wrapper"><span class="kd">function</span> <span class="nx">isInterpolJSON</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">return</span> <span class="k">typeof</span> <span class="nx">value</span> <span class="o">===</span> <span class="s1">&#39;object&#39;</span> <span class="o">&amp;&amp;</span>
-    <span class="nx">value</span> <span class="o">!==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span>
-    <span class="nx">value</span><span class="p">.</span><span class="nx">i</span> <span class="o">===</span> <span class="s1">&#39;interpol&#39;</span> <span class="o">&amp;&amp;</span>
-    <span class="k">typeof</span> <span class="nx">value</span><span class="p">.</span><span class="nx">v</span> <span class="o">===</span> <span class="s1">&#39;string&#39;</span> <span class="o">&amp;&amp;</span>
-    <span class="o">!</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
-    <span class="nx">isArray</span><span class="p">(</span><span class="nx">value</span><span class="p">.</span><span class="nx">l</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
-    <span class="nx">isArray</span><span class="p">(</span><span class="nx">value</span><span class="p">.</span><span class="nx">n</span><span class="p">);</span>
+         <span class="nx">value</span> <span class="o">!==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span>
+         <span class="nx">value</span><span class="p">.</span><span class="nx">i</span> <span class="o">===</span> <span class="s1">&#39;interpol&#39;</span> <span class="o">&amp;&amp;</span>
+         <span class="k">typeof</span> <span class="nx">value</span><span class="p">.</span><span class="nx">v</span> <span class="o">===</span> <span class="s1">&#39;string&#39;</span> <span class="o">&amp;&amp;</span>
+         <span class="o">!</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+         <span class="nx">isArray</span><span class="p">(</span><span class="nx">value</span><span class="p">.</span><span class="nx">l</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+         <span class="nx">isArray</span><span class="p">(</span><span class="nx">value</span><span class="p">.</span><span class="nx">n</span><span class="p">);</span>
 <span class="p">}</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p>Checks whether or not the provided value is <em>truthy</em> by Interpol's
 standards.</p>
 

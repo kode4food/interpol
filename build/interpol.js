@@ -632,7 +632,7 @@ function keys(writer, value) {
 // it.  If the array is sparse (has gaps) it will only return the
 // assigned values.
 function values(writer, value) {
-  if ( typeof value !== 'object' ) {
+  if ( typeof value !== 'object' || value === null ) {
     return null;
   }
   var keys = objectKeys(value);
@@ -2122,7 +2122,7 @@ var extendObject;
 function mixin(target) {
   for ( var i = 1, ilen = arguments.length; i < ilen; i++ ) {
     var src = arguments[i];
-    if ( typeof src !== 'object' || src === null || isArray(target) ) {
+    if ( typeof src !== 'object' || src === null || isArray(src) ) {
       continue;
     }
     var keys = objectKeys(src);
@@ -2165,12 +2165,12 @@ function createStaticMixin(obj) {
 
 function isInterpolJSON(value) {
   return typeof value === 'object' &&
-    value !== null &&
-    value.i === 'interpol' &&
-    typeof value.v === 'string' &&
-    !isArray(value) &&
-    isArray(value.l) &&
-    isArray(value.n);
+         value !== null &&
+         value.i === 'interpol' &&
+         typeof value.v === 'string' &&
+         !isArray(value) &&
+         isArray(value.l) &&
+         isArray(value.n);
 }
 
 /**
