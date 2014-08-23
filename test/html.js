@@ -1,6 +1,6 @@
 var nodeunit = require('nodeunit');
 var interpol = require('../lib');
-var eval = interpol.evaluate;
+var evaluate = interpol.evaluate;
 
 exports.html = nodeunit.testCase({
   "Dynamic HTML Generation": function (test) {
@@ -22,15 +22,15 @@ exports.html = nodeunit.testCase({
     
     var script4 = '<(selfClosing) />';
 
-    test.equal(eval(script1, data), 
+    test.equal(evaluate(script1, data), 
       '<htmlBody (attrName)=\"aValue\" litAttr=\"attr\">\n</htmlBody>');
     
-    test.equal(eval(script2, data), 
+    test.equal(evaluate(script2, data), 
       '<!DOCTYPE any>\n<start>someAttr</start>');
     
-    test.equal(eval(script3, data), '<aTag boolAttr>');
+    test.equal(evaluate(script3, data), '<aTag boolAttr>');
     
-    test.equal(eval(script4, data), '<selfClosingTag />');
+    test.equal(evaluate(script4, data), '<selfClosingTag />');
     
     test.done();
   }

@@ -1,6 +1,6 @@
 var nodeunit = require('nodeunit');
 var interpol = require('../lib');
-var eval = interpol.evaluate;
+var evaluate = interpol.evaluate;
 
 exports.using = nodeunit.testCase({
   setUp: function (callback) {
@@ -34,8 +34,8 @@ exports.using = nodeunit.testCase({
                   '  end\n' +
                   'end';
 
-    test.equal(eval(script1), "Hello, Frog!\n");
-    test.equal(eval(script2), "Hello, Doggy!\n\n");
+    test.equal(evaluate(script1), "Hello, Frog!\n");
+    test.equal(evaluate(script2), "Hello, Doggy!\n\n");
     test.done();
   },
 
@@ -55,10 +55,10 @@ exports.using = nodeunit.testCase({
 
     var script4 = '%name is %age using b using c';
 
-    test.equal(eval(script1), "Thom is 42");
-    test.equal(eval(script2), "Thom is 42 and is a Developer");
-    test.equal(eval(script3), "Thom is 42 and is a Developer");
-    test.throws(function () { eval(script4); });
+    test.equal(evaluate(script1), "Thom is 42");
+    test.equal(evaluate(script2), "Thom is 42 and is a Developer");
+    test.equal(evaluate(script3), "Thom is 42 and is a Developer");
+    test.throws(function () { evaluate(script4); });
     test.done();
   }
 });

@@ -1,6 +1,6 @@
 var nodeunit = require('nodeunit');
 var interpol = require('../lib');
-var eval = interpol.evaluate;
+var evaluate = interpol.evaluate;
 
 exports.partials = nodeunit.testCase({
   setUp: function (callback) {
@@ -15,7 +15,7 @@ exports.partials = nodeunit.testCase({
                  "end\n" +
                  "oneStatement(true)";
 
-    test.equal(eval(script), "Hello\n");
+    test.equal(evaluate(script), "Hello\n");
     test.done();
   },
 
@@ -34,9 +34,9 @@ exports.partials = nodeunit.testCase({
                   'end\n' +
                   '(v1 if coming else v2)("Interpol")';
 
-    test.equal(eval(script1), "Hello Interpol\n");
-    test.equal(eval(script2, { coming: true }), "Hello Interpol\n");
-    test.equal(eval(script2, { coming: false }), "Goodbye Interpol\n");
+    test.equal(evaluate(script1), "Hello Interpol\n");
+    test.equal(evaluate(script2, { coming: true }), "Hello Interpol\n");
+    test.equal(evaluate(script2, { coming: false }), "Goodbye Interpol\n");
     test.done();
   },
 
@@ -63,9 +63,9 @@ exports.partials = nodeunit.testCase({
                   'end\n' +
                   'test(10)';
 
-    test.equal(eval(script1), "Hello, Bob!\n\n");
-    test.throws(function () { eval(script2); });
-    test.throws(function () { eval(script3); });
+    test.equal(evaluate(script1), "Hello, Bob!\n\n");
+    test.throws(function () { evaluate(script2); });
+    test.throws(function () { evaluate(script3); });
 
     test.done();
   },
@@ -82,10 +82,10 @@ exports.partials = nodeunit.testCase({
                  '  "third %val"\n' +
                  'end';
 
-    test.equal(eval(script, { value: 20 }), "first 20\n\n");
-    test.equal(eval(script, { value: 10 }), "second 10\n\n");
-    test.equal(eval(script, { value: 20, extern: true }), "third 20\n\n");
-    test.equal(eval(script, { value: 10, extern: true }), "third 10\n\n");
+    test.equal(evaluate(script, { value: 20 }), "first 20\n\n");
+    test.equal(evaluate(script, { value: 10 }), "second 10\n\n");
+    test.equal(evaluate(script, { value: 20, extern: true }), "third 20\n\n");
+    test.equal(evaluate(script, { value: 10, extern: true }), "third 10\n\n");
 
     test.done();
   },
@@ -99,10 +99,10 @@ exports.partials = nodeunit.testCase({
                  '  "%name is awesome!"\n' +
                  'end';
 
-    test.equal(eval(script, { type: "manager", name: "Bill" }),
+    test.equal(evaluate(script, { type: "manager", name: "Bill" }),
                "Bill is a manager\n\n");
 
-    test.equal(eval(script, { type: "developer", name: "Alice" }),
+    test.equal(evaluate(script, { type: "developer", name: "Alice" }),
                "Alice is awesome!\n\n");
 
     test.done();
@@ -117,10 +117,10 @@ exports.partials = nodeunit.testCase({
                  '  "This is a %type named %name"\n' +
                  'end';
 
-    test.equal(eval(script, { typeVal: "monkey", typeName: "George"}),
+    test.equal(evaluate(script, { typeVal: "monkey", typeName: "George"}),
                "I am a monkey named George\n\n");
 
-    test.equal(eval(script, { typeVal: "cricket", typeName: "Jim"}),
+    test.equal(evaluate(script, { typeVal: "cricket", typeName: "Jim"}),
                "This is a cricket named Jim\n\n");
 
     test.done();

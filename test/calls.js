@@ -1,6 +1,6 @@
 var nodeunit = require('nodeunit');
 var interpol = require('../lib');
-var eval = interpol.evaluate;
+var evaluate = interpol.evaluate;
 
 exports.calls = nodeunit.testCase({
   setUp: function (callback) {
@@ -17,7 +17,7 @@ exports.calls = nodeunit.testCase({
                   'let formatted = title(join(name))\n' +
                   '"Hello, %formatted!"';
 
-    test.equal(eval(script1, this.data), "Hello, Title Case!");
+    test.equal(evaluate(script1, this.data), "Hello, Title Case!");
 
     test.done();
   },
@@ -28,7 +28,7 @@ exports.calls = nodeunit.testCase({
                   'let formatted = name | join | title\n' +
                   '"Hello, %formatted!"';
 
-    test.equal(eval(script1, this.data), "Hello, Title Case!");
+    test.equal(evaluate(script1, this.data), "Hello, Title Case!");
 
     test.done();
   }

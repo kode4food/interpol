@@ -1,6 +1,6 @@
 var nodeunit = require('nodeunit');
 var interpol = require('../lib');
-var eval = interpol.evaluate;
+var evaluate = interpol.evaluate;
 
 exports.interpolation = nodeunit.testCase({
   setUp: function (callback) {
@@ -21,27 +21,27 @@ exports.interpolation = nodeunit.testCase({
   },
 
   "Interpolation Operator": function (test) {
-    test.equal(eval("'% is the new %' % ('red', 'black')"),
+    test.equal(evaluate("'% is the new %' % ('red', 'black')"),
                "red is the new black");
-    test.equal(eval("'%2 is the new %1' % ('red', 'black')"),
+    test.equal(evaluate("'%2 is the new %1' % ('red', 'black')"),
                "black is the new red");
-    test.equal(eval("dogs_lbl % ('red', 'cats', 'dogs')", this.data),
+    test.equal(evaluate("dogs_lbl % ('red', 'cats', 'dogs')", this.data),
                "Furthermore, dogs are the new cats");
     test.done();
   },
 
   "Automatic Interpolation": function (test) {
-    test.equal(eval('"%% %%%% % %% %%%%%% %"'), "%% %%%% % %% %%%%%% %");
-    test.equal(eval("'%% %%%% % %% %%%%%% %' % self"), "% %%  % %%% ");
-    test.equal(eval('"Hello, %name!"', { name: 'World'}), "Hello, World!");
-    test.equal(eval('"""Hello\n%name!"""', { name: 'World'}), "Hello\nWorld!");
-    test.equal(eval('"Hello, %name! %"', { name: 'World'}), "Hello, World! ");
-    test.equal(eval("'Hello, %name! %'", { name: 'Wordl'}), "Hello, %name! %");
-    test.equal(eval('"%% %name"', { name: 'World'}), "% World");
-    test.equal(eval('"This % should not interpolate"'),
+    test.equal(evaluate('"%% %%%% % %% %%%%%% %"'), "%% %%%% % %% %%%%%% %");
+    test.equal(evaluate("'%% %%%% % %% %%%%%% %' % self"), "% %%  % %%% ");
+    test.equal(evaluate('"Hello, %name!"', { name: 'World'}), "Hello, World!");
+    test.equal(evaluate('"""Hello\n%name!"""', { name: 'World'}), "Hello\nWorld!");
+    test.equal(evaluate('"Hello, %name! %"', { name: 'World'}), "Hello, World! ");
+    test.equal(evaluate("'Hello, %name! %'", { name: 'Wordl'}), "Hello, %name! %");
+    test.equal(evaluate('"%% %name"', { name: 'World'}), "% World");
+    test.equal(evaluate('"This % should not interpolate"'),
                "This % should not interpolate");
-    test.equal(eval('hello_lbl % "wrong "', this.data), "Hello, !");
-    test.equal(eval('hello_lbl % self', this.data), "Hello, World!");
+    test.equal(evaluate('hello_lbl % "wrong "', this.data), "Hello, !");
+    test.equal(evaluate('hello_lbl % self', this.data), "Hello, World!");
     test.done();
   },
 
@@ -53,8 +53,8 @@ exports.interpolation = nodeunit.testCase({
     var script2 = 'from string import upper\n' +
                   '"The Title is %|upper" % "upper"';
 
-    test.equal(eval(script1, this.data), "Result is Title Case String");
-    test.equal(eval(script2, this.data), "The Title is UPPER");
+    test.equal(evaluate(script1, this.data), "Result is Title Case String");
+    test.equal(evaluate(script2, this.data), "The Title is UPPER");
     test.done();
   }
 });

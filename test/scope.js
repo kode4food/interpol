@@ -1,6 +1,6 @@
 var nodeunit = require('nodeunit');
 var interpol = require('../lib');
-var eval = interpol.evaluate;
+var evaluate = interpol.evaluate;
 
 exports.scope = nodeunit.testCase({
   setUp: function (callback) {
@@ -11,8 +11,8 @@ exports.scope = nodeunit.testCase({
   },
 
   "Shadow Global Scope": function (test) {
-    test.equal(eval("let greeting='Not Hello!'\ngreeting"), "Not Hello!");
-    test.equal(eval("greeting"), "Hello, World!");
+    test.equal(evaluate("let greeting='Not Hello!'\ngreeting"), "Not Hello!");
+    test.equal(evaluate("greeting"), "Hello, World!");
     test.done();
   },
 
@@ -24,8 +24,8 @@ exports.scope = nodeunit.testCase({
                  "end\n" +
                  "localGreeting() greeting";
 
-    test.equal(eval(script).trim(), "Local Hello\n Not Hello");
-    test.equal(eval("greeting"), "Hello, World!");
+    test.equal(evaluate(script).trim(), "Local Hello\n Not Hello");
+    test.equal(evaluate("greeting"), "Hello, World!");
     test.done();
   }
 });

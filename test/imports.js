@@ -1,6 +1,6 @@
 var nodeunit = require('nodeunit');
 var interpol = require('../lib');
-var eval = interpol.evaluate;
+var evaluate = interpol.evaluate;
 
 exports.imports = nodeunit.testCase({
   setUp: function (callback) {
@@ -25,8 +25,8 @@ exports.imports = nodeunit.testCase({
     var script2 = "from helpers import testHelper as test\n" +
                   "test(5,6)";
 
-    test.equal(eval(script1), "arg1=1:arg2=2");
-    test.equal(eval(script2), "arg1=5:arg2=6");
+    test.equal(evaluate(script1), "arg1=1:arg2=2");
+    test.equal(evaluate(script2), "arg1=5:arg2=6");
     test.done();
   },
 
@@ -34,7 +34,7 @@ exports.imports = nodeunit.testCase({
     var script = "import test as t\n" +
                  "t.renderTest('Curly')";
 
-    test.equal(eval(script), "Hello Curly\n");
+    test.equal(evaluate(script), "Hello Curly\n");
     test.done();
   },
 
@@ -43,14 +43,14 @@ exports.imports = nodeunit.testCase({
     var script2 = "import module2\nmodule2.test_value";
     var script3 = "import module1.index\nindex.test_value";
 
-    test.equal(eval(script1), "right!");
-    test.equal(eval(script2), "right!");
-    test.equal(eval(script3), "wrong!");
+    test.equal(evaluate(script1), "right!");
+    test.equal(evaluate(script2), "right!");
+    test.equal(evaluate(script3), "wrong!");
     test.done();
   },
 
   "System Import": function (test) {
-    test.equal(eval("import math\nmath.round(9.5)"), "10");
+    test.equal(evaluate("import math\nmath.round(9.5)"), "10");
     test.done();
   },
 
@@ -60,13 +60,13 @@ exports.imports = nodeunit.testCase({
                  "let j = @join(nil, '///')\n" +
                  "a | j";
 
-    test.equal(eval(script), "this///is///a///list");
+    test.equal(evaluate(script), "this///is///a///list");
     test.done();
   },
 
   "Math Constant Import": function (test) {
-    test.equal(eval("import math\nmath.E"), Math.E);
-    test.equal(eval("import math\nmath.PI"), Math.PI);
+    test.equal(evaluate("import math\nmath.E"), Math.E);
+    test.equal(evaluate("import math\nmath.PI"), Math.PI);
     test.done();
   }
 });
