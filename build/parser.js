@@ -151,7 +151,7 @@ module.exports = (function() {
         peg$c106 = /^[\-+]/,
         peg$c107 = { type: "class", value: "[\\-+]", description: "[\\-+]" },
         peg$c108 = function(s, d) {
-              return 'e' + (s ? s : '') + d.join('');
+              return 'e' + (s ? s : '+') + d.join('');
             },
         peg$c109 = ".",
         peg$c110 = { type: "literal", value: ".", description: "\".\"" },

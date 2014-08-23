@@ -1,10 +1,6 @@
 var nodeunit = require('nodeunit');
 var interpol = require('../lib');
-
-function eval(str, ctx) {
-  var template = interpol(str);
-  return template(ctx);
-}
+var eval = interpol.evaluate;
 
 exports.interpolation = nodeunit.testCase({
   setUp: function (callback) {
@@ -38,6 +34,7 @@ exports.interpolation = nodeunit.testCase({
     test.equal(eval('"%% %%%% % %% %%%%%% %"'), "%% %%%% % %% %%%%%% %");
     test.equal(eval("'%% %%%% % %% %%%%%% %' % self"), "% %%  % %%% ");
     test.equal(eval('"Hello, %name!"', { name: 'World'}), "Hello, World!");
+    test.equal(eval('"""Hello\n%name!"""', { name: 'World'}), "Hello\nWorld!");
     test.equal(eval('"Hello, %name! %"', { name: 'World'}), "Hello, World! ");
     test.equal(eval("'Hello, %name! %'", { name: 'Wordl'}), "Hello, %name! %");
     test.equal(eval('"%% %name"', { name: 'World'}), "% World");

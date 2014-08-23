@@ -1,10 +1,6 @@
 var nodeunit = require('nodeunit');
 var interpol = require('../lib');
-
-function eval(str, ctx) {
-  var template = interpol(str);
-  return template(ctx);
-}
+var eval = interpol.evaluate;
 
 exports.imports = nodeunit.testCase({
   setUp: function (callback) {

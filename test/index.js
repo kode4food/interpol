@@ -5,5 +5,7 @@ exports.imports = require('./imports').imports;
 exports.interpolation = require('./interpolation').interpolation;
 exports.partials = require('./partials').partials;
 exports.scope = require('./scope').scope;
+exports.strings = require('./strings').strings;
 exports.lists = require('./lists').lists;
+exports.math = require('./math').math;
 exports.using = require('./using').using;
