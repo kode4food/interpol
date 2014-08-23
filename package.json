@@ -9,9 +9,18 @@
   "bin": {
     "interpol": "lib/cli.js"
   },
-  "keywords": ["javascript", "html", "nodejs", "browser", "templates"],
+  "keywords": [
+    "javascript",
+    "html",
+    "nodejs",
+    "browser",
+    "templates"
+  ],
   "contributors": [
-    { "name": "Thom Bradford", "email": "thom@kode4food.it" }
+    {
+      "name": "Thom Bradford",
+      "email": "thom@kode4food.it"
+    }
   ],
   "repository": "git@bitbucket.org:kode4food/interpol.git",
   "scripts": {
@@ -21,18 +30,20 @@
     "bundle-parser": "browserify browserify/parser.js | uglifyjs -m --preamble \"`cat doc/preamble.js`\" -o build/interpol-parser.min.js",
     "bundle-debug": "browserify --debug browserify/parser.js > build/interpol-debug.js",
     "build": "npm run-script build-parser && npm run-script bundle-standard && npm run-script bundle-parser && npm run-script bundle-debug",
-    "test": "nodeunit test/index.js"
+    "test": "nodeunit test/index.js",
+    "coverage": "istanbul cover node_modules/nodeunit/bin/nodeunit test/index.js"
   },
   "dependencies": {
     "mkdirp": "*",
     "glob": "*"
   },
   "devDependencies": {
-    "pegjs": "*",
-    "nodeunit": "*",
-    "uglify-js": "*",
     "browserify": "*",
-    "groc": "*"
+    "groc": "*",
+    "istanbul": "^0.3.0",
+    "nodeunit": "*",
+    "pegjs": "*",
+    "uglify-js": "*"
   },
   "engines": {
     "node": "*"
