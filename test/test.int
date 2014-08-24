@@ -1,3 +1,4 @@
+<!-- A Test Script -->
 <h2>title</h2>
 let defaultRenderList = @renderList(people)
 

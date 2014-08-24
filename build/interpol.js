@@ -809,7 +809,7 @@ function lower(writer, value) {
 // specified delimiter (or whitespace) is encountered and returns the
 // result.
 function split(writer, value, delim, idx) {
-  var val = stringify(value).split(delim || ' \n\r\t');
+  var val = stringify(value).split(delim || /\s*/);
   return idx !== undefined ? val[idx] : val;
 }
 
