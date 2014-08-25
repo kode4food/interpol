@@ -11,7 +11,7 @@ exports.imports = nodeunit.testCase({
     });
 
     var fileResolver = interpol.createFileResolver({
-      path: "./test", compile: true, monitor: false
+      path: "./test", compile: true, monitor: true
     });
     interpol.resolvers().push(fileResolver);
 
