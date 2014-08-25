@@ -73,6 +73,7 @@ exports.like = nodeunit.testCase({
               "They don't match!\n");
     test.equal(evaluate(script5, data), "They don't match!\n");
     test.equal(evaluate(script5, { person1: null }), "They don't match!\n");
+    
     test.done();
   }
 });

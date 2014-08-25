@@ -34,5 +34,39 @@ exports.lists = nodeunit.testCase({
     test.equal(evaluate(base + ".people[1].name"), "Curly");
     test.equal(evaluate(base + ".people.length"), "3");
     test.done();
+  },
+
+  "Functions": function (test) {
+    test.equal(evaluate("import list\nlist.join(('this','is','interpol'))"),
+                        "this is interpol");
+
+    test.equal(evaluate("import list\nlist.join(('this','is','interpol'), '-=-')"),
+                        "this-=-is-=-interpol");
+
+    test.equal(evaluate("import list\nlist.join('hello', '-=-')"), "hello");
+
+    test.equal(evaluate("import list\nlist.first((1,2,3))"), "1");
+    test.equal(evaluate("import list\nlist.first((9))"), "9");
+
+    test.equal(evaluate("import list\nlist.last((1,2,3))"), "3");
+    test.equal(evaluate("import list\nlist.last(())"), "");
+    test.equal(evaluate("import list\nlist.last((9))"), "9");
+
+    test.equal(evaluate("import list\nlist.length((1,2,3))"), "3");
+    test.equal(evaluate("import list\nlist.length((9))"), "0");
+
+    test.equal(evaluate("import list\nlist.empty((1,2,3))"), "false");
+    test.equal(evaluate("import list\nlist.empty(())"), "true");
+    test.equal(evaluate("import list\nlist.empty(9)"), "true");
+
+    test.equal(evaluate("import list\nlist.keys((name='Thom',age=42))"),
+               "name age");
+    test.equal(evaluate("import list\nlist.keys(62)"), "");
+
+    test.equal(evaluate("import list\nlist.values((name='Thom',age=42))"),
+               "Thom 42");
+    test.equal(evaluate("import list\nlist.values(62)"), "");
+
+    test.done();
   }
 });

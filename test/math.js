@@ -27,7 +27,6 @@ exports.math = nodeunit.testCase({
     test.done();
   },
 
-
   "Arithmetic Evaluation": function (test) {
     test.equal(evaluate("1 + 1"), "2");
     test.equal(evaluate("10 - 7"), "3");
@@ -47,6 +46,35 @@ exports.math = nodeunit.testCase({
     test.equal(evaluate("100 / people[0].age", this.data), "2");
     test.equal(evaluate("3 * people[0].age", this.data), "150");
     test.equal(evaluate("(33 * 6 - (people[0].age + 1)) mod 6", this.data), "3");
+    test.done();
+  },
+
+  "Functions": function (test) {
+    test.equal(evaluate("import math\nmath.avg((1,2,3))"), "2");
+    test.equal(evaluate("import math\nmath.avg(())"), "0");
+    test.equal(evaluate("import math\nmath.avg(('non_num'))"), "NaN");
+    test.equal(evaluate("import math\nmath.avg(1)"), "1");
+
+    test.equal(evaluate("import math\nmath.sum((1,2,3))"), "6");
+    test.equal(evaluate("import math\nmath.sum(5)"), "5");
+    test.equal(evaluate("import math\nmath.sum('non_num')"), "NaN");
+
+    test.equal(evaluate("import math\nmath.max((1,9,7))"), "9");
+    test.equal(evaluate("import math\nmath.max(7)"), "7");
+    test.equal(evaluate("import math\nmath.max('non_num')"), "NaN");
+
+    test.equal(evaluate("import math\nmath.median((1,9,7,50))"), "8");
+    test.equal(evaluate("import math\nmath.median((1,9,7,50,6))"), "7");
+    test.equal(evaluate("import math\nmath.median((9,1))"), "5");
+    test.equal(evaluate("import math\nmath.median((9,))"), "9");
+    test.equal(evaluate("import math\nmath.median(7)"), "7");
+    test.equal(evaluate("import math\nmath.median(())"), "0");
+    test.equal(evaluate("import math\nmath.median('non_num')"), "NaN");
+
+    test.equal(evaluate("import math\nmath.min((1,9,7))"), "1");
+    test.equal(evaluate("import math\nmath.min(5)"), "5");
+    test.equal(evaluate("import math\nmath.min('non_num')"), "NaN");
+
     test.done();
   }
 });

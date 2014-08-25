@@ -598,7 +598,9 @@ function last(writer, value) {
   if ( !isArray(value) ) {
     return value;
   }
-  if ( value.length ) return value[value.length - 1];
+  if ( value.length ) {
+    return value[value.length - 1];
+  }
   return null;
 }
 
@@ -611,7 +613,10 @@ function length(writer, value) {
 // `empty(value)` returns true or false depending on whether or not the
 // provided array is empty.
 function empty(writer, value) {
-  return !value || !value.length;
+  if ( isArray(value) ) {
+    return !value.length;
+  }
+  return true;
 }
 
 // `keys(value)` returns the keys of the Object or indexes of the Array
@@ -664,6 +669,10 @@ var isArray = util.isArray;
 
 var wrap = require('./wrap');
 
+function numberSort(left, right) {
+  return left > right;
+}
+
 // `avg(value)` if an Array, returns the average (mathematical mean) of
 // value's elements
 function avg(writer, value) {
@@ -690,12 +699,12 @@ function median(writer, value) {
     return typeof value === 'number' ? value : NaN;
   }
   if ( value.length === 0 ) return 0;
-  var temp = value.slice(0).order();
+  var temp = value.slice(0).sort(numberSort);
   if ( temp.length % 2 === 0 ) {
     var mid = temp.length / 2;
     return (temp[mid - 1] + temp[mid]) / 2;
   }
-  return temp[(temp.length + 1) / 2];
+  return temp[((temp.length + 1) / 2) - 1];
 }
 
 // `min(value)` if an Array, return the lowest value in it
