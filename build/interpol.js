@@ -1610,12 +1610,12 @@ function buildRuntime(parseOutput, localOptions) {
           }
         }
 
-        function createArrayItem() {
-          return data[i];
+        function createArrayItem(idx) {
+          return data[idx];
         }
 
-        function createObjectItem() {
-          var name = items[i];
+        function createObjectItem(idx) {
+          var name = items[idx];
           return { name: name, value: data[name] };
         }
       }
