@@ -290,10 +290,6 @@ var objectKeys = util.objectKeys;
  */
 
 function isMatchingObject(template, obj) {
-  if ( template === obj ) {
-    return true;
-  }
-
   if ( template === null || template === undefined ) {
     return obj === null || obj === undefined;
   }
