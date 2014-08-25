@@ -10,6 +10,7 @@
 <span class="kd">var</span> <span class="nx">slice</span> <span class="o">=</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">slice</span><span class="p">;</span>
 
 <span class="kd">var</span> <span class="nx">isArray</span> <span class="o">=</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">isArray</span><span class="p">;</span>
+<span class="cm">/* istanbul ignore if */</span>
 <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isArray</span> <span class="p">)</span> <span class="p">{</span>
   <span class="nx">isArray</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">_isArray</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">obj</span> <span class="o">&amp;&amp;</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">length</span> <span class="o">&amp;&amp;</span> <span class="nx">toString</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="o">===</span> <span class="s1">&#39;[object Array]&#39;</span><span class="p">;</span>
@@ -17,6 +18,7 @@
 <span class="p">}</span>
 
 <span class="kd">var</span> <span class="nx">objectKeys</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">keys</span><span class="p">;</span>
+<span class="cm">/* istanbul ignore if */</span>
 <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">objectKeys</span> <span class="p">)</span> <span class="p">{</span>
   <span class="nx">objectKeys</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">_objectKeys</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">keys</span> <span class="o">=</span> <span class="p">[];</span>
@@ -30,6 +32,7 @@
 <span class="p">}</span>
 
 <span class="kd">var</span> <span class="nx">freezeObject</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">freeze</span><span class="p">;</span>
+<span class="cm">/* istanbul ignore if */</span>
 <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">freezeObject</span> <span class="p">)</span> <span class="p">{</span>
   <span class="nx">freezeObject</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">_freezeObject</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">obj</span><span class="p">;</span>
@@ -41,6 +44,7 @@
   <span class="kd">function</span> <span class="nx">FakeConstructor</span><span class="p">()</span> <span class="p">{}</span>
   <span class="kd">var</span> <span class="nx">testProto</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">__proto__</span><span class="o">:</span> <span class="p">{</span> <span class="nx">works</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">};</span>
 
+  <span class="cm">/* istanbul ignore else */</span>
   <span class="k">if</span> <span class="p">(</span> <span class="nx">testProto</span><span class="p">.</span><span class="nx">works</span> <span class="o">&amp;&amp;</span> <span class="nx">objectKeys</span><span class="p">(</span><span class="nx">testProto</span><span class="p">).</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">0</span> <span class="p">)</span> <span class="p">{</span>
     <span class="nx">extendObject</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">_fastExtendObject</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
       <span class="k">return</span> <span class="p">{</span> <span class="nx">__proto__</span><span class="o">:</span> <span class="nx">obj</span> <span class="p">};</span>

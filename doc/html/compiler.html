@@ -16,6 +16,8 @@
 
 <span class="kd">var</span> <span class="nx">isArray</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">isArray</span><span class="p">;</span>
 <span class="kd">var</span> <span class="nx">freezeObject</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">freezeObject</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">escapeContent</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">escapeContent</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">escapeAttribute</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">escapeAttribute</span><span class="p">;</span>
 <span class="kd">var</span> <span class="nx">stringify</span> <span class="o">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">stringify</span><span class="p">;</span>
 
 <span class="kd">var</span> <span class="nx">sym</span> <span class="o">=</span> <span class="nx">parser</span><span class="p">.</span><span class="nx">sym</span><span class="p">;</span>
@@ -202,7 +204,8 @@ single branched partial</p></div></div><div class="code"><div class="wrapper">  
     <span class="p">}</span>
 
     <span class="kd">function</span> <span class="nx">processStatement</span><span class="p">(</span><span class="nx">statement</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">return</span> <span class="p">[</span><span class="nx">sym</span><span class="p">(</span><span class="s1">&#39;ra&#39;</span><span class="p">),</span> <span class="nx">sym</span><span class="p">(</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">statement</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">value</span><span class="p">),</span> <span class="s1">&#39;lit&#39;</span><span class="p">)];</span>
+      <span class="kd">var</span> <span class="nx">content</span> <span class="o">=</span> <span class="nx">escapeContent</span><span class="p">(</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">statement</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">value</span><span class="p">));</span>
+      <span class="k">return</span> <span class="p">[</span><span class="nx">sym</span><span class="p">(</span><span class="s1">&#39;ra&#39;</span><span class="p">),</span> <span class="nx">sym</span><span class="p">(</span><span class="nx">content</span><span class="p">,</span> <span class="s1">&#39;lit&#39;</span><span class="p">)];</span>
     <span class="p">}</span>
   <span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Literal HTML tags can be converted to raw output</p></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">convertLiteralHTML</span><span class="p">(</span><span class="nx">statements</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">match</span><span class="p">(</span><span class="nx">statements</span><span class="p">,</span> <span class="nx">matcher</span><span class="p">,</span> <span class="nx">processStatement</span><span class="p">);</span>
@@ -448,7 +451,8 @@ to the callback function for replacement</p></div></div><div class="code"><div c
       <span class="p">}</span>
       <span class="kd">var</span> <span class="nx">val</span> <span class="o">=</span> <span class="nx">attr</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">value</span><span class="p">;</span>
       <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">val</span> <span class="o">!==</span> <span class="s1">&#39;boolean&#39;</span> <span class="p">)</span> <span class="p">{</span>
-        <span class="nx">tag</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="nx">attr</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span><span class="p">,</span> <span class="s2">&quot;=\&quot;&quot;</span><span class="p">,</span> <span class="nx">stringify</span><span class="p">(</span><span class="nx">attr</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">value</span><span class="p">),</span> <span class="s2">&quot;\&quot;&quot;</span><span class="p">);</span>
+        <span class="kd">var</span> <span class="nx">content</span> <span class="o">=</span> <span class="nx">escapeAttribute</span><span class="p">(</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">val</span><span class="p">));</span>
+        <span class="nx">tag</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="nx">attr</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span><span class="p">,</span> <span class="s2">&quot;=\&quot;&quot;</span><span class="p">,</span> <span class="nx">content</span><span class="p">,</span> <span class="s2">&quot;\&quot;&quot;</span><span class="p">);</span>
         <span class="k">continue</span><span class="p">;</span>
       <span class="p">}</span>
       <span class="k">if</span> <span class="p">(</span> <span class="nx">val</span> <span class="p">)</span> <span class="p">{</span>

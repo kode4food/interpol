@@ -2077,6 +2077,7 @@ var toString = Object.prototype.toString;
 var slice = Array.prototype.slice;
 
 var isArray = Array.isArray;
+/* istanbul ignore if */
 if ( !isArray ) {
   isArray = function _isArray(obj) {
     return obj && obj.length && toString.call(obj) === '[object Array]';
@@ -2084,6 +2085,7 @@ if ( !isArray ) {
 }
 
 var objectKeys = Object.keys;
+/* istanbul ignore if */
 if ( !objectKeys ) {
   objectKeys = function _objectKeys(obj) {
     var keys = [];
@@ -2097,6 +2099,7 @@ if ( !objectKeys ) {
 }
 
 var freezeObject = Object.freeze;
+/* istanbul ignore if */
 if ( !freezeObject ) {
   freezeObject = function _freezeObject(obj) {
     return obj;
@@ -2108,6 +2111,7 @@ var extendObject;
   function FakeConstructor() {}
   var testProto = { __proto__: { works: true } };
 
+  /* istanbul ignore else */
   if ( testProto.works && objectKeys(testProto).length === 0 ) {
     extendObject = function _fastExtendObject(obj) {
       return { __proto__: obj };
