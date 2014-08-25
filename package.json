@@ -31,7 +31,7 @@
     "bundle-debug": "browserify --debug browserify/parser.js > build/interpol-debug.js",
     "build": "npm run-script build-parser && npm run-script bundle-standard && npm run-script bundle-parser && npm run-script bundle-debug",
     "test": "nodeunit test/index.js",
-    "coverage": "istanbul cover node_modules/nodeunit/bin/nodeunit test/index.js"
+    "coverage": "istanbul cover -x '**/build/**' node_modules/nodeunit/bin/nodeunit test/index.js"
   },
   "dependencies": {
     "mkdirp": "*",
