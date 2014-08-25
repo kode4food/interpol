@@ -19,19 +19,25 @@ exports.html = nodeunit.testCase({
                   '<start>attrName</start>';
     
     var script3 = '<aTag boolAttr=boolVal>';
-    
     var script4 = '<(selfClosing) />';
+    var script5 = '<tag attr="\'<>">';
+    var script6 = '<tag>"str<>ing1" "s<>tring2"</tag>';
 
-    test.equal(evaluate(script1, data), 
+    test.equal(evaluate(script1, data),
       '<htmlBody (attrName)=\"aValue\" litAttr=\"attr\">\n</htmlBody>');
     
-    test.equal(evaluate(script2, data), 
+    test.equal(evaluate(script2, data),
       '<!DOCTYPE any>\n<start>someAttr</start>');
     
     test.equal(evaluate(script3, data), '<aTag boolAttr>');
     
     test.equal(evaluate(script4, data), '<selfClosingTag />');
-    
+  
+    test.equal(evaluate(script5), '<tag attr=\"&#39;&lt;&gt;\">');
+
+    test.equal(evaluate(script6),
+               '<tag>str&lt;&gt;ing1 s&lt;&gt;tring2</tag>');
+
     test.done();
   }
 });
