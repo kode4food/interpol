@@ -92,5 +92,27 @@ exports.codepaths = nodeunit.testCase({
     test.equals(evaluate("false or true", this.data), "true");
     test.equals(evaluate("true or false", this.data), "true");
     test.done();
+  },
+
+  "Conditional": function (test) {
+    test.equals(evaluate("true if true else false", this.data), "true");
+    test.equals(evaluate("true if true_val else false", this.data), "true");
+    test.equals(evaluate("true if true else false_val", this.data), "true");
+    test.equals(evaluate("true if true_val else false_val", this.data), "true");
+    test.equals(evaluate("true_val if true else false", this.data), "true");
+    test.equals(evaluate("true_val if true_val else false", this.data), "true");
+    test.equals(evaluate("true_val if true else false_val", this.data), "true");
+    test.equals(evaluate("true_val if true_val else false_val", this.data), "true");
+
+    test.equals(evaluate("true if false else false", this.data), "false");
+    test.equals(evaluate("true if false_val else false", this.data), "false");
+    test.equals(evaluate("true if false else false_val", this.data), "false");
+    test.equals(evaluate("true if false_val else false_val", this.data), "false");
+    test.equals(evaluate("true_val if false else false", this.data), "false");
+    test.equals(evaluate("true_val if false_val else false", this.data), "false");
+    test.equals(evaluate("true_val if false else false_val", this.data), "false");
+    test.equals(evaluate("true_val if false_val else false_val", this.data), "false");
+
+    test.done();
   }
 });
