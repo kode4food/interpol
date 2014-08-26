@@ -135,5 +135,11 @@ exports.codepaths = nodeunit.testCase({
     test.equals(evaluate("obj_value[missing_key]", this.data), "");
 
     test.done();
+  },
+
+  "Truthy": function (test) {
+    test.equals(evaluate("if (1,2,3)\ntrue\nend"), "true\n");
+    test.equals(evaluate("unless ()\ntrue\nend"), "true\n");
+    test.done();
   }
 });
