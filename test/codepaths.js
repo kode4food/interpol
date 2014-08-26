@@ -8,7 +8,14 @@ exports.codepaths = nodeunit.testCase({
       low_number: 12,
       high_number: 20,
       true_val: true,
-      false_val: false
+      false_val: false,
+      nil_value: null,
+      obj_value: {
+        name: 'Thom',
+        age: 42
+      },
+      name_key: "name",
+      missing_key: "missing"
     };
 
     callback();
@@ -112,6 +119,20 @@ exports.codepaths = nodeunit.testCase({
     test.equals(evaluate("true_val if false_val else false", this.data), "false");
     test.equals(evaluate("true_val if false else false_val", this.data), "false");
     test.equals(evaluate("true_val if false_val else false_val", this.data), "false");
+
+    test.done();
+  },
+
+  "Membership": function (test) {
+    test.equals(evaluate("nil.missing"), "");
+    test.equals(evaluate("nil_value.missing", this.data), "");
+    test.equals(evaluate("nil_value[nil_value]", this.data), "");
+    test.equals(evaluate("nil[nil_value]", this.data), "");
+    test.equals(evaluate("obj_value.name", this.data), "Thom");
+    test.equals(evaluate("obj_value['name']", this.data), "Thom");
+    test.equals(evaluate("obj_value[name_key]", this.data), "Thom");
+    test.equals(evaluate("obj_value.missing", this.data), "");
+    test.equals(evaluate("obj_value[missing_key]", this.data), "");
 
     test.done();
   }
