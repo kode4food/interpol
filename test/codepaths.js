@@ -28,7 +28,9 @@ exports.codepaths = nodeunit.testCase({
     test.equals(evaluate("high_number like high_number", this.data), "true");
     test.equals(evaluate("high_number mod low_number", this.data), "8");
     test.equals(evaluate("true_val and true_val", this.data), "true");
+    test.equals(evaluate("false_val and true_val", this.data), "false");
     test.equals(evaluate("false_val or true_val", this.data), "true");
+    test.equals(evaluate("true_val or false_val", this.data), "true");
     test.done();
   },
 
@@ -46,7 +48,9 @@ exports.codepaths = nodeunit.testCase({
     test.equals(evaluate("20 like high_number", this.data), "true");
     test.equals(evaluate("20 mod low_number", this.data), "8");
     test.equals(evaluate("true and true_val", this.data), "true");
+    test.equals(evaluate("false and true_val", this.data), "false");
     test.equals(evaluate("false or true_val", this.data), "true");
+    test.equals(evaluate("true or false_val", this.data), "true");
     test.done();
   },
 
@@ -64,7 +68,9 @@ exports.codepaths = nodeunit.testCase({
     test.equals(evaluate("high_number like 20", this.data), "true");
     test.equals(evaluate("high_number mod 12", this.data), "8");
     test.equals(evaluate("true_val and true", this.data), "true");
+    test.equals(evaluate("false_val and true", this.data), "false");
     test.equals(evaluate("false_val or true", this.data), "true");
+    test.equals(evaluate("true_val or false", this.data), "true");
     test.done();
   },
 
@@ -82,7 +88,9 @@ exports.codepaths = nodeunit.testCase({
     test.equals(evaluate("20 like 20", this.data), "true");
     test.equals(evaluate("20 mod 12", this.data), "8");
     test.equals(evaluate("true and true", this.data), "true");
+    test.equals(evaluate("false and true", this.data), "false");
     test.equals(evaluate("false or true", this.data), "true");
+    test.equals(evaluate("true or false", this.data), "true");
     test.done();
   }
 });
