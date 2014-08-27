@@ -1,5 +1,6 @@
 exports.basics = require('./basics').basics;
 exports.calls = require('./calls').calls;
+exports.cli = require('./cli').cli;
 exports.codepaths = require('./codepaths').codepaths;
 exports.html = require('./html').html;
 exports.imports = require('./imports').imports;

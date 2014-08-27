@@ -1,0 +1,9 @@
+# Simple test for warning parse
+
+def partial(name, age) when age gt 25
+  "They are older than 25"
+end
+
+def partial(name, age)
+  "This will shadow the previous, and generate a warning"
+end
