@@ -1,6 +1,8 @@
 # Change History
 
 ## Version 0.4.1 - 'using' Expressions
+Test coverage has been greatly increased, from about 50% to 90%.  Corrected quite a few bugs in the process.
+
 * The 'using' construct can now be applied to individual expressions.
 
 ```python
