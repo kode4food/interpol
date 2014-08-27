@@ -1,9 +1,22 @@
+/*
+ * Interpol (Templates Sans Facial Hair)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thomas S. Bradford (kode4food.it)
+ */
+
+"use strict";
+
+var fs = require('fs');
 var nodeunit = require('nodeunit');
 var interpol = require('../lib');
 var commandLine = require('../lib/cli').commandLine;
 
 function createConsole() {
   var buffer = [];
+  var str;
+
   return {
     log: append,
     info: append,
@@ -15,10 +28,14 @@ function createConsole() {
 
   function append(value) {
     buffer.push(value);
+    str = null;
   }
 
   function result() {
-    return buffer.join('\n');
+    if ( !str ) {
+      str = buffer.join('\n');
+    }
+    return str;
   }
 
   function contains(str) {
@@ -47,7 +64,8 @@ exports.cli = nodeunit.testCase({
       test.equal(typeof content, 'object');
       var compiled = interpol(content);
       test.equal(typeof compiled, 'function');
-
+      fs.unlinkSync("./test/cli_success/test1.int.json"); // cleanup
+      fs.unlinkSync("./test/cli_success/test2.int.json");
       test.done();
     });
   },
@@ -59,6 +77,7 @@ exports.cli = nodeunit.testCase({
       test.ok(cons.contains("Success"));
       test.ok(cons.contains("Warnings"));
       test.ok(!cons.contains("Failures"));
+      fs.unlinkSync("./test/cli_warning/test1.int.json"); // cleanup
       test.done();
     });
   },
@@ -105,24 +124,29 @@ exports.cli = nodeunit.testCase({
       test.ok(!cons.contains("Warnings"));
       test.ok(!cons.contains("Failures"));
 
+      // Rewrite the file to point to the local Interpol instance
+      var content = fs.readFileSync('./test/test_bundle.js').toString();
+      content = content.replace("require('interpol')", "require('../lib')");
+      fs.writeFileSync('./test/test_bundle.js', content);
+      
       require('./test_bundle.js');
       test.ok(interpol.hasOwnProperty('test_bundle'));
       test.ok(interpol.test_bundle.hasOwnProperty('test1'));
-
+      fs.unlinkSync("./test/test_bundle.js"); // cleanup
       test.done();
     });
   },
 
   "Create JSON Bundle": function (test) {
     var cons = createConsole();
-    commandLine(["-json", "test_bundle.json", "-in", "./test/cli_success"], cons, function (exitCode) {
+    commandLine(["-json", "test/test_bundle.json", "-in", "./test/cli_success"], cons, function (exitCode) {
       test.ok(cons.contains("Interpol Parsing Complete"));
       test.ok(cons.contains("Success"));
       test.ok(!cons.contains("Warnings"));
       test.ok(!cons.contains("Failures"));
+      fs.unlinkSync("./test/test_bundle.json"); // cleanup
       test.done();
     });
   }
-
 
 });
