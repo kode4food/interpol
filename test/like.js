@@ -45,7 +45,8 @@ exports.like = nodeunit.testCase({
       person2: person2,
       person3: person3,
       person4: person4,
-      array: array
+      array: array,
+      null_value: null
     };
 
     var script1 = 'if person1 like person2\n' +
@@ -84,6 +85,9 @@ exports.like = nodeunit.testCase({
     test.equal(evaluate(script5, data), "They don't match!\n");
     test.equal(evaluate(script5, { person1: null }), "They don't match!\n");
     
+    test.equal(evaluate("nil like null_value", data), "true");
+    test.equal(evaluate("null_value like nil", data), "true");
+
     test.done();
   }
 });
