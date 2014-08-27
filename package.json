@@ -40,7 +40,7 @@
   "devDependencies": {
     "browserify": "*",
     "groc": "*",
-    "istanbul": "^0.3.0",
+    "istanbul": "*",
     "nodeunit": "*",
     "pegjs": "*",
     "uglify-js": "*"
