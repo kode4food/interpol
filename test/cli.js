@@ -42,6 +42,12 @@ exports.cli = nodeunit.testCase({
       test.ok(cons.contains("Success"));
       test.ok(!cons.contains("Warnings"));
       test.ok(!cons.contains("Failures"));
+
+      var content = require('./cli_success/test1.int.json');
+      test.equal(typeof content, 'object');
+      var compiled = interpol(content);
+      test.equal(typeof compiled, 'function');
+
       test.done();
     });
   },
@@ -93,11 +99,16 @@ exports.cli = nodeunit.testCase({
 
   "Create App Bundle": function (test) {
     var cons = createConsole();
-    commandLine(["-app", "test_bundle.js", "-in", "./test/cli_success"], cons, function (exitCode) {
+    commandLine(["-app", "test/test_bundle.js", "-in", "./test/cli_success"], cons, function (exitCode) {
       test.ok(cons.contains("Interpol Parsing Complete"));
       test.ok(cons.contains("Success"));
       test.ok(!cons.contains("Warnings"));
       test.ok(!cons.contains("Failures"));
+
+      require('./test_bundle.js');
+      test.ok(interpol.hasOwnProperty('test_bundle'));
+      test.ok(interpol.test_bundle.hasOwnProperty('test1'));
+
       test.done();
     });
   },

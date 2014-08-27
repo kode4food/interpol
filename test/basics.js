@@ -23,6 +23,11 @@ exports.basics = nodeunit.testCase({
     callback();
   },
 
+  "Entry Point": function (test) {
+    test.throws(function() { interpol(47); });
+    test.done();
+  },
+
   "Relational Evaluation": function (test) {
     test.equal(evaluate("10 * 99 gt 900"), "true");
     test.equal(evaluate("100 / 5 ge 30"), "false");
@@ -93,7 +98,7 @@ exports.basics = nodeunit.testCase({
     test.equal(evaluate(script), "cond4");
     test.done();
   },
-  
+
   "Like Evaluation": function (test) {
     var data = {
       person: {
@@ -102,11 +107,11 @@ exports.basics = nodeunit.testCase({
         title: "Developer"
       }
     };
-    
+
     var script = 'if person like (name = "Thom", age = 42)\n' +
                  '  "%name is %age" % person\n' +
                  'end';
-    
+
     test.equal(evaluate(script, data), "Thom is 42\n");
     test.done();
   }
