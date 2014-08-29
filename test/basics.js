@@ -41,8 +41,10 @@ exports.basics = nodeunit.testCase({
   "Relational Evaluation": function (test) {
     test.equal(evaluate("10 * 99 gt 900"), "true");
     test.equal(evaluate("100 / 5 ge 30"), "false");
+    test.equal(evaluate("100 / 5 gte 30"), "false");
     test.equal(evaluate("99 mod 6 ge 3"), "true");
     test.equal(evaluate("33 * 3 mod 6 le 2"), "false");
+    test.equal(evaluate("33 * 3 mod 6 lte 2"), "false");
     test.equal(evaluate("people[0].age * 2 gt 99", this.data), "true");
     test.equal(evaluate("people[0].age / 2 lt 24", this.data), "false");
     test.equal(evaluate("100 / people[0].age ge 2", this.data), "true");

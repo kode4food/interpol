@@ -85,7 +85,7 @@ exports.partials = nodeunit.testCase({
                  'def partialCall(val) when val\n' +
                  '  "first %val"\n' +
                  'end\n' +
-                 'def partialCall(val) when val == 10\n\n' +
+                 'def partialCall(val) where val == 10\n\n' +
                  '  "second %val"\n' +
                  'end\n' +
                  'def partialCall(val) when extern\n' +
