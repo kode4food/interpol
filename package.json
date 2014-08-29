@@ -34,16 +34,16 @@
     "coverage": "istanbul cover -x '**/build/**' node_modules/nodeunit/bin/nodeunit test/index.js"
   },
   "dependencies": {
-    "mkdirp": "*",
-    "glob": "*"
+    "mkdirp": "~0.5.0",
+    "glob": "~3.2.9"
   },
   "devDependencies": {
-    "browserify": "*",
-    "groc": "*",
-    "istanbul": "*",
-    "nodeunit": "*",
-    "pegjs": "*",
-    "uglify-js": "*"
+    "browserify": "~3.46.0",
+    "groc": "~0.6.3",
+    "istanbul": "~0.3.0",
+    "nodeunit": "~0.8.7",
+    "pegjs": "~0.8.0",
+    "uglify-js": "~2.4.13"
   },
   "engines": {
     "node": "*"
