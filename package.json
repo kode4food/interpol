@@ -25,7 +25,7 @@
   "repository": "git@bitbucket.org:kode4food/interpol.git",
   "scripts": {
     "build-parser": "pegjs -o speed lib/parser.pegjs build/parser.js",
-    "build-doc": "rm -rf doc/html && groc --languages ./doc/languages --out 'doc/html' --except '**/index.js' --except 'lib/parser.js' 'README.md' 'lib/**/*.js'",
+    "build-doc": "rm -rf doc/html && groc --languages ./doc/languages --out 'doc/html' 'README.md' 'lib/**/*.js'",
     "bundle-standard": "browserify browserify/standard.js > build/interpol.js && uglifyjs -m --preamble \"`cat doc/preamble.js`\" build/interpol.js -o build/interpol.min.js",
     "bundle-parser": "browserify browserify/parser.js | uglifyjs -m --preamble \"`cat doc/preamble.js`\" -o build/interpol-parser.min.js",
     "bundle-debug": "browserify --debug browserify/parser.js > build/interpol-debug.js",
