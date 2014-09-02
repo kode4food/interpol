@@ -909,6 +909,8 @@ var globalOptions = { writer: null, errorCallback: null };
 var globalContext = {};
 var globalResolvers = [];
 
+function noOp() {}
+
 /**
  * Converts a pre-compiled JSON instance to an evaluative runtime closure.
  *
@@ -924,43 +926,44 @@ function buildRuntime(parseOutput, localOptions) {
 
   // A lookup table of code-path generators
   var Evaluators = freezeObject({
-    st: createStatementsEvaluator,
-    im: createImportEvaluator,
-    de: createPartialEvaluator,
-    bi: createBindEvaluator,
-    ca: createCallEvaluator,
-    as: createAssignEvaluator,
-    op: createOpenTagEvaluator,
-    cl: createCloseTagEvaluator,
-    ct: createCommentTagEvaluator,
-    dt: createDocTypeEvaluator,
-    ou: createOutputEvaluator,
-    ra: createRawOutputEvaluator,
-    fr: createForEvaluator,
-    us: createUsingEvaluator,
-    cn: createConditionalEvaluator,
-    or: createOrEvaluator,
-    an: createAndEvaluator,
-    eq: createEqEvaluator,
-    ma: createMatchEvaluator,
-    nq: createNeqEvaluator,
-    gt: createGtEvaluator,
-    lt: createLtEvaluator,
-    ge: createGteEvaluator,
-    le: createLteEvaluator,
-    ad: createAddEvaluator,
-    su: createSubEvaluator,
-    mu: createMulEvaluator,
-    di: createDivEvaluator,
-    mo: createModEvaluator,
-    fm: createFormatEvaluator,
-    no: createNotEvaluator,
-    ne: createNegEvaluator,
-    mb: createMemberEvaluator,
-    ar: createArrayEvaluator,
-    dc: createDictionaryEvaluator,
-    id: createIdEvaluator,
-    se: createSelfEvaluator
+    'im': createImportEvaluator,
+    'de': createPartialEvaluator,
+    'bi': createBindEvaluator,
+    'ca': createCallEvaluator,
+    'as': createAssignEvaluator,
+    'op': createOpenTagEvaluator,
+    'cl': createCloseTagEvaluator,
+    'ct': createCommentTagEvaluator,
+    'dt': createDocTypeEvaluator,
+    'ou': createOutputEvaluator,
+    'ra': createRawOutputEvaluator,
+    'fr': createForEvaluator,
+    'us': createUsingStmtEvaluator,
+    'ux': createUsingExprEvaluator,
+    'cn': createTernaryEvaluator,
+    'if': createIfEvaluator,
+    'or': createOrEvaluator,
+    'an': createAndEvaluator,
+    'eq': createEqEvaluator,
+    'ma': createMatchEvaluator,
+    'nq': createNeqEvaluator,
+    'gt': createGtEvaluator,
+    'lt': createLtEvaluator,
+    'ge': createGteEvaluator,
+    'le': createLteEvaluator,
+    'ad': createAddEvaluator,
+    'su': createSubEvaluator,
+    'mu': createMulEvaluator,
+    'di': createDivEvaluator,
+    'mo': createModEvaluator,
+    'fm': createFormatEvaluator,
+    'no': createNotEvaluator,
+    'ne': createNegEvaluator,
+    'mb': createMemberEvaluator,
+    'ar': createArrayEvaluator,
+    'dc': createDictionaryEvaluator,
+    'id': createIdEvaluator,
+    'se': createSelfEvaluator
   });
 
   // literals are stored in the `l` property of parseOutput, while the parse
@@ -1167,15 +1170,26 @@ function buildRuntime(parseOutput, localOptions) {
   // ## Evaluator Generation
 
   function createStatementsEvaluator(statementNodes) {
-    if ( statementNodes.length === 1 ) {
-      return createEvaluator(statementNodes[0]);
-    }
-
     var statements = wrapArrayEvaluators(statementNodes).reverse();
-    var slen = statements.length - 1;
-
-    return statementsEvaluator;
-
+    var slen;
+    var statement;
+    
+    if ( statements.length > 1 ) {
+      slen = statements.length - 1;
+      return statementsEvaluator;
+    }
+    if ( statements.length === 1 ) {
+      statement = statements[0];
+      return statementEvaluator;
+    }
+    else {
+      return noOp;
+    }
+    
+    function statementEvaluator(ctx, writer) {
+      statement(ctx, writer);
+    }
+    
     function statementsEvaluator(ctx, writer) {
       for ( var i = slen; i >= 0; i-- ) {
         statements[i](ctx, writer);
@@ -1621,13 +1635,22 @@ function buildRuntime(parseOutput, localOptions) {
       }
     }
   }
-
+  
   // generate an evaluator that borrows the specified expressions
   // as the evaluated node's new scope for locals (remaining immutable)
-  function createUsingEvaluator(usingNode, evalNode) {
+  function createUsingStmtEvaluator(usingNode, evalNodes) {
+    var evalExpr = createStatementsEvaluator(evalNodes);
+    return buildUsingEvaluator(usingNode, evalExpr);
+  }
+
+  function createUsingExprEvaluator(usingNode, evalNode) {
+    var evalExpr = createEvaluator(evalNode);
+    return buildUsingEvaluator(usingNode, evalExpr);
+  }
+
+  function buildUsingEvaluator(usingNode, evalExpr) {
     var usingExprs = [null].concat(wrapArrayEvaluators(usingNode));
     var ulen = usingExprs.length;
-    var evalExpr = createEvaluator(evalNode);
 
     return usingEvaluator;
 
@@ -1644,12 +1667,23 @@ function buildRuntime(parseOutput, localOptions) {
     }
   }
 
-  // generate a conditional evaluator (if/else or ternary)
-  function createConditionalEvaluator(conditionNode, trueNodes, falseNodes) {
+  // generate a conditional (ternary) evaluator
+  function createTernaryEvaluator(conditionNode, trueNode, falseNode) {
+    var $1 = createEvaluator(conditionNode);
+    var $2 = createEvaluator(trueNode);
+    var $3 = createEvaluator(falseNode);
+    return buildConditionalEvaluator($1, $2, $3);
+  }
+
+  // generate an if statement evaluator
+  function createIfEvaluator(conditionNode, trueNodes, falseNodes) {
     var $1 = createEvaluator(conditionNode);
     var $2 = createStatementsEvaluator(trueNodes);
     var $3 = createStatementsEvaluator(falseNodes);
-
+    return buildConditionalEvaluator($1, $2, $3);
+  }
+  
+  function buildConditionalEvaluator($1, $2, $3) {
     if ( typeof $1 !== 'function' ) {
       return isTruthy($1) ? $2 : $3;
     }

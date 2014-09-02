@@ -403,7 +403,7 @@ module.exports = (function() {
               return [path];
             },
         peg$c249 = function(op, exprs, statements) {
-              return [sym(op), exprs, [sym('st'), statements]];
+              return [sym(op), exprs, statements];
             },
         peg$c250 = function(op, ranges, statements, tail) {
               return [sym(op), ranges, statements, tail];
@@ -417,15 +417,15 @@ module.exports = (function() {
             },
         peg$c253 = function(op, expr, statements, tail) {
               if ( !op ) {
-                return [sym('cn'), expr, tail, statements];
+                return [sym('if'), expr, tail, statements];
               }
-              return [sym('cn'), expr, statements, tail];
+              return [sym('if'), expr, statements, tail];
             },
         peg$c254 = function(ifStatement) {
               return stmts([ifStatement]);
             },
         peg$c255 = function() {
-              return [sym(null, 'lit')];
+              return [];
             },
         peg$c256 = function(op, a) {
             return [sym(op), a];
@@ -439,7 +439,7 @@ module.exports = (function() {
               if ( !tail || !tail.length ) {
                 return head;
               }
-              return [sym('us'), tail, head];
+              return [sym('ux'), tail, head];
             },
         peg$c261 = "%",
         peg$c262 = { type: "literal", value: "%", description: "\"%\"" },
@@ -458,9 +458,9 @@ module.exports = (function() {
             },
         peg$c265 = function(tval, op, cond, fval) {
               if ( !op ) {
-                return [sym('cn'), cond, [fval], [tval]];
+                return [sym('cn'), cond, fval, tval];
               }
-              return [sym('cn'), cond, [tval], [fval]];
+              return [sym('cn'), cond, tval, fval];
             },
         peg$c266 = function(op, r) { return [sym(op), r]; },
         peg$c267 = function(head, tail) {
@@ -487,20 +487,20 @@ module.exports = (function() {
             },
         peg$c273 = function(sel) { return sel; },
         peg$c274 = function(elem) {
-              return [sym('mb'), elem];
+              return [sym('mb'), sym(elem.value, 'lit')];
             },
         peg$c275 = "[",
         peg$c276 = { type: "literal", value: "[", description: "\"[\"" },
         peg$c277 = "]",
         peg$c278 = { type: "literal", value: "]", description: "\"]\"" },
-        peg$c279 = function(args) {
+        peg$c279 = function(elem) {
+              return [sym('mb'), elem];
+            },
+        peg$c280 = function(args) {
               return [sym('ca'), args];
             },
-        peg$c280 = function(elems) {
+        peg$c281 = function(elems) {
               return elems;
-            },
-        peg$c281 = function() {
-              return [];
             },
         peg$c282 = function(elems, force) {
               if ( elems.length > 1 || force ) {
@@ -6523,7 +6523,7 @@ module.exports = (function() {
                 }
                 if (s5 !== peg$FAILED) {
                   peg$reportedPos = s0;
-                  s1 = peg$c274(s3);
+                  s1 = peg$c279(s3);
                   s0 = s1;
                 } else {
                   peg$currPos = s0;
@@ -6550,7 +6550,7 @@ module.exports = (function() {
           s1 = peg$parsecallArgs();
           if (s1 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c279(s1);
+            s1 = peg$c280(s1);
           }
           s0 = s1;
         }
@@ -6586,7 +6586,7 @@ module.exports = (function() {
               }
               if (s5 !== peg$FAILED) {
                 peg$reportedPos = s0;
-                s1 = peg$c280(s3);
+                s1 = peg$c281(s3);
                 s0 = s1;
               } else {
                 peg$currPos = s0;
@@ -6629,7 +6629,7 @@ module.exports = (function() {
             }
             if (s3 !== peg$FAILED) {
               peg$reportedPos = s0;
-              s1 = peg$c281();
+              s1 = peg$c255();
               s0 = s1;
             } else {
               peg$currPos = s0;

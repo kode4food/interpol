@@ -1,6 +1,15 @@
 # Change History
 
 ## Version 0.4.2 - Synonyms
+* Synonyms for the following keywords have been added:
+
+  * `lte` can now be used in place of `le` (less than or equal to)
+  * `gte` can now be used in place of `ge` (greater than or equal to)
+  * `where` can now be used in place of `when` (for guard clauses)
+
+The goal here, particularly for the `where` synonym, is to make your code a little more readable and contribute to its ability to convey your intent.
+
+* Various optimizations relating to the treatment of literals have been added.  These include constant folding and branch elimination.
 
 ## Version 0.4.1 - 'using' Expressions
 Test coverage has been greatly increased, from about 50% to 90%.  Corrected quite a few bugs in the process, some of them major.
