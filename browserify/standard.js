@@ -12,7 +12,7 @@
 // Browserify build.  It's of no interest to Node.js
 
 // Set the Interpol browser global
-window.$interpol = require('../lib/interpol');
+window.interpol = require('../lib/interpol');
 
 // Resolvers
 require('../lib/resolvers/memory');

@@ -158,12 +158,12 @@ var interpol = require('interpol');
 ## Inclusion in a Browser
 There are two ways to include Interpol templates in a browser-based application.  One is to compile raw templates using the Interpol compiler.  Another is to load the templates from pre-compiled JSON output.  The PEG.js parser used by the compiler is *massive* and slower than loading JSON, but it may be necessary if you want to compile ad-hoc templates.
 
-*Note:* The entry point function for Interpol in the browser is *always* named `$interpol()`.
+*Note:* The entry point function for Interpol in the browser is *always* named `interpol()`.
 
 ### Loading Pre-Compiled JSON
-The `$interpol()` function will accept a pre-compiled JSON object instead of a JavaScript string.  This will allow you to bypass the loading of the PEG.js parser.  Instead, you can load pre-compiled templates from your server for faster initialization.
+The `interpol()` function will accept a pre-compiled JSON object instead of a JavaScript string.  This will allow you to bypass the loading of the PEG.js parser.  Instead, you can load pre-compiled templates from your server for faster initialization.
 
-You can also invoke the compiler by calling the `$interpol.compile(Object)` function.
+You can also invoke the compiler by calling the `interpol.compile(Object)` function.
 
 ```html
 <script src="build/interpol.min.js" type="text/javascript"></script>
@@ -179,10 +179,10 @@ If you *must* parse raw templates in the browser, you will need to load the vers
 ```
 
 ## Using the Library
-To compile a raw template into a closure, invoke `$interpol(String)` as a function.  Provide to it a string containing your template:
+To compile a raw template into a closure, invoke `interpol(String)` as a function.  Provide to it a string containing your template:
 
 ```javascript
-var compiledTemplate = $interpol(someTemplateString);
+var compiledTemplate = interpol(someTemplateString);
 ```
 
 This will generate a closure that takes up to two parameters, both of which are optional.  The first is the data that your template renders.  The second is an options object used to override the content writer interface.  By default, the library writes to a JavaScript string.

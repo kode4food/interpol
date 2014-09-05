@@ -1,6 +1,8 @@
 # Change History
 
 ## Version 0.4.2 - Synonyms
+* The global function for Web Browser deployment has been renamed from `$interpol()` to `interpol()`.
+
 * Synonyms for the following keywords have been added:
 
   * `lte` can now be used in place of `le` (less than or equal to)
@@ -291,7 +293,7 @@ A very basic DOM Writer is now available for the browser.  You can create an ins
 
 ```javascript
 var parentElem = document.getElementById('content')
-  , domWriter = $interpol.createDOMWriter(parentElem, 'insert');
+  , domWriter = interpol.createDOMWriter(parentElem, 'insert');
 ```
 
 Now, every time you invoke your template with this writer, the parentElem's contents will be updated:

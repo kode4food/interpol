@@ -20,9 +20,9 @@
 </script>
 <script type="application/javascript">
   var parentElem = document.getElementById('content');
-  var domWriter = $interpol.createDOMWriter(parentElem, 'insert');
+  var domWriter = interpol.createDOMWriter(parentElem, 'insert');
   var data = JSON.parse(document.getElementById("data").textContent);
-  var template = $interpol.testApp.test.configure(data, { writer: domWriter });
+  var template = interpol.testApp.test.configure(data, { writer: domWriter });
   template(data);
 </script>
 </html>
