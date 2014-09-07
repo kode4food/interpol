@@ -13,16 +13,16 @@
 // Browserify build.  It's of no interest to Node.js
 
 // Set the Interpol browser global
-window.interpol = require('../lib/interpol');
+var interpol = window.interpol = require('../lib/interpol');
 
 // Resolvers
-require('../lib/resolvers/memory');
-require('../lib/resolvers/system');
+require('../lib/resolvers/memory').registerResolver(interpol);
+require('../lib/resolvers/system').registerResolver(interpol);
 
 // Writers
-require('../lib/writers/null');
-require('../lib/writers/string');
-require('../lib/writers/dom');
+require('../lib/writers/null').registerWriter(interpol);
+require('../lib/writers/string').registerWriter(interpol);
+require('../lib/writers/dom').registerWriter(interpol);
 
 },{"../lib/interpol":3,"../lib/resolvers/memory":5,"../lib/resolvers/system":6,"../lib/writers/dom":13,"../lib/writers/null":14,"../lib/writers/string":15}],2:[function(require,module,exports){
 /*
@@ -194,7 +194,7 @@ var bless = util.bless;
 var isInterpolJSON = util.isInterpolJSON;
 var buildRuntime = runtime.buildRuntime;
 
-var CURRENT_VERSION = "0.4.2";
+var CURRENT_VERSION = "0.4.3";
 var compileModule = null;
 
 var slice = Array.prototype.slice;
@@ -415,7 +415,6 @@ exports.buildMatcher = buildMatcher;
 
 "use strict";
 
-var interpol = require('../interpol');
 var util = require('../util');
 
 var slice = Array.prototype.slice;
@@ -424,14 +423,17 @@ var isInterpolJSON = util.isInterpolJSON;
 var bless = util.bless;
 
 /**
- * Creates a new Memory Resolver.  As its name implies, this resolver
+ * Creates a new MemoryResolver.  As its name implies, this resolver
  * allows one to register a module to be stored in memory.  A default
  * instance of this resolver is used to store the System Modules.
  * Because of its flexibility, it can also be used to store custom
  * modules and native JavaScript helpers.
+ *
+ * @param {function} interpol the Interpol Instance to use for compilation
+ * @param {Object} [options] Options for generating the MemoryResolver
  */
 
-function createMemoryResolver(options) {
+function createMemoryResolver(interpol, options) {
   var cache = {};
 
   return {
@@ -529,18 +531,20 @@ function normalizeModuleName(name) {
   return name.replace(/[/\\.]+/g, '/');
 }
 
-// Add Default Memory Resolver
-var defaultMemoryResolver = createMemoryResolver();
-interpol.resolvers().push(defaultMemoryResolver);
-interpol.registerModule = defaultMemoryResolver.registerModule;
-interpol.unregisterModule = defaultMemoryResolver.unregisterModule;
+function registerResolver(interpol) {
+  var defaultMemoryResolver = createMemoryResolver(interpol);
+  interpol.resolvers().push(defaultMemoryResolver);
+  interpol.registerModule = defaultMemoryResolver.registerModule;
+  interpol.unregisterModule = defaultMemoryResolver.unregisterModule;
+  interpol.createMemoryResolver = createMemoryResolver;
+  interpol.defaultMemoryResolver = defaultMemoryResolver;
+}
 
 // Exported Functions
-exports.defaultMemoryResolver = defaultMemoryResolver;
 exports.createMemoryResolver = createMemoryResolver;
-interpol.createMemoryResolver = createMemoryResolver;
+exports.registerResolver = registerResolver;
 
-},{"../interpol":3,"../util":12}],6:[function(require,module,exports){
+},{"../util":12}],6:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -551,14 +555,21 @@ interpol.createMemoryResolver = createMemoryResolver;
 
 "use strict";
 
-var memory = require('../memory');
-var defaultMemoryResolver = memory.defaultMemoryResolver;
+var math = require('./math');
+var list = require('./list');
+var string = require('./string');
 
-defaultMemoryResolver.registerModule('math', require('./math'));
-defaultMemoryResolver.registerModule('list', require('./list'));
-defaultMemoryResolver.registerModule('string', require('./string'));
+function registerResolver(interpol) {
+  var defaultMemoryResolver = interpol.defaultMemoryResolver;
+  defaultMemoryResolver.registerModule('math', math);
+  defaultMemoryResolver.registerModule('list', list);
+  defaultMemoryResolver.registerModule('string', string);
+}
 
-},{"../memory":5,"./list":7,"./math":8,"./string":9}],7:[function(require,module,exports){
+// Exported Functions
+exports.registerResolver = registerResolver;
+
+},{"./list":7,"./math":8,"./string":9}],7:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -885,8 +896,8 @@ var util = require('./util');
 var format = require('./format');
 var match = require('./match');
 
-var stringWriter = require('./writers/string');
-var nullWriter = require('./writers/null');
+var createStringWriter = require('./writers/string').createStringWriter;
+var nullWriter = require('./writers/null').createNullWriter();
 
 var isArray = util.isArray;
 var mixin = util.mixin;
@@ -921,9 +932,6 @@ function noOp() {}
  */
 
 function buildRuntime(parseOutput, localOptions) {
-  var createStringWriter = stringWriter.createStringWriter;
-  var NullWriter = nullWriter.createNullWriter();
-
   // A lookup table of code-path generators
   var Evaluators = freezeObject({
     'im': createImportEvaluator,
@@ -1047,7 +1055,7 @@ function buildRuntime(parseOutput, localOptions) {
 
     exportedContext = extendObject(globalContext);
     exportedContext.__intExports = true;
-    evaluator(exportedContext, NullWriter);
+    evaluator(exportedContext, nullWriter);
     delete exportedContext.__intExports;
 
     return exportedContext;
@@ -2409,7 +2417,6 @@ exports.configure = configure;
 
 "use strict";
 
-var interpol = require('../interpol');
 var util = require('../util');
 var string = require('./string');
 
@@ -2470,11 +2477,15 @@ function createDOMWriter(parentElement, renderMode) {
   }
 }
 
+function registerWriter(interpol) {
+  interpol.createDOMWriter = createDOMWriter;
+}
+
 // Exported Functions
 exports.createDOMWriter = createDOMWriter;
-interpol.createDOMWriter = createDOMWriter;
+exports.registerWriter = registerWriter;
 
-},{"../interpol":3,"../util":12,"./string":15}],14:[function(require,module,exports){
+},{"../util":12,"./string":15}],14:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -2485,7 +2496,6 @@ interpol.createDOMWriter = createDOMWriter;
 
 "use strict";
 
-var interpol = require('../interpol');
 var util = require('../util');
 
 var freezeObject = util.freezeObject;
@@ -2512,11 +2522,14 @@ function createNullWriter() {
   });
 }
 
+function registerWriter(interpol) {
+  interpol.createNullWriter = createNullWriter;
+}
+
 // Exported Functions
 exports.createNullWriter = createNullWriter;
-interpol.createNullWriter = createNullWriter;
-
-},{"../interpol":3,"../util":12}],15:[function(require,module,exports){
+exports.registerWriter = registerWriter;
+},{"../util":12}],15:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -2527,7 +2540,6 @@ interpol.createNullWriter = createNullWriter;
 
 "use strict";
 
-var interpol = require('../interpol');
 var util = require('../util');
 
 var freezeObject = util.freezeObject;
@@ -2612,8 +2624,11 @@ function createStringWriter() {
   }
 }
 
+function registerWriter(interpol) {
+  interpol.createStringWriter = createStringWriter;
+}
+
 // Exported Functions
 exports.createStringWriter = createStringWriter;
-interpol.createStringWriter = createStringWriter;
-
-},{"../interpol":3,"../util":12}]},{},[1])
+exports.registerWriter = registerWriter;
+},{"../util":12}]},{},[1])
