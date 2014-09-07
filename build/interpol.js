@@ -21,10 +21,10 @@ require('../lib/resolvers/system');
 
 // Writers
 require('../lib/writers/null');
-require('../lib/writers/array');
+require('../lib/writers/string');
 require('../lib/writers/dom');
 
-},{"../lib/interpol":3,"../lib/resolvers/memory":5,"../lib/resolvers/system":6,"../lib/writers/array":13,"../lib/writers/dom":14,"../lib/writers/null":15}],2:[function(require,module,exports){
+},{"../lib/interpol":3,"../lib/resolvers/memory":5,"../lib/resolvers/system":6,"../lib/writers/dom":13,"../lib/writers/null":14,"../lib/writers/string":15}],2:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -175,7 +175,7 @@ function buildTemplate(formatStr) {
 // Exported Functions
 exports.buildTemplate = buildTemplate;
 
-},{"./util":12,"./writers/null":15}],3:[function(require,module,exports){
+},{"./util":12,"./writers/null":14}],3:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -885,7 +885,7 @@ var util = require('./util');
 var format = require('./format');
 var match = require('./match');
 
-var arrayWriter = require('./writers/array');
+var stringWriter = require('./writers/string');
 var nullWriter = require('./writers/null');
 
 var isArray = util.isArray;
@@ -921,7 +921,7 @@ function noOp() {}
  */
 
 function buildRuntime(parseOutput, localOptions) {
-  var createArrayWriter = arrayWriter.createArrayWriter;
+  var createStringWriter = stringWriter.createStringWriter;
   var NullWriter = nullWriter.createNullWriter();
 
   // A lookup table of code-path generators
@@ -999,7 +999,7 @@ function buildRuntime(parseOutput, localOptions) {
     var processingOptions = mixin({}, globalOptions, localOptions);
 
     // If no Writer is provided, create a throw-away Array Writer
-    var writer = processingOptions.writer || createArrayWriter();
+    var writer = processingOptions.writer || createStringWriter();
 
     try {
       writer.startRender();
@@ -2094,7 +2094,7 @@ exports.options = options;
 exports.globals = globals;
 exports.resolvers = resolvers;
 
-},{"./format":2,"./match":4,"./util":12,"./writers/array":13,"./writers/null":15}],12:[function(require,module,exports){
+},{"./format":2,"./match":4,"./util":12,"./writers/null":14,"./writers/string":15}],12:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -2411,6 +2411,124 @@ exports.configure = configure;
 
 var interpol = require('../interpol');
 var util = require('../util');
+var string = require('./string');
+
+var freezeObject = util.freezeObject;
+var mixin = util.mixin;
+var createStringWriter = string.createStringWriter;
+
+var REPLACE = createDOMWriter.REPLACE = 'replace';
+var APPEND = createDOMWriter.APPEND = 'append';
+var INSERT = createDOMWriter.INSERT = 'insert';
+
+/**
+ * Creates a DOMWriter.  A DOMWriter attaches itself to a DOM Element,
+ * and will manipulate that Element's content when a template is rendered
+ * with it.  The writer is very simple and won't cover all use-cases, it
+ * also may not be the most performant approach.
+ *
+ * The default mode is REPLACE, meaning all of the Element's children are
+ * replaced when the associated template is rendered.  INSERT and APPEND
+ * will insert new renderings to the beginning or end of the child list
+ * respectively.
+ *
+ * @param {Element} parentElement the Element to which this DOMWriter attaches
+ * @param {String} [renderMode] the DOM rendering mode: REPLACE|APPEND|INSERT
+ */
+
+function createDOMWriter(parentElement, renderMode) {
+  var arr = [];
+  var writer = createStringWriter(arr);
+  var writerEndRender = writer.endRender;
+  var endRender;
+
+  switch ( renderMode ) {
+    case APPEND:  endRender = appendEndRender; break;
+    case INSERT:  endRender = insertEndRender; break;
+    // case REPLACE: endRender = replaceEndRender; break;
+    default:      endRender = replaceEndRender;
+  }
+
+  return freezeObject(mixin({}, writer, {
+    endRender: endRender
+  }));
+
+  function appendEndRender() {
+    var container = document.createElement("span");
+    container.innerHTML = writerEndRender();
+    parentElement.appendChild(container);
+  }
+
+  function insertEndRender() {
+    var container = document.createElement("span");
+    container.innerHTML = writerEndRender();
+    parentElement.insertBefore(container, parentElement.firstChild);
+  }
+
+  function replaceEndRender() {
+    parentElement.innerHTML = writerEndRender();
+  }
+}
+
+// Exported Functions
+exports.createDOMWriter = createDOMWriter;
+interpol.createDOMWriter = createDOMWriter;
+
+},{"../interpol":3,"../util":12,"./string":15}],14:[function(require,module,exports){
+/*
+ * Interpol (Templates Sans Facial Hair)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thomas S. Bradford (kode4food.it)
+ */
+
+"use strict";
+
+var interpol = require('../interpol');
+var util = require('../util');
+
+var freezeObject = util.freezeObject;
+
+function noOp() {}
+
+/**
+ * Creates a NullWriter.  All calls to this writer find their way into the
+ * bit bucket.  Its primary purpose is to support the background rendering of
+ * modules in order to yield their exported symbols.
+ */
+ 
+function createNullWriter() {
+  return freezeObject({
+    startRender: noOp,
+    endRender: noOp,
+    startElement: noOp,
+    selfCloseElement: noOp,
+    endElement: noOp,
+    comment: noOp,
+    docType: noOp,
+    content: noOp,
+    rawContent: noOp
+  });
+}
+
+// Exported Functions
+exports.createNullWriter = createNullWriter;
+interpol.createNullWriter = createNullWriter;
+
+},{"../interpol":3,"../util":12}],15:[function(require,module,exports){
+/*
+ * Interpol (Templates Sans Facial Hair)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thomas S. Bradford (kode4food.it)
+ */
+
+"use strict";
+
+var interpol = require('../interpol');
+var util = require('../util');
 
 var freezeObject = util.freezeObject;
 var stringify = util.stringify;
@@ -2420,16 +2538,14 @@ var escapeContent = util.escapeContent;
 function noOp() {}
 
 /**
- * Creates an Array Writer.  Interpol will create one by default if it is not
- * provided as an option to a compiled template.  An Array Writer manages the
- * writing of content as an Array of Strings.  This Array is joined and
- * returned when the `endRender()` function is called.
- *
- * @param {Array} [arr] The Array to manage, otherwise one is created
+ * Creates a StringWriter.  Interpol will create one by default if it is not
+ * provided as an option to a compiled template.  A StringWriter manages the
+ * writing of content as an underlying Array of Strings.  This Array is joined
+ * and returned when the `endRender()` function is called.
  */
 
-function createArrayWriter(arr) {
-  arr = arr || [];
+function createStringWriter() {
+  var arr = [];
 
   return freezeObject({
     startRender: noOp,
@@ -2444,7 +2560,9 @@ function createArrayWriter(arr) {
   });
 
   function endRender() {
-    return arr.join('');
+    var result = arr.join('');
+    arr.length = 0;
+    return result;
   }
 
   function writeAttributes(attributes) {
@@ -2485,145 +2603,17 @@ function createArrayWriter(arr) {
     arr.push("<!DOCTYPE ", stringify(rootElement), ">");
   }
 
-  function content() {
-    for ( var i = 0, len = arguments.length; i < len; i++ ) {
-      arr.push(escapeContent(stringify(arguments[i])));
-    }
+  function content(content) {
+    arr.push(escapeContent(stringify(content)));
   }
 
-  function rawContent() {
-    arr.push.apply(arr, arguments);
+  function rawContent(content) {
+    arr.push(stringify(content));
   }
 }
 
 // Exported Functions
-exports.createArrayWriter = createArrayWriter;
-interpol.createArrayWriter = createArrayWriter;
-
-},{"../interpol":3,"../util":12}],14:[function(require,module,exports){
-/*
- * Interpol (Templates Sans Facial Hair)
- * Licensed under the MIT License
- * see doc/LICENSE.md
- *
- * @author Thomas S. Bradford (kode4food.it)
- */
-
-"use strict";
-
-var interpol = require('../interpol');
-var util = require('../util');
-var array = require('./array');
-
-var freezeObject = util.freezeObject;
-var mixin = util.mixin;
-var createArrayWriter = array.createArrayWriter;
-
-var REPLACE = createDOMWriter.REPLACE = 'replace';
-var APPEND = createDOMWriter.APPEND = 'append';
-var INSERT = createDOMWriter.INSERT = 'insert';
-
-/**
- * Creates a DOM Writer.  A DOM Writer attaches itself to a DOM Element,
- * and will manipulate that Element's content when a template is rendered
- * with it.  The writer is very simple and won't cover all use-cases, it
- * also may not be the most performant approach.
- *
- * The default mode is REPLACE, meaning all of the Element's children are
- * replaced when the associated template is rendered.  INSERT and APPEND
- * will insert new renderings to the beginning or end of the child list
- * respectively.
- *
- * @param {Element} parentElement the Element to which this DOMWriter attaches
- * @param {String} [renderMode] the DOM rendering mode: REPLACE|APPEND|INSERT
- */
-
-function createDOMWriter(parentElement, renderMode) {
-  var arr = [];
-  var writer = createArrayWriter(arr);
-  var endRender;
-
-  switch ( renderMode ) {
-    case APPEND:  endRender = appendEndRender; break;
-    case INSERT:  endRender = insertEndRender; break;
-    case REPLACE: endRender = replaceEndRender; break;
-    default:      endRender = replaceEndRender;
-  }
-
-  return freezeObject(mixin({}, writer, {
-    startRender: startRender,
-    endRender: endRender
-  }));
-
-  function startRender() {
-    // Just in case
-    arr.length = 0;
-  }
-
-  function appendEndRender() {
-    var container = document.createElement("span");
-    container.innerHTML = arr.join('');
-    arr.length = 0;
-    parentElement.appendChild(container);
-  }
-
-  function insertEndRender() {
-    var container = document.createElement("span");
-    container.innerHTML = arr.join('');
-    arr.length = 0;
-    parentElement.insertBefore(container, parentElement.firstChild);
-  }
-
-  function replaceEndRender() {
-    parentElement.innerHTML = arr.join('');
-    arr.length = 0;
-  }
-}
-
-// Exported Functions
-exports.createDOMWriter = createDOMWriter;
-interpol.createDOMWriter = createDOMWriter;
-
-},{"../interpol":3,"../util":12,"./array":13}],15:[function(require,module,exports){
-/*
- * Interpol (Templates Sans Facial Hair)
- * Licensed under the MIT License
- * see doc/LICENSE.md
- *
- * @author Thomas S. Bradford (kode4food.it)
- */
-
-"use strict";
-
-var interpol = require('../interpol');
-var util = require('../util');
-
-var freezeObject = util.freezeObject;
-
-function noOp() {}
-
-/**
- * Creates a Null Writer.  All calls to this writer find their way into the
- * bit bucket.  Its primary purpose is to support the background rendering of
- * modules in order to yield their exported symbols.
- */
- 
-function createNullWriter() {
-  return freezeObject({
-    startRender: noOp,
-    endRender: noOp,
-    startElement: noOp,
-    selfCloseElement: noOp,
-    endElement: noOp,
-    comment: noOp,
-    docType: noOp,
-    content: noOp,
-    rawContent: noOp
-  });
-}
-
-// Exported Functions
-exports.createNullWriter = createNullWriter;
-interpol.createNullWriter = createNullWriter;
+exports.createStringWriter = createStringWriter;
+interpol.createStringWriter = createStringWriter;
 
 },{"../interpol":3,"../util":12}]},{},[1])

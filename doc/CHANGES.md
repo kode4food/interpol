@@ -13,6 +13,8 @@ The goal here, particularly for the `where` synonym, is to make your code a litt
 
 * Various optimizations relating to the treatment of literals have been added.  These include constant folding and branch elimination.
 
+* `createArrayWriter()` has been renamed to `createStringWriter()` because that's what it does.
+
 ## Version 0.4.1 - 'using' Expressions
 Test coverage has been greatly increased, from about 50% to 90%.  Corrected quite a few bugs in the process, some of them major.
 

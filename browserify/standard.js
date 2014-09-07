@@ -20,5 +20,5 @@ require('../lib/resolvers/system');
 
 // Writers
 require('../lib/writers/null');
-require('../lib/writers/array');
+require('../lib/writers/string');
 require('../lib/writers/dom');
