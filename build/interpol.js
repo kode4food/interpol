@@ -2122,7 +2122,7 @@ var isArray = Array.isArray;
 /* istanbul ignore if */
 if ( !isArray ) {
   isArray = function _isArray(obj) {
-    return obj && obj.length && toString.call(obj) === '[object Array]';
+    return obj && toString.call(obj) === '[object Array]';
   };
 }
 
