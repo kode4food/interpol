@@ -8,8 +8,8 @@
   "homepage": "http://www.interpoljs.io/",
   "keywords": ["javascript", "html", "nodejs", "browser", "templates"],
   "repository": {
-    "type": "https",
-    "url": "https://bitbucket.org/kode4food/interpol.git"
+    "type": "git",
+    "url": "git@github.com:kode4food/interpol.git"
   },
   "ignore": [
     "browserify",
