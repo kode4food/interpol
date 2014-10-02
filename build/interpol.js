@@ -904,7 +904,6 @@ var mixin = util.mixin;
 var isTruthy = util.isTruthy;
 var configure = util.configure;
 var extendObject = util.extendObject;
-var freezeObject = util.freezeObject;
 var objectKeys = util.objectKeys;
 var isInterpolFunction = util.isInterpolFunction;
 var createStaticMixin = util.createStaticMixin;
@@ -933,7 +932,7 @@ function noOp() {}
 
 function buildRuntime(parseOutput, localOptions) {
   // A lookup table of code-path generators
-  var Evaluators = freezeObject({
+  var Evaluators = {
     'im': createImportEvaluator,
     'de': createPartialEvaluator,
     'bi': createBindEvaluator,
@@ -972,7 +971,7 @@ function buildRuntime(parseOutput, localOptions) {
     'dc': createDictionaryEvaluator,
     'id': createIdEvaluator,
     'se': createSelfEvaluator
-  });
+  };
 
   // literals are stored in the `l` property of parseOutput, while the parse
   // tree is stored in the `n` property.  Since a parsed Interpol module
@@ -988,7 +987,7 @@ function buildRuntime(parseOutput, localOptions) {
 
   runtimeTemplate.configure = configureTemplate;
   runtimeTemplate.exports = templateExports;
-  return freezeObject(runtimeTemplate);
+  return runtimeTemplate;
 
   /**
    * The result of a runtime processing is this closure.  `obj` is the
@@ -1496,7 +1495,7 @@ function buildRuntime(parseOutput, localOptions) {
         }
         result[key] = val;
       }
-      return freezeObject(result);
+      return result;
     }
   }
 
@@ -2042,7 +2041,7 @@ function buildRuntime(parseOutput, localOptions) {
       for ( var i = 0; i < elen; i++ ) {
         result[i] = elems[i](ctx, writer);
       }
-      return freezeObject(result);
+      return result;
     }
   }
 
@@ -2059,7 +2058,7 @@ function buildRuntime(parseOutput, localOptions) {
         var assign = assigns[i];
         dict[assign[0]] = assign[1](ctx, writer);
       }
-      return freezeObject(dict);
+      return dict;
     }
   }
 
@@ -2140,14 +2139,6 @@ if ( !objectKeys ) {
   };
 }
 
-var freezeObject = Object.freeze;
-/* istanbul ignore if */
-if ( !freezeObject ) {
-  freezeObject = function _freezeObject(obj) {
-    return obj;
-  };
-}
-
 var extendObject;
 (function () {
   function FakeConstructor() {}
@@ -2189,11 +2180,11 @@ function mixin(target) {
  * Creates a closure whose job it is to mix the configured Object's
  * properties into a target provided to the closure.
  *
- * @param {Object} obj the Object to copy (will be frozen)
+ * @param {Object} obj the Object to copy
  */
 
 function createStaticMixin(obj) {
-  var keys = objectKeys(freezeObject(obj)).reverse();
+  var keys = objectKeys(obj).reverse();
   var klen = keys.length - 1;
 
   return staticMixin;
@@ -2243,13 +2234,13 @@ function isTruthy(value) {
 
 // ## String Handling
 
-var EscapeChars = freezeObject({
+var EscapeChars = {
   '&': '&amp;',
   '<': '&lt;',
   '>': '&gt;',
   '"': '&quot;',
   "'": '&#39;'
-});
+};
 
 function escapeAttribute(str) {
   return str.replace(/[&<>'"]/gm, function(ch) {
@@ -2391,7 +2382,6 @@ function configure(func, requiredCount, defaultArgs) {
 // Exported Functions
 exports.isArray = isArray;
 exports.extendObject = extendObject;
-exports.freezeObject = freezeObject;
 exports.objectKeys = objectKeys;
 exports.mixin = mixin;
 exports.createStaticMixin = createStaticMixin;
@@ -2420,7 +2410,6 @@ exports.configure = configure;
 var util = require('../util');
 var string = require('./string');
 
-var freezeObject = util.freezeObject;
 var mixin = util.mixin;
 var createStringWriter = string.createStringWriter;
 
@@ -2456,9 +2445,9 @@ function createDOMWriter(parentElement, renderMode) {
     default:      endRender = replaceEndRender;
   }
 
-  return freezeObject(mixin({}, writer, {
+  return mixin({}, writer, {
     endRender: endRender
-  }));
+  });
 
   function appendEndRender() {
     var container = document.createElement("span");
@@ -2498,8 +2487,6 @@ exports.registerWriter = registerWriter;
 
 var util = require('../util');
 
-var freezeObject = util.freezeObject;
-
 function noOp() {}
 
 /**
@@ -2509,7 +2496,7 @@ function noOp() {}
  */
  
 function createNullWriter() {
-  return freezeObject({
+  return {
     startRender: noOp,
     endRender: noOp,
     startElement: noOp,
@@ -2519,7 +2506,7 @@ function createNullWriter() {
     docType: noOp,
     content: noOp,
     rawContent: noOp
-  });
+  };
 }
 
 function registerWriter(interpol) {
@@ -2542,7 +2529,6 @@ exports.registerWriter = registerWriter;
 
 var util = require('../util');
 
-var freezeObject = util.freezeObject;
 var stringify = util.stringify;
 var escapeAttribute = util.escapeAttribute;
 var escapeContent = util.escapeContent;
@@ -2559,7 +2545,7 @@ function noOp() {}
 function createStringWriter() {
   var arr = [];
 
-  return freezeObject({
+  return {
     startRender: noOp,
     endRender: endRender,
     startElement: startElement,
@@ -2569,7 +2555,7 @@ function createStringWriter() {
     docType: docType,
     content: content,
     rawContent: rawContent
-  });
+  };
 
   function endRender() {
     var result = arr.join('');

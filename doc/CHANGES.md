@@ -44,10 +44,10 @@ A lot of effort has been put into stabilizing the Interpol code base.  There are
 * The Separate Language and API References will eventually be removed.  Instead, [The Interpol Guide](http://interpoljs.io/guide) will serve as an ongoing source of Interpol Information.
 
 ## Version 0.3.17 - Bower Support
-Adding Bower Support.  Because we're hosting at BitBucket, you'll have to install directly from our repository, like so:
+Adding Bower Support.
 
 ```bash
-bower install https://bitbucket.org/kode4food/interpol.git
+bower install interpol
 ```
 
 ## Version 0.3.16 - HTML Attributes
