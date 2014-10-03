@@ -78,5 +78,12 @@ exports.imports = nodeunit.testCase({
     test.equal(evaluate("import math\nmath.E"), Math.E);
     test.equal(evaluate("import math\nmath.PI"), Math.PI);
     test.done();
+  },
+
+  "Missing Module Import": function (test) {
+    test.throws(function () {
+      evaluate("import bogus");
+    }, "should throw module not resolved");
+    test.done();
   }
 });

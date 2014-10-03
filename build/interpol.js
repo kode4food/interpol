@@ -1044,6 +1044,7 @@ function buildRuntime(parseOutput, localOptions) {
    */
 
   function templateExports() {
+    /* istanbul ignore if */
     if ( exportedContext ) {
       return exportedContext;
     }
@@ -1076,6 +1077,7 @@ function buildRuntime(parseOutput, localOptions) {
 
   // Given an array of nodes, create evaluators for each element
   function wrapArrayEvaluators(arrayNodes) {
+    /* istanbul ignore if */
     if ( !arrayNodes ) {
       return [];
     }
@@ -1089,6 +1091,7 @@ function buildRuntime(parseOutput, localOptions) {
 
   // Given an array of literal ids, expand them to real values
   function expandLiterals(literalArray) {
+    /* istanbul ignore if */
     if ( !literalArray ) {
       return [];
     }
@@ -1103,6 +1106,7 @@ function buildRuntime(parseOutput, localOptions) {
   // wrap evaluators for processing HTML attributes, including the attribute
   // names, since they can also be represented by expressions
   function wrapAttributeEvaluators(keyValueNodes) {
+    /* istanbul ignore if */
     if ( !keyValueNodes ) {
       return [];
     }
@@ -1118,6 +1122,7 @@ function buildRuntime(parseOutput, localOptions) {
 
   // wrap evaluators for local variable assignments, name is always a literal
   function wrapAssignmentEvaluators(assignNodes) {
+    /* istanbul ignore if */
     if ( !assignNodes ) {
       return [];
     }
@@ -1142,6 +1147,7 @@ function buildRuntime(parseOutput, localOptions) {
 
   function createEvaluator(node) {
     if ( !isArray(node) ) {
+      /* istanbul ignore if */
       if ( node === null || node === undefined ) {
         return null;
       }
@@ -1151,6 +1157,7 @@ function buildRuntime(parseOutput, localOptions) {
     var nodeType = lits[node[0]];
     var createFunction = Evaluators[nodeType];
 
+    /* istanbul ignore if */
     if ( !createFunction ) {
       throw new Error("Invalid Node in Parse Tree: " + nodeType);
     }
