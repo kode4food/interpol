@@ -14,7 +14,7 @@ var evaluate = interpol.evaluate;
 
 exports.scope = nodeunit.testCase({
   setUp: function (callback) {
-    this.globals = interpol.globals();
+    this.globals = interpol.context();
     this.globals.greeting = "Hello, World!";
 
     callback();
