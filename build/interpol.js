@@ -175,7 +175,31 @@ function buildFormatter(formatStr) {
 }
 
 function createFormatterCache() {
+  var cache = {};
+  var cacheCount = 0;
 
+  return dynamicFormatter;
+
+  function dynamicFormatter(formatStr, data, ctx) {
+    // If we exhaust TemplateCacheMax, then something is clearly wrong here
+    // and we're not using the evaluator for localized strings.  If we keep
+    // caching, we're going to start leaking memory.  So this evaluator will
+    // blow away the cache and start over
+    var dynamicTemplate = cache[formatStr];
+
+    if ( !dynamicTemplate ) {
+      if ( cacheCount >= TemplateCacheMax ) {
+        cache = {};
+        cacheCount = 0;
+      }
+      // build and cache the dynamic template
+      dynamicTemplate = buildFormatter(formatStr);
+      cache[formatStr] = dynamicTemplate;
+      cacheCount++;
+    }
+
+    return dynamicTemplate(data, ctx);
+  }
 }
 
 // Exported Functions
@@ -1037,18 +1061,16 @@ function defineTemplate(template) {
   }
 }
 
-function definePartial(ctx, name, partial) {
-  ctx[name] = partial;
+function definePartial(partial) {
   partial.__intFunction = 'part';
   return partial;
 }
 
-function defineGuardedPartial(ctx, name, envelope) {
-  var originalPartial = ctx[name];
+function defineGuardedPartial(originalPartial, envelope) {
   if ( !isInterpolPartial(originalPartial) ) {
     originalPartial = noOp;
   }
-  definePartial(ctx, name, envelope(originalPartial));
+  return definePartial(envelope(originalPartial));
 }
 
 function isNil(value) {
@@ -1502,7 +1524,7 @@ function createNullWriter() {
     comment: noOp,
     docType: noOp,
     content: noOp,
-    rawContent: noOp
+    raw: noOp
   };
 }
 
@@ -1551,7 +1573,7 @@ function createStringWriter() {
     comment: comment,
     docType: docType,
     content: content,
-    rawContent: rawContent
+    raw: raw
   };
 
   function endRender() {
@@ -1602,7 +1624,7 @@ function createStringWriter() {
     arr.push(escapeContent(stringify(content)));
   }
 
-  function rawContent(content) {
+  function raw(content) {
     arr.push(stringify(content));
   }
 }
