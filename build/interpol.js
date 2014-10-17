@@ -48,6 +48,8 @@ var Params = "%((%)|(" + Digits + ")|(" + Ident + "))?(([|]" + Ident + ")*)?";
 
 var ParamRegex = new RegExp(Params, "m");
 
+var TemplateCacheMax = 256;
+
 /**
  * Builds a closure that will be used internally to support Interpol's
  * interpolation operations.  The returned closure may attach a flag
@@ -58,7 +60,7 @@ var ParamRegex = new RegExp(Params, "m");
  * @param {String} formatStr the String to be used for interpolation
  */
 
-function buildTemplate(formatStr) {
+function buildFormatter(formatStr) {
   var funcs = [];
   var flen = 0;
   var autoIdx = 0;
@@ -172,8 +174,13 @@ function buildTemplate(formatStr) {
   }
 }
 
+function createFormatterCache() {
+
+}
+
 // Exported Functions
-exports.buildTemplate = buildTemplate;
+exports.buildFormatter = buildFormatter;
+exports.createFormatterCache = createFormatterCache;
 
 },{"./util":12,"./writers/null":14}],3:[function(require,module,exports){
 /*
@@ -191,8 +198,7 @@ var runtime = require('./runtime');
 
 var isArray = util.isArray;
 var bless = util.bless;
-var isInterpolJSON = util.isInterpolJSON;
-var buildRuntime = runtime.buildRuntime;
+var createRuntime = runtime.createRuntime;
 
 var CURRENT_VERSION = "0.4.3";
 var compileModule = null;
@@ -205,9 +211,9 @@ interpol.VERSION = CURRENT_VERSION;
 interpol.bless = bless;
 interpol.evaluate = evaluate;
 interpol.compile = compile;
-interpol.runtime = runtime.buildRuntime;
+interpol.runtime = runtime.createRuntime;
 interpol.options = runtime.options;
-interpol.globals = runtime.globals;
+interpol.globals = runtime.context;
 interpol.resolvers = runtime.resolvers;
 
 // ## Core Interpol Implementation
@@ -223,16 +229,15 @@ interpol.resolvers = runtime.resolvers;
 
 function interpol(template, options) {
   var compiledOutput = null;
-  if ( isInterpolJSON(template) ) {
-    compiledOutput = template;
-  }
-  else if ( typeof template === 'string' ) {
-    compiledOutput = compile(template);
+  if ( typeof template === 'string' ) {
+    compiledOutput = compile(template, options);
   }
   else {
     throw new Error("template must be a String or JSON Object");
   }
-  return buildRuntime(compiledOutput, options);
+
+  var wrapper = Function(['r'], compiledOutput);
+  return wrapper(createRuntime(options));
 }
 
 /**
@@ -252,16 +257,14 @@ function evaluate(script, obj, options) {
  * @param {String} template the Interpol Template to be compiled
  */
 
-function compile(template) {
+function compile(template, options) {
   if ( !compileModule ) {
     if ( typeof interpol.compileModule !== 'function' ) {
       throw new Error("The Interpol compiler was never loaded");
     }
     compileModule = interpol.compileModule;
   }
-  var result = compileModule(template);
-  result.v = CURRENT_VERSION;
-  return result;
+  return compileModule(template, options);
 }
 
 // Exported Functions
@@ -419,7 +422,6 @@ var util = require('../util');
 
 var slice = Array.prototype.slice;
 var isArray = util.isArray;
-var isInterpolJSON = util.isInterpolJSON;
 var bless = util.bless;
 
 /**
@@ -489,9 +491,8 @@ function createMemoryResolver(interpol, options) {
       return;
     }
 
-    // *String* - An unparsed Interpol template **or**
-    // *Object* - A pre-compiled Interpol template
-    if ( typeof module === 'string' || isInterpolJSON(module) ) {
+    // *String* - An unparsed Interpol template
+    if ( typeof module === 'string' ) {
       cache[name] = { module: interpol(module) };
       return;
     }
@@ -901,17 +902,11 @@ var nullWriter = require('./writers/null').createNullWriter();
 
 var isArray = util.isArray;
 var mixin = util.mixin;
-var isTruthy = util.isTruthy;
-var configure = util.configure;
+var each = util.each;
 var extendObject = util.extendObject;
 var objectKeys = util.objectKeys;
+var configure = util.configure;
 var isInterpolFunction = util.isInterpolFunction;
-var createStaticMixin = util.createStaticMixin;
-var buildTemplate = format.buildTemplate;
-var isMatchingObject = match.isMatchingObject;
-var buildMatcher = match.buildMatcher;
-
-var TemplateCacheMax = 256;
 
 var slice = Array.prototype.slice;
 
@@ -920,88 +915,68 @@ var globalContext = {};
 var globalResolvers = [];
 
 function noOp() {}
+noOp.__intFunction = 'part';
 
-/**
- * Converts a pre-compiled JSON instance to an evaluative runtime closure.
- *
- * @param {Object} parseOutput the pre-compiled JSON to use
- * @param {Object} [localOptions] Object for configuring the closure
- * @param {[Resolver]} [resolvers] Resolvers to use for performing imports
- * @param {boolean} [cache] whether or not to cache resolved imports
- */
-
-function buildRuntime(parseOutput, localOptions) {
-  // A lookup table of code-path generators
-  var Evaluators = {
-    'im': createImportEvaluator,
-    'de': createPartialEvaluator,
-    'bi': createBindEvaluator,
-    'ca': createCallEvaluator,
-    'as': createAssignEvaluator,
-    'op': createOpenTagEvaluator,
-    'cl': createCloseTagEvaluator,
-    'ct': createCommentTagEvaluator,
-    'dt': createDocTypeEvaluator,
-    'ou': createOutputEvaluator,
-    'ra': createRawOutputEvaluator,
-    'fr': createForEvaluator,
-    'us': createUsingStmtEvaluator,
-    'ux': createUsingExprEvaluator,
-    'cn': createTernaryEvaluator,
-    'if': createIfEvaluator,
-    'or': createOrEvaluator,
-    'an': createAndEvaluator,
-    'eq': createEqEvaluator,
-    'ma': createMatchEvaluator,
-    'nq': createNeqEvaluator,
-    'gt': createGtEvaluator,
-    'lt': createLtEvaluator,
-    'ge': createGteEvaluator,
-    'le': createLteEvaluator,
-    'ad': createAddEvaluator,
-    'su': createSubEvaluator,
-    'mu': createMulEvaluator,
-    'di': createDivEvaluator,
-    'mo': createModEvaluator,
-    'fm': createFormatEvaluator,
-    'no': createNotEvaluator,
-    'ne': createNegEvaluator,
-    'mb': createMemberEvaluator,
-    'ar': createArrayEvaluator,
-    'dc': createDictionaryEvaluator,
-    'id': createIdEvaluator,
-    'se': createSelfEvaluator
-  };
-
-  // literals are stored in the `l` property of parseOutput, while the parse
-  // tree is stored in the `n` property.  Since a parsed Interpol module
-  // is simply a set of statements, we can create a statementsEvaluator and
-  // call it a day.
-
-  var lits = parseOutput.l;
+function createRuntime(localOptions) {
   var runtimeOptions = mixin({}, globalOptions, localOptions);
   var cacheModules = runtimeOptions.cache;
-  var resolvers = runtimeOptions.resolvers || globalResolvers;
-  var evaluator = wrapLiteral(createStatementsEvaluator(parseOutput.n));
-  var exportedContext = null;
+  var runtimeResolvers = runtimeOptions.resolvers || globalResolvers;
+  var runtimeContext = extendObject(runtimeOptions.context || globalContext);
 
-  runtimeTemplate.configure = configureTemplate;
-  runtimeTemplate.exports = templateExports;
-  return runtimeTemplate;
+  return {
+    resolvers: function () { return runtimeResolvers; },
+    context: function() { return runtimeContext; },
+    options: function () { return runtimeOptions; },
 
-  /**
-   * The result of a runtime processing is this closure.  `obj` is the
-   * Object to be used as a working context, while `localOptions` are
-   * options to be applied to a particular rendering.  If no `errorCallback`
-   * is provided, calls to this function may throw errors.
-   *
-   * @param {Object} obj the context Object to be rendered
-   * @param {Object} [localOptions] Object for configuring the current render
-   * @param {Writer} [localOptions.writer] an alternative Writer to use
-   * @param {Function} [localOptions.errorCallback] a callback for errors
-   */
+    globalResolvers: resolvers,
+    globalContext: context,
+    globalOptions: options,
 
-  function runtimeTemplate(obj, localOptions) {
+    extendObject: util.extendObject,
+    mixin: util.mixin,
+    isTruthy: util.isTruthy,
+
+    buildFormatter: format.buildFormatter,
+    buildFormatterCache: format.createFormatterCache,
+    isMatchingObject: match.isMatchingObject,
+    buildMatcher: match.buildMatcher,
+
+    isInterpolPartial: isInterpolPartial,
+    defineTemplate: defineTemplate,
+    definePartial: definePartial,
+    defineGuardedPartial: defineGuardedPartial,
+
+    handleNil: handleNil,
+    getProperty: getProperty,
+    loop: loop,
+    exec: exec,
+    bind: bind
+  };
+}
+
+function options() {
+  return globalOptions;
+}
+
+function context() {
+  return globalContext;
+}
+
+function resolvers() {
+  return globalResolvers;
+}
+
+function isInterpolPartial(func) {
+  return typeof func === 'function' && func.__intFunction === 'part';
+}
+
+function defineTemplate(template) {
+  var exportedContext;
+  template.configure = configureTemplate;
+  template.exports = templateExports;
+  return templateInterface;
+
+  function templateInterface(obj, localOptions) {
     var ctx = mixin(extendObject(globalContext), obj);
     var processingOptions = mixin({}, globalOptions, localOptions);
 
@@ -1010,7 +985,7 @@ function buildRuntime(parseOutput, localOptions) {
 
     try {
       writer.startRender();
-      evaluator(ctx, writer);
+      template(ctx, writer);
       return writer.endRender();
     }
     catch ( err ) {
@@ -1033,7 +1008,7 @@ function buildRuntime(parseOutput, localOptions) {
    */
 
   function configureTemplate(defaultObj, defaultOptions) {
-    return configure(runtimeTemplate, 0, slice.call(arguments, 0));
+    return configure(template, 0, slice.call(arguments, 0));
   }
 
   /**
@@ -1055,1057 +1030,76 @@ function buildRuntime(parseOutput, localOptions) {
 
     exportedContext = extendObject(globalContext);
     exportedContext.__intExports = true;
-    evaluator(exportedContext, nullWriter);
+    template(exportedContext, nullWriter);
     delete exportedContext.__intExports;
 
     return exportedContext;
   }
+}
 
-  // ## Evaluator Generation Utilities
+function definePartial(ctx, name, partial) {
+  ctx[name] = partial;
+  partial.__intFunction = 'part';
+  return partial;
+}
 
-  function wrapLiteral(value) {
-    // if value is already a Function, we don't have to wrap it
-    if ( typeof value === 'function' ) {
-      return value;
-    }
-    return wrapper;
-
-    function wrapper() {
-      return value;
-    }
+function defineGuardedPartial(ctx, name, envelope) {
+  var originalPartial = ctx[name];
+  if ( !isInterpolPartial(originalPartial) ) {
+    originalPartial = noOp;
   }
+  definePartial(ctx, name, envelope(originalPartial));
+}
 
-  // Given an array of nodes, create evaluators for each element
-  function wrapArrayEvaluators(arrayNodes) {
-    /* istanbul ignore if */
-    if ( !arrayNodes ) {
-      return [];
-    }
+function isNil(value) {
+  return value === undefined || value === null;
+}
 
-    var result = [];
-    for ( var i = arrayNodes.length - 1; i >= 0; i-- ) {
-      result[i] = wrapLiteral(createEvaluator(arrayNodes[i]));
-    }
-    return result;
+function handleNil(value) {
+  return value === null ? undefined : value;
+}
+
+function getProperty(obj, property) {
+  if ( isNil(obj) ) {
+    return undefined;
   }
+  return handleNil(obj[property]);
+}
 
-  // Given an array of literal ids, expand them to real values
-  function expandLiterals(literalArray) {
-    /* istanbul ignore if */
-    if ( !literalArray ) {
-      return [];
-    }
-
-    var result = [];
-    for ( var i = literalArray.length - 1; i >= 0; i-- ) {
-      result[i] = lits[literalArray[i]];
-    }
-    return result;
+function loop(collection, state, loopCallback, elseCallback) {
+  if ( typeof state === 'function' ) {
+    elseCallback = loopCallback;
+    loopCallback = state;
+    state = [];
   }
-
-  // wrap evaluators for processing HTML attributes, including the attribute
-  // names, since they can also be represented by expressions
-  function wrapAttributeEvaluators(keyValueNodes) {
-    /* istanbul ignore if */
-    if ( !keyValueNodes ) {
-      return [];
-    }
-
-    var result = [];
-    for ( var i = 0, len = keyValueNodes.length; i < len; i++ ) {
-      var keyValueNode = keyValueNodes[i];
-      result[i] = [createEvaluator(keyValueNode[0]),
-                  createEvaluator(keyValueNode[1])];
-    }
-    return result;
+  if ( !isArray(collection) || !collection.length ) {
+    return;
   }
-
-  // wrap evaluators for local variable assignments, name is always a literal
-  function wrapAssignmentEvaluators(assignNodes) {
-    /* istanbul ignore if */
-    if ( !assignNodes ) {
-      return [];
-    }
-
-    var result = [];
-    for ( var i = 0, len = assignNodes.length; i < len; i++ ) {
-      var assignNode = assignNodes[i];
-      result[i] = [lits[assignNode[0]],
-                  wrapLiteral(createEvaluator(assignNode[1]))];
-    }
-    return result;
+  for ( var i = 0, len = collection.length; i < len; i++ ) {
+    loopCallback(collection[i], state);
   }
-
-  /**
-   * The busiest function in the runtime process.  createEvaluator
-   * resolves the evaluator generation function to use by taking the
-   * first element of the node array.  It then passes the rest of the
-   * node's elements as arguments to that generation function.
-   *
-   * @param {Array|Number} node Either an Array or a Literal Id
-   */
-
-  function createEvaluator(node) {
-    if ( !isArray(node) ) {
-      /* istanbul ignore if */
-      if ( node === null || node === undefined ) {
-        return null;
-      }
-      return lits[node];
-    }
-
-    var nodeType = lits[node[0]];
-    var createFunction = Evaluators[nodeType];
-
-    /* istanbul ignore if */
-    if ( !createFunction ) {
-      throw new Error("Invalid Node in Parse Tree: " + nodeType);
-    }
-
-    return createFunction.apply(node, node.slice(1));
-  }
-
-  /**
-   * Depending on the value types for `left` and `right`, will return an
-   * index into an Array for choosing the best code-path to take in
-   * evaluating an operator.  0=both are literals, 1=left is a function,
-   * 2=right is a function, 3=both are functions.
-   *
-   * @param {Function|Mixed} left the left operand
-   * @param {Function|Mixed} right the right operand
-   */
-
-  function getBinaryType(left, right) {
-    var l = typeof left === 'function' ? 1 : 0;
-    var r = typeof right === 'function' ? 2 : 0;
-    return l | r;
-  }
-
-  // ## Evaluator Generation
-
-  function createStatementsEvaluator(statementNodes) {
-    var statements = wrapArrayEvaluators(statementNodes).reverse();
-    var slen;
-    var statement;
-    
-    if ( statements.length > 1 ) {
-      slen = statements.length - 1;
-      return statementsEvaluator;
-    }
-    if ( statements.length === 1 ) {
-      statement = statements[0];
-      return statementEvaluator;
-    }
-    else {
-      return noOp;
-    }
-    
-    function statementEvaluator(ctx, writer) {
-      statement(ctx, writer);
-    }
-    
-    function statementsEvaluator(ctx, writer) {
-      for ( var i = slen; i >= 0; i-- ) {
-        statements[i](ctx, writer);
-      }
-    }
-  }
-
-  // generate an evaluator to deal with 'from' and 'import' statements
-  function createImportEvaluator(fromNodes) {
-    var importList = [];
-    var ilen = fromNodes.length - 1;
-    var evaluator = cacheModules ? cacheableEvaluator : dynamicEvaluator;
-
-    for ( var i = ilen; i >= 0; i-- ) {
-      var fromNode = fromNodes[i];
-      var moduleName = lits[fromNode[0]];
-      var aliases = fromNode[1];
-      var moduleAlias = null;
-      var toResolve = null;
-
-      if ( isArray(aliases) ) {
-        toResolve = [];
-        for ( var j = aliases.length - 1; j >= 0; j-- ) {
-          var importInfo = aliases[j];
-          var name = lits[importInfo[0]];
-          var alias = importInfo[1] ? lits[importInfo[1]] : name;
-          toResolve.push([alias, name]);
-        }
-      }
-      else if ( typeof aliases === 'number' ) {
-        moduleAlias = lits[aliases];
-      }
-      else {
-        moduleAlias = moduleName.split('/').pop();
-      }
-
-      importList.push([moduleName, moduleAlias, toResolve]);
-    }
-
-    return importEvaluator;
-
-    function importEvaluator(ctx, writer) {
-      // have to call it like this because we can't override importEvaluator
-      // after it has been returned to a parent evaluator
-      evaluator(ctx, writer);
-    }
-
-    // if moduleCaching is on, we use the cachable form of the evaluator
-    function cacheableEvaluator(ctx, writer) {
-      if ( ctx.__intExports ) {
-        dynamicEvaluator(ctx, writer);
-        return;
-      }
-
-      var target = {};
-      dynamicEvaluator(target, writer);
-      evaluator = createStaticMixin(target);
-      evaluator(ctx);
-    }
-
-    // if moduleCaching is off, we resolve the exports every time
-    function dynamicEvaluator(ctx, writer) {
-      for ( var i = ilen; i >= 0; i-- ) {
-        var importItem = importList[i];
-        var moduleName = importItem[0];
-        var moduleAlias = importItem[1];
-        var toResolve = importItem[2];
-
-        var moduleExports = resolveExports(moduleName, true);
-
-        if ( toResolve ) {
-          for ( var j = toResolve.length - 1; j >= 0; j-- ) {
-            var aliasMap = toResolve[j];
-            ctx[aliasMap[0]] = moduleExports[aliasMap[1]];
-          }
-        }
-        else {
-          ctx[moduleAlias] = moduleExports;
-        }
-      }
-    }
-
-    // where exports are actually resolved. raiseError will be false
-    // if we're in the process of evaluating a template for the purpose
-    // of yielding its exports
-    function resolveExports(moduleName, raiseError) {
-      var module = null;
-      for ( var i = resolvers.length - 1; i >= 0; i-- ) {
-        module = resolvers[i].resolveExports(moduleName, runtimeOptions);
-        if ( module ) {
-          break;
-        }
-      }
-      if ( !module && raiseError ) {
-        throw new Error("Module '" + moduleName +"' not resolved");
-      }
-      return module;
-    }
-  }
-
-  function isInterpolPartial(func) {
-    return typeof func === 'function' && func.__intFunction === 'part';
-  }
-
-  // generate an evaluator to represent a partial and its associated closure
-  function createPartialEvaluator(nameLiteral, paramDefs,
-                                  statementNodes, guardNode) {
-    var name = lits[nameLiteral];
-    var params = [null].concat(expandLiterals(paramDefs));
-    var plen = params.length;
-    var statements = createStatementsEvaluator(statementNodes);
-    var guard = guardNode && createEvaluator(guardNode);
-
-    return guard ? guardedClosureEvaluator : unguardedClosureEvaluator;
-
-    function unguardedClosureEvaluator(ctx /*, writer */) {
-      ctx[name] = callEvaluator;
-      callEvaluator.__intFunction = 'part';
-      callEvaluator.__intEvaluator = bodyEvaluator;
-
-      function callEvaluator(writer) {
-        statements(createCallContext(ctx, callEvaluator, arguments), writer);
-        return null;
-      }
-
-      function bodyEvaluator(writer) {
-        statements(createCallContext(ctx, callEvaluator, arguments), writer);
-        return true;
-      }
-    }
-
-    function guardedClosureEvaluator(ctx /*, writer */) {
-      var bodyEvaluator, oldEvaluator, newEvaluator;
-      if ( !ctx.hasOwnProperty(name) || !isInterpolPartial(ctx[name]) ) {
-        bodyEvaluator = guardedBodyEvaluator;
-      }
-      else {
-        oldEvaluator = ctx[name].__intEvaluator;
-        bodyEvaluator = branchedBodyEvaluator;
-        newEvaluator = guardedBodyEvaluator;
-      }
-      ctx[name] = callEvaluator;
-      callEvaluator.__intFunction = 'part';
-      callEvaluator.__intEvaluator = bodyEvaluator;
-
-      function callEvaluator() {
-        /* jshint validthis:true */
-        bodyEvaluator.apply(this, arguments);
-        return null;
-      }
-
-      function guardedBodyEvaluator(writer) {
-        var newCtx = createCallContext(ctx, callEvaluator, arguments);
-        if ( guard(newCtx, writer) ) {
-          statements(newCtx, writer);
-          return true;
-        }
-      }
-
-      function branchedBodyEvaluator() {
-        /* jshint validthis:true */
-        return newEvaluator.apply(this, arguments) ||
-               oldEvaluator.apply(this, arguments);
-      }
-    }
-
-    // Creates a new calling context and stores its locals from arguments
-    function createCallContext(parentCtx, callEvaluator, args) {
-      var newCtx = extendObject(parentCtx);
-      newCtx[name] = callEvaluator;
-      for ( var i = 1; i < plen; i++ ) {
-        newCtx[params[i]] = args[i];
-      }
-      return newCtx;
-    }
-  }
-
-  // generate a bound call evaluator
-  function createBindEvaluator(memberNode, argNodes) {
-    var member = createEvaluator(memberNode);
-    var args = wrapArrayEvaluators(argNodes);
-    var alen = args.length;
-
-    return bindEvaluator;
-
-    function bindEvaluator(ctx, writer) {
-      var func = member(ctx, writer);
-
-      if ( !isInterpolFunction(func) ) {
-        if ( ctx.__intExports ) {
-          return null;
-        }
-        throw new Error("Attempting to bind an unblessed function");
-      }
-
-      var callArgs = [];
-      for ( var i = 0; i < alen; i++ ) {
-        callArgs[i] = args[i](ctx, writer);
-      }
-
-      var bound = configure(func, 1, callArgs);
-      bound.__intFunction = func.__intFunction;
-      return bound;
-    }
-  }
-
-  // generate an evaluator to perform a function or partial call
-  function createCallEvaluator(memberNode, argNodes) {
-    var member = createEvaluator(memberNode);
-    var args = [null].concat(wrapArrayEvaluators(argNodes));
-    var alen = args.length;
-
-    return callEvaluator;
-
-    // If we're in the process of gathering module exports, and the called
-    // function can't be resolved, then just exit without exploding.
-    // What happens inside of a function probably shouldn't influence the
-    // top-level export context anyway
-    function callEvaluator(ctx, writer) {
-      var func = member(ctx, writer);
-
-      if ( !isInterpolFunction(func) ) {
-        if ( ctx.__intExports ) {
-          return null;
-        }
-        throw new Error("Attempting to call an unblessed function");
-      }
-
-      var callArgs = [writer];
-      for ( var i = 1; i < alen; i++ ) {
-        callArgs[i] = args[i](ctx, writer);
-      }
-
-      return func.apply(null, callArgs);
-    }
-  }
-
-  // generate an evaluator to perform local variable assignment
-  function createAssignEvaluator(assignmentDefs) {
-    var assigns = wrapAssignmentEvaluators(assignmentDefs).reverse();
-    var alen = assigns.length - 1;
-
-    return assignEvaluator;
-
-    function assignEvaluator(ctx, writer) {
-      for ( var i = alen; i >= 0; i-- ) {
-        var assign = assigns[i];
-        ctx[assign[0]] = assign[1](ctx, writer);
-      }
-    }
-  }
-
-  // generate an evaluator to write an html opening tag
-  function createOpenTagEvaluator(nameNode, attributeDefs, selfClose) {
-    var name = createEvaluator(nameNode);
-    var attributes = wrapAttributeEvaluators(attributeDefs).reverse();
-    var alen = attributes.length - 1;
-
-    if ( typeof name === 'function' ) {
-      return selfClose ? selfCloseFuncEvaluator : openTagFuncEvaluator;
-    }
-    return selfClose ? selfCloseLiteralEvaluator : openTagLiteralEvaluator;
-
-    function selfCloseFuncEvaluator(ctx, writer) {
-      writer.selfCloseElement(name(ctx, writer), getAttributes(ctx, writer));
-    }
-
-    function openTagFuncEvaluator(ctx, writer) {
-      writer.startElement(name(ctx, writer), getAttributes(ctx, writer));
-    }
-
-    function selfCloseLiteralEvaluator(ctx, writer) {
-      writer.selfCloseElement(name, getAttributes(ctx, writer));
-    }
-
-    function openTagLiteralEvaluator(ctx, writer) {
-      writer.startElement(name, getAttributes(ctx, writer));
-    }
-
-    function getAttributes(ctx, writer) {
-      var result = {};
-      for ( var i = alen; i >= 0; i-- ) {
-        var attribute = attributes[i];
-        var key = attribute[0];
-
-        if ( typeof key === 'function' ) {
-          key = key(ctx, writer);
-          if ( key === null ) {
-            continue;
-          }
-        }
-
-        var val = attribute[1];
-        if ( typeof val === 'function' ) {
-          val = val(ctx, writer);
-        }
-        result[key] = val;
-      }
-      return result;
-    }
-  }
-
-  // generate an evaluator to write an html closing tag
-  function createCloseTagEvaluator(nameNode) {
-    var name = createEvaluator(nameNode);
-    var name_func = typeof name === 'function';
-
-    return name_func ? closeFuncEvaluator : closeLiteralEvaluator;
-
-    function closeFuncEvaluator(ctx, writer) {
-      writer.endElement(name(ctx, writer));
-    }
-
-    function closeLiteralEvaluator(ctx, writer) {
-      writer.endElement(name);
-    }
-  }
-
-  // generate an evaluator to write an html comment
-  function createCommentTagEvaluator(contentLiteral) {
-    var content = lits[contentLiteral];
-
-    return commentTagEvaluator;
-
-    function commentTagEvaluator(ctx, writer) {
-      writer.comment(content);
-    }
-  }
-
-  // generate an evaluator to write an html5 doctype
-  function createDocTypeEvaluator(rootElemLiteral) {
-    var rootElem = lits[rootElemLiteral];
-
-    return docTypeEvaluator;
-
-    function docTypeEvaluator(ctx, writer) {
-      writer.docType(rootElem);
-    }
-  }
-
-  // generate an evaluator that writes the result of an expression
-  function createOutputEvaluator(exprNode) {
-    var $1 = createEvaluator(exprNode);
-
-    return typeof $1 !== 'function' ? outputLiteral : outputEvaluator;
-
-    function outputEvaluator(ctx, writer) {
-      writer.content($1(ctx, writer));
-    }
-
-    function outputLiteral(ctx, writer) {
-      writer.content($1);
-    }
-  }
-
-  // generate an evaluator that writes the result of an
-  // expression without escaping
-  function createRawOutputEvaluator(exprNode) {
-    var $1 = createEvaluator(exprNode);
-
-    return typeof $1 !== 'function' ? outputLiteral : outputEvaluator;
-
-    function outputEvaluator(ctx, writer) {
-      writer.rawContent($1(ctx, writer));
-    }
-
-    function outputLiteral(ctx, writer) {
-      writer.rawContent($1);
-    }
-  }
-
-  // generate an evaluator that performs for looping over ranges
-  function createForEvaluator(rangeNodes, statementNodes, elseNodes) {
-    var ranges = [];
-    var rlen = rangeNodes.length;
-    var statements = createStatementsEvaluator(statementNodes);
-    var elseStatements = elseNodes && createStatementsEvaluator(elseNodes);
-
-    for ( var i = 0, len = rangeNodes.length; i < len; i++ ) {
-      var rangeNode = rangeNodes[i];
-      ranges[i] = [
-        lits[rangeNode[0]],
-        wrapLiteral(createEvaluator(rangeNode[1])),
-        rangeNode[2] && wrapLiteral(createEvaluator(rangeNode[2]))
-      ];
-    }
-    ranges.reverse();
-
-    return forEvaluator;
-
-    function forEvaluator(ctx, writer) {
-      // The entire for loop is only a single nested context
-      var newCtx = extendObject(ctx);
-      var statementsEvaluated = false;
-
-      processRange(rlen - 1);
-      if ( !statementsEvaluated && elseStatements ) {
-        elseStatements(ctx, writer);
-      }
-
-      function processRange(idx) {
-        var range = ranges[idx];
-        var name = range[0];
-        var data = range[1](newCtx, writer);
-        var guard = range[2];
-        var items = data;
-
-        if ( typeof data !== 'object' || data === null ) {
-          return;
-        }
-
-        var createItem;
-        if ( isArray(data) ) {
-          createItem = createArrayItem;
-        }
-        else {
-          items = objectKeys(data);
-          createItem = createObjectItem;
-        }
-
-        for ( var i = 0, len = items.length; i < len; i++ ) {
-          newCtx[name] = createItem(i);
-          if ( guard && !guard(newCtx, writer) ) {
-            continue;
-          }
-          if ( idx ) {
-            processRange(idx - 1);
-          }
-          else {
-            statements(newCtx, writer);
-            statementsEvaluated = true;
-          }
-        }
-
-        function createArrayItem(idx) {
-          return data[idx];
-        }
-
-        function createObjectItem(idx) {
-          var name = items[idx];
-          return { name: name, value: data[name] };
-        }
-      }
-    }
-  }
-  
-  // generate an evaluator that borrows the specified expressions
-  // as the evaluated node's new scope for locals (remaining immutable)
-  function createUsingStmtEvaluator(usingNode, evalNodes) {
-    var evalExpr = createStatementsEvaluator(evalNodes);
-    return buildUsingEvaluator(usingNode, evalExpr);
-  }
-
-  function createUsingExprEvaluator(usingNode, evalNode) {
-    var evalExpr = createEvaluator(evalNode);
-    return buildUsingEvaluator(usingNode, evalExpr);
-  }
-
-  function buildUsingEvaluator(usingNode, evalExpr) {
-    var usingExprs = [null].concat(wrapArrayEvaluators(usingNode));
-    var ulen = usingExprs.length;
-
-    return usingEvaluator;
-
-    function usingEvaluator(ctx, writer) {
-      var newCtx = extendObject(ctx);
-      var args = [newCtx];
-
-      for ( var i = 1; i < ulen; i++ ) {
-        args[i] = usingExprs[i](ctx, writer);
-      }
-
-      mixin.apply(null, args);
-      return evalExpr(newCtx, writer);
-    }
-  }
-
-  // generate a conditional (ternary) evaluator
-  function createTernaryEvaluator(conditionNode, trueNode, falseNode) {
-    var $1 = createEvaluator(conditionNode);
-    var $2 = createEvaluator(trueNode);
-    var $3 = createEvaluator(falseNode);
-    return buildConditionalEvaluator($1, $2, $3);
-  }
-
-  // generate an if statement evaluator
-  function createIfEvaluator(conditionNode, trueNodes, falseNodes) {
-    var $1 = createEvaluator(conditionNode);
-    var $2 = createStatementsEvaluator(trueNodes);
-    var $3 = createStatementsEvaluator(falseNodes);
-    return buildConditionalEvaluator($1, $2, $3);
-  }
-  
-  function buildConditionalEvaluator($1, $2, $3) {
-    if ( typeof $1 !== 'function' ) {
-      return isTruthy($1) ? $2 : $3;
-    }
-
-    var type = getBinaryType($2, $3);
-    return [condLiteral, condTrue, condFalse, condBoth][type];
-
-    function condLiteral(c, w) {
-      return isTruthy($1(c, w)) ? $2 : $3;
-    }
-
-    function condTrue(c, w) {
-      return isTruthy($1(c, w)) ? $2(c, w) : $3;
-    }
-
-    function condFalse(c, w) {
-      return isTruthy($1(c, w)) ? $2 : $3(c, w);
-    }
-
-    function condBoth(c, w) {
-      return isTruthy($1(c, w)) ? $2(c, w) : $3(c, w);
-    }
-  }
-
-  // generate an 'or' evaluator, including short circuiting
-  function createOrEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode);
-    var $2 = createEvaluator(rightNode);
-
-    if ( typeof $1 !== 'function' ) {
-      return isTruthy($1) ? $1 : $2;
-    }
-
-    return typeof $2 === 'function' ? orFuncEvaluator : orLiteralEvaluator;
-
-    function orFuncEvaluator(ctx, writer) {
-      var lval = $1(ctx, writer);
-      return isTruthy(lval) ? lval : $2(ctx, writer);
-    }
-
-    function orLiteralEvaluator(ctx, writer) {
-      var lval = $1(ctx, writer);
-      return isTruthy(lval) ? lval : $2;
-    }
-  }
-
-  // generate an 'and' evaluator, including short circuiting
-  function createAndEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode);
-    var $2 = createEvaluator(rightNode);
-
-    if ( typeof $1 !== 'function' ) {
-      return isTruthy($1) ? $2 : $1;
-    }
-
-    return typeof $2 === 'function' ? andFuncEvaluator : andLiteralEvaluator;
-
-    function andFuncEvaluator(ctx, writer) {
-      var lval = $1(ctx, writer);
-      return isTruthy(lval) ? $2(ctx, writer) : lval;
-    }
-
-    function andLiteralEvaluator(ctx, writer) {
-      var lval = $1(ctx, writer);
-      return isTruthy(lval) ? $2 : lval;
-    }
-  }
-
-  // generate a match evaluator
-  function createMatchEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode);
-    var $2 = createEvaluator(rightNode);
-
-    switch ( getBinaryType($1, $2) ) {
-      case 0: return isMatchingObject($2, $1);
-      case 1: $2 = buildMatcher($2); return maLeft;
-      case 2: return maRight;
-      case 3: return maBoth;
-    }
-
-    function maLeft(c, w) { return $2($1(c, w)); }
-    function maRight(c, w) { return isMatchingObject($2(c, w), $1); }
-    function maBoth(c, w) { return isMatchingObject($2(c, w), $1(c, w)); }
-  }
-
-  // generate an equality evaluator
-  function createEqEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode);
-    var $2 = createEvaluator(rightNode);
-    var type = getBinaryType($1, $2);
-
-    return [null, eqLeft, eqRight, eqBoth][type] || ($1 === $2);
-
-    function eqLeft(c, w) { return $1(c, w) === $2; }
-    function eqRight(c, w) { return $1 === $2(c, w); }
-    function eqBoth(c, w) { return $1(c, w) === $2(c, w); }
-  }
-
-  // generate an inequality evaluator
-  function createNeqEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode);
-    var $2 = createEvaluator(rightNode);
-    var type = getBinaryType($1, $2);
-
-    return [null, neqLeft, neqRight, neqBoth][type] || ($1 !== $2);
-
-    function neqLeft(c, w) { return $1(c, w) !== $2; }
-    function neqRight(c, w) { return $1 !== $2(c, w); }
-    function neqBoth(c, w) { return $1(c, w) !== $2(c, w); }
-  }
-
-  // generate a greater-than evaluator
-  function createGtEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode);
-    var $2 = createEvaluator(rightNode);
-    var type = getBinaryType($1, $2);
-
-    return [null, gtLeft, gtRight, gtBoth][type] || ($1 > $2);
-
-    function gtLeft(c, w) { return $1(c, w) > $2; }
-    function gtRight(c, w) { return $1 > $2(c, w); }
-    function gtBoth(c, w) { return $1(c, w) > $2(c, w); }
-  }
-
-  // generate a greater-than or equal to evaluator
-  function createGteEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode);
-    var $2 = createEvaluator(rightNode);
-    var type = getBinaryType($1, $2);
-
-    return [null, gteLeft, gteRight, gteBoth][type] || ($1 >= $2);
-
-    function gteLeft(c, w) { return $1(c, w) >= $2; }
-    function gteRight(c, w) { return $1 >= $2(c, w); }
-    function gteBoth(c, w) { return $1(c, w) >= $2(c, w); }
-  }
-
-  // generate a less-than evaluator
-  function createLtEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode);
-    var $2 = createEvaluator(rightNode);
-    var type = getBinaryType($1, $2);
-
-    return [null, ltLeft, ltRight, ltBoth][type] || ($1 < $2);
-
-    function ltLeft(c, w) { return $1(c, w) < $2; }
-    function ltRight(c, w) { return $1 < $2(c, w); }
-    function ltBoth(c, w) { return $1(c, w) < $2(c, w); }
-  }
-
-  // generate a less-than or equal to evaluator
-  function createLteEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode);
-    var $2 = createEvaluator(rightNode);
-    var type = getBinaryType($1, $2);
-
-    return [null, lteLeft, lteRight, lteBoth][type] || ($1 <= $2);
-
-    function lteLeft(c, w) { return $1(c, w) <= $2; }
-    function lteRight(c, w) { return $1 <= $2(c, w); }
-    function lteBoth(c, w) { return $1(c, w) <= $2(c, w); }
-  }
-
-  // generate an addition evaluator
-  function createAddEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode);
-    var $2 = createEvaluator(rightNode);
-    var type = getBinaryType($1, $2);
-
-    return [null, addLeft, addRight, addBoth][type] || ($1 + $2);
-
-    function addLeft(c, w) { return $1(c, w) + $2; }
-    function addRight(c, w) { return $1 + $2(c, w); }
-    function addBoth(c, w) { return $1(c, w) + $2(c, w); }
-  }
-
-  // generate a subtraction evaluator
-  function createSubEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode);
-    var $2 = createEvaluator(rightNode);
-    var type = getBinaryType($1, $2);
-
-    return [null, subLeft, subRight, subBoth][type] || ($1 - $2);
-
-    function subLeft(c, w) { return $1(c, w) - $2; }
-    function subRight(c, w) { return $1 - $2(c, w); }
-    function subBoth(c, w) { return $1(c, w) - $2(c, w); }
-  }
-
-  // generate a multiplication evaluator
-  function createMulEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode);
-    var $2 = createEvaluator(rightNode);
-    var type = getBinaryType($1, $2);
-
-    return [null, mulLeft, mulRight, mulBoth][type] || ($1 * $2);
-
-    function mulLeft(c, w) { return $1(c, w) * $2; }
-    function mulRight(c, w) { return $1 * $2(c, w); }
-    function mulBoth(c, w) { return $1(c, w) * $2(c, w); }
-  }
-
-  // generate a division evaluator
-  function createDivEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode);
-    var $2 = createEvaluator(rightNode);
-    var type = getBinaryType($1, $2);
-
-    return [null, divLeft, divRight, divBoth][type] || ($1 / $2);
-
-    function divLeft(c, w) { return $1(c, w) / $2; }
-    function divRight(c, w) { return $1 / $2(c, w); }
-    function divBoth(c, w) { return $1(c, w) / $2(c, w); }
-  }
-
-  // generate a remainder evaluator
-  function createModEvaluator(leftNode, rightNode) {
-    var $1 = createEvaluator(leftNode);
-    var $2 = createEvaluator(rightNode);
-    var type = getBinaryType($1, $2);
-
-    return [null, modLeft, modRight, modBoth][type] || ($1 % $2);
-
-    function modLeft(c, w) { return $1(c, w) % $2; }
-    function modRight(c, w) { return $1 % $2(c, w); }
-    function modBoth(c, w) { return $1(c, w) % $2(c, w); }
-  }
-
-  // generate an interpolation evaluator
-  function createFormatEvaluator(formatNode, exprNode) {
-    var $1 = createEvaluator(formatNode);
-    var $1_func = typeof $1 === 'function';
-    var $2 = createEvaluator(exprNode);
-    var $2_func = typeof $2 === 'function';
-
-    var template = null;
-    if ( !$1_func ) {
-      // we can cache everything if the left operand is a literal
-      template = buildTemplate($1);
-      if ( $2_func ) {
-        return builtExpressionEvaluator;
-      }
-      if ( template.__requiresContext ) {
-        return builtLiteralEvaluator;
-      }
-      return template($2);
-    }
-
-    var cache = {};
-    var cacheCount = 0;
-
-    // otherwise, we have to evaluate the interpolation every time
-    return dynamicFormatEvaluator;
-
-    function builtExpressionEvaluator(ctx, writer) {
-      return template($2(ctx, writer), ctx);
-    }
-
-    function builtLiteralEvaluator(ctx, writer) {
-      return template($2, ctx);
-    }
-
-    // If we exhaust TemplateCacheMax, then something is clearly wrong here
-    // and we're not using the evaluator for localized strings.  If we keep
-    // caching, we're going to start leaking memory.  So this evaluator will
-    // blow away the cache and start over
-    function dynamicFormatEvaluator(ctx, writer) {
-      var formatStr = $1(ctx, writer);
-      var data = $2_func ? $2(ctx, writer) : $2;
-      var dynamicTemplate = cache[formatStr];
-
-      if ( !dynamicTemplate ) {
-        if ( cacheCount >= TemplateCacheMax ) {
-          cache = {};
-          cacheCount = 0;
-        }
-        // build and cache the dynamic template
-        dynamicTemplate = buildTemplate(formatStr);
-        cache[formatStr] = dynamicTemplate;
-        cacheCount++;
-      }
-
-      return dynamicTemplate(data, ctx);
-    }
-  }
-
-  // generate a logical 'not' evaluator
-  function createNotEvaluator(node) {
-    var $1 = createEvaluator(node);
-    return typeof $1 === 'function' ? notEvaluator : !isTruthy($1);
-
-    function notEvaluator(ctx, writer) {
-      return !isTruthy($1(ctx, writer));
-    }
-  }
-
-  // generate a mathematic negation evaluator
-  function createNegEvaluator(node) {
-    var $1 = createEvaluator(node);
-    return typeof $1 === 'function' ? negEvaluator : -$1;
-
-    function negEvaluator(ctx, writer) {
-      return -$1(ctx, writer);
-    }
-  }
-
-  // generate an array or object member access evaluator
-  function createMemberEvaluator(parentNode, elemNode) {
-    var $1 = createEvaluator(parentNode);
-
-    if ( $1 === null ) {
-      return null;
-    }
-
-    var $2 = createEvaluator(elemNode);
-    var type = getBinaryType($1, $2);
-
-    return [null, memLeft, null, memBoth][type] || ($1[$2]);
-
-    function memLeft(c, w) {
-      var parent = $1(c, w);
-      if ( parent === null ) {
-        return null;
-      }
-      var result = parent[$2];
-      return result === undefined ? null : result;
-    }
-
-    function memBoth(c, w) {
-      var parent = $1(c, w);
-      if ( parent === null ) {
-        return null;
-      }
-      var result = parent[$2(c, w)];
-      return result === undefined ? null : result;
-    }
-  }
-
-  // generate an array evaluator
-  function createArrayEvaluator(elemNodes) {
-    var elems = wrapArrayEvaluators(elemNodes);
-    var elen = elems.length;
-
-    return arrayEvaluator;
-
-    function arrayEvaluator(ctx, writer) {
-      var result = [];
-      for ( var i = 0; i < elen; i++ ) {
-        result[i] = elems[i](ctx, writer);
-      }
-      return result;
-    }
-  }
-
-  // generate a dictionary evaluator
-  function createDictionaryEvaluator(assignmentDefs) {
-    var assigns = wrapAssignmentEvaluators(assignmentDefs).reverse();
-    var alen = assigns.length - 1;
-
-    return dictionaryEvaluator;
-
-    function dictionaryEvaluator(ctx, writer) {
-      var dict = {};
-      for ( var i = alen; i >= 0; i-- ) {
-        var assign = assigns[i];
-        dict[assign[0]] = assign[1](ctx, writer);
-      }
-      return dict;
-    }
-  }
-
-  // generate a local variable retrieval evaluator
-  function createIdEvaluator(nameLiteral) {
-    var name = lits[nameLiteral];
-    return idEvaluator;
-
-    function idEvaluator(ctx, writer) {
-      var result = ctx[name];
-      return result === undefined ? null : result;
-    }
-  }
-
-  // generate a self-reference evaluator
-  function createSelfEvaluator() {
-    return selfEvaluator;
-
-    function selfEvaluator(ctx, writer) {
-      return ctx;
-    }
+  if ( !state[0] && elseCallback ) {
+    elseCallback();
   }
 }
 
-function options() {
-  return globalOptions;
+function exec(func, args) {
+  if ( !isInterpolFunction(func) ) {
+    throw new Error("Nope!");
+  }
+  return func.apply(null, args);
 }
 
-function globals() {
-  return globalContext;
-}
-
-function resolvers() {
-  return globalResolvers;
+function bind(func, callArgs) {
+  var bound = configure(func, 2, callArgs);
+  bound.__intFunction = func.__intFunction;
+  return bound;
 }
 
 // Exported Functions
-exports.buildRuntime = buildRuntime;
+exports.createRuntime = createRuntime;
 exports.options = options;
-exports.globals = globals;
+exports.context = context;
 exports.resolvers = resolvers;
 
 },{"./format":2,"./match":4,"./util":12,"./writers/null":14,"./writers/string":15}],12:[function(require,module,exports){
@@ -2184,45 +1178,6 @@ function mixin(target) {
 }
 
 /**
- * Creates a closure whose job it is to mix the configured Object's
- * properties into a target provided to the closure.
- *
- * @param {Object} obj the Object to copy
- */
-
-function createStaticMixin(obj) {
-  var keys = objectKeys(obj).reverse();
-  var klen = keys.length - 1;
-
-  return staticMixin;
-
-  function staticMixin(target) {
-    for ( var i = klen; i >= 0; i-- ) {
-      var key = keys[i];
-      target[key] = obj[key];
-    }
-    return target;
-  }
-}
-
-/**
- * Checks whether or not the provided value is an Interpol pre-compiled JSON
- * Object.
- *
- * @param {Object} value an Object to be checked
- */
-
-function isInterpolJSON(value) {
-  return typeof value === 'object' &&
-         value !== null &&
-         value.i === 'interpol' &&
-         typeof value.v === 'string' &&
-         !isArray(value) &&
-         isArray(value.l) &&
-         isArray(value.n);
-}
-
-/**
  * Checks whether or not the provided value is *truthy* by Interpol's
  * standards.
  *
@@ -2298,35 +1253,6 @@ function stringify(value) {
   }
 }
 
-// ## Exceptions
-
-/**
- * Intercepts a PEG.js Exception and generate a human-readable error message.
- *
- * @param {Exception} err the Exception that was raised
- * @param {String} [filePath] path to the file that was being parsed
- */
-
-function formatSyntaxError(err, filePath) {
-  if ( !err.name || err.name !== 'SyntaxError') {
-    return err;
-  }
-
-  var unexpected = err.found ? "'" + err.found + "'" : "end of file";
-  var errString = "Unexpected " + unexpected;
-  var lineInfo = ":" + err.line + ":" + err.column;
-
-  return new Error((filePath || 'string') + lineInfo + ": " + errString);
-}
-
-function formatWarning(warning, filePath) {
-  var lineInfo = ":" + warning.line + ":" + warning.column;
-  var warningString = warning.message;
-
-  filePath = filePath || warning.filePath || 'string';
-  return filePath + lineInfo + ": " + warningString;
-}
-
 // ## Function Invocation
 
 /**
@@ -2386,22 +1312,86 @@ function configure(func, requiredCount, defaultArgs) {
   }
 }
 
+var each;
+if ( Array.prototype.forEach ) {
+  each = (function () {
+    var forEachMethod = Array.prototype.forEach;
+    return function _each(arr, callback) {
+      return forEachMethod.call(arr, callback);
+    };
+  })();
+}
+else {
+  each = function _each(arr, callback) {
+    for ( var i = 0, len = arr.length; i < len; i++ ) {
+      callback(arr[i], i);
+    }
+  };
+}
+
+var map;
+if ( Array.prototype.map ) {
+  map = (function () {
+    var mapMethod = Array.prototype.map;
+    return function _map(arr, callback) {
+      return mapMethod.call(arr, callback);
+    };
+  })();
+}
+else {
+  map = function _map(arr, callback) {
+    var result = [];
+    each(arr, function (item) {
+      result[i] = callback(item);
+    });
+    return result;
+  };
+}
+
+var filter;
+if ( Array.prototype.filter ) {
+  filter = (function () {
+    var filterMethod = Array.prototype.filter;
+    return function _filter(arr, callback) {
+      return filterMethod.call(arr, callback);
+    };
+  })();
+}
+else {
+  filter = function _filter(arr, callback) {
+    var result = [];
+    each(arr, function (item) {
+      if ( !callback(item) ) {
+        result.push(item);
+      }
+    });
+    return result;
+  };
+}
+
+function selfMap(arr, callback) {
+  each(arr, function (item, i) {
+    arr[i] = callback(item);
+  });
+  return arr;
+}
+
 // Exported Functions
 exports.isArray = isArray;
 exports.extendObject = extendObject;
 exports.objectKeys = objectKeys;
 exports.mixin = mixin;
-exports.createStaticMixin = createStaticMixin;
-exports.isInterpolJSON = isInterpolJSON;
 exports.isTruthy = isTruthy;
 exports.escapeAttribute = escapeAttribute;
 exports.escapeContent = escapeContent;
 exports.stringify = stringify;
-exports.formatSyntaxError = formatSyntaxError;
-exports.formatWarning = formatWarning;
 exports.isInterpolFunction = isInterpolFunction;
 exports.bless = bless;
 exports.configure = configure;
+exports.each = each;
+exports.map = map;
+exports.filter = filter;
+exports.selfMap = selfMap;
 
 },{}],13:[function(require,module,exports){
 /*
