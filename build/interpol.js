@@ -109,14 +109,14 @@ function buildFormatter(formatStr) {
 
   return templateFunction;
 
-  function templateFunction(data, ctx) {
+  function templateFunction(ctx, data) {
     if ( typeof data !== 'object' || data === null ) {
       data = [data];
     }
 
     var output = [];
     for ( var i = 0; i < flen; i++ ) {
-      output[i] = funcs[i](data, ctx);
+      output[i] = funcs[i](ctx, data);
     }
 
     return output.join('');
@@ -133,7 +133,7 @@ function buildFormatter(formatStr) {
   function createIndexedFunction(idx) {
     return indexedFunction;
 
-    function indexedFunction(data) {
+    function indexedFunction(ctx, data) {
       return stringify(data[idx]);
     }
   }
@@ -149,7 +149,7 @@ function buildFormatter(formatStr) {
 
     return pipedFunction;
 
-    function pipedFunction(data, ctx) {
+    function pipedFunction(ctx, data) {
       var value = data[idx];
       for ( var i = flen; i >= 0; i-- ) {
         var funcName = funcs[i];
@@ -180,7 +180,7 @@ function createFormatterCache() {
 
   return dynamicFormatter;
 
-  function dynamicFormatter(formatStr, data, ctx) {
+  function dynamicFormatter(ctx, formatStr, data) {
     // If we exhaust TemplateCacheMax, then something is clearly wrong here
     // and we're not using the evaluator for localized strings.  If we keep
     // caching, we're going to start leaking memory.  So this evaluator will
@@ -198,7 +198,7 @@ function createFormatterCache() {
       cacheCount++;
     }
 
-    return dynamicTemplate(data, ctx);
+    return dynamicTemplate(ctx, data);
   }
 }
 
@@ -237,7 +237,7 @@ interpol.evaluate = evaluate;
 interpol.compile = compile;
 interpol.runtime = runtime.createRuntime;
 interpol.options = runtime.options;
-interpol.globals = runtime.context;
+interpol.context = runtime.context;
 interpol.resolvers = runtime.resolvers;
 
 // ## Core Interpol Implementation
@@ -942,30 +942,28 @@ function noOp() {}
 noOp.__intFunction = 'part';
 
 function createRuntime(localOptions) {
-  var runtimeOptions = mixin({}, globalOptions, localOptions);
-  var cacheModules = runtimeOptions.cache;
-  var runtimeResolvers = runtimeOptions.resolvers || globalResolvers;
-  var runtimeContext = extendObject(runtimeOptions.context || globalContext);
+  var options = mixin({}, globalOptions, localOptions);
+  var cacheModules = options.cache;
+  var resolvers = options.resolvers || globalResolvers;
+  var context = extendObject(options.context || globalContext);
 
   return {
-    resolvers: function () { return runtimeResolvers; },
-    context: function() { return runtimeContext; },
-    options: function () { return runtimeOptions; },
-
-    globalResolvers: resolvers,
-    globalContext: context,
-    globalOptions: options,
+    resolvers: function () { return resolvers; },
+    context: function() { return context; },
+    options: function () { return options; },
 
     extendObject: util.extendObject,
     mixin: util.mixin,
     isTruthy: util.isTruthy,
+    isFalsy: util.isFalsy,
 
     buildFormatter: format.buildFormatter,
-    buildFormatterCache: format.createFormatterCache,
+    createFormatterCache: format.createFormatterCache,
     isMatchingObject: match.isMatchingObject,
     buildMatcher: match.buildMatcher,
 
     isInterpolPartial: isInterpolPartial,
+    buildImporter: buildImporter,
     defineTemplate: defineTemplate,
     definePartial: definePartial,
     defineGuardedPartial: defineGuardedPartial,
@@ -976,6 +974,40 @@ function createRuntime(localOptions) {
     exec: exec,
     bind: bind
   };
+
+  // where exports are actually resolved. raiseError will be false
+  // if we're in the process of evaluating a template for the purpose
+  // of yielding its exports
+  function buildImporter(moduleName) {
+    var importer = dynamicImporter;
+    var module;
+
+    return performImport;
+
+    function performImport(ctx) {
+      return importer(ctx);
+    }
+
+    function cachedImporter(ctx) {
+      return module;
+    }
+
+    function dynamicImporter(ctx) {
+      for ( var i = resolvers.length - 1; i >= 0; i-- ) {
+        module = resolvers[i].resolveExports(moduleName, options);
+        if ( module ) {
+          break;
+        }
+      }
+      if ( !module ) {
+        throw new Error("Module '" + moduleName + "' not resolved");
+      }
+      if ( cacheModules ) {
+        importer = cachedImporter;
+      }
+      return module;
+    }
+  }
 }
 
 function options() {
@@ -1105,15 +1137,26 @@ function loop(collection, state, loopCallback, elseCallback) {
   }
 }
 
-function exec(func, args) {
+function exec(ctx, func, args) {
   if ( !isInterpolFunction(func) ) {
-    throw new Error("Nope!");
+    if ( ctx.__intExports ) {
+      return null;
+    }
+    throw new Error("Attempting to call an unblessed function");
   }
+
   return func.apply(null, args);
 }
 
-function bind(func, callArgs) {
-  var bound = configure(func, 2, callArgs);
+function bind(ctx, func, callArgs) {
+  if ( !isInterpolFunction(func) ) {
+    if ( ctx.__intExports ) {
+      return null;
+    }
+    throw new Error("Attempting to bind an unblessed function");
+  }
+
+  var bound = configure(func, 1, callArgs);
   bound.__intFunction = func.__intFunction;
   return bound;
 }
@@ -1214,6 +1257,16 @@ function isTruthy(value) {
     return value.length > 0;
   }
   return true;
+}
+
+function isFalsy(value) {
+  if ( !value ) {
+    return true;
+  }
+  if ( isArray(value) ) {
+    return value.length === 0;
+  }
+  return false;
 }
 
 // ## String Handling
@@ -1404,6 +1457,7 @@ exports.extendObject = extendObject;
 exports.objectKeys = objectKeys;
 exports.mixin = mixin;
 exports.isTruthy = isTruthy;
+exports.isFalsy = isFalsy;
 exports.escapeAttribute = escapeAttribute;
 exports.escapeContent = escapeContent;
 exports.stringify = stringify;
