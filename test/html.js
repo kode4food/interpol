@@ -34,7 +34,7 @@ exports.html = nodeunit.testCase({
     var script6 = '<tag>"str<>ing1" "s<>tring2"</tag>';
 
     test.equal(evaluate(script1, data),
-      '<htmlBody (attrName)=\"aValue\" litAttr=\"attr\">\n</htmlBody>');
+      '<htmlBody someAttr=\"aValue\" litAttr=\"attr\">\n</htmlBody>');
     
     test.equal(evaluate(script2, data),
       '<!DOCTYPE any>\n<start>someAttr</start>');
