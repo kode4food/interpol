@@ -7335,7 +7335,7 @@ function generateTemplateBody(parseTree, literals, options) {
         ]);
       });
     });
-    gen.assignments(assigns);
+    gen.declarations(assigns);
   }
 
   // generate an evaluator to represent a partial and its associated closure
@@ -7346,7 +7346,7 @@ function generateTemplateBody(parseTree, literals, options) {
       return literals[paramDef];
     });
     var create = guardNode ? createGuardedPartial : createUnguardedPartial;
-    gen.assignments([
+    gen.declarations([
       [partialName, create]
     ]);
 
@@ -7430,7 +7430,7 @@ function generateTemplateBody(parseTree, literals, options) {
         defer(assignmentDef[1])
       ];
     });
-    gen.assignments(assigns);
+    gen.declarations(assigns);
   }
 
   // generate an evaluator to write an html opening tag
@@ -7916,7 +7916,7 @@ function createModule(globals) {
     writer: writer,
     write: write,
     getter: getter,
-    assignments: assignments,
+    declarations: assignments,
     unaryOperator: unaryOperator,
     binaryOperator: binaryOperator,
     conditionalOperator: conditionalOperator,
