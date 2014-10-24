@@ -1120,20 +1120,32 @@ function getProperty(obj, property) {
   return handleNil(obj[property]);
 }
 
-function loop(collection, state, loopCallback, elseCallback) {
-  if ( typeof state === 'function' ) {
-    elseCallback = loopCallback;
-    loopCallback = state;
-    state = [];
-  }
-  if ( !isArray(collection) || !collection.length ) {
+function loop(data, loopCallback) {
+  if ( typeof data !== 'object' ) {
     return;
   }
-  for ( var i = 0, len = collection.length; i < len; i++ ) {
-    loopCallback(collection[i], state);
+
+  var items, createItem;
+  if ( !isArray(data) ) {
+    items = objectKeys(data);
+    createItem = createObjectItem;
   }
-  if ( !state[0] && elseCallback ) {
-    elseCallback();
+  else {
+    items = data;
+    createItem = createArrayItem;
+  }
+
+  for ( var i = 0, len = items.length; i < len; i++ ) {
+    loopCallback(createItem(i));
+  }
+
+  function createArrayItem(idx) {
+    return handleNil(items[idx]);
+  }
+
+  function createObjectItem(idx) {
+    var name = items[idx];
+    return { name: name, value: handleNil(data[name]) };
   }
 }
 
