@@ -8,7 +8,7 @@
 
 "use strict";
 
-// This module is used to collect the requirements for a parser-included
+// This module is used to collect the requirements for a compiler-included
 // Browserify build.  It's of no interest to Node.js
 
 require('./standard');

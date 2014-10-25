@@ -7042,7 +7042,7 @@ module.exports = (function() {
     }
 
 
-      var parser = require('../lib/parser');
+      var parser = require('../lib/compiler/parser');
       var buildBinaryChain = parser.buildBinaryChain;
       var hasOperator = parser.hasOperator;
       var changeOperator = parser.changeOperator;

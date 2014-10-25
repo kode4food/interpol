@@ -24,10 +24,10 @@
   ],
   "repository": "git@bitbucket.org:kode4food/interpol.git",
   "scripts": {
-    "build-parser": "pegjs -o speed lib/parser.pegjs build/parser.js",
+    "build-parser": "pegjs -o speed lib/compiler/parser.pegjs build/parser.js",
     "bundle-standard": "browserify browserify/standard.js > build/interpol.js && uglifyjs -m --preamble \"`cat doc/preamble.js`\" build/interpol.js -o build/interpol.min.js",
-    "bundle-parser": "browserify browserify/parser.js | uglifyjs -m --preamble \"`cat doc/preamble.js`\" -o build/interpol-parser.min.js",
-    "bundle-debug": "browserify --debug browserify/parser.js > build/interpol-debug.js",
+    "bundle-parser": "browserify browserify/compiler.js | uglifyjs -m --preamble \"`cat doc/preamble.js`\" -o build/interpol-parser.min.js",
+    "bundle-debug": "browserify --debug browserify/compiler.js > build/interpol-debug.js",
     "build": "mkdir -p build && npm run-script build-parser && npm run-script bundle-standard && npm run-script bundle-parser && npm run-script bundle-debug && npm run-script coverage",
     "test": "nodeunit test/index.js",
     "coverage": "istanbul cover -x '**/build/**' node_modules/nodeunit/bin/nodeunit test/index.js"
