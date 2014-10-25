@@ -59,7 +59,6 @@ var TemplateCacheMax = 256;
  *
  * @param {String} formatStr the String to be used for interpolation
  */
-
 function buildFormatter(formatStr) {
   var funcs = [];
   var flen = 0;
@@ -250,7 +249,6 @@ interpol.resolvers = runtime.resolvers;
  * @param {String|Object} template the template to be compiled
  * @param {Object} [options] configuration Object passed to the compile step
  */
-
 function interpol(template, options) {
   var compiledOutput = null;
   if ( typeof template === 'string' ) {
@@ -268,7 +266,6 @@ function interpol(template, options) {
  * Convenience function to compile and execute a template against a context
  * Object and options.  Not generally recommended.
  */
-
 function evaluate(script, obj, options) {
   var compiled = interpol(script, options);
   return compiled(obj, options);
@@ -280,7 +277,6 @@ function evaluate(script, obj, options) {
  *
  * @param {String} template the Interpol Template to be compiled
  */
-
 function compile(template, options) {
   if ( !compileModule ) {
     if ( typeof interpol.compileModule !== 'function' ) {
@@ -315,7 +311,6 @@ var objectKeys = util.objectKeys;
  * @param {Mixed} template the Template to match against
  * @param {Mixed} obj the Object being inspected
  */
-
 function isMatchingObject(template, obj) {
   if ( template === null || template === undefined ) {
     return obj === null || obj === undefined;
@@ -354,7 +349,6 @@ function isMatchingObject(template, obj) {
  *
  * @param {Mixed} template the Template to match against
  */
-
 function buildMatcher(template) {
   if ( template === null || template === undefined ) {
     return nullMatcher;
@@ -458,7 +452,6 @@ var bless = util.bless;
  * @param {function} interpol the Interpol Instance to use for compilation
  * @param {Object} [options] Options for generating the MemoryResolver
  */
-
 function createMemoryResolver(interpol, options) {
   var cache = {};
 
@@ -493,7 +486,6 @@ function createMemoryResolver(interpol, options) {
    *
    * @param {String} name the name of the module to remove
    */
-
   function unregisterModule(name) {
     delete cache[normalizeModuleName(name)];
   }
@@ -504,7 +496,6 @@ function createMemoryResolver(interpol, options) {
    * @param {String} name the name of the module to be registered
    * @param {Function|String|Object} module the module to register
    */
-
   function registerModule(name, module) {
     name = normalizeModuleName(name);
 
@@ -537,7 +528,6 @@ function createMemoryResolver(interpol, options) {
  *
  * @param {Object} module the Module to bless
  */
-
 function blessModule(module) {
   var result = {};
   for ( var key in module ) {
@@ -931,6 +921,7 @@ var extendObject = util.extendObject;
 var objectKeys = util.objectKeys;
 var configure = util.configure;
 var isInterpolFunction = util.isInterpolFunction;
+var isInterpolPartial = util.isInterpolPartial;
 
 var slice = Array.prototype.slice;
 
@@ -943,15 +934,10 @@ noOp.__intFunction = 'part';
 
 function createRuntime(localOptions) {
   var options = mixin({}, globalOptions, localOptions);
-  var cacheModules = options.cache;
   var resolvers = options.resolvers || globalResolvers;
-  var context = extendObject(options.context || globalContext);
+  var cacheModules = options.cache;
 
   return {
-    resolvers: function () { return resolvers; },
-    context: function() { return context; },
-    options: function () { return options; },
-
     extendObject: util.extendObject,
     mixin: util.mixin,
     isTruthy: util.isTruthy,
@@ -962,7 +948,6 @@ function createRuntime(localOptions) {
     isMatchingObject: match.isMatchingObject,
     buildMatcher: match.buildMatcher,
 
-    isInterpolPartial: isInterpolPartial,
     buildImporter: buildImporter,
     defineTemplate: defineTemplate,
     definePartial: definePartial,
@@ -1022,10 +1007,6 @@ function resolvers() {
   return globalResolvers;
 }
 
-function isInterpolPartial(func) {
-  return typeof func === 'function' && func.__intFunction === 'part';
-}
-
 function defineTemplate(template) {
   var exportedContext;
   template.configure = configureTemplate;
@@ -1062,7 +1043,6 @@ function defineTemplate(template) {
    * @param {Object} defaultObj default context Object to use
    * @param {Object} defaultOptions default Options to provide
    */
-
   function configureTemplate(defaultObj, defaultOptions) {
     return configure(template, 0, slice.call(arguments, 0));
   }
@@ -1073,7 +1053,6 @@ function defineTemplate(template) {
    * the method by which Interpol imports work.  Partials produced with
    * this method still have access to the global context.
    */
-
   function templateExports() {
     /* istanbul ignore if */
     if ( exportedContext ) {
@@ -1216,7 +1195,7 @@ if ( !objectKeys ) {
   };
 }
 
-var extendObject;
+var extendObject = null;
 (function () {
   function FakeConstructor() {}
   var testProto = { __proto__: { works: true } };
@@ -1307,7 +1286,6 @@ function escapeContent(str) {
  *
  * @param {Mixed} value the value to stringify
  */
-
 function stringify(value) {
   var type = typeof value;
   switch ( type ) {
@@ -1351,13 +1329,22 @@ function isInterpolFunction(func) {
 }
 
 /**
+ * Same as isInterpolFunction except that it's checking specifically for
+ * a declared partial.
+ *
+ * @param {Function} func the Function to check
+ */
+function isInterpolPartial(func) {
+  return typeof func === 'function' && func.__intFunction === 'part';
+}
+
+/**
  * 'bless' a Function as being Interpol-compatible.  This essentially means
  * that the Function must accept a Writer instance as the first argument, as
  * a writer will be passed to it by the compiled template.
  *
  * @param {Function} func the Function to 'bless'
  */
-
 function bless(func) {
   if ( typeof func !== 'function' ) {
     throw new Error("Argument to bless must be a Function");
@@ -1385,7 +1372,6 @@ function bless(func) {
  * @param {Number} requiredCount the number of arguments that are required
  * @param {Array} defaultArgs default values for the rest of the arguments
  */
-
 function configure(func, requiredCount, defaultArgs) {
   var argTemplate = new Array(requiredCount).concat(defaultArgs);
   return configuredWrapper;
@@ -1473,8 +1459,10 @@ exports.escapeAttribute = escapeAttribute;
 exports.escapeContent = escapeContent;
 exports.stringify = stringify;
 exports.isInterpolFunction = isInterpolFunction;
+exports.isInterpolPartial = isInterpolPartial;
 exports.bless = bless;
 exports.configure = configure;
+
 exports.each = each;
 exports.map = map;
 exports.filter = filter;
@@ -1515,7 +1503,6 @@ var INSERT = createDOMWriter.INSERT = 'insert';
  * @param {Element} parentElement the Element to which this DOMWriter attaches
  * @param {String} [renderMode] the DOM rendering mode: REPLACE|APPEND|INSERT
  */
-
 function createDOMWriter(parentElement, renderMode) {
   var arr = [];
   var writer = createStringWriter(arr);
@@ -1578,7 +1565,6 @@ function noOp() {}
  * bit bucket.  Its primary purpose is to support the background rendering of
  * modules in order to yield their exported symbols.
  */
- 
 function createNullWriter() {
   return {
     startRender: noOp,
@@ -1625,7 +1611,6 @@ function noOp() {}
  * writing of content as an underlying Array of Strings.  This Array is joined
  * and returned when the `endRender()` function is called.
  */
-
 function createStringWriter() {
   var arr = [];
 
