@@ -37,5 +37,28 @@ exports.scope = nodeunit.testCase({
     test.equal(evaluate(script).trim(), "Local Hello\n Not Hello");
     test.equal(evaluate("greeting"), "Hello, World!");
     test.done();
+  },
+
+  "Scope Override": function (test) {
+    var script = "a\n" +
+                 "let a = 'child'\n" +
+                 "a";
+
+    test.equal(evaluate(script, { a: 'parent' }), "parent\nchild");
+    test.done();
+  },
+
+  "Conditional Scope": function (test) {
+    var script = "a\n" +
+                 "if b\n" +
+                 "  let a = 'child'\n" +
+                 "  a\n" +
+                 "end\n" +
+                 "a";
+
+    test.equal(evaluate(script, { a: 'parent', b: true }),
+               "parent\nchild\nchild");
+
+    test.done();
   }
 });
