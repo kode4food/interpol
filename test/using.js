@@ -65,9 +65,13 @@ exports.using = nodeunit.testCase({
 
     var script4 = '%name is %age using b using c';
 
+    var script5 = 'let o = (name = "Thom", age = 42, job = "Developer")\n' +
+                  '(age * multiplier) using o';
+
     test.equal(evaluate(script1), "Thom is 42");
     test.equal(evaluate(script2), "Thom is 42 and is a Developer");
     test.equal(evaluate(script3), "Thom is 42 and is a Developer");
+    test.equal(evaluate(script5, { age: 90, multiplier: 3 }), "126");
     test.throws(function () { evaluate(script4); });
     test.done();
   }
