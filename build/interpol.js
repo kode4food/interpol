@@ -221,6 +221,8 @@ var runtime = require('./runtime');
 
 var isArray = util.isArray;
 var bless = util.bless;
+var isInterpolRuntime = util.isInterpolRuntime;
+var generateFunction = util.generateFunction;
 var createRuntime = runtime.createRuntime;
 
 var CURRENT_VERSION = "0.9.0";
@@ -241,25 +243,32 @@ interpol.resolvers = runtime.resolvers;
 
 // ## Core Interpol Implementation
 
+var globalRuntime = createRuntime();
+
 /**
  * Main Interpol entry point.  Takes a template and returns a closure
  * for rendering it.  The template can either be an unparsed String or
  * a pre-compiled JSON Object.
  *
  * @param {String|Object} template the template to be compiled
- * @param {Object} [options] configuration Object passed to the compile step
+ * @param {Object} [options] configuration Object
  */
-function interpol(template, options) {
-  var compiledOutput = null;
-  if ( typeof template === 'string' ) {
-    compiledOutput = compile(template, options);
-  }
-  else {
-    throw new Error("template must be a String or JSON Object");
+function interpol(template, runtime, options) {
+  if ( !isInterpolRuntime(runtime) ) {
+    options = runtime;
+    runtime = options ? createRuntime(options) : globalRuntime;
   }
 
-  var wrapper = new Function(['r'], compiledOutput);
-  return wrapper(createRuntime(options));
+  var compiledOutput = null;
+  if ( typeof template === 'string' ) {
+    compiledOutput = compile(template, options).templateBody;
+  }
+  else {
+    throw new Error("template must be a String");
+  }
+
+  var wrapper = generateFunction(compiledOutput);
+  return wrapper(runtime);
 }
 
 /**
@@ -462,12 +471,12 @@ function createMemoryResolver(interpol, options) {
     registerModule: registerModule
   };
 
-  function resolveModule(name) {
+  function resolveModule(name, runtime) {
     var result = cache[name];
     return result ? result.module : null;
   }
 
-  function resolveExports(name) {
+  function resolveExports(name, runtime) {
     var result = cache[name];
     if ( !result ) {
       return null;
@@ -937,7 +946,9 @@ function createRuntime(localOptions) {
   var resolvers = options.resolvers || globalResolvers;
   var cacheModules = options.cache;
 
-  return {
+  var runtime = {
+    __intRuntime: true,
+
     extendObject: util.extendObject,
     mixin: util.mixin,
     isTruthy: util.isTruthy,
@@ -960,6 +971,8 @@ function createRuntime(localOptions) {
     bind: bind
   };
 
+  return runtime;
+
   // where exports are actually resolved. raiseError will be false
   // if we're in the process of evaluating a template for the purpose
   // of yielding its exports
@@ -979,7 +992,7 @@ function createRuntime(localOptions) {
 
     function dynamicImporter(ctx) {
       for ( var i = resolvers.length - 1; i >= 0; i-- ) {
-        module = resolvers[i].resolveExports(moduleName, options);
+        module = resolvers[i].resolveExports(moduleName, runtime, options);
         if ( module ) {
           break;
         }
@@ -1009,8 +1022,8 @@ function resolvers() {
 
 function defineTemplate(template) {
   var exportedContext;
-  template.configure = configureTemplate;
-  template.exports = templateExports;
+  templateInterface.configure = configureTemplate;
+  templateInterface.exports = templateExports;
   return templateInterface;
 
   function templateInterface(obj, localOptions) {
@@ -1317,6 +1330,10 @@ function stringify(value) {
   }
 }
 
+function isInterpolRuntime(obj) {
+  return typeof obj === 'object' && obj !== null && obj.__intRuntime;
+}
+
 // ## Function Invocation
 
 /**
@@ -1448,6 +1465,34 @@ function selfMap(arr, callback) {
   return arr;
 }
 
+function generateNodeModule(generatedCode) {
+  var buffer = [];
+  buffer.push('module.exports={');
+  buffer.push('__intNodeModule: true,');
+  buffer.push('template:function(r){');
+  buffer.push(generatedCode);
+  buffer.push('}};');
+  return buffer.join('');
+}
+
+var generateFunction;
+if ( typeof vm !== 'undefined' && typeof vm.createContext === 'function' ) {
+  // The safer sandboxed method
+  generateFunction = function _sandboxed(scriptCode) {
+    var context = vm.createContext({
+      module: { exports: {} }
+    });
+    vm.runInContext(scriptCode, context);
+    return context.module.exports.template;
+  };
+}
+else {
+  // The shitty browser-based approach
+  generateFunction = function _funcConstructed(scriptCode) {
+    return new Function(['r'], scriptCode)
+  };
+}
+
 // Exported Functions
 exports.isArray = isArray;
 exports.extendObject = extendObject;
@@ -1458,6 +1503,7 @@ exports.isFalsy = isFalsy;
 exports.escapeAttribute = escapeAttribute;
 exports.escapeContent = escapeContent;
 exports.stringify = stringify;
+exports.isInterpolRuntime = isInterpolRuntime;
 exports.isInterpolFunction = isInterpolFunction;
 exports.isInterpolPartial = isInterpolPartial;
 exports.bless = bless;
@@ -1467,6 +1513,9 @@ exports.each = each;
 exports.map = map;
 exports.filter = filter;
 exports.selfMap = selfMap;
+
+exports.generateNodeModule = generateNodeModule;
+exports.generateFunction = generateFunction;
 
 },{}],13:[function(require,module,exports){
 /*
