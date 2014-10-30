@@ -949,6 +949,9 @@ function createRuntime(localOptions) {
   var runtime = {
     __intRuntime: true,
 
+    options: options,
+    resolvers: resolvers,
+
     extendObject: util.extendObject,
     mixin: util.mixin,
     isTruthy: util.isTruthy,
@@ -982,15 +985,15 @@ function createRuntime(localOptions) {
 
     return performImport;
 
-    function performImport(ctx) {
-      return importer(ctx);
+    function performImport() {
+      return importer();
     }
 
-    function cachedImporter(ctx) {
+    function cachedImporter() {
       return module;
     }
 
-    function dynamicImporter(ctx) {
+    function dynamicImporter() {
       for ( var i = resolvers.length - 1; i >= 0; i-- ) {
         module = resolvers[i].resolveExports(moduleName, runtime, options);
         if ( module ) {
