@@ -62,8 +62,8 @@ exports.cli = nodeunit.testCase({
       test.ok(!cons.contains("Failures"));
 
       var content = require('./cli_success/test1.int.js');
-      test.equal(typeof content.template, 'function');
-      var compiled = content.template(createRuntime());
+      test.equal(typeof content.createTemplate, 'function');
+      var compiled = content.createTemplate(createRuntime());
       test.equal(typeof compiled, 'function');
       fs.unlinkSync("./test/cli_success/test1.int.js"); // cleanup
       fs.unlinkSync("./test/cli_success/test2.int.js");
