@@ -156,12 +156,12 @@ var interpol = require('interpol');
 ```
 
 ## Inclusion in a Browser
-There are two ways to include Interpol templates in a browser-based application.  One is to compile raw templates using the Interpol compiler.  Another is to load the templates from pre-compiled JSON output.  The PEG.js parser used by the compiler is *massive* and slower than loading JSON, but it may be necessary if you want to compile ad-hoc templates.
+There are two ways to include Interpol templates in a browser-based application.  One is to compile raw templates using the Interpol compiler.  Another is to load the templates from pre-compiled bundles.  The PEG.js parser used by the compiler is *massive* and slower than loading JavaScript, but it may be necessary if you want to compile ad-hoc templates.
 
 *Note:* The entry point function for Interpol in the browser is *always* named `interpol()`.
 
-### Loading Pre-Compiled JSON
-The `interpol()` function will accept a pre-compiled JSON object instead of a JavaScript string.  This will allow you to bypass the loading of the PEG.js parser.  Instead, you can load pre-compiled templates from your server for faster initialization.
+### Pre-Compiled JavaScript Bundles
+Application bundles can be pre-compiled and automatically registered with Interpol.  This will allow you to bypass the loading of the PEG.js parser.  Instead, you can load pre-compiled templates from your server for faster initialization.
 
 You can also invoke the compiler by calling the `interpol.compile(Object)` function.
 
@@ -169,7 +169,7 @@ You can also invoke the compiler by calling the `interpol.compile(Object)` funct
 <script src="build/interpol.min.js" type="text/javascript"></script>
 ```
 
-*Note:* The Interpol command-line interface generates pre-compiled JSON.  You can install this globally using `npm -g install` and can then invoke the tools at your terminal by typing `interpol`.
+*Note:* The Interpol command-line interface generates pre-compiled bundles.  You can install this globally using `npm -g install` and can then invoke the tools at your terminal by typing `interpol`.
 
 ### Including the PEG.js Compiler
 If you *must* parse raw templates in the browser, you will need to load the version of Interpol that includes the compiler (and its PEG.js parser).
