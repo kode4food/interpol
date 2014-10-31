@@ -247,10 +247,9 @@ var globalRuntime = createRuntime();
 
 /**
  * Main Interpol entry point.  Takes a template and returns a closure
- * for rendering it.  The template can either be an unparsed String or
- * a pre-compiled JSON Object.
+ * for rendering it.  The template must be a String.
  *
- * @param {String|Object} template the template to be compiled
+ * @param {String} template the template to be compiled
  * @param {Object} [options] configuration Object
  */
 function interpol(template, runtime, options) {
@@ -1494,11 +1493,12 @@ function selfMap(arr, callback) {
 
 function generateNodeModule(generatedCode) {
   var buffer = [];
-  buffer.push('module.exports={');
-  buffer.push('__intNodeModule: true,');
-  buffer.push('createTemplate:function(r){');
+  buffer.push("\"use strict\";");
+  buffer.push("module.exports={");
+  buffer.push("__intNodeModule: true,");
+  buffer.push("createTemplate:function(r){");
   buffer.push(generatedCode);
-  buffer.push('}};');
+  buffer.push("}};");
   return buffer.join('');
 }
 

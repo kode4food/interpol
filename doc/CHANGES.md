@@ -1,8 +1,7 @@
 # Change History
 
 ## Version 0.9 - Compiler Rewrite
-The compiler backend has been completely rewritten to transpile JavaScript.  This has resulted in significant performance improvements of compiled templates and greatly reduces the size of the Interpol runtime.
-
+The compiler backend has been completely rewritten.  It now transpiles JavaScript instead of generating JSON information.  This has resulted in significant performance improvements for template processing and greatly reduces the size of the Interpol runtime.  It does mean that on-the-fly compilation is a little slower, but this is only a one-time penalty.
 
 
 ## Version 0.4.2 - Synonyms
