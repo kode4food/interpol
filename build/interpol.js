@@ -230,18 +230,18 @@ var compileModule = null;
 
 var slice = Array.prototype.slice;
 
-// ## Bootstrap
+// Bootstrap
 
 interpol.VERSION = CURRENT_VERSION;
 interpol.bless = bless;
 interpol.evaluate = evaluate;
 interpol.compile = compile;
-interpol.runtime = runtime.createRuntime;
+interpol.runtime = getRuntime;
 interpol.options = runtime.options;
 interpol.context = runtime.context;
 interpol.resolvers = runtime.resolvers;
 
-// ## Core Interpol Implementation
+// Core Interpol Implementation
 
 var globalRuntime = createRuntime();
 
@@ -294,6 +294,22 @@ function compile(template, options) {
     compileModule = interpol.compileModule;
   }
   return compileModule(template, options);
+}
+
+/**
+ * Returns a new Runtime based on the provided options.  If no options are
+ * provided, will return the global Runtime instance.
+ *
+ * @param {Object} [options] configuration Object
+ */
+function getRuntime(options) {
+  if ( isInterpolRuntime(options) ) {
+    return options;
+  }
+  if ( typeof options === 'object' && options !== null ) {
+    return createRuntime(options);
+  }
+  return globalRuntime;
 }
 
 // Exported Functions
@@ -760,7 +776,7 @@ function sum(writer, value) {
   return res;
 }
 
-// ### Math functions
+// Math functions
 
 // `number(value)` convert value to a Number
 exports.number = wrap(Number);
@@ -966,8 +982,8 @@ function createRuntime(localOptions) {
     defineTemplate: defineTemplate,
     definePartial: definePartial,
     defineGuardedPartial: defineGuardedPartial,
+    cleanseArguments: cleanseArguments,
 
-    handleNil: handleNil,
     getProperty: getProperty,
     loop: loop,
     exec: exec,
@@ -1100,6 +1116,14 @@ function defineGuardedPartial(originalPartial, envelope) {
   return definePartial(envelope(originalPartial));
 }
 
+function cleanseArguments(arr, startIdx) {
+  for ( var i = startIdx, len = arr.length; i < len; i++ ) {
+    if ( arr[i] === null ) {
+      arr[i] = undefined;
+    }
+  }
+}
+
 function isNil(value) {
   return value === undefined || value === null;
 }
@@ -1184,7 +1208,7 @@ exports.resolvers = resolvers;
 
 "use strict";
 
-// ## Array and Object Handling
+// Array and Object Handling
 
 var toString = Object.prototype.toString;
 var slice = Array.prototype.slice;
@@ -1275,7 +1299,7 @@ function isFalsy(value) {
   return false;
 }
 
-// ## String Handling
+// String Handling
 
 var EscapeChars = {
   '&': '&amp;',
@@ -1337,7 +1361,7 @@ function isInterpolRuntime(obj) {
   return typeof obj === 'object' && obj !== null && obj.__intRuntime;
 }
 
-// ## Function Invocation
+// Function Invocation
 
 /**
  * Returns whether or not a Function is 'blessed' as Interpol-compatible.
@@ -1472,7 +1496,7 @@ function generateNodeModule(generatedCode) {
   var buffer = [];
   buffer.push('module.exports={');
   buffer.push('__intNodeModule: true,');
-  buffer.push('template:function(r){');
+  buffer.push('createTemplate:function(r){');
   buffer.push(generatedCode);
   buffer.push('}};');
   return buffer.join('');
@@ -1486,13 +1510,13 @@ if ( typeof vm !== 'undefined' && typeof vm.createContext === 'function' ) {
       module: { exports: {} }
     });
     vm.runInContext(scriptCode, context);
-    return context.module.exports.template;
+    return context.module.exports.create;
   };
 }
 else {
   // The shitty browser-based approach
   generateFunction = function _funcConstructed(scriptCode) {
-    return new Function(['r'], scriptCode)
+    return new Function(['r'], scriptCode);
   };
 }
 
@@ -1727,7 +1751,7 @@ function createStringWriter() {
   }
 
   function raw(content) {
-    arr.push(stringify(content));
+    arr.push(content);
   }
 }
 
