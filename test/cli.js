@@ -118,23 +118,24 @@ exports.cli = nodeunit.testCase({
   },
 
   "Create Browser Bundle": function (test) {
-    //var cons = createConsole();
-    //commandLine(["-browser", "test/test_bundle.js", "-in", "./test/cli_success"], cons, function (exitCode) {
-    //  test.ok(cons.contains("Interpol Parsing Complete"));
-    //  test.ok(cons.contains("Success"));
-    //  test.ok(!cons.contains("Warnings"));
-    //  test.ok(!cons.contains("Failures"));
-    //
-    //  // Rewrite the file to point to the local Interpol instance
-    //  var content = fs.readFileSync('./test/test_bundle.js').toString();
-    //  content = content.replace("require('interpol')", "require('../lib')");
-    //  fs.writeFileSync('./test/test_bundle.js', content);
-    //
-    //  require('./test_bundle.js');
-    //  test.ok(interpol.hasOwnProperty('test_bundle'));
-    //  test.ok(interpol.test_bundle.hasOwnProperty('test1'));
-    //  fs.unlinkSync("./test/test_bundle.js"); // cleanup
+    var cons = createConsole();
+    commandLine(["-bundle", "test/test_bundle.js", "-in", "./test/cli_success"], cons, function (exitCode) {
+      test.ok(cons.contains("Interpol Parsing Complete"));
+      test.ok(cons.contains("Success"));
+      test.ok(!cons.contains("Warnings"));
+      test.ok(!cons.contains("Failures"));
+
+      // Rewrite the file to point to the local Interpol instance
+      var content = fs.readFileSync('./test/test_bundle.js').toString();
+      content = content.replace("require('interpol')", "require('../lib')");
+      fs.writeFileSync('./test/test_bundle.js', content);
+
+      require('./test_bundle.js');
+      test.ok(interpol.hasOwnProperty('test_bundle'));
+      test.ok(interpol.test_bundle.hasOwnProperty('test1'));
+      test.equal(interpol.test_bundle.test2(), "Hello, world!");
+      fs.unlinkSync("./test/test_bundle.js"); // cleanup
       test.done();
-    //});
+    });
   }
 });
