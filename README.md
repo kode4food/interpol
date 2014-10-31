@@ -137,16 +137,16 @@ from people import renderPeople
 Easy as pie!  And your primary template gets right to the point.
 
 ## Current Status
-The grammar has stabilized.  The run-time library is still under development, particularly formatting generators.  Optimizations still need to be made.  Check [the TODO document](doc/TODO.md) for an idea of what's to come.
+The grammar has stabilized.  The system libraries are still under development, particularly formatting generators.  Check [the TODO document](doc/TODO.md) for an idea of what's to come.
 
 ## Installation
 A pre-built version of the parser is already included.  If you'd like to build it yourself then you can do so by issuing the following command from the package's top-level directory:
 
 ```bash
-npm install && npm run-script build && npm test
+npm install && npm run-script build
 ```
 
-This will also install any development dependencies and run the nodeunit test suite.
+This will also install any development dependencies, run the nodeunit test suite, and generate coverage reports.
 
 ## Inclusion in Node.js
 Assuming you have installed the Interpol package with npm, you can include it in your Node code with the following:
@@ -161,12 +161,11 @@ There are two ways to include Interpol templates in a browser-based application.
 *Note:* The entry point function for Interpol in the browser is *always* named `interpol()`.
 
 ### Pre-Compiled JavaScript Bundles
-Application bundles can be pre-compiled and automatically registered with Interpol.  This will allow you to bypass the loading of the PEG.js parser.  Instead, you can load pre-compiled templates from your server for faster initialization.
-
-You can also invoke the compiler by calling the `interpol.compile(Object)` function.
+Application bundles can be pre-compiled and automatically registered with Interpol.  This will allow you to bypass the loading of the compiler and PEG.js parser.  Instead, you can load sets of pre-compiled templates from your server for faster initialization.
 
 ```html
 <script src="build/interpol.min.js" type="text/javascript"></script>
+<script src="your_bundle.js" type="text/javascript"></script>
 ```
 
 *Note:* The Interpol command-line interface generates pre-compiled bundles.  You can install this globally using `npm -g install` and can then invoke the tools at your terminal by typing `interpol`.
