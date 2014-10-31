@@ -7758,7 +7758,7 @@ var optimizer = require('./optimizer');
 var codegen = require('./codegen');
 
 var parseTemplate = parser.parseTemplate;
-var optimizeModule = optimizer.optimizeModule;
+var optimizeModule = optimizer.rewriteSyntaxTree;
 var generateTemplateBody = codegen.generateTemplateBody;
 
 var isArray = util.isArray;
@@ -9004,7 +9004,7 @@ function createCommentTag(statement) {
 }
 
 // Exported Functions
-exports.optimizeModule = optimizeModule;
+exports.rewriteSyntaxTree = optimizeModule;
 
 },{"../interpol":10,"../match":11,"../util":19,"./parser":8}],8:[function(require,module,exports){
 /*
