@@ -1580,8 +1580,7 @@ var INSERT = createDOMWriter.INSERT = 'insert';
  * @param {String} [renderMode] the DOM rendering mode: REPLACE|APPEND|INSERT
  */
 function createDOMWriter(parentElement, renderMode) {
-  var arr = [];
-  var writer = createStringWriter(arr);
+  var writer = createStringWriter();
   var writerEndRender = writer.endRender;
   var endRender;
 
@@ -1699,7 +1698,7 @@ function createStringWriter() {
     comment: comment,
     docType: docType,
     content: content,
-    raw: raw
+    raw: arr.push.bind(arr)
   };
 
   function endRender() {
@@ -1748,10 +1747,6 @@ function createStringWriter() {
 
   function content(content) {
     arr.push(escapeContent(stringify(content)));
-  }
-
-  function raw(content) {
-    arr.push(content);
   }
 }
 
