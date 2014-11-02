@@ -465,6 +465,7 @@ var util = require('../util');
 var slice = Array.prototype.slice;
 var isArray = util.isArray;
 var bless = util.bless;
+var isInterpolModule = util.isInterpolModule;
 
 /**
  * Creates a new MemoryResolver.  As its name implies, this resolver
@@ -523,9 +524,8 @@ function createMemoryResolver(interpol, options) {
   function registerModule(name, module) {
     name = normalizeModuleName(name);
 
-    // *Function* - A compiled Interpol closure
-    if ( typeof module === 'function' &&
-         typeof module.exports === 'function' ) {
+    // A compiled Interpol Module function
+    if ( isInterpolModule(module) ) {
       cache[name] = { module: module };
       return;
     }
@@ -978,7 +978,7 @@ function createRuntime(localOptions) {
     buildMatcher: match.buildMatcher,
 
     buildImporter: buildImporter,
-    defineTemplate: defineTemplate,
+    defineModule: defineModule,
     definePartial: definePartial,
     defineGuardedPartial: defineGuardedPartial,
     cleanseArguments: cleanseArguments,
@@ -1038,8 +1038,9 @@ function resolvers() {
   return globalResolvers;
 }
 
-function defineTemplate(template) {
+function defineModule(template) {
   var exportedContext;
+  templateInterface.__intModule = true;
   templateInterface.configure = configureTemplate;
   templateInterface.exports = templateExports;
   return templateInterface;
@@ -1356,11 +1357,15 @@ function stringify(value) {
   }
 }
 
+// Function Invocation
+
 function isInterpolRuntime(obj) {
   return typeof obj === 'object' && obj !== null && obj.__intRuntime;
 }
 
-// Function Invocation
+function isInterpolModule(func) {
+  return typeof func === 'function' && func.__intModule;
+}
 
 /**
  * Returns whether or not a Function is 'blessed' as Interpol-compatible.
@@ -1531,6 +1536,7 @@ exports.escapeAttribute = escapeAttribute;
 exports.escapeContent = escapeContent;
 exports.stringify = stringify;
 exports.isInterpolRuntime = isInterpolRuntime;
+exports.isInterpolModule = isInterpolModule;
 exports.isInterpolFunction = isInterpolFunction;
 exports.isInterpolPartial = isInterpolPartial;
 exports.bless = bless;
