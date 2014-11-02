@@ -489,7 +489,7 @@ function createMemoryResolver(interpol, options) {
 
   function resolveModule(name, runtime) {
     var result = cache[name];
-    return result ? result.module : null;
+    return result ? result.module : undefined;
   }
 
   function resolveExports(name, runtime) {
