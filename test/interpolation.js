@@ -66,5 +66,17 @@ exports.interpolation = nodeunit.testCase({
     test.equal(evaluate(script1, this.data), "Result is Title Case String");
     test.equal(evaluate(script2, this.data), "The Title is UPPER");
     test.done();
+  },
+
+  "Mixed Interpolation": function (test) {
+    var script = "let val2 = 'test2'\n" +
+      "def part('test3', val4)\n" +
+      "  \"%val1 %val4 %val2 %1\"\n" +
+      "end\n" +
+      "part(val3, 'test4')";
+
+    test.equal(evaluate(script, { val1: 'test1', val3: 'test3' }),
+      "test1 test4 test2 test3\n");
+    test.done();
   }
 });
