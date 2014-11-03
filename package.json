@@ -25,7 +25,7 @@
   "repository": "git@bitbucket.org:kode4food/interpol.git",
   "scripts": {
     "build-parser": "pegjs -o speed lib/compiler/parser.pegjs build/parser.js",
-    "bundle-standard": "browserify browserify/standard.js > build/interpol.js && uglifyjs -m --preamble \"`cat doc/preamble.js`\" build/interpol.js -o build/interpol.min.js",
+    "bundle-standard": "browserify --ignore './compiler' browserify/standard.js > build/interpol.js && uglifyjs -m --preamble \"`cat doc/preamble.js`\" build/interpol.js -o build/interpol.min.js",
     "bundle-parser": "browserify browserify/compiler.js | uglifyjs -m --preamble \"`cat doc/preamble.js`\" -o build/interpol-parser.min.js",
     "bundle-debug": "browserify --debug browserify/compiler.js > build/interpol-debug.js",
     "build": "mkdir -p build && npm run-script build-parser && npm run-script bundle-standard && npm run-script bundle-parser && npm run-script bundle-debug && npm run-script coverage",
@@ -33,15 +33,18 @@
     "coverage": "istanbul cover -x '**/build/**' node_modules/nodeunit/bin/nodeunit test/index.js"
   },
   "dependencies": {
-    "mkdirp": "~0.5.0",
-    "glob": "~3.2.9"
+    "glob": "~4.0.6",
+    "mkdirp": "~0.5.0"
   },
   "devDependencies": {
-    "browserify": "~3.46.0",
-    "istanbul": "~0.3.0",
-    "nodeunit": "~0.8.7",
+    "browserify": "~6.2.0",
+    "istanbul": "~0.3.2",
+    "nodeunit": "~0.9.0",
     "pegjs": "~0.8.0",
-    "uglify-js": "~2.4.13"
+    "uglify-js": "~2.4.15"
+  },
+  "browser": {
+    "vm": false
   },
   "engines": {
     "node": "*"

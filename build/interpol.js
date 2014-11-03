@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -24,7 +24,24 @@ require('../lib/writers/null').registerWriter(interpol);
 require('../lib/writers/string').registerWriter(interpol);
 require('../lib/writers/dom').registerWriter(interpol);
 
-},{"../lib/interpol":3,"../lib/resolvers/memory":5,"../lib/resolvers/system":6,"../lib/writers/dom":13,"../lib/writers/null":14,"../lib/writers/string":15}],2:[function(require,module,exports){
+},{"../lib/interpol":4,"../lib/resolvers/memory":6,"../lib/resolvers/system":7,"../lib/writers/dom":15,"../lib/writers/null":16,"../lib/writers/string":17}],2:[function(require,module,exports){
+/*
+ * Interpol (Templates Sans Facial Hair)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thomas S. Bradford (kode4food.it)
+ */
+
+"use strict";
+
+/**
+ * This is a stub that will be populated by the 'real' compiler functionality
+ * should it be loaded by either Node.js or Browserify.  It's here because
+ * we shouldn't have to rely on Browserify's `--ignore` option.
+ */
+
+},{}],3:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -36,8 +53,12 @@ require('../lib/writers/dom').registerWriter(interpol);
 "use strict";
 
 var util = require('./util');
-var isInterpolFunction = util.isInterpolFunction;
-var stringify = util.stringify;
+var types = require('./types');
+
+var objectKeys = util.objectKeys;
+var each = util.each;
+var stringify = types.stringify;
+var isInterpolFunction = types.isInterpolFunction;
 
 var nullWriter;
 
@@ -52,15 +73,16 @@ var TemplateCacheMax = 256;
 
 /**
  * Builds a closure that will be used internally to support Interpol's
- * interpolation operations.  The returned closure may attach a flag
- * `__requiresContext` that identifies it as requiring an Interpol
- * context to fulfill its formatting.  This usually occurs when the
- * pipe `|` operator is used.
+ * interpolation operations.  The returned closure will attach two flags
+ * `__intRequiredNames` and `__intRequiredFuncs` that identify any names
+ * that must be provided by interpol to fulfill its formatting.
  *
  * @param {String} formatStr the String to be used for interpolation
  */
 function buildFormatter(formatStr) {
   var funcs = [];
+  var requiredNames = {};
+  var requiredFunctions = {};
   var flen = 0;
   var autoIdx = 0;
 
@@ -88,6 +110,7 @@ function buildFormatter(formatStr) {
     var idx = autoIdx++;
     if ( paramMatch[4] ) {
       idx = paramMatch[4];
+      requiredNames[idx] = true;
     }
     else if ( paramMatch[3] ) {
       idx = parseInt(paramMatch[3], 10) - 1;
@@ -96,7 +119,6 @@ function buildFormatter(formatStr) {
     if ( paramMatch[5] ) {
       var formatters = paramMatch[5].slice(1).split('|');
       funcs.push(createPipedFunction(idx, formatters));
-      templateFunction.__requiresContext = true;
     }
     else {
       funcs.push(createIndexedFunction(idx));
@@ -106,16 +128,18 @@ function buildFormatter(formatStr) {
   }
   flen = funcs.length;
 
+  templateFunction.__intRequiredNames = objectKeys(requiredNames);
+  templateFunction.__intRequiredFunctions = objectKeys(requiredFunctions);
   return templateFunction;
 
-  function templateFunction(ctx, data) {
+  function templateFunction(data, supportFunctions) {
     if ( typeof data !== 'object' || data === null ) {
       data = [data];
     }
 
     var output = [];
     for ( var i = 0; i < flen; i++ ) {
-      output[i] = funcs[i](ctx, data);
+      output[i] = funcs[i](data, supportFunctions);
     }
 
     return output.join('');
@@ -132,7 +156,7 @@ function buildFormatter(formatStr) {
   function createIndexedFunction(idx) {
     return indexedFunction;
 
-    function indexedFunction(ctx, data) {
+    function indexedFunction(data, supportFunctions) {
       return stringify(data[idx]);
     }
   }
@@ -141,6 +165,11 @@ function buildFormatter(formatStr) {
     var funcs = formatters.reverse();
     var flen = funcs.length - 1;
 
+    // Register requirement on these formatters
+    each(funcs, function (funcName) {
+      requiredFunctions[funcName] = true;
+    });
+
     if ( !nullWriter ) {
       var createNullWriter = require('./writers/null').createNullWriter;
       nullWriter = createNullWriter();
@@ -148,19 +177,19 @@ function buildFormatter(formatStr) {
 
     return pipedFunction;
 
-    function pipedFunction(ctx, data) {
+    function pipedFunction(data, supportFunctions) {
       var value = data[idx];
       for ( var i = flen; i >= 0; i-- ) {
         var funcName = funcs[i];
         var func = data[funcName];
 
-        if ( func === undefined && ctx ) {
-          // Only fall back to context if func is not in data at all
-          func = ctx[funcName];
+        if ( func === undefined && supportFunctions ) {
+          // Only fall back to supportFunctions if func is not in data at all
+          func = supportFunctions[funcName];
         }
 
         if ( !isInterpolFunction(func) ) {
-          if ( ctx.__intExports ) {
+          if ( supportFunctions.__intExports ) {
             continue;
           }
           throw new Error("Attempting to call an unblessed function");
@@ -179,7 +208,7 @@ function createFormatterCache() {
 
   return dynamicFormatter;
 
-  function dynamicFormatter(ctx, formatStr, data) {
+  function dynamicFormatter(formatStr, data, supportFunctions) {
     // If we exhaust TemplateCacheMax, then something is clearly wrong here
     // and we're not using the evaluator for localized strings.  If we keep
     // caching, we're going to start leaking memory.  So this evaluator will
@@ -197,7 +226,7 @@ function createFormatterCache() {
       cacheCount++;
     }
 
-    return dynamicTemplate(ctx, data);
+    return dynamicTemplate(data, supportFunctions);
   }
 }
 
@@ -205,7 +234,7 @@ function createFormatterCache() {
 exports.buildFormatter = buildFormatter;
 exports.createFormatterCache = createFormatterCache;
 
-},{"./util":12,"./writers/null":14}],3:[function(require,module,exports){
+},{"./types":13,"./util":14,"./writers/null":16}],4:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -217,16 +246,18 @@ exports.createFormatterCache = createFormatterCache;
 "use strict";
 
 var util = require('./util');
+var types = require('./types');
+var compiler = require('./compiler/stub');
 var runtime = require('./runtime');
 
 var isArray = util.isArray;
-var bless = util.bless;
-var isInterpolRuntime = util.isInterpolRuntime;
-var generateFunction = util.generateFunction;
+var bless = types.bless;
+
 var createRuntime = runtime.createRuntime;
+var compileModule = null;
+var generateFunction = null;
 
 var CURRENT_VERSION = "0.9.0";
-var compileModule = null;
 
 var slice = Array.prototype.slice;
 
@@ -245,18 +276,17 @@ interpol.resolvers = runtime.resolvers;
 
 var globalRuntime = createRuntime();
 
+
 /**
  * Main Interpol entry point.  Takes a template and returns a closure
  * for rendering it.  The template must be a String.
  *
  * @param {String} template the template to be compiled
- * @param {Object} [options] configuration Object
+ * @param {Runtime} [runtime] Runtime Instance (or config Object)
  */
-function interpol(template, runtime, options) {
-  if ( !isInterpolRuntime(runtime) ) {
-    options = runtime;
-    runtime = options ? createRuntime(options) : globalRuntime;
-  }
+function interpol(template, runtime) {
+  runtime = getRuntime(runtime);
+  var options = runtime.options;
 
   var compiledOutput = null;
   if ( typeof template === 'string' ) {
@@ -287,10 +317,11 @@ function evaluate(script, obj, options) {
  */
 function compile(template, options) {
   if ( !compileModule ) {
-    if ( typeof interpol.compileModule !== 'function' ) {
+    if ( typeof compiler.compileModule !== 'function' ) {
       throw new Error("The Interpol compiler was never loaded");
     }
-    compileModule = interpol.compileModule;
+    compileModule = compiler.compileModule;
+    generateFunction = compiler.generateFunction;
   }
   return compileModule(template, options);
 }
@@ -302,19 +333,16 @@ function compile(template, options) {
  * @param {Object} [options] configuration Object
  */
 function getRuntime(options) {
-  if ( isInterpolRuntime(options) ) {
-    return options;
+  if ( !options ) {
+    return globalRuntime;
   }
-  if ( typeof options === 'object' && options !== null ) {
-    return createRuntime(options);
-  }
-  return globalRuntime;
+  return createRuntime(options);
 }
 
 // Exported Functions
 module.exports = interpol;
 
-},{"./runtime":11,"./util":12}],4:[function(require,module,exports){
+},{"./compiler/stub":2,"./runtime":12,"./types":13,"./util":14}],5:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -449,7 +477,7 @@ function buildObjectMatcher(template) {
 exports.isMatchingObject = isMatchingObject;
 exports.buildMatcher = buildMatcher;
 
-},{"./util":12}],5:[function(require,module,exports){
+},{"./util":14}],6:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -461,11 +489,12 @@ exports.buildMatcher = buildMatcher;
 "use strict";
 
 var util = require('../util');
+var types = require('../types');
 
 var slice = Array.prototype.slice;
 var isArray = util.isArray;
-var bless = util.bless;
-var isInterpolModule = util.isInterpolModule;
+var bless = types.bless;
+var isInterpolModule = types.isInterpolModule;
 
 /**
  * Creates a new MemoryResolver.  As its name implies, this resolver
@@ -583,7 +612,7 @@ function registerResolver(interpol) {
 exports.createMemoryResolver = createMemoryResolver;
 exports.registerResolver = registerResolver;
 
-},{"../util":12}],6:[function(require,module,exports){
+},{"../types":13,"../util":14}],7:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -608,7 +637,7 @@ function registerResolver(interpol) {
 // Exported Functions
 exports.registerResolver = registerResolver;
 
-},{"./list":7,"./math":8,"./string":9}],7:[function(require,module,exports){
+},{"./list":8,"./math":9,"./string":10}],8:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -703,7 +732,7 @@ exports.empty = empty;
 exports.keys = keys;
 exports.values = values;
 
-},{"../../util":12}],8:[function(require,module,exports){
+},{"../../util":14}],9:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -838,7 +867,7 @@ exports.median = median;
 exports.min = min;
 exports.sum = sum;
 
-},{"../../util":12,"./wrap":10}],9:[function(require,module,exports){
+},{"../../util":14,"./wrap":11}],10:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -849,8 +878,8 @@ exports.sum = sum;
 
 "use strict";
 
-var util = require('../../util');
-var stringify = util.stringify;
+var types = require('../../types');
+var stringify = types.stringify;
 
 var wrap = require('./wrap');
 
@@ -892,7 +921,7 @@ exports.split = split;
 exports.title = title;
 exports.upper = upper;
 
-},{"../../util":12,"./wrap":10}],10:[function(require,module,exports){
+},{"../../types":13,"./wrap":11}],11:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -903,8 +932,8 @@ exports.upper = upper;
 
 "use strict";
 
-var util = require('../../util');
-var bless = util.bless;
+var types = require('../../types');
+var bless = types.bless;
 
 var slice = Array.prototype.slice;
 
@@ -920,7 +949,7 @@ function wrap(func) {
 // Exported Functions
 module.exports = wrap;
 
-},{"../../util":12}],11:[function(require,module,exports){
+},{"../../types":13}],12:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -934,9 +963,16 @@ module.exports = wrap;
 var util = require('./util');
 var format = require('./format');
 var match = require('./match');
+var types = require('./types');
 
 var createStringWriter = require('./writers/string').createStringWriter;
 var nullWriter = require('./writers/null').createNullWriter();
+
+var isInterpolRuntime = types.isInterpolRuntime;
+var isInterpolPartial = types.isInterpolPartial;
+var isInterpolFunction = types.isInterpolFunction;
+var isNil = types.isNil;
+var handleNil = types.handleNil;
 
 var isArray = util.isArray;
 var mixin = util.mixin;
@@ -944,8 +980,6 @@ var each = util.each;
 var extendObject = util.extendObject;
 var objectKeys = util.objectKeys;
 var configure = util.configure;
-var isInterpolFunction = util.isInterpolFunction;
-var isInterpolPartial = util.isInterpolPartial;
 
 var slice = Array.prototype.slice;
 
@@ -957,6 +991,10 @@ function noOp() {}
 noOp.__intFunction = 'part';
 
 function createRuntime(localOptions) {
+  if ( isInterpolRuntime(localOptions) ) {
+    return localOptions;
+  }
+
   var options = mixin({}, globalOptions, localOptions);
   var resolvers = options.resolvers || globalResolvers;
   var cacheModules = options.cache;
@@ -969,8 +1007,8 @@ function createRuntime(localOptions) {
 
     extendObject: util.extendObject,
     mixin: util.mixin,
-    isTruthy: util.isTruthy,
-    isFalsy: util.isFalsy,
+    isTruthy: types.isTruthy,
+    isFalsy: types.isFalsy,
 
     buildFormatter: format.buildFormatter,
     createFormatterCache: format.createFormatterCache,
@@ -1124,14 +1162,6 @@ function cleanseArguments(arr, startIdx) {
   }
 }
 
-function isNil(value) {
-  return value === undefined || value === null;
-}
-
-function handleNil(value) {
-  return value === null ? undefined : value;
-}
-
 function getProperty(obj, property) {
   if ( isNil(obj) ) {
     return undefined;
@@ -1197,7 +1227,7 @@ exports.options = options;
 exports.context = context;
 exports.resolvers = resolvers;
 
-},{"./format":2,"./match":4,"./util":12,"./writers/null":14,"./writers/string":15}],12:[function(require,module,exports){
+},{"./format":3,"./match":5,"./types":13,"./util":14,"./writers/null":16,"./writers/string":17}],13:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1208,7 +1238,187 @@ exports.resolvers = resolvers;
 
 "use strict";
 
-// Array and Object Handling
+var util = require('./util');
+
+var isArray = util.isArray;
+
+/**
+ * Returns whether or not an Object is an Interpol Runtime instance.
+ *
+ * @param {Object} obj the Object to check
+ */
+function isInterpolRuntime(obj) {
+  return typeof obj === 'object' && obj !== null && obj.__intRuntime;
+}
+
+/**
+ * Returns whether or not a Function is a compiled Interpol Module.
+ *
+ * @param {Function} func the Function to check
+ */
+function isInterpolModule(func) {
+  return typeof func === 'function' && func.__intModule;
+}
+
+/**
+ * Returns whether or not a Function is 'blessed' as Interpol-compatible.
+ *
+ * @param {Function} func the Function to check
+ */
+function isInterpolFunction(func) {
+  return typeof func === 'function' && func.__intFunction;
+}
+
+/**
+ * Same as isInterpolFunction except that it's checking specifically for
+ * a declared partial.
+ *
+ * @param {Function} func the Function to check
+ */
+function isInterpolPartial(func) {
+  return typeof func === 'function' && func.__intFunction === 'part';
+}
+
+/**
+ * 'bless' a Function as being Interpol-compatible.  This essentially means
+ * that the Function must accept a Writer instance as the first argument, as
+ * a writer will be passed to it by the compiled template.
+ *
+ * @param {Function} func the Function to 'bless'
+ */
+function bless(func) {
+  if ( typeof func !== 'function' ) {
+    throw new Error("Argument to bless must be a Function");
+  }
+
+  if ( func.__intFunction ) {
+    return func;
+  }
+
+  blessedWrapper.__intFunction = 'wrap';
+  return blessedWrapper;
+
+  function blessedWrapper() {
+    /* jshint validthis:true */
+    return func.apply(this, arguments);
+  }
+}
+
+var EscapeChars = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;'
+};
+
+function escapeAttribute(str) {
+  return str.replace(/[&<>'"]/gm, function(ch) {
+    return EscapeChars[ch];
+  });
+}
+
+function escapeContent(str) {
+  return str.replace(/[&<>]/gm, function(ch) {
+    return EscapeChars[ch];
+  });
+}
+
+/**
+ * Stringify the provided value for Interpol's purposes.
+ *
+ * @param {Mixed} value the value to stringify
+ */
+function stringify(value) {
+  var type = typeof value;
+  switch ( type ) {
+    case 'string':
+      return value;
+
+    case 'number':
+      return value.toString();
+
+    case 'boolean':
+      return value ? 'true' : 'false';
+
+    case 'xml':
+      return value.toXMLString();
+
+    case 'object':
+      if ( isArray(value) ) {
+        var result = [];
+        for ( var i = 0, len = value.length; i < len; i++ ) {
+          result[i] = stringify(value[i]);
+        }
+        return result.join(' ');
+      }
+      return value !== null ? value.toString() : '';
+
+    default:
+      // catches 'undefined'
+      return '';
+  }
+}
+
+/**
+ * Checks whether or not the provided value is *truthy* by Interpol's
+ * standards.
+ *
+ * @param {Mixed} value the value to test
+ * @returns {boolean} if the value constitutes a *truthy* one
+ */
+function isTruthy(value) {
+  if ( !value ) {
+    return false;
+  }
+  if ( isArray(value) ) {
+    return value.length > 0;
+  }
+  return true;
+}
+
+function isFalsy(value) {
+  if ( !value ) {
+    return true;
+  }
+  if ( isArray(value) ) {
+    return value.length === 0;
+  }
+  return false;
+}
+
+function isNil(value) {
+  return value === undefined || value === null;
+}
+
+function handleNil(value) {
+  return value === null ? undefined : value;
+}
+
+// Exported Functions
+exports.isInterpolRuntime = isInterpolRuntime;
+exports.isInterpolModule = isInterpolModule;
+exports.isInterpolFunction = isInterpolFunction;
+exports.isInterpolPartial = isInterpolPartial;
+exports.escapeAttribute = escapeAttribute;
+exports.escapeContent = escapeContent;
+exports.stringify = stringify;
+exports.bless = bless;
+exports.isTruthy = isTruthy;
+exports.isFalsy = isFalsy;
+exports.isNil = isNil;
+exports.handleNil = handleNil;
+
+},{"./util":14}],14:[function(require,module,exports){
+/*
+ * Interpol (Templates Sans Facial Hair)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thomas S. Bradford (kode4food.it)
+ */
+
+"use strict";
 
 var toString = Object.prototype.toString;
 var slice = Array.prototype.slice;
@@ -1270,145 +1480,6 @@ function mixin(target) {
     }
   }
   return target;
-}
-
-/**
- * Checks whether or not the provided value is *truthy* by Interpol's
- * standards.
- *
- * @param {Mixed} value the value to test
- * @returns {boolean} if the value constitutes a *truthy* one
- */
-function isTruthy(value) {
-  if ( !value ) {
-    return false;
-  }
-  if ( isArray(value) ) {
-    return value.length > 0;
-  }
-  return true;
-}
-
-function isFalsy(value) {
-  if ( !value ) {
-    return true;
-  }
-  if ( isArray(value) ) {
-    return value.length === 0;
-  }
-  return false;
-}
-
-// String Handling
-
-var EscapeChars = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#39;'
-};
-
-function escapeAttribute(str) {
-  return str.replace(/[&<>'"]/gm, function(ch) {
-    return EscapeChars[ch];
-  });
-}
-
-function escapeContent(str) {
-  return str.replace(/[&<>]/gm, function(ch) {
-    return EscapeChars[ch];
-  });
-}
-
-/**
- * Stringify the provided value for Interpol's purposes.
- *
- * @param {Mixed} value the value to stringify
- */
-function stringify(value) {
-  var type = typeof value;
-  switch ( type ) {
-    case 'string':
-      return value;
-
-    case 'number':
-      return value.toString();
-
-    case 'boolean':
-      return value ? 'true' : 'false';
-
-    case 'xml':
-      return value.toXMLString();
-
-    case 'object':
-      if ( isArray(value) ) {
-        var result = [];
-        for ( var i = 0, len = value.length; i < len; i++ ) {
-          result[i] = stringify(value[i]);
-        }
-        return result.join(' ');
-      }
-      return value !== null ? value.toString() : '';
-
-    default:
-      // catches 'undefined'
-      return '';
-  }
-}
-
-// Function Invocation
-
-function isInterpolRuntime(obj) {
-  return typeof obj === 'object' && obj !== null && obj.__intRuntime;
-}
-
-function isInterpolModule(func) {
-  return typeof func === 'function' && func.__intModule;
-}
-
-/**
- * Returns whether or not a Function is 'blessed' as Interpol-compatible.
- *
- * @param {Function} func the Function to check
- */
-function isInterpolFunction(func) {
-  return typeof func === 'function' && func.__intFunction;
-}
-
-/**
- * Same as isInterpolFunction except that it's checking specifically for
- * a declared partial.
- *
- * @param {Function} func the Function to check
- */
-function isInterpolPartial(func) {
-  return typeof func === 'function' && func.__intFunction === 'part';
-}
-
-/**
- * 'bless' a Function as being Interpol-compatible.  This essentially means
- * that the Function must accept a Writer instance as the first argument, as
- * a writer will be passed to it by the compiled template.
- *
- * @param {Function} func the Function to 'bless'
- */
-function bless(func) {
-  if ( typeof func !== 'function' ) {
-    throw new Error("Argument to bless must be a Function");
-  }
-
-  if ( func.__intFunction ) {
-    return func;
-  }
-
-  blessedWrapper.__intFunction = 'wrap';
-  return blessedWrapper;
-
-  function blessedWrapper() {
-    /* jshint validthis:true */
-    return func.apply(this, arguments);
-  }
 }
 
 /**
@@ -1496,50 +1567,11 @@ function selfMap(arr, callback) {
   return arr;
 }
 
-function generateNodeModule(generatedCode) {
-  var buffer = [];
-  buffer.push("\"use strict\";");
-  buffer.push("module.exports={");
-  buffer.push("__intNodeModule: true,");
-  buffer.push("createTemplate:function(r){");
-  buffer.push(generatedCode);
-  buffer.push("}};");
-  return buffer.join('');
-}
-
-var generateFunction;
-if ( typeof vm !== 'undefined' && typeof vm.createContext === 'function' ) {
-  // The safer sandboxed method
-  generateFunction = function _sandboxed(scriptCode) {
-    var context = vm.createContext({
-      module: { exports: {} }
-    });
-    vm.runInContext(scriptCode, context);
-    return context.module.exports.create;
-  };
-}
-else {
-  // The shitty browser-based approach
-  generateFunction = function _funcConstructed(scriptCode) {
-    return new Function(['r'], scriptCode);
-  };
-}
-
 // Exported Functions
 exports.isArray = isArray;
 exports.extendObject = extendObject;
 exports.objectKeys = objectKeys;
 exports.mixin = mixin;
-exports.isTruthy = isTruthy;
-exports.isFalsy = isFalsy;
-exports.escapeAttribute = escapeAttribute;
-exports.escapeContent = escapeContent;
-exports.stringify = stringify;
-exports.isInterpolRuntime = isInterpolRuntime;
-exports.isInterpolModule = isInterpolModule;
-exports.isInterpolFunction = isInterpolFunction;
-exports.isInterpolPartial = isInterpolPartial;
-exports.bless = bless;
 exports.configure = configure;
 
 exports.each = each;
@@ -1547,10 +1579,7 @@ exports.map = map;
 exports.filter = filter;
 exports.selfMap = selfMap;
 
-exports.generateNodeModule = generateNodeModule;
-exports.generateFunction = generateFunction;
-
-},{}],13:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1626,7 +1655,7 @@ function registerWriter(interpol) {
 exports.createDOMWriter = createDOMWriter;
 exports.registerWriter = registerWriter;
 
-},{"../util":12,"./string":15}],14:[function(require,module,exports){
+},{"../util":14,"./string":17}],16:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1667,7 +1696,7 @@ function registerWriter(interpol) {
 // Exported Functions
 exports.createNullWriter = createNullWriter;
 exports.registerWriter = registerWriter;
-},{"../util":12}],15:[function(require,module,exports){
+},{"../util":14}],17:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1678,11 +1707,11 @@ exports.registerWriter = registerWriter;
 
 "use strict";
 
-var util = require('../util');
+var types = require('../types');
 
-var stringify = util.stringify;
-var escapeAttribute = util.escapeAttribute;
-var escapeContent = util.escapeContent;
+var stringify = types.stringify;
+var escapeAttribute = types.escapeAttribute;
+var escapeContent = types.escapeContent;
 
 function noOp() {}
 
@@ -1763,4 +1792,4 @@ function registerWriter(interpol) {
 // Exported Functions
 exports.createStringWriter = createStringWriter;
 exports.registerWriter = registerWriter;
-},{"../util":12}]},{},[1])
+},{"../types":13}]},{},[1]);
