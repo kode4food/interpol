@@ -257,7 +257,7 @@ module.exports = (function() {
               for ( var i = 0, len = statements.length; i < len; i++ ) {
                 results.push.apply(results, statements[i][0]);
                 var ws = statements[i][1];
-                if ( ws ) {
+                if ( ws && ws.length ) {
                   results.push([sym('ou'), sym(ws, 'lit')]);
                 }
               }
@@ -6968,9 +6968,9 @@ module.exports = (function() {
     function peg$parsestring() {
       var s0;
 
-      s0 = peg$parseSimpleString();
+      s0 = peg$parseMultiLineString();
       if (s0 === peg$FAILED) {
-        s0 = peg$parseMultiLineString();
+        s0 = peg$parseSimpleString();
       }
 
       return s0;
