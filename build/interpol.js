@@ -1163,6 +1163,7 @@ function cleanseArguments(arr, startIdx) {
 }
 
 function getProperty(obj, property) {
+  if ( obj )
   if ( isNil(obj) ) {
     return undefined;
   }
