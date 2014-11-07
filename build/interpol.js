@@ -971,8 +971,6 @@ var nullWriter = require('./writers/null').createNullWriter();
 var isInterpolRuntime = types.isInterpolRuntime;
 var isInterpolPartial = types.isInterpolPartial;
 var isInterpolFunction = types.isInterpolFunction;
-var isNil = types.isNil;
-var handleNil = types.handleNil;
 
 var isArray = util.isArray;
 var mixin = util.mixin;
@@ -1163,39 +1161,42 @@ function cleanseArguments(arr, startIdx) {
 }
 
 function getProperty(obj, property) {
-  if ( obj )
-  if ( isNil(obj) ) {
+  if ( obj === undefined || obj === null ) {
     return undefined;
   }
-  return handleNil(obj[property]);
+  var res = obj[property];
+  return res === null ? undefined : res;
 }
 
 function loop(data, loopCallback) {
-  if ( typeof data !== 'object' ) {
+  if ( data === null || typeof data !== 'object' ) {
     return;
   }
 
-  var items, createItem;
-  if ( !isArray(data) ) {
-    items = objectKeys(data);
-    createItem = createObjectItem;
+  if ( isArray(data) ) {
+    loopArray();
   }
   else {
-    items = data;
-    createItem = createArrayItem;
+    loopObject();
   }
 
-  for ( var i = 0, len = items.length; i < len; i++ ) {
-    loopCallback(createItem(i));
+  function loopArray() {
+    for ( var i = 0, len = data.length; i < len; i++ ) {
+      var value = data[i];
+      loopCallback(value === null ? undefined : value);
+    }
   }
 
-  function createArrayItem(idx) {
-    return handleNil(items[idx]);
-  }
-
-  function createObjectItem(idx) {
-    var name = items[idx];
-    return { name: name, value: handleNil(data[name]) };
+  function loopObject() {
+    var items = objectKeys(data);
+    for ( var i = 0, len = items.length; i < len; i++ ) {
+      var name = items[i];
+      var value = data[name];
+      loopCallback({
+        name: name,
+        value: value === null ? undefined : value
+      });
+    }
   }
 }
 

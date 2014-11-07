@@ -22,5 +22,4 @@ exports.partials = require('./partials').partials;
 exports.scope = require('./scope').scope;
 exports.strings = require('./strings').strings;
 exports.math = require('./math').math;
-exports.using = require('./using').using;
 exports.writers = require('./writers').writers;

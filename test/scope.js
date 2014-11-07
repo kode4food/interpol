@@ -20,12 +20,6 @@ exports.scope = nodeunit.testCase({
     callback();
   },
 
-  //"Shadow Global Scope": function (test) {
-  //  test.equal(evaluate("let greeting='Not Hello!'\ngreeting"), "Not Hello!");
-  //  test.equal(evaluate("greeting"), "Hello, World!");
-  //  test.done();
-  //},
-
   "Shadow Local Scope": function (test) {
     var script1 = "let greeting = 'Not Hello'\n" +
                   "def localGreeting()\n" +
@@ -55,26 +49,32 @@ exports.scope = nodeunit.testCase({
     test.done();
   },
 
-  //"Scope Override": function (test) {
-  //  var script = "a\n" +
-  //               "let a = 'child'\n" +
-  //               "a";
-  //
-  //  test.equal(evaluate(script, { a: 'parent' }), "parent\nchild");
-  //  test.done();
-  //},
-  //
-  //"Conditional Scope": function (test) {
-  //  var script = "a\n" +
-  //               "if b\n" +
-  //               "  let a = 'child'\n" +
-  //               "  a\n" +
-  //               "end\n" +
-  //               "a";
-  //
-  //  test.equal(evaluate(script, { a: 'parent', b: true }),
-  //             "parent\nchild\nchild");
-  //
-  //  test.done();
-  //}
+  "Shadow Global Scope": function (test) {
+    test.equal(evaluate("let greeting='Not Hello!'\ngreeting"), "Not Hello!");
+    test.equal(evaluate("greeting"), "Hello, World!");
+    test.done();
+  },
+
+  "Scope Override": function (test) {
+    var script = "a\n" +
+                 "let a = 'child'\n" +
+                 "a";
+
+    test.equal(evaluate(script, { a: 'parent' }), "parent\nchild");
+    test.done();
+  },
+
+  "Conditional Scope": function (test) {
+    var script = "a\n" +
+                 "if b\n" +
+                 "  let a = 'child'\n" +
+                 "  a\n" +
+                 "end\n" +
+                 "a";
+
+    test.equal(evaluate(script, { a: 'parent', b: true }),
+               "parent\nchild\nchild");
+
+    test.done();
+  }
 });
