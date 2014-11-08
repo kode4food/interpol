@@ -3,8 +3,6 @@
 ## Version 0.9 - Compiler Rewrite
 The compiler backend has been completely rewritten.  It now transpiles JavaScript instead of generating JSON information.  This has resulted in significant performance improvements for template processing and greatly reduces the size of the Interpol runtime.  It does mean that on-the-fly compilation is a little slower, but this is only a one-time penalty.
 
-* 'using' statements and expressions have been removed.  They introduced more confusion than they solved and made the transpiler way more complex than it had to be.
-
 ## Version 0.4.2 - Synonyms
 * The global function for Web Browser deployment has been renamed from `$interpol()` to `interpol()`.
 

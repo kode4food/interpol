@@ -21,5 +21,6 @@ exports.loops = require('./loops').loops;
 exports.partials = require('./partials').partials;
 exports.scope = require('./scope').scope;
 exports.strings = require('./strings').strings;
+exports.using = require('./using').using;
 exports.math = require('./math').math;
 exports.writers = require('./writers').writers;

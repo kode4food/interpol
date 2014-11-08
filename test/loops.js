@@ -50,8 +50,7 @@ exports.loops = nodeunit.testCase({
                   'end';
 
     var script5 = 'for person in people, brother in person.brothers\n' +
-                  '  let name=person.name\n' +
-                  '  "%name-%brother"\n' +
+                  '  "%name-%brother" using person\n' +
                   'end';
 
     test.equal(evaluate(script1), "green is a color\nblue is a color\n");
