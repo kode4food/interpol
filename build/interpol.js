@@ -311,7 +311,8 @@ function evaluate(script, obj, options) {
 
 /**
  * Invokes the Interpol compiler against the specified template and produces
- * a JSON instance.  The compiler module has to be loaded for this to work.
+ * an Object that includes the compiled template generator and any errors or
+ * warnings.  The compiler module has to be loaded for this to work.
  *
  * @param {String} template the Interpol Template to be compiled
  */
