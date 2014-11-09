@@ -148,6 +148,24 @@ npm install && npm run-script build
 
 This will also install any development dependencies, run the nodeunit test suite, and generate coverage reports.
 
+### Express Integration
+For [Express](http://expressjs.com/) or [Kraken](http://krakenjs.com/) View Rendering, use the following command from your package's top-level directory:
+
+```bash
+npm install interpol-express --save
+```
+
+You can then follow the instructions at the [Interpol-Express](https://bitbucket.org/kode4food/interpol-express) Bitbucket page.
+
+### hapi Integration
+For [hapi](http://hapijs.com/) View Rendering, use the following command from your package's top-level directory:
+
+```bash
+npm install hapi-interpol --save
+```
+
+You can then follow the instructions at the [hapi-interpol](https://bitbucket.org/kode4food/hapi-interpol) Bitbucket page.
+
 ## Inclusion in Node.js
 Assuming you have installed the Interpol package with npm, you can include it in your Node code with the following:
 
