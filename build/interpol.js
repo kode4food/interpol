@@ -1450,12 +1450,12 @@ if ( !objectKeys ) {
 var extendObject = null;
 (function () {
   function FakeConstructor() {}
-  var testProto = { __proto__: { works: true } };
+  var testProto = { __proto__: { works: true } };         // jshint ignore:line
 
   /* istanbul ignore else */
   if ( testProto.works && objectKeys(testProto).length === 0 ) {
     extendObject = function _fastExtendObject(obj) {
-      return { __proto__: obj };
+      return { __proto__: obj };                          // jshint ignore:line
     };
   }
   else if ( Object.create ) {
@@ -1782,8 +1782,8 @@ function createStringWriter() {
     arr.push("<!DOCTYPE ", stringify(rootElement), ">");
   }
 
-  function content(content) {
-    arr.push(escapeContent(stringify(content)));
+  function content(value) {
+    arr.push(escapeContent(stringify(value)));
   }
 }
 
