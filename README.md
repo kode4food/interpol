@@ -136,9 +136,6 @@ from people import renderPeople
 
 Easy as pie!  And your primary template gets right to the point.
 
-## Current Status
-The grammar has stabilized.  The system libraries are still under development, particularly formatting generators.  Check [the TODO document](doc/TODO.md) for an idea of what's to come.
-
 ## Interpol and Node.js
 To use Interpol directly from Node.js applications, NPM install it like so:
 
@@ -151,6 +148,7 @@ You can then include it in your Node code with the following:
 ```javascript
 var interpol = require('interpol');
 ```
+
 ### Express Integration
 For [Express](http://expressjs.com/) or [Kraken](http://krakenjs.com/) View Rendering, NPM install it like so:
 
