@@ -524,7 +524,7 @@ function createMemoryResolver(interpol, options) {
   function resolveExports(name, runtime) {
     var result = cache[name];
     if ( !result ) {
-      return null;
+      return undefined;
     }
 
     if ( result.moduleExports ) {
@@ -680,7 +680,7 @@ function last(writer, value) {
   if ( value.length ) {
     return value[value.length - 1];
   }
-  return null;
+  return undefined;
 }
 
 // `length(value)` if it is an array, returns the length of the provided
@@ -705,7 +705,7 @@ function keys(writer, value) {
   if ( typeof value === 'object' && value !== null ) {
     return objectKeys(value);
   }
-  return null;
+  return undefined;
 }
 
 // values(value)` returns the values of the Object or Array passed to
@@ -713,7 +713,7 @@ function keys(writer, value) {
 // assigned values.
 function values(writer, value) {
   if ( typeof value !== 'object' || value === null ) {
-    return null;
+    return undefined;
   }
   var keys = objectKeys(value);
   var result = [];
@@ -1203,7 +1203,7 @@ function loop(data, loopCallback) {
 function exec(ctx, func, args) {
   if ( !isInterpolFunction(func) ) {
     if ( ctx.__intExports ) {
-      return null;
+      return undefined;
     }
     throw new Error("Attempting to call an unblessed function");
   }
@@ -1213,7 +1213,7 @@ function exec(ctx, func, args) {
 function bind(ctx, func, callArgs) {
   if ( !isInterpolFunction(func) ) {
     if ( ctx.__intExports ) {
-      return null;
+      return undefined;
     }
     throw new Error("Attempting to bind an unblessed function");
   }
