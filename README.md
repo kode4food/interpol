@@ -139,17 +139,20 @@ Easy as pie!  And your primary template gets right to the point.
 ## Current Status
 The grammar has stabilized.  The system libraries are still under development, particularly formatting generators.  Check [the TODO document](doc/TODO.md) for an idea of what's to come.
 
-## Installation
-A pre-built version of the parser is already included.  If you'd like to build it yourself then you can do so by issuing the following command from the package's top-level directory:
+## Interpol and Node.js
+To use Interpol directly from Node.js applications, NPM install it like so:
 
 ```bash
-npm install && npm run-script build
+npm install interpol --save
 ```
 
-This will also install any development dependencies, run the nodeunit test suite, and generate coverage reports.
+You can then include it in your Node code with the following:
 
+```javascript
+var interpol = require('interpol');
+```
 ### Express Integration
-For [Express](http://expressjs.com/) or [Kraken](http://krakenjs.com/) View Rendering, use the following command from your package's top-level directory:
+For [Express](http://expressjs.com/) or [Kraken](http://krakenjs.com/) View Rendering, NPM install it like so:
 
 ```bash
 npm install interpol-express --save
@@ -158,7 +161,7 @@ npm install interpol-express --save
 You can then follow the instructions at the [Interpol-Express](https://bitbucket.org/kode4food/interpol-express) Bitbucket page.
 
 ### hapi Integration
-For [hapi](http://hapijs.com/) View Rendering, use the following command from your package's top-level directory:
+For [hapi](http://hapijs.com/) View Rendering, NPM install it like so:
 
 ```bash
 npm install hapi-interpol --save
@@ -166,14 +169,14 @@ npm install hapi-interpol --save
 
 You can then follow the instructions at the [hapi-interpol](https://bitbucket.org/kode4food/hapi-interpol) Bitbucket page.
 
-## Inclusion in Node.js
-Assuming you have installed the Interpol package with npm, you can include it in your Node code with the following:
+## Interpol and the Browser
+To add Interpol as a Bower dependency to your project, do the following:
 
-```javascript
-var interpol = require('interpol');
+```bash
+bower install interpol --save
 ```
 
-## Inclusion in a Browser
+### Inclusion in a Web Page
 There are two ways to include Interpol templates in a browser-based application.  One is to compile raw templates using the Interpol compiler.  Another is to load the templates from pre-compiled bundles.  The PEG.js parser used by the compiler is *massive* and slower than loading JavaScript, but it may be necessary if you want to compile ad-hoc templates.
 
 *Note:* The entry point function for Interpol in the browser is *always* named `interpol()`.
