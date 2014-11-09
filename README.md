@@ -143,29 +143,29 @@ To use Interpol directly from Node.js applications, NPM install it like so:
 npm install interpol --save
 ```
 
-You can then include it in your Node code with the following:
+You can then include it in your Node code like so:
 
 ```javascript
 var interpol = require('interpol');
 ```
 
 ### Express Integration
-For [Express](http://expressjs.com/) or [Kraken](http://krakenjs.com/) View Rendering, NPM install it like so:
+For [Express](http://expressjs.com/) or [Kraken.js](http://krakenjs.com/) View Rendering, install with NPM:
 
 ```bash
 npm install interpol-express --save
 ```
 
-You can then follow the instructions at the [Interpol-Express](https://bitbucket.org/kode4food/interpol-express) Bitbucket page.
+Then follow the instructions at the [Interpol-Express](https://bitbucket.org/kode4food/interpol-express) Bitbucket page.
 
 ### hapi Integration
-For [hapi](http://hapijs.com/) View Rendering, NPM install it like so:
+For [hapi](http://hapijs.com/) View Rendering, again use NPM:
 
 ```bash
 npm install hapi-interpol --save
 ```
 
-You can then follow the instructions at the [hapi-interpol](https://bitbucket.org/kode4food/hapi-interpol) Bitbucket page.
+Then follow the instructions at the [hapi-interpol](https://bitbucket.org/kode4food/hapi-interpol) Bitbucket page.
 
 ## Interpol and the Browser
 To add Interpol as a Bower dependency to your project, do the following:
@@ -183,8 +183,10 @@ There are two ways to include Interpol templates in a browser-based application.
 Application bundles can be pre-compiled and automatically registered with Interpol.  This will allow you to bypass the loading of the compiler and PEG.js parser.  Instead, you can load sets of pre-compiled templates from your server for faster initialization.
 
 ```html
-<script src="build/interpol.min.js" type="text/javascript"></script>
-<script src="your_bundle.js" type="text/javascript"></script>
+<script src="build/interpol.min.js"
+        type="text/javascript"></script>
+<script src="your_bundle.js"
+        type="text/javascript"></script>
 ```
 
 *Note:* The Interpol command-line interface generates pre-compiled bundles.  You can install this globally using `npm -g install` and can then invoke the tools at your terminal by typing `interpol`.
@@ -193,7 +195,8 @@ Application bundles can be pre-compiled and automatically registered with Interp
 If you *must* parse raw templates in the browser, you will need to load the version of Interpol that includes the compiler (and its PEG.js parser).
 
 ```html
-<script src="build/interpol-parser.min.js" type="text/javascript"></script>
+<script src="build/interpol-parser.min.js"
+        type="text/javascript"></script>
 ```
 
 ## Using the Library
