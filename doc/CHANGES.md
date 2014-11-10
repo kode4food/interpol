@@ -1,5 +1,8 @@
 # Change History
 
+## Version 0.9.1 - interpol-views Integration
+Added `resolve()` function to the Runtime to support import resolution by external libraries.
+
 ## Version 0.9 - Compiler Rewrite
 The compiler backend has been completely rewritten.  It now transpiles JavaScript instead of generating JSON information.  This has resulted in significant performance improvements for template processing and greatly reduces the size of the Interpol runtime.  It does mean that on-the-fly compilation is a little slower, but this is only a one-time penalty.
 

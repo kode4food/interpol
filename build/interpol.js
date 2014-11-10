@@ -257,7 +257,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule = null;
 var generateFunction = null;
 
-var CURRENT_VERSION = "0.9.0";
+var CURRENT_VERSION = "0.9.1";
 
 var slice = Array.prototype.slice;
 
