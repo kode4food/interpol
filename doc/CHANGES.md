@@ -1,6 +1,6 @@
 # Change History
 
-## Version 0.9.1 - interpol-views Integration
+## Version 0.9.1, 0.9.2 - interpol-views Integration
 Added `resolve()` function to the Runtime to support import resolution by external libraries.
 
 ## Version 0.9 - Compiler Rewrite

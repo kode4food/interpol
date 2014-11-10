@@ -257,7 +257,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule = null;
 var generateFunction = null;
 
-var CURRENT_VERSION = "0.9.1";
+var CURRENT_VERSION = "0.9.2";
 
 var slice = Array.prototype.slice;
 
@@ -998,6 +998,9 @@ function createRuntime(localOptions) {
   var resolvers = options.resolvers || globalResolvers;
   var cacheModules = options.cache;
 
+  var resolveExports = resolve.bind(null, 'resolveExports');
+  var resolveModule = resolve.bind(null, 'resolveModule');
+
   var runtime = {
     __intRuntime: true,
 
@@ -1014,6 +1017,7 @@ function createRuntime(localOptions) {
     isMatchingObject: match.isMatchingObject,
     buildMatcher: match.buildMatcher,
 
+    resolveExports: resolveExports,
     resolveModule: resolveModule,
     buildImporter: buildImporter,
     defineModule: defineModule,
@@ -1029,9 +1033,9 @@ function createRuntime(localOptions) {
 
   return runtime;
 
-  function resolveModule(moduleName) {
+  function resolve(methodName, moduleName) {
     for ( var i = resolvers.length - 1; i >= 0; i-- ) {
-      var module = resolvers[i].resolveExports(moduleName, runtime, options);
+      var module = resolvers[i][methodName](moduleName, runtime, options);
       if ( module ) {
         return module;
       }
@@ -1057,7 +1061,7 @@ function createRuntime(localOptions) {
     }
 
     function dynamicImporter() {
-      var module = resolveModule(moduleName);
+      var module = resolveExports(moduleName);
       if ( !module ) {
         throw new Error("Module '" + moduleName + "' not resolved");
       }
