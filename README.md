@@ -149,23 +149,14 @@ You can then include it in your Node code like so:
 var interpol = require('interpol');
 ```
 
-### Express Integration
-For [Express](http://expressjs.com/) or [Kraken.js](http://krakenjs.com/) View Rendering, install with NPM:
+### Express / KrakenJS / hapi Integration
+For [Express](http://expressjs.com/), [Kraken.js](http://krakenjs.com/), or [hapi](http://hapijs.com/) View Rendering, install with NPM:
 
 ```bash
-npm install interpol-express --save
+npm install interpol-views --save
 ```
 
-Then follow the instructions at the [Interpol-Express](https://bitbucket.org/kode4food/interpol-express) Bitbucket page.
-
-### hapi Integration
-For [hapi](http://hapijs.com/) View Rendering, again use NPM:
-
-```bash
-npm install hapi-interpol --save
-```
-
-Then follow the instructions at the [hapi-interpol](https://bitbucket.org/kode4food/hapi-interpol) Bitbucket page.
+Then follow the instructions at the [interpol-views](https://bitbucket.org/kode4food/interpol-views) Bitbucket page.
 
 ## Interpol and the Browser
 To add Interpol as a Bower dependency to your project, do the following:
