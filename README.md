@@ -156,7 +156,7 @@ For [Express](http://expressjs.com/), [Kraken.js](http://krakenjs.com/), or [hap
 npm install interpol-views --save
 ```
 
-Then follow the instructions at the [interpol-views](https://bitbucket.org/kode4food/interpol-views) Bitbucket page.
+You can then follow the instructions available at the [interpol-views](https://bitbucket.org/kode4food/interpol-views) Bitbucket page.
 
 ## Interpol and the Browser
 To add Interpol as a Bower dependency to your project, do the following:
