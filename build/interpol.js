@@ -1014,6 +1014,7 @@ function createRuntime(localOptions) {
     isMatchingObject: match.isMatchingObject,
     buildMatcher: match.buildMatcher,
 
+    resolveModule: resolveModule,
     buildImporter: buildImporter,
     defineModule: defineModule,
     definePartial: definePartial,
@@ -1027,6 +1028,16 @@ function createRuntime(localOptions) {
   };
 
   return runtime;
+
+  function resolveModule(moduleName) {
+    for ( var i = resolvers.length - 1; i >= 0; i-- ) {
+      var module = resolvers[i].resolveExports(moduleName, runtime, options);
+      if ( module ) {
+        return module;
+      }
+    }
+    return undefined;
+  }
 
   // where exports are actually resolved. raiseError will be false
   // if we're in the process of evaluating a template for the purpose
@@ -1046,12 +1057,7 @@ function createRuntime(localOptions) {
     }
 
     function dynamicImporter() {
-      for ( var i = resolvers.length - 1; i >= 0; i-- ) {
-        module = resolvers[i].resolveExports(moduleName, runtime, options);
-        if ( module ) {
-          break;
-        }
-      }
+      var module = resolveModule(moduleName);
       if ( !module ) {
         throw new Error("Module '" + moduleName + "' not resolved");
       }
