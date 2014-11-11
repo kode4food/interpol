@@ -542,7 +542,7 @@ function createMemoryResolver(interpol, options) {
    * @param {String} name the name of the module to remove
    */
   function unregisterModule(name) {
-    delete cache[normalizeModuleName(name)];
+    delete cache[name];
   }
 
   /**
@@ -552,8 +552,6 @@ function createMemoryResolver(interpol, options) {
    * @param {Function|String|Object} module the module to register
    */
   function registerModule(name, module) {
-    name = normalizeModuleName(name);
-
     // A compiled Interpol Module function
     if ( isInterpolModule(module) ) {
       cache[name] = { module: module };
@@ -594,10 +592,6 @@ function blessModule(module) {
     }
   }
   return result;
-}
-
-function normalizeModuleName(name) {
-  return name.replace(/[/\\.]+/g, '/');
 }
 
 function registerResolver(interpol) {
