@@ -151,5 +151,29 @@ exports.codepaths = nodeunit.testCase({
     test.equals(evaluate("if (1,2,3)\ntrue\nend"), "true\n");
     test.equals(evaluate("unless ()\ntrue\nend"), "true\n");
     test.done();
+  },
+
+  "Rewrite": function (test) {
+    var script1 = "let a = 'hello'\n" +
+                  "let b = 'goodbye'\n" +
+                  "<outer><inner>a</inner></outer>b";
+
+    var script2 = "let a = 5\n" +
+                  "if not (a like 10)\n" +
+                  "  'hello!'\n" +
+                  "end";
+
+    var script3 = "let a = 5\n" +
+                  "if not (a like 10) and not (a like 8)\n" +
+                  "  'hello!'\n" +
+                  "end";
+
+    test.equals(evaluate(script1),
+                "<outer><inner>hello</inner></outer>goodbye");
+
+    test.equals(evaluate(script2), "hello!\n");
+    test.equals(evaluate(script3), "hello!\n");
+
+    test.done();
   }
 });

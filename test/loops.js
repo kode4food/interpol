@@ -53,13 +53,20 @@ exports.loops = nodeunit.testCase({
                   '  "%name-%brother" using person\n' +
                   'end';
 
+    var script6 = 'for person in people\n' +
+                  '  for brother in person.brothers\n' +
+                  '    "%name-%brother" using person\n' +
+                  '  end\n' +
+                  'end';
+
     test.equal(evaluate(script1), "green is a color\nblue is a color\n");
     test.equal(evaluate(script2), "No Colors\n");
     test.equal(evaluate(script3), "");
     test.equal(evaluate(script4), "name=Thom\nage=42\n");
     test.equal(evaluate(script5, this.data),
                "Curly-Moe\nCurly-Shemp\nMoe-Curly\nMoe-Shemp\n");
-
+    test.equal(evaluate(script6, this.data),
+               "Curly-Moe\nCurly-Shemp\nMoe-Curly\nMoe-Shemp\n");
     test.done();
   }
 });
