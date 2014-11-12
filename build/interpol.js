@@ -257,7 +257,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule = null;
 var generateFunction = null;
 
-var CURRENT_VERSION = "0.9.2";
+var CURRENT_VERSION = "0.9.3";
 
 var slice = Array.prototype.slice;
 
@@ -1174,29 +1174,23 @@ function getProperty(obj, property) {
 }
 
 function loop(data, loopCallback) {
+  var i, len, name, value;
+
   if ( data === null || typeof data !== 'object' ) {
     return;
   }
 
   if ( isArray(data) ) {
-    loopArray();
-  }
-  else {
-    loopObject();
-  }
-
-  function loopArray() {
-    for ( var i = 0, len = data.length; i < len; i++ ) {
-      var value = data[i];
+    for ( i = 0, len = data.length; i < len; i++ ) {
+      value = data[i];
       loopCallback(value === null ? undefined : value);
     }
   }
-
-  function loopObject() {
+  else {
     var items = objectKeys(data);
-    for ( var i = 0, len = items.length; i < len; i++ ) {
-      var name = items[i];
-      var value = data[name];
+    for ( i = 0, len = items.length; i < len; i++ ) {
+      name = items[i];
+      value = data[name];
       loopCallback({
         name: name,
         value: value === null ? undefined : value
@@ -1294,6 +1288,7 @@ function isInterpolPartial(func) {
  * @param {Function} func the Function to 'bless'
  */
 function bless(func) {
+  /* istanbul ignore if */
   if ( typeof func !== 'function' ) {
     throw new Error("Argument to bless must be a Function");
   }
@@ -1348,9 +1343,6 @@ function stringify(value) {
     case 'boolean':
       return value ? 'true' : 'false';
 
-    case 'xml':
-      return value.toXMLString();
-
     case 'object':
       if ( isArray(value) ) {
         var result = [];
@@ -1394,14 +1386,6 @@ function isFalsy(value) {
   return false;
 }
 
-function isNil(value) {
-  return value === undefined || value === null;
-}
-
-function handleNil(value) {
-  return value === null ? undefined : value;
-}
-
 // Exported Functions
 exports.isInterpolRuntime = isInterpolRuntime;
 exports.isInterpolModule = isInterpolModule;
@@ -1413,8 +1397,6 @@ exports.stringify = stringify;
 exports.bless = bless;
 exports.isTruthy = isTruthy;
 exports.isFalsy = isFalsy;
-exports.isNil = isNil;
-exports.handleNil = handleNil;
 
 },{"./util":14}],14:[function(require,module,exports){
 /*
@@ -1511,6 +1493,7 @@ function configure(func, requiredCount, defaultArgs) {
 }
 
 var each;
+/* istanbul ignore else */
 if ( Array.prototype.forEach ) {
   each = (function () {
     var forEachMethod = Array.prototype.forEach;
@@ -1528,6 +1511,7 @@ else {
 }
 
 var map;
+/* istanbul ignore else */
 if ( Array.prototype.map ) {
   map = (function () {
     var mapMethod = Array.prototype.map;
@@ -1547,6 +1531,7 @@ else {
 }
 
 var filter;
+/* istanbul ignore else */
 if ( Array.prototype.filter ) {
   filter = (function () {
     var filterMethod = Array.prototype.filter;
