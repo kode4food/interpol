@@ -1,5 +1,8 @@
 # Change History
 
+## Version 0.9.3 - Better Code Generation
+The JavaScript code generator now attempts to avoid leveraging Immediately Invoked Function Expressions wherever possible.
+
 ## Version 0.9.1, 0.9.2 - interpol-views Integration
 Added `resolve()` function to the Runtime to support import resolution by external libraries.
 
