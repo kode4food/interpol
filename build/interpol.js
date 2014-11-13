@@ -1316,27 +1316,24 @@ var EscapeChars = {
   "'": '&#39;'
 };
 
-function escapeAttribute(str) {
-  return str.replace(/[&<>'"]/gm, function(ch) {
-    return EscapeChars[ch];
-  });
-}
-
-function escapeContent(str) {
-  return str.replace(/[&<>]/gm, function(ch) {
-    return EscapeChars[ch];
-  });
-}
+var stringify = stringifyImpl.bind(null, null);
+var escapeAttribute = stringifyImpl.bind(null, (/[&<>'"]/gm));
+var escapeContent = stringifyImpl.bind(null, (/[&<>]/gm));
 
 /**
  * Stringify the provided value for Interpol's purposes.
  *
  * @param {Mixed} value the value to stringify
  */
-function stringify(value) {
+function stringifyImpl(escapeRegex, value) {
   var type = typeof value;
   switch ( type ) {
     case 'string':
+      if ( escapeRegex ) {
+        return value.replace(escapeRegex, function(ch) {
+          return EscapeChars[ch];
+        });
+      }
       return value;
 
     case 'number':
@@ -1349,7 +1346,7 @@ function stringify(value) {
       if ( isArray(value) ) {
         var result = [];
         for ( var i = 0, len = value.length; i < len; i++ ) {
-          result[i] = stringify(value[i]);
+          result[i] = stringifyImpl(escapeRegex, value[i]);
         }
         return result.join(' ');
       }
@@ -1740,8 +1737,7 @@ function createStringWriter() {
     for ( var key in attributes ) {
       var val = attributes[key];
       if ( typeof val !== 'boolean' ) {
-        arr.push(" ", stringify(key), "=\"",
-                 escapeAttribute(stringify(val)), "\"");
+        arr.push(" ", stringify(key), "=\"", escapeAttribute(val), "\"");
         continue;
       }
       if ( val ) {
@@ -1775,7 +1771,7 @@ function createStringWriter() {
   }
 
   function content(value) {
-    arr.push(escapeContent(stringify(value)));
+    arr.push(escapeContent(value));
   }
 }
 
@@ -1786,4 +1782,5 @@ function registerWriter(interpol) {
 // Exported Functions
 exports.createStringWriter = createStringWriter;
 exports.registerWriter = registerWriter;
+
 },{"../types":13}]},{},[1]);
