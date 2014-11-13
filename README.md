@@ -149,8 +149,8 @@ You can then include it in your Node code like so:
 var interpol = require('interpol');
 ```
 
-### Express / KrakenJS / hapi Integration
-For [Express](http://expressjs.com/), [Kraken.js](http://krakenjs.com/), or [hapi](http://hapijs.com/) View Rendering, you can install the `interpol-views` package with NPM:
+### Express / hapi Integration
+For [Express](http://expressjs.com/) or [hapi](http://hapijs.com/) View Rendering, you can install the `interpol-views` package with NPM:
 
 ```bash
 npm install interpol-views --save
