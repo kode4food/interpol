@@ -1127,7 +1127,7 @@ function defineModule(template) {
    * this method still have access to the global context.
    */
   function templateExports() {
-    /* istanbul ignore if */
+    /* istanbul ignore if: guard */
     if ( exportedContext ) {
       return exportedContext;
     }
@@ -1157,6 +1157,7 @@ function defineGuardedPartial(originalPartial, envelope) {
   return definePartial(envelope(originalPartial));
 }
 
+/* istanbul ignore next: sanity checker */
 function cleanseArguments(arr, startIdx) {
   for ( var i = startIdx, len = arr.length; i < len; i++ ) {
     if ( arr[i] === null ) {
@@ -1200,6 +1201,7 @@ function loop(data, loopCallback) {
 }
 
 function exec(ctx, func, args) {
+  /* istanbul ignore if: short-circuit */
   if ( !isInterpolFunction(func) ) {
     if ( ctx.__intExports ) {
       return undefined;
@@ -1210,6 +1212,7 @@ function exec(ctx, func, args) {
 }
 
 function bind(ctx, func, callArgs) {
+  /* istanbul ignore if: short-circuit */
   if ( !isInterpolFunction(func) ) {
     if ( ctx.__intExports ) {
       return undefined;
@@ -1288,7 +1291,6 @@ function isInterpolPartial(func) {
  * @param {Function} func the Function to 'bless'
  */
 function bless(func) {
-  /* istanbul ignore if */
   if ( typeof func !== 'function' ) {
     throw new Error("Argument to bless must be a Function");
   }
@@ -1413,7 +1415,7 @@ var toString = Object.prototype.toString;
 var slice = Array.prototype.slice;
 
 var isArray = Array.isArray;
-/* istanbul ignore if */
+/* istanbul ignore if: won't happen in node */
 if ( !isArray ) {
   isArray = function _isArray(obj) {
     return obj && toString.call(obj) === '[object Array]';
@@ -1421,7 +1423,7 @@ if ( !isArray ) {
 }
 
 var objectKeys = Object.keys;
-/* istanbul ignore if */
+/* istanbul ignore if: won't happen in node */
 if ( !objectKeys ) {
   objectKeys = function _objectKeys(obj) {
     var keys = [];
@@ -1439,7 +1441,7 @@ var extendObject = null;
   function FakeConstructor() {}
   var testProto = { __proto__: { works: true } };         // jshint ignore:line
 
-  /* istanbul ignore else */
+  /* istanbul ignore else: won't happen in node */
   if ( testProto.works && objectKeys(testProto).length === 0 ) {
     extendObject = function _fastExtendObject(obj) {
       return { __proto__: obj };                          // jshint ignore:line
@@ -1493,7 +1495,7 @@ function configure(func, requiredCount, defaultArgs) {
 }
 
 var each;
-/* istanbul ignore else */
+/* istanbul ignore else: untestable */
 if ( Array.prototype.forEach ) {
   each = (function () {
     var forEachMethod = Array.prototype.forEach;
@@ -1511,7 +1513,7 @@ else {
 }
 
 var map;
-/* istanbul ignore else */
+/* istanbul ignore else: won't happen in node */
 if ( Array.prototype.map ) {
   map = (function () {
     var mapMethod = Array.prototype.map;
@@ -1531,7 +1533,7 @@ else {
 }
 
 var filter;
-/* istanbul ignore else */
+/* istanbul ignore else: won't happen in node */
 if ( Array.prototype.filter ) {
   filter = (function () {
     var filterMethod = Array.prototype.filter;
