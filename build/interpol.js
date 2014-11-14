@@ -257,7 +257,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule = null;
 var generateFunction = null;
 
-var CURRENT_VERSION = "0.9.3";
+var CURRENT_VERSION = "0.9.4";
 
 var slice = Array.prototype.slice;
 
@@ -1255,6 +1255,15 @@ function isInterpolRuntime(obj) {
 }
 
 /**
+ * Returns whether or not an Object is an Interpol Node Module.
+ *
+ * @param {Object} obj the Object to check
+ */
+function isInterpolNodeModule(obj) {
+  return typeof obj === 'object' && obj !== null && obj.__intNodeModule;
+}
+
+/**
  * Returns whether or not a Function is a compiled Interpol Module.
  *
  * @param {Function} func the Function to check
@@ -1407,6 +1416,7 @@ function isFalsy(value) {
 
 // Exported Functions
 exports.isInterpolRuntime = isInterpolRuntime;
+exports.isInterpolNodeModule = isInterpolNodeModule;
 exports.isInterpolModule = isInterpolModule;
 exports.isInterpolFunction = isInterpolFunction;
 exports.isInterpolPartial = isInterpolPartial;

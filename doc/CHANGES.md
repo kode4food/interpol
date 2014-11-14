@@ -1,5 +1,8 @@
 # Change History
 
+## Version 0.9.4 - Bug Fix - File Resolver
+File resolver was not properly loading compiled templates.
+
 ## Version 0.9.3 - Better Code Generation
 The JavaScript code generator now attempts to avoid leveraging Immediately Invoked Function Expressions wherever possible.
 
