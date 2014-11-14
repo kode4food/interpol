@@ -927,24 +927,24 @@ exports.upper = upper;
 
 "use strict";
 
+var util = require('../../util');
 var types = require('../../types');
+var slice = util.slice;
 var bless = types.bless;
-
-var slice = Array.prototype.slice;
 
 function wrap(func) {
   return bless(wrappedFunction);
 
   function wrappedFunction(writer) {
     /* jshint validthis:true */
-    return func.apply(this, slice.call(arguments, 1));
+    return func.apply(this, slice(arguments, 1));
   }
 }
 
 // Exported Functions
 module.exports = wrap;
 
-},{"../../types":13}],12:[function(require,module,exports){
+},{"../../types":13,"../../util":14}],12:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -968,13 +968,12 @@ var isInterpolPartial = types.isInterpolPartial;
 var isInterpolFunction = types.isInterpolFunction;
 
 var isArray = util.isArray;
+var slice = util.slice;
 var mixin = util.mixin;
 var each = util.each;
 var extendObject = util.extendObject;
 var objectKeys = util.objectKeys;
 var configure = util.configure;
-
-var slice = Array.prototype.slice;
 
 var globalOptions = { writer: null, errorCallback: null };
 var globalContext = {};
@@ -1117,7 +1116,7 @@ function defineModule(template) {
    * @param {Object} defaultOptions default Options to provide
    */
   function configureTemplate(defaultObj, defaultOptions) {
-    return configure(template, 0, slice.call(arguments, 0));
+    return configure(template, 0, slice(arguments, 0));
   }
 
   /**
@@ -1322,7 +1321,21 @@ var EscapeChars = {
  * @param {Mixed} value the value to stringify
  */
 var stringify = stringifyImpl.bind(null, null);
+
+/**
+ * Escape the provided value for the purposes of rendering it as an HTML
+ * attribute.
+ *
+ * @param {Mixed} value the value to escape
+ */
 var escapeAttribute = stringifyImpl.bind(null, (/[&<>'"]/gm));
+
+/**
+ * Escape the provided value for the purposes of rendering it as HTML
+ * content.
+ *
+ * @param {Mixed} value the value to escape
+ */
 var escapeContent = stringifyImpl.bind(null, (/[&<>]/gm));
 
 function stringifyImpl(escapeRegex, value) {
@@ -1375,6 +1388,13 @@ function isTruthy(value) {
   return true;
 }
 
+/**
+ * Checks whether or not the provided value is *falsy* by Interpol's
+ * standards.
+ *
+ * @param {Mixed} value the value to test
+ * @returns {boolean} if the value constitutes a *falsy* one
+ */
 function isFalsy(value) {
   if ( !value ) {
     return true;
@@ -1408,14 +1428,14 @@ exports.isFalsy = isFalsy;
 
 "use strict";
 
-var toString = Object.prototype.toString;
-var slice = Array.prototype.slice;
+var toString = Object.prototype.toString.call.bind(Object.prototype.toString);
+var slice = Array.prototype.slice.call.bind(Array.prototype.slice);
 
 var isArray = Array.isArray;
 /* istanbul ignore if: won't happen in node */
 if ( !isArray ) {
   isArray = function _isArray(obj) {
-    return obj && toString.call(obj) === '[object Array]';
+    return obj && toString(obj) === '[object Array]';
   };
 }
 
@@ -1485,7 +1505,7 @@ function configure(func, requiredCount, defaultArgs) {
 
   function configuredWrapper() {
     /* jshint validthis:true */
-    var args = slice.call(arguments, 0);
+    var args = slice(arguments, 0);
     var applyArgs = args.concat(argTemplate.slice(args.length));
     return func.apply(this, applyArgs);
   }
@@ -1494,12 +1514,7 @@ function configure(func, requiredCount, defaultArgs) {
 var each;
 /* istanbul ignore else: untestable */
 if ( Array.prototype.forEach ) {
-  each = (function () {
-    var forEachMethod = Array.prototype.forEach;
-    return function _each(arr, callback) {
-      return forEachMethod.call(arr, callback);
-    };
-  })();
+  each = Array.prototype.forEach.call.bind(Array.prototype.forEach);
 }
 else {
   each = function _each(arr, callback) {
@@ -1512,12 +1527,7 @@ else {
 var map;
 /* istanbul ignore else: won't happen in node */
 if ( Array.prototype.map ) {
-  map = (function () {
-    var mapMethod = Array.prototype.map;
-    return function _map(arr, callback) {
-      return mapMethod.call(arr, callback);
-    };
-  })();
+  map = Array.prototype.map.call.bind(Array.prototype.map);
 }
 else {
   map = function _map(arr, callback) {
@@ -1532,12 +1542,7 @@ else {
 var filter;
 /* istanbul ignore else: won't happen in node */
 if ( Array.prototype.filter ) {
-  filter = (function () {
-    var filterMethod = Array.prototype.filter;
-    return function _filter(arr, callback) {
-      return filterMethod.call(arr, callback);
-    };
-  })();
+  filter = Array.prototype.filter.call.bind(Array.prototype.filter);
 }
 else {
   filter = function _filter(arr, callback) {
@@ -1560,6 +1565,7 @@ function selfMap(arr, callback) {
 
 // Exported Functions
 exports.isArray = isArray;
+exports.slice = slice;
 exports.extendObject = extendObject;
 exports.objectKeys = objectKeys;
 exports.mixin = mixin;
