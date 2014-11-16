@@ -8,8 +8,6 @@
 
 "use strict";
 
-require('es5-shim');
-
 // This module is used to collect the requirements for a minimal
 // Browserify build.  It's of no interest to Node.js
 
