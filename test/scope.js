@@ -14,8 +14,7 @@ var evaluate = interpol.evaluate;
 
 exports.scope = nodeunit.testCase({
   setUp: function (callback) {
-    this.globals = interpol.context();
-    this.globals.greeting = "Hello, World!";
+    this.globals = { greeting: "Hello, World!" };
 
     callback();
   },
@@ -43,15 +42,18 @@ exports.scope = nodeunit.testCase({
                   "localGreeting()\n" +
                   "greeting";
 
-    test.equal(evaluate(script2).trim(), "Not Hello\nLocal Hello\nMore Local Hello\n\n\nNot Hello");
-    test.equal(evaluate(script1).trim(), "Not Hello\nLocal Hello\n Not Hello");
-    test.equal(evaluate("greeting"), "Hello, World!");
+    test.equal(evaluate(script2, this.globals).trim(),
+               "Not Hello\nLocal Hello\nMore Local Hello\n\n\nNot Hello");
+    test.equal(evaluate(script1, this.globals).trim(),
+               "Not Hello\nLocal Hello\n Not Hello");
+    test.equal(evaluate("greeting", this.globals), "Hello, World!");
     test.done();
   },
 
   "Shadow Global Scope": function (test) {
-    test.equal(evaluate("let greeting='Not Hello!'\ngreeting"), "Not Hello!");
-    test.equal(evaluate("greeting"), "Hello, World!");
+    test.equal(evaluate("let greeting='Not Hello!'\ngreeting", this.globals),
+               "Not Hello!");
+    test.equal(evaluate("greeting", this.globals), "Hello, World!");
     test.done();
   },
 

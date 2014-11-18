@@ -14,11 +14,8 @@
 // Set the Interpol browser global
 var interpol = window.interpol = require('../lib/interpol');
 
-// Resolvers
-require('../lib/resolvers/memory').registerResolver(interpol);
-require('../lib/resolvers/system').registerResolver(interpol);
-
-// Writers
-require('../lib/writers/null').registerWriter(interpol);
-require('../lib/writers/string').registerWriter(interpol);
-require('../lib/writers/dom').registerWriter(interpol);
+// Register the Writers for easier access
+var writers = require('../lib/writers');
+interpol.createDOMWriter = writers.createDOMWriter;
+interpol.createNullWriter = writers.createNullWriter;
+interpol.createStringWriter = writers.createStringWriter;
