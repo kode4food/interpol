@@ -1,5 +1,8 @@
 # Change History
 
+## Version 0.9.6 - Removed 'using'
+* The 'using' statement and expression have been removed.  Their use was confusing and unnecessarily complicated the code-generation process.
+
 ## Version 0.9.4, 0.9.5 - Bug Fix - File Resolver
 File resolver was not properly loading compiled templates.
 

@@ -50,12 +50,13 @@ exports.loops = nodeunit.testCase({
                   'end';
 
     var script5 = 'for person in people, brother in person.brothers\n' +
-                  '  "%name-%brother" using person\n' +
+                  '  let name = person.name\n' +
+                  '  "%name-%brother"\n' +
                   'end';
 
     var script6 = 'for person in people\n' +
                   '  for brother in person.brothers\n' +
-                  '    "%name-%brother" using person\n' +
+                  '    "%name-%brother" % (name=person.name, brother=brother)\n' +
                   '  end\n' +
                   'end';
 
