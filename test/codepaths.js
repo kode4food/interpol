@@ -148,8 +148,8 @@ exports.codepaths = nodeunit.testCase({
   },
 
   "Truthy": function (test) {
-    test.equals(evaluate("if (1,2,3)\ntrue\nend"), "true\n");
-    test.equals(evaluate("unless ()\ntrue\nend"), "true\n");
+    test.equals(evaluate("if [1,2,3]\ntrue\nend"), "true\n");
+    test.equals(evaluate("unless []\ntrue\nend"), "true\n");
     test.done();
   },
 

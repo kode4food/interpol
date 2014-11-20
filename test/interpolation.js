@@ -31,27 +31,38 @@ exports.interpolation = nodeunit.testCase({
   },
 
   "Interpolation Operator": function (test) {
-    test.equal(evaluate("'% is the new %' % ('red', 'black')"),
+    test.equal(evaluate("['red', 'black'] | '% is the new %'"),
                "red is the new black");
-    test.equal(evaluate("'%2 is the new %1' % ('red', 'black')"),
+    test.equal(evaluate("'%2 is the new %1'(['red', 'black'])"),
                "black is the new red");
-    test.equal(evaluate("dogs_lbl % ('red', 'cats', 'dogs')", this.data),
-               "Furthermore, dogs are the new cats");
+
+    test.throws(function () {
+      evaluate("dogs_lbl('red', 'cats', 'dogs')", this.data);
+    }, "can't interpolate external data");
+
     test.done();
   },
 
   "Automatic Interpolation": function (test) {
-    test.equal(evaluate('"%% %%%% % %% %%%%%% %"'), "%% %%%% % %% %%%%%% %");
-    test.equal(evaluate("'%% %%%% % %% %%%%%% %' % self"), "% %%  % %%% ");
+    test.equal(evaluate("'%% %%%% % %% %%%%%% %'"), "%% %%%% % %% %%%%%% %");
+    test.equal(evaluate('"%% %%%% % %% %%%%%% %"'), "% %%  % %%% ");
+    test.equal(evaluate("self | '%% %%%% % %% %%%%%% %'"), "% %%  % %%% ");
     test.equal(evaluate('"Hello, %name!"', { name: 'World'}), "Hello, World!");
     test.equal(evaluate('"""Hello\n%name!"""', { name: 'World'}), "Hello\nWorld!");
     test.equal(evaluate('"Hello, %name! %"', { name: 'World'}), "Hello, World! ");
     test.equal(evaluate("'Hello, %name! %'", { name: 'Wordl'}), "Hello, %name! %");
     test.equal(evaluate('"%% %name"', { name: 'World'}), "% World");
-    test.equal(evaluate('"This % should not interpolate"'),
-               "This % should not interpolate");
-    test.equal(evaluate('hello_lbl % "wrong "', this.data), "Hello, !");
-    test.equal(evaluate('hello_lbl % self', this.data), "Hello, World!");
+    test.equal(evaluate('"This % will interpolate badly"'),
+               "This  will interpolate badly");
+    test.equal(evaluate('"the answer is %val%% (percent)"', { val: 88 }),
+               "the answer is 88% (percent)");
+    test.done();
+  },
+
+  "List Interpolation": function (test) {
+    test.equal(evaluate("'%name is %age'[name='Bill',age=20]"),
+               "Bill is 20");
+
     test.done();
   },
 
@@ -61,22 +72,22 @@ exports.interpolation = nodeunit.testCase({
                   '"Result is %some_array|join|title"';
 
     var script2 = 'from string import upper\n' +
-                  '"The Title is %|upper" % "upper"';
+                  '"The Title is %|upper"("big")';
 
     test.equal(evaluate(script1, this.data), "Result is Title Case String");
-    test.equal(evaluate(script2, this.data), "The Title is UPPER");
+    test.equal(evaluate(script2, this.data), "The Title is BIG");
     test.done();
   },
 
   "Mixed Interpolation": function (test) {
     var script = "let val2 = 'test2'\n" +
-      "def part('test3', val4)\n" +
-      "  \"%val1 %val4 %val2 %1\"\n" +
-      "end\n" +
-      "part(val3, 'test4')";
+                 "def part('test3', val4)\n" +
+                 '  "%val1 %val4 %val2 %1"\n' +
+                 "end\n" +
+                 "part(val3, 'test4')";
 
     test.equal(evaluate(script, { val1: 'test1', val3: 'test3' }),
-      "test1 test4 test2 test3\n");
+               "test1 test4 test2 test3\n");
     test.done();
   }
 });

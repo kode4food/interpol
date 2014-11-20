@@ -10,7 +10,7 @@ end
 
 def renderList(people)
   # otherwise will fall through to this
-  "There are %length stooges" % people
+  people | "There are %length stooges"
   <ul>
   for person in people, brother in person.brothers
     renderItem(person.name, brother)

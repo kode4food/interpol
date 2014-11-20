@@ -1,5 +1,27 @@
 # Change History
 
+## Version 0.9.6 - Major Changes
+This release introduces several changes that I've been wanting to make for quite a while.  They needed to happen before 1.0 to avoid forever being married to the old way of doing things.
+
+* The 'using' statement and expression have been removed.  Their use was confusing and unnecessarily complicated the code-generation process.
+
+* Lists are now constructed using square brackets rather than parentheses.
+
+* The '%' operator has been removed.  Allowing arbitrary interpolation was a potential security risk and also completely useless syntax.  Now all literal strings that contain escapes will be treated as capable of being interpolated.  They can then be called as a function, either using the pipe operator or by passing a literal list to them.  For example:
+
+```python
+let person = [name = 'Bob', age = 42]
+person | "my name is %name and I am %age"
+# or
+"my name is %name and I am %age"(person)
+```
+
+* Literal lists can be applied to literal strings as an Interpolation shorthand:
+
+```python
+"my name is %name and I am %age" [name = 'Bob', age = 42]
+```
+
 ## Version 0.9.4, 0.9.5 - Bug Fix - File Resolver
 File resolver was not properly loading compiled templates.
 

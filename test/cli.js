@@ -63,7 +63,7 @@ exports.cli = nodeunit.testCase({
 
       var content = require('./cli_success/test1.int.js');
       test.equal(typeof content.createTemplate, 'function');
-      var compiled = content.createTemplate(createRuntime());
+      var compiled = content.createTemplate(createRuntime(interpol));
       test.equal(typeof compiled, 'function');
       fs.unlinkSync("./test/cli_success/test1.int.js"); // cleanup
       fs.unlinkSync("./test/cli_success/test2.int.js");

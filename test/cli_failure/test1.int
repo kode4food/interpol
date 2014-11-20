@@ -2,5 +2,5 @@
 
 for person at people,
     sibling in person.siblings
-  "% is the sibling of %" % (person.name, sibling.name
+  person.name, sibling.name] | "% is the sibling of %"
 end

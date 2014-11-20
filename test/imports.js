@@ -10,6 +10,7 @@
 
 var nodeunit = require('nodeunit');
 var interpol = require('../lib');
+var resolvers = require('../lib/resolvers');
 var runtime;
 
 function evaluate(script, context) {
@@ -21,15 +22,12 @@ exports.imports = nodeunit.testCase({
 
   "helper imports": nodeunit.testCase({
     setUp: function (callback) {
-      var resolver = interpol.createMemoryResolver();
-      resolver.registerModule('helpers', {
+      runtime = interpol.runtime({ resolvers: [] });
+      resolvers.createMemoryResolver(runtime);
+      runtime.registerModule('helpers', {
         testHelper: function testHelper(writer, arg1, arg2) {
           writer.content("arg1=" + arg1 + ":arg2=" + arg2);
         }
-      });
-
-      runtime = interpol.runtime({
-        resolvers: [ resolver ]
       });
 
       callback();
@@ -66,7 +64,7 @@ exports.imports = nodeunit.testCase({
 
     "Bound System Import": function (test) {
       var script = "from list import join\n" +
-        "let a = ('this', 'is', 'a', 'list')\n" +
+        "let a = ['this', 'is', 'a', 'list']\n" +
         "let j = @join(nil, '///')\n" +
         "a | j";
 
@@ -95,12 +93,9 @@ function createFileImportTests(compile, monitor) {
       if ( !compile ) {
         // command-line build the files
       }
-      runtime = interpol.runtime({
-        resolvers: [
-          interpol.createFileResolver({
-            path: "./test", compile: compile, monitor: monitor
-          })
-        ]
+      runtime = interpol.runtime({ resolvers: [] });
+      resolvers.createFileResolver(runtime, {
+        path: "./test", compile: compile, monitor: monitor
       });
 
       callback();
@@ -115,7 +110,7 @@ function createFileImportTests(compile, monitor) {
 
     "File Import": function (test) {
       var script = "import test as t\n" +
-        "t.renderTest('Curly')";
+                   "t.renderTest('Curly')";
 
       test.equal(evaluate(script), "Hello Curly\n");
       test.done();

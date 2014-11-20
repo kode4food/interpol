@@ -61,13 +61,13 @@ exports.like = nodeunit.testCase({
                   '  "They don\'t match!"\n' +
                   'end';
 
-    var script4 = 'if array like ("red", "green", "blue")\n' +
+    var script4 = 'if array like ["red", "green", "blue"]\n' +
                   '  "They match!"\n' +
                   'else\n' +
                   '  "They don\'t match!"\n' +
                   'end';
 
-    var script5 = 'unless person1 like (name = "Thom", age = 56)\n' +
+    var script5 = 'unless person1 like [name = "Thom", age = 56]\n' +
                   '  "They don\'t match!"\n' +
                   'end';
 

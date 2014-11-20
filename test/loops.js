@@ -30,12 +30,12 @@ exports.loops = nodeunit.testCase({
   },
 
   "Basic Loops": function (test) {
-    var script1 = 'for color in ("red", "green", "blue")\n' +
+    var script1 = 'for color in ["red", "green", "blue"]\n' +
                   'when color != "red"\n' +
                   '  "%color is a color\n"' +
                   'end';
 
-    var script2 = 'for color in ()\n' +
+    var script2 = 'for color in []\n' +
                   '  "%color is a color"\n' +
                   'else\n' +
                   '  "No Colors"\n' +
@@ -45,17 +45,18 @@ exports.loops = nodeunit.testCase({
                   '  "%color is a color"\n' +
                   'end';
 
-    var script4 = 'for pair in (name="Thom", age=42)\n' +
-                  '  "%name=%value" % pair\n' +
+    var script4 = 'for pair in [name="Thom", age=42]\n' +
+                  '  "%name=%value"(pair)\n' +
                   'end';
 
     var script5 = 'for person in people, brother in person.brothers\n' +
-                  '  "%name-%brother" using person\n' +
+                  '  let name = person.name\n' +
+                  '  "%name-%brother"\n' +
                   'end';
 
     var script6 = 'for person in people\n' +
                   '  for brother in person.brothers\n' +
-                  '    "%name-%brother" using person\n' +
+                  '    [name=person.name, brother=brother] | "%name-%brother"\n' +
                   '  end\n' +
                   'end';
 

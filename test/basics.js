@@ -120,11 +120,16 @@ exports.basics = nodeunit.testCase({
       }
     };
 
-    var script = 'if person like (name = "Thom", age = 42)\n' +
-                 '  "%name is %age" % person\n' +
-                 'end';
+    var script1 = 'if person like [name = "Thom", age = 42]\n' +
+                  '  person | "%name is %age"\n' +
+                  'end';
 
-    test.equal(evaluate(script, data), "Thom is 42\n");
+    var script2 = 'if person like [name = "Thom", age = 42]\n' +
+                  '  "%name is %age"(person)\n' +
+                  'end';
+
+    test.equal(evaluate(script1, data), "Thom is 42\n");
+    test.equal(evaluate(script2, data), "Thom is 42\n");
     test.done();
   }
 });
