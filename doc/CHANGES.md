@@ -7,7 +7,7 @@ This release introduces several changes that I've been wanting to make for quite
 
 * Lists are now constructed using square brackets rather than parentheses.
 
-* The '%' operator has been removed.  Allowing arbitrary interpolation was a potential security risk and also completely useless syntax.  Now all literal strings that contain escapes will be treated as capable of being interpolated.  They can then be called as a function, either using the pipe operator or by passing a literal list to them.  For example:
+* The '%' operator has been removed.  Allowing arbitrary interpolation was a potential security risk and also completely useless syntax.  Now all literal strings that contain escapes will be treated as capable of being interpolated.  They can then be called as a function, either using the pipe operator or a normal function call.  For example:
 
 ```python
 let person = [name = 'Bob', age = 42]
