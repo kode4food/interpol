@@ -22,6 +22,12 @@ person | "my name is %name and I am %age"
 "my name is %name and I am %age" [name = 'Bob', age = 42]
 ```
 
+Note that this *only* applies to literal strings, and is basically syntactic sugar for:
+
+```python
+"my name is %name and I am %age"([name = 'Bob', age = 42])
+```
+
 ## Version 0.9.4, 0.9.5 - Bug Fix - File Resolver
 File resolver was not properly loading compiled templates.
 
