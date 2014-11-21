@@ -6825,7 +6825,7 @@ var generatedParser = require('../../build/parser');
 var isArray = util.isArray;
 var mixin = util.mixin;
 var each = util.each;
-var buildFormatter = formatter.localFormatter;
+var buildLocalFormatter = formatter.buildLocalFormatter;
 
 var formatterCache = {};
 
@@ -6863,7 +6863,7 @@ function stmts(statements) {
 function symInterpolate(value, auto) {
   var testFormatter = formatterCache[value];
   if ( !testFormatter ) {
-    testFormatter = formatterCache[value] = buildFormatter(value);
+    testFormatter = formatterCache[value] = buildLocalFormatter(value);
   }
   var requiredIndexes = testFormatter.__intRequiredIndexes || [];
   if ( !requiredIndexes.length ) {
@@ -7178,8 +7178,9 @@ function buildGlobalFormatter(formatStr) {
 }
 
 // Exported Functions
-exports.localFormatter = buildLocalFormatter;
-exports.globalFormatter = buildGlobalFormatter;
+exports.buildLocalFormatter = buildLocalFormatter;
+exports.buildGlobalFormatter = buildGlobalFormatter;
+
 },{"./types":17,"./util":18,"./writers/null":21}],6:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
@@ -8102,10 +8103,19 @@ exports.sum = sum;
 
 "use strict";
 
+var format = require('../../format');
 var types = require('../../types');
+var wrap = require('./wrap');
+
+var buildLocalFormatter = format.buildLocalFormatter;
 var stringify = types.stringify;
 
-var wrap = require('./wrap');
+// `build(value, supportFunctions)` converts the provided string and
+// supportFunctions Object into an Interpol interpolation function.
+function build(writer, value, supportFunctions) {
+  var formatter = buildLocalFormatter(stringify(value));
+  return formatter(supportFunctions);
+}
 
 // `lower(value)` converts the provided string to lower-case and returns
 // the result.
@@ -8140,12 +8150,13 @@ function upper(writer, value) {
 exports.string = wrap(String);
 
 // Exported Functions
+exports.build = build;
 exports.lower = lower;
 exports.split = split;
 exports.title = title;
 exports.upper = upper;
 
-},{"../../types":17,"./wrap":15}],15:[function(require,module,exports){
+},{"../../format":5,"../../types":17,"./wrap":15}],15:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -8243,8 +8254,8 @@ function createRuntime(interpol, runtimeOptions) {
     isTruthy: types.isTruthy,
     isFalsy: types.isFalsy,
 
-    localFormatter: format.localFormatter,
-    globalFormatter: format.globalFormatter,
+    localFormatter: format.buildLocalFormatter,
+    globalFormatter: format.buildGlobalFormatter,
     matches: match.matches,
     matcher: match.matcher,
 
