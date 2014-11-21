@@ -6825,7 +6825,7 @@ var generatedParser = require('../../build/parser');
 var isArray = util.isArray;
 var mixin = util.mixin;
 var each = util.each;
-var buildFormatter = formatter.buildFormatter;
+var buildFormatter = formatter.localFormatter;
 
 var formatterCache = {};
 
@@ -7038,7 +7038,7 @@ var ParamRegex = new RegExp(Params, "m");
  *
  * @param {String} formatStr the String to be used for interpolation
  */
-function buildFormatter(formatStr) {
+function buildLocalFormatter(formatStr) {
   var funcs = [];
   var requiredIndexes = {};
   var requiredFunctions = {};
@@ -7173,13 +7173,13 @@ function buildFormatter(formatStr) {
 }
 
 function buildGlobalFormatter(formatStr) {
-  var formatter = buildFormatter(formatStr);
+  var formatter = buildLocalFormatter(formatStr);
   return formatter();
 }
 
 // Exported Functions
-exports.buildFormatter = buildFormatter;
-exports.buildGlobalFormatter = buildGlobalFormatter;
+exports.localFormatter = buildLocalFormatter;
+exports.globalFormatter = buildGlobalFormatter;
 },{"./types":17,"./util":18,"./writers/null":21}],6:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
@@ -7415,8 +7415,8 @@ function buildObjectMatcher(template) {
 }
 
 // Exported Functions
-exports.isMatchingObject = isMatchingObject;
-exports.buildMatcher = buildMatcher;
+exports.matches = isMatchingObject;
+exports.matcher = buildMatcher;
 
 },{"./util":18}],8:[function(require,module,exports){
 (function (process){
@@ -8243,14 +8243,14 @@ function createRuntime(interpol, runtimeOptions) {
     isTruthy: types.isTruthy,
     isFalsy: types.isFalsy,
 
-    buildFormatter: format.buildFormatter,
-    buildGlobalFormatter: format.buildGlobalFormatter,
-    isMatchingObject: match.isMatchingObject,
-    buildMatcher: match.buildMatcher,
+    localFormatter: format.localFormatter,
+    globalFormatter: format.globalFormatter,
+    matches: match.matches,
+    matcher: match.matcher,
 
     resolveExports: resolveExports,
     resolveModule: resolveModule,
-    buildImporter: buildImporter,
+    importer: buildImporter,
     defineModule: defineModule,
     definePartial: definePartial,
     defineGuardedPartial: defineGuardedPartial,
