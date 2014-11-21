@@ -7099,10 +7099,9 @@ function buildFormatter(formatStr) {
 
   function templateFunction(supportFunctions, data) {
     if ( data === undefined ) {
-      var bound = bind(templateFunction, supportFunctions);
-      bound.__intFunction = 'format';
-      bound.toString = toString;
-      return bound;
+      execInterface.__intFunction = 'format';
+      execInterface.toString = toString;
+      return execInterface;
     }
 
     if ( typeof data !== 'object' || data === null ) {
@@ -7115,6 +7114,10 @@ function buildFormatter(formatStr) {
     }
 
     return output.join('');
+
+    function execInterface(writer, data) {
+      return templateFunction(supportFunctions, data);
+    }
   }
 
   function createLiteralFunction(literal) {
@@ -7169,9 +7172,14 @@ function buildFormatter(formatStr) {
   }
 }
 
+function buildGlobalFormatter(formatStr) {
+  var formatter = buildFormatter(formatStr);
+  return formatter();
+}
+
 // Exported Functions
 exports.buildFormatter = buildFormatter;
-
+exports.buildGlobalFormatter = buildGlobalFormatter;
 },{"./types":17,"./util":18,"./writers/null":21}],6:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
@@ -8236,6 +8244,7 @@ function createRuntime(interpol, runtimeOptions) {
     isFalsy: types.isFalsy,
 
     buildFormatter: format.buildFormatter,
+    buildGlobalFormatter: format.buildGlobalFormatter,
     isMatchingObject: match.isMatchingObject,
     buildMatcher: match.buildMatcher,
 

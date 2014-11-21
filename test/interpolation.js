@@ -31,6 +31,11 @@ exports.interpolation = nodeunit.testCase({
   },
 
   "Interpolation Operator": function (test) {
+    var script = "let a = ['red', 'black']\n" +
+                 "let b = '% is the new %'\n" +
+                 'a | b';
+
+    test.equal(evaluate(script), "red is the new black");
     test.equal(evaluate("['red', 'black'] | '% is the new %'"),
                "red is the new black");
     test.equal(evaluate("'%2 is the new %1'(['red', 'black'])"),
