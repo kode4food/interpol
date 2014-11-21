@@ -9121,7 +9121,7 @@ exports.createStringWriter = createStringWriter;
 
 },{}],24:[function(require,module,exports){
 module.exports=require(23)
-},{"/Users/thom/work/interpol/node_modules/browserify/lib/_empty.js":23}],25:[function(require,module,exports){
+},{"/home/thom/work/interpol/node_modules/browserify/lib/_empty.js":23}],25:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //

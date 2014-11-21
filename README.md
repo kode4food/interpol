@@ -46,7 +46,7 @@ This template is actually completely dynamic, including the HTML tags and attrib
 
 ```html
 <div class="person">
-  for field in ('name', 'address', 'telephone')
+  for field in ['name', 'address', 'telephone']
     <div class=field> person[field] </div>
   end
 </div>
@@ -76,7 +76,7 @@ end
 
 def renderPerson(person)
   <div class="person">
-    for field in ('name', 'address', 'telephone')
+    for field in ['name', 'address', 'telephone']
       <div class=field> person[field] </div>
     end
   </div>
@@ -110,7 +110,7 @@ end
 
 def renderPerson(person)
   <div class="person">
-    for field in ('name', 'address', 'telephone')
+    for field in ['name', 'address', 'telephone']
       <div class=field> person[field] </div>
     end
   </div>
