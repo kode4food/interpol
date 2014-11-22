@@ -58,14 +58,15 @@ var bind = util.bind;
 var stringify = types.stringify;
 var isInterpolFunction = types.isInterpolFunction;
 
-var nullWriter;
-
 var Digits = "0|[1-9][0-9]*";
 var Ident = "[$_a-zA-Z][$_a-zA-Z0-9]*";
 var Params = "%((%)|(" + Digits + ")|(" + Ident + "))?(([|]" + Ident + ")*)?";
              /* "%" ( "%" | digits | identifier )? ( "|" identifier )* */
 
 var ParamRegex = new RegExp(Params, "m");
+
+var emptyObject = {};
+var nullWriter;
 
 /**
  * Builds a closure that will be used internally to support Interpol's
@@ -145,15 +146,25 @@ function buildLocalFormatter(formatStr) {
       data = [data];
     }
 
-    var output = [];
-    for ( var i = 0; i < flen; i++ ) {
-      output[i] = funcs[i](data, supportFunctions);
-    }
-
-    return output.join('');
+    return processTemplate(data);
 
     function execInterface(writer, data) {
-      return templateFunction(supportFunctions, data);
+      if ( data === undefined ) {
+        return processTemplate(emptyObject);
+      }
+      else if ( typeof data !== 'object' || data === null ) {
+        data = [data];
+      }
+
+      return processTemplate(data);
+    }
+
+    function processTemplate(data) {
+      var output = [];
+      for ( var i = 0; i < flen; i++ ) {
+        output[i] = funcs[i](data, supportFunctions);
+      }
+      return output.join('');
     }
   }
 
