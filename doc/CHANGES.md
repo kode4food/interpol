@@ -30,6 +30,12 @@ Note that this *only* applies to literal strings and lists, and is basically syn
 
 If you still need to perform arbitrary interpolation, you can use the `build(str, [supportFuncs])` function in the `string` system module.
 
+* Indexed Interpolation is now zero-based so that it is consistent with indexed retrieval from lists.  So, you'd perform the interpolation like so:
+
+```python
+"%1 is the new %0" ['black', 'red']
+```
+
 ## Version 0.9.4, 0.9.5 - Bug Fix - File Resolver
 File resolver was not properly loading compiled templates.
 

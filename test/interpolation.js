@@ -38,7 +38,7 @@ exports.interpolation = nodeunit.testCase({
     test.equal(evaluate(script), "red is the new black");
     test.equal(evaluate("['red', 'black'] | '% is the new %'"),
                "red is the new black");
-    test.equal(evaluate("'%2 is the new %1'(['red', 'black'])"),
+    test.equal(evaluate("'%1 is the new %0'(['red', 'black'])"),
                "black is the new red");
 
     test.throws(function () {
@@ -87,7 +87,7 @@ exports.interpolation = nodeunit.testCase({
   "Mixed Interpolation": function (test) {
     var script = "let val2 = 'test2'\n" +
                  "def part('test3', val4)\n" +
-                 '  "%val1 %val4 %val2 %1"\n' +
+                 '  "%val1 %val4 %val2 %0"\n' +
                  "end\n" +
                  "part(val3, 'test4')";
 

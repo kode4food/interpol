@@ -60,7 +60,7 @@ var isInterpolFunction = types.isInterpolFunction;
 
 var nullWriter;
 
-var Digits = "[1-9][0-9]*";
+var Digits = "0|[1-9][0-9]*";
 var Ident = "[$_a-zA-Z][$_a-zA-Z0-9]*";
 var Params = "%((%)|(" + Digits + ")|(" + Ident + "))?(([|]" + Ident + ")*)?";
              /* "%" ( "%" | digits | identifier )? ( "|" identifier )* */
@@ -109,7 +109,7 @@ function buildLocalFormatter(formatStr) {
       idx = paramMatch[4];
     }
     else if ( paramMatch[3] ) {
-      idx = parseInt(paramMatch[3], 10) - 1;
+      idx = parseInt(paramMatch[3], 10);
     }
     requiredIndexes[idx] = true;
 
@@ -1023,7 +1023,7 @@ function createRuntime(interpol, runtimeOptions) {
 
   var resolveExports = bind(resolve, 'resolveExports');
   var resolveModule = bind(resolve, 'resolveModule');
-  
+
   var runtime = {
     __intRuntime: true,
     interpol: interpol,
