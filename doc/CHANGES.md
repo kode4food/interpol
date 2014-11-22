@@ -1,7 +1,7 @@
 # Change History
 
 ## Version 1.0 - Major Changes
-This is version 1.0 release of Interpol.  It introduces several changes that I've been wanting to make for quite a while.  These changes needed to happen with 1.0 to avoid forever being married to the old way of doing things.
+This is version 1.0 of Interpol.  It introduces several changes that I've been wanting to make for quite a while.  These changes needed to happen with 1.0 to avoid forever being married to the old way of doing things.  Therefore 1.0 is *not* backward compatible to the 0.x releases.
 
 * The 'using' statement and expression have been removed.  Their use was confusing and unnecessarily complicated the code-generation process.
 
@@ -22,11 +22,13 @@ person | "my name is %name and I am %age"
 "my name is %name and I am %age" [name = 'Bob', age = 42]
 ```
 
-Note that this *only* applies to literal strings, and is basically syntactic sugar for:
+Note that this *only* applies to literal strings and lists, and is basically syntactic sugar for:
 
 ```python
 "my name is %name and I am %age"([name = 'Bob', age = 42])
 ```
+
+If you still need to perform arbitrary interpolation, you can use the `build(str, [supportFuncs])` function in the `string` system module.
 
 ## Version 0.9.4, 0.9.5 - Bug Fix - File Resolver
 File resolver was not properly loading compiled templates.
