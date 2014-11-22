@@ -3,11 +3,11 @@
 ## Version 1.0 - Major Changes
 This is version 1.0 of Interpol.  It introduces several changes that I've been wanting to make for quite a while.  These changes needed to happen with 1.0 to avoid forever being married to the old way of doing things.  Therefore 1.0 is *not* backward compatible to the 0.x releases.
 
-* The 'using' statement and expression have been removed.  Their use was confusing and unnecessarily complicated the code-generation process.
+The 'using' statement and expression have been removed.  Their use was confusing and unnecessarily complicated the code-generation process.
 
-* Lists are now constructed using square brackets rather than parentheses.  I did this because it makes parsing a little less prone to ambiguity and because, quite honestly, I was seeing too many fucking parentheses.
+Lists are now constructed using square brackets rather than parentheses.  I did this because it makes parsing a little less prone to ambiguity and because, quite honestly, I was seeing too many fucking parentheses.
 
-* The '%' operator has been removed.  Allowing arbitrary interpolation was a potential security risk and also a completely useless syntax.  Now all literal strings that contain escapes will be treated as capable of being interpolated.  They can then be called as a function, either using the pipe operator or a normal function call.  For example:
+The '%' operator has been removed.  Allowing arbitrary interpolation was a potential security risk and also a completely useless syntax.  Now all literal strings that contain escapes will be treated as capable of being interpolated.  They can then be called as a function, either using the pipe operator or a normal function call.  For example:
 
 ```python
 let person = [name = 'Bob', age = 42]
@@ -18,7 +18,7 @@ person | "my name is %name and I am %age"
 
 Keep in mind that if they're not involved in a function call, double quoted strings are *still* automatically interpolated against local variables.  Also, support functions (those referenced by in-string pipe operators) are gathered from the string's creation scope, not from its execution scope.
 
-* Literal lists can be applied to literal strings as an Interpolation shorthand:
+Literal lists can be applied to literal strings as an Interpolation shorthand:
 
 ```python
 "my name is %name and I am %age" [name = 'Bob', age = 42]
@@ -32,7 +32,7 @@ Note that this *only* applies to literal strings and lists, and is basically syn
 
 If you still absolutely need to perform arbitrary interpolation, you can use the `build(str, [supportFuncs])` function in the `string` system module.
 
-* Indexed Interpolation is now zero-based so that it is consistent with indexed retrieval from lists.  So, you'd perform the interpolation like so:
+Indexed Interpolation is now zero-based so that it is consistent with indexed retrieval from lists.  So, you'd perform the interpolation like so:
 
 ```python
 "%1 is the new %0" ['black', 'red']
@@ -51,9 +51,9 @@ Added `resolve()` function to the Runtime to support import resolution by extern
 The compiler backend has been completely rewritten.  It now transpiles JavaScript instead of generating JSON information.  This has resulted in significant performance improvements for template processing and greatly reduces the size of the Interpol runtime.  It does mean that on-the-fly compilation is a little slower, but this is only a one-time penalty.
 
 ## Version 0.4.2 - Synonyms
-* The global function for Web Browser deployment has been renamed from `$interpol()` to `interpol()`.
+The global function for Web Browser deployment has been renamed from `$interpol()` to `interpol()`.
 
-* Synonyms for the following keywords have been added:
+Synonyms for the following keywords have been added:
 
   * `lte` can now be used in place of `le` (less than or equal to)
   * `gte` can now be used in place of `ge` (greater than or equal to)
@@ -61,14 +61,14 @@ The compiler backend has been completely rewritten.  It now transpiles JavaScrip
 
 The goal here, particularly for the `where` synonym, is to make your code a little more readable and contribute to its ability to convey your intent.
 
-* Various optimizations relating to the treatment of literals have been added.  These include constant folding and branch elimination.
+Various optimizations relating to the treatment of literals have been added.  These include constant folding and branch elimination.
 
-* `createArrayWriter()` has been renamed to `createStringWriter()` because that's what it does.
+`createArrayWriter()` has been renamed to `createStringWriter()` because that's what it does.
 
 ## Version 0.4.1 - 'using' Expressions
 Test coverage has been greatly increased, from about 50% to 90%.  Corrected quite a few bugs in the process, some of them major.
 
-* The 'using' construct can now be applied to individual expressions.
+The 'using' construct can now be applied to individual expressions.
 
 ```python
 let result = "%name and %age" using person, profile
@@ -77,13 +77,13 @@ let result = "%name and %age" using person, profile
 ## Version 0.4 - Stabilization
 A lot of effort has been put into stabilizing the Interpol code base.  There are no new features in this release, but some have been removed.  Also, some behaviors have been clarified.  Specifically:
 
-* Removed single-line `:` syntax for statements, so you *have* to use `end` now.  This choice was made because HTML in combination with this feature would create more confusion than benefit.
+Removed single-line `:` syntax for statements, so you *have* to use `end` now.  This choice was made because HTML in combination with this feature would create more confusion than benefit.
 
-* Both JavaScript `null` and `undefined` now resolve to Interpol's `Nil`.
+Both JavaScript `null` and `undefined` now resolve to Interpol's `Nil`.
 
-* All equality comparisons now use the strict `===` and `!==` operators.  Meaning you can no longer compare the values 1 and "1" and expect a `true` result.  JSON differentiates between Strings and Numbers.  So does Interpol.
+All equality comparisons now use the strict `===` and `!==` operators.  Meaning you can no longer compare the values 1 and "1" and expect a `true` result.  JSON differentiates between Strings and Numbers.  So does Interpol.
 
-* Conditionals operators (if/unless/when) now follow a strict definition of 'truthy' rather than JavaScript's.  In Interpol 'truthy' is any value that matches the following criteria:
+Conditionals operators (if/unless/when) now follow a strict definition of 'truthy' rather than JavaScript's.  In Interpol 'truthy' is any value that matches the following criteria:
 
   * Arrays with at least one element
   * Strings with at least one character
@@ -91,7 +91,7 @@ A lot of effort has been put into stabilizing the Interpol code base.  There are
   * Non-Zero Numbers
   * Any Object
 
-* The Separate Language and API References will eventually be removed.  Instead, [The Interpol Guide](http://interpoljs.io/guide) will serve as an ongoing source of Interpol Information.
+The Separate Language and API References will eventually be removed.  Instead, [The Interpol Guide](http://interpoljs.io/guide) will serve as an ongoing source of Interpol Information.
 
 ## Version 0.3.17 - Bower Support
 Adding Bower Support.
@@ -101,15 +101,15 @@ bower install interpol
 ```
 
 ## Version 0.3.16 - HTML Attributes
-* Now dealing with HTML Attributes in a more HTML5-friendly way.  If the value is a boolean, either render the attribute name or omit it completely.
+Now dealing with HTML Attributes in a more HTML5-friendly way.  If the value is a boolean, either render the attribute name or omit it completely.
 
 ## Version 0.3.15 - Browserify Fix
-* Browserify version wasn't being built correctly.
+Browserify version wasn't being built correctly.
 
 ## Version 0.3.14 - Feature Complete
-* Refactored the parser/compiler and began to introduce optimizations to the JSON representation that is generated.
+Refactored the parser/compiler and began to introduce optimizations to the JSON representation that is generated.
 
-* The 'using' statement has been introduced.  It creates a new scope where the properties of any specified expressions are mixed in and made available as local variables.  For example, `name` and `age` may be taken from the `person` instance, while summary might be taken from the `profile` instance.
+The 'using' statement has been introduced.  It creates a new scope where the properties of any specified expressions are mixed in and made available as local variables.  For example, `name` and `age` may be taken from the `person` instance, while summary might be taken from the `profile` instance.
 
 ```python
 def renderPerson(person, profile)
@@ -121,9 +121,9 @@ def renderPerson(person, profile)
 end
 ```
 
-* The 'array' module has been renamed to 'list'.  The Tuple, Array, and Dictionary distinction is confusing, and completely unnecessary.  So the term 'List' is now preferred.
+The 'array' module has been renamed to 'list'.  The Tuple, Array, and Dictionary distinction is confusing, and completely unnecessary.  So the term 'List' is now preferred.
 
-* For Loops have been extended to support range guards as well as an `else` clause.  You can define an `else` clause for those cases where the for loop finds no matches:
+For Loops have been extended to support range guards as well as an `else` clause.  You can define an `else` clause for those cases where the for loop finds no matches:
 
 ```python
 for person in people, brother in person.brothers
@@ -144,7 +144,7 @@ else
 end
 ```
 
-* Added *very crude* pattern matching capability to Partial Definitions in order to facilitate what are essentially inline-guards.  For example:
+Added *very crude* pattern matching capability to Partial Definitions in order to facilitate what are essentially inline-guards.  For example:
 
 ```python
 def renderItem(type, name)
@@ -168,7 +168,7 @@ def renderItem(self[0], name) when self[0] like "developer"
 end
 ```
 
-* The `like` operator was introduced to support inline guards.  Like will perform a deep comparison of values to determine whether the left operand is 'compatible' with the template on the right.
+The `like` operator was introduced to support inline guards.  Like will perform a deep comparison of values to determine whether the left operand is 'compatible' with the template on the right.
 
 Compatibility is mostly as you would expect, with one exception.  If the template is an Object, only the properties defined in that Object are checked.  If the left operand has additional properties, those are ignored.
 
@@ -176,9 +176,11 @@ Compatibility is mostly as you would expect, with one exception.  If the templat
 Automatic Interpolation was a pain in the ass when you didn't want it to happen, requiring you to escape all of your percent signs `%`.  Now it will only occur against double quoted strings containing named indexes.  Single quoted strings will be treated as literals.
 
 ## Version 0.3.12 - Conditional Operator
-* To better support the parse-tree rewriting that is now taking place, moved most of the parser support code into parser.js rather than the PEG.js code.
-* The logical negation `!` operator has been renamed `not`.
-* The conditional operator is now pythonesque rather than derived from C.
+To better support the parse-tree rewriting that is now taking place, moved most of the parser support code into parser.js rather than the PEG.js code.
+
+The logical negation `!` operator has been renamed `not`.
+
+The conditional operator is now pythonesque rather than derived from C.
 
 ```python
 # <true_value> if <condition> else <false_value>
@@ -311,8 +313,9 @@ Result is joined -- with -- dashes
 The convention used here is that we always treat the first argument to a function as the piped input, and any subsequent arguments are configurable.  Of course, you could have also called `j` normally with `"Result is " + j(a)`
 
 ## Version 0.3.2 - Even Better Piped Interpolation
-* Fixed a bug in piped interpolation where literals were used as a right-hand operands.
-* Express View Engine now stops monitoring/compiling if NODE_ENV != 'development'.
+Fixed a bug in piped interpolation where literals were used as a right-hand operands.
+
+Express View Engine now stops monitoring/compiling if NODE_ENV != 'development'.
 
 ## Version 0.3.1 - Better Piped Interpolation
 Piped interpolation can now retrieve functions from the local scope if they're not present in the evaluated data.
@@ -418,19 +421,19 @@ You can also instantiate customized engines.  Customizations include setting the
 ## Version 0.1.3 - Let, Unless, Imports and Stuff
 Getting close to a usable system
 
-* `let` allows you to define variables in the local scope, meaning it will shadow any variables in a parent scope, rather than allowing you to overwrite them.
+`let` allows you to define variables in the local scope, meaning it will shadow any variables in a parent scope, rather than allowing you to overwrite them.
 
-* `unless` is syntactic sugar for `if !(...)`
+`unless` is syntactic sugar for `if !(...)`
 
-* Importing now works against the three available resolvers: file (Node.js only), helpers, and memory.  See [The Interpol Guide](http://interpoljs.io/guide) for more information.
+Importing now works against the three available resolvers: file (Node.js only), helpers, and memory.  See [The Interpol Guide](http://interpoljs.io/guide) for more information.
 
-* Compiled templates now have an `exports()` function that returns functions and variables defined in their root context.  The results are evaluated against the global context *only*.
+Compiled templates now have an `exports()` function that returns functions and variables defined in their root context.  The results are evaluated against the global context *only*.
 
-* The Command-Line interface can now generate a self-contained bundle of pre-compiled templates that can easily be loaded into a web page or Node.js environment.
+The Command-Line interface can now generate a self-contained bundle of pre-compiled templates that can easily be loaded into a web page or Node.js environment.
 
-* `self` refers to the variables of the current scope, and can be passed around.
+`self` refers to the variables of the current scope, and can be passed around.
 
-* Named Interpolation is now supported.  Any `%` followed by an identifier is expanded to the value of that property in the passed Object. `self` is assumed if nothing is passed.  See [The Interpol Guide](http://interpoljs.io/guide) for more information.
+Named Interpolation is now supported.  Any `%` followed by an identifier is expanded to the value of that property in the passed Object. `self` is assumed if nothing is passed.  See [The Interpol Guide](http://interpoljs.io/guide) for more information.
 
 ## Version 0.1.2 - Bug Fixes and Test
 Fixed some bugs in the PEG.js parser, including its inability to right-recurse unary and membership productions.  Also increased test coverage.
