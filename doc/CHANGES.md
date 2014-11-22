@@ -16,6 +16,8 @@ person | "my name is %name and I am %age"
 "my name is %name and I am %age"(person)
 ```
 
+Keep in mind that if they're not involved in a function call, double quoted strings are *still* automatically interpolated against local variables.  Also, support functions (those referenced by in-string pipe operators) are gathered from the string's creation scope, not from its execution scope.
+
 * Literal lists can be applied to literal strings as an Interpolation shorthand:
 
 ```python
@@ -28,7 +30,7 @@ Note that this *only* applies to literal strings and lists, and is basically syn
 "my name is %name and I am %age"([name = 'Bob', age = 42])
 ```
 
-If you still need to perform arbitrary interpolation, you can use the `build(str, [supportFuncs])` function in the `string` system module.
+If you still absolutely need to perform arbitrary interpolation, you can use the `build(str, [supportFuncs])` function in the `string` system module.
 
 * Indexed Interpolation is now zero-based so that it is consistent with indexed retrieval from lists.  So, you'd perform the interpolation like so:
 

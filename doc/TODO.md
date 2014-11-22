@@ -1,5 +1,5 @@
 # TODO
 
-* Good Documentation
-* Better Debugging Output
-* Source Maps
+* Better Documentation
+* Better Debugging Output (Source Maps)
+
