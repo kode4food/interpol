@@ -28,9 +28,10 @@
     "bundle-standard": "browserify --ignore './compiler' browserify/standard.js > build/interpol.js && uglifyjs -m --preamble \"`cat doc/preamble.js`\" build/interpol.js -o build/interpol.min.js",
     "bundle-parser": "browserify browserify/compiler.js | uglifyjs -m --preamble \"`cat doc/preamble.js`\" -o build/interpol-parser.min.js",
     "bundle-debug": "browserify --debug browserify/compiler.js > build/interpol-debug.js",
-    "build": "mkdir -p build && npm run-script build-parser && npm run-script bundle-standard && npm run-script bundle-parser && npm run-script bundle-debug && npm run-script coverage",
+    "build": "mkdir -p build && npm run-script build-parser && npm run-script bundle-standard && npm run-script bundle-parser && npm run-script bundle-debug && npm run-script coverage && npm run-script plato",
     "test": "nodeunit test/index.js",
-    "coverage": "istanbul cover -x '**/build/**' node_modules/nodeunit/bin/nodeunit test/index.js"
+    "coverage": "istanbul cover -x '**/build/**' node_modules/nodeunit/bin/nodeunit test/index.js",
+    "plato": "plato -r -l .jshintrc -d report index.js lib"
   },
   "dependencies": {
     "glob": "~4.0.6",
@@ -41,6 +42,7 @@
     "istanbul": "~0.3.2",
     "nodeunit": "~0.9.0",
     "pegjs": "~0.8.0",
+    "plato": "~1.2.2",
     "uglify-js": "~2.4.15"
   },
   "browser": {
