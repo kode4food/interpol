@@ -13,36 +13,7 @@ var nodeunit = require('nodeunit');
 var interpol = require('../lib');
 var commandLine = require('../lib/cli').commandLine;
 var createRuntime = require('../lib/runtime').createRuntime;
-
-function createConsole() {
-  var buffer = [];
-  var str;
-
-  return {
-    log: append,
-    info: append,
-    warn: append,
-    error: append,
-    result: result,
-    contains: contains
-  };
-
-  function append(value) {
-    buffer.push(value);
-    str = null;
-  }
-
-  function result() {
-    if ( !str ) {
-      str = buffer.join('\n');
-    }
-    return str;
-  }
-
-  function contains(str) {
-    return result().indexOf(str) !== -1;
-  }
-}
+var createConsole = require('./helpers').createConsole;
 
 exports.cli = nodeunit.testCase({
   "Command Line Help": function (test) {
@@ -55,7 +26,7 @@ exports.cli = nodeunit.testCase({
 
   "Successful Parse": function (test) {
     var cons = createConsole();
-    commandLine(["-in", "./test/cli_success"], cons, function (exitCode) {
+    commandLine(["-in", "./test/cli_success"], cons, function () {
       test.ok(cons.contains("Interpol Parsing Complete"));
       test.ok(cons.contains("Success"));
       test.ok(!cons.contains("Warnings"));
@@ -65,8 +36,11 @@ exports.cli = nodeunit.testCase({
       test.equal(typeof content.createTemplate, 'function');
       var compiled = content.createTemplate(createRuntime(interpol));
       test.equal(typeof compiled, 'function');
-      fs.unlinkSync("./test/cli_success/test1.int.js"); // cleanup
+
+      // cleanup
+      fs.unlinkSync("./test/cli_success/test1.int.js");
       fs.unlinkSync("./test/cli_success/test2.int.js");
+
       test.done();
     });
   },

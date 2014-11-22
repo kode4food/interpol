@@ -7204,7 +7204,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule = null;
 var generateFunction = null;
 
-var CURRENT_VERSION = "0.9.6";
+var CURRENT_VERSION = "1.0.0";
 
 // Bootstrap
 
@@ -9141,7 +9141,7 @@ exports.createStringWriter = createStringWriter;
 
 },{}],24:[function(require,module,exports){
 module.exports=require(23)
-},{"/home/thom/work/interpol/node_modules/browserify/lib/_empty.js":23}],25:[function(require,module,exports){
+},{"/Users/thom/work/interpol/node_modules/browserify/lib/_empty.js":23}],25:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //

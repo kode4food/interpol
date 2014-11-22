@@ -1,13 +1,13 @@
 # Change History
 
-## Version 0.9.6 - Major Changes
-This release introduces several changes that I've been wanting to make for quite a while.  They needed to happen before 1.0 to avoid forever being married to the old way of doing things.
+## Version 1.0 - Major Changes
+This is version 1.0 release of Interpol.  It introduces several changes that I've been wanting to make for quite a while.  These changes needed to happen with 1.0 to avoid forever being married to the old way of doing things.
 
 * The 'using' statement and expression have been removed.  Their use was confusing and unnecessarily complicated the code-generation process.
 
-* Lists are now constructed using square brackets rather than parentheses.
+* Lists are now constructed using square brackets rather than parentheses.  I did this because it makes parsing a little less prone to ambiguity and because, quite honestly, I was seeing too many fucking parentheses.
 
-* The '%' operator has been removed.  Allowing arbitrary interpolation was a potential security risk and also completely useless syntax.  Now all literal strings that contain escapes will be treated as capable of being interpolated.  They can then be called as a function, either using the pipe operator or a normal function call.  For example:
+* The '%' operator has been removed.  Allowing arbitrary interpolation was a potential security risk and also a completely useless syntax.  Now all literal strings that contain escapes will be treated as capable of being interpolated.  They can then be called as a function, either using the pipe operator or a normal function call.  For example:
 
 ```python
 let person = [name = 'Bob', age = 42]

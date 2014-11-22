@@ -8,9 +8,19 @@
 
 "use strict";
 
+var fs = require('fs');
+var path = require('path');
+var glob = require('glob');
+
 var nodeunit = require('nodeunit');
 var interpol = require('../lib');
+var util = require('../lib/util');
 var resolvers = require('../lib/resolvers');
+var commandLine = require('../lib/cli').commandLine;
+var createConsole = require('./helpers').createConsole;
+
+var each = util.each;
+
 var runtime;
 
 function evaluate(script, context) {
@@ -64,9 +74,9 @@ exports.imports = nodeunit.testCase({
 
     "Bound System Import": function (test) {
       var script = "from list import join\n" +
-        "let a = ['this', 'is', 'a', 'list']\n" +
-        "let j = @join(nil, '///')\n" +
-        "a | j";
+                   "let a = ['this', 'is', 'a', 'list']\n" +
+                   "let j = @join(nil, '///')\n" +
+                   "a | j";
 
       test.equal(evaluate(script), "this///is///a///list");
       test.done();
@@ -90,20 +100,30 @@ exports.imports = nodeunit.testCase({
 function createFileImportTests(compile, monitor) {
   return nodeunit.testCase({
     setUp: function (callback) {
-      if ( !compile ) {
-        // command-line build the files
-      }
       runtime = interpol.runtime({ resolvers: [] });
       resolvers.createFileResolver(runtime, {
         path: "./test", compile: compile, monitor: monitor
       });
 
-      callback();
+      if ( compile ) {
+        callback();
+        return;
+      }
+
+      // command-line build the files
+      commandLine(["-in", "./test"], createConsole(), function (exitCode) {
+        callback();
+      });
     },
 
     tearDown: function (callback) {
       if ( !compile ) {
         // delete the generated files
+        var root = './test';
+        var files = glob.sync('**/*.int.js', { cwd: root });
+        each(files, function (file) {
+          fs.unlinkSync(path.join(root, file));
+        });
       }
       callback();
     },
