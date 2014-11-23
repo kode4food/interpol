@@ -52,8 +52,6 @@ interpol.createStringWriter = writers.createStringWriter;
 var util = require('./util');
 var types = require('./types');
 
-var nullWriter = require('./writers/null').createNullWriter();
-
 var objectKeys = util.objectKeys;
 var each = util.each;
 var bind = util.bind;
@@ -67,6 +65,8 @@ var Params = "%((%)|(" + Digits + ")|(" + Ident + "))?(([|]" + Ident + ")*)?";
 
 var ParamRegex = new RegExp(Params, "m");
 
+var nullWriter = require('./writers/null').createNullWriter;
+
 /**
  * Builds a closure that will be used internally to support Interpol's
  * interpolation operations.  The returned closure will attach flags
@@ -76,17 +76,17 @@ var ParamRegex = new RegExp(Params, "m");
  * @param {String} formatStr the String to be used for interpolation
  */
 function buildFormatter(formatStr) {
-  var funcs = [];
+  var components = [];
   var requiredIndexes = {};
   var requiredFunctions = {};
-  var flen = 0;
+  var clen = 0;
   var autoIdx = 0;
 
   var workStr = formatStr;
   while ( workStr && workStr.length ) {
     var paramMatch = ParamRegex.exec(workStr);
     if ( !paramMatch ) {
-      funcs.push(createLiteralFunction(workStr));
+      components.push(createLiteralComponent(workStr));
       break;
     }
 
@@ -95,11 +95,11 @@ function buildFormatter(formatStr) {
     var matchLen = match.length;
 
     if ( matchIdx ) {
-      funcs.push(createLiteralFunction(workStr.substring(0, matchIdx)));
+      components.push(createLiteralComponent(workStr.substring(0, matchIdx)));
     }
 
     if ( paramMatch[2] === '%' ) {
-      funcs.push(createLiteralFunction('%'));
+      components.push(createLiteralComponent('%'));
       workStr = workStr.substring(matchIdx + matchLen);
       continue;
     }
@@ -115,15 +115,15 @@ function buildFormatter(formatStr) {
 
     if ( paramMatch[5] ) {
       var formatters = paramMatch[5].slice(1).split('|');
-      funcs.push(createPipedFunction(idx, formatters));
+      components.push(createPipedComponent(idx, formatters));
     }
     else {
-      funcs.push(createIndexedFunction(idx));
+      components.push(createIndexedComponent(idx));
     }
 
     workStr = workStr.substring(matchIdx + matchLen);
   }
-  flen = funcs.length;
+  clen = components.length;
 
   formatFunction.__intRequiredIndexes = objectKeys(requiredIndexes);
   formatFunction.__intRequiredFunctions = objectKeys(requiredFunctions);
@@ -140,29 +140,26 @@ function buildFormatter(formatStr) {
     }
 
     var output = [];
-    for ( var i = 0; i < flen; i++ ) {
-      output[i] = funcs[i](data, supportFunctions);
+    for ( var i = 0; i < clen; i++ ) {
+      var component = components[i];
+      switch ( component[0] ) {
+        case 0: output[i] = component[1]; break;
+        case 1: output[i] = stringify(data[component[1]]); break;
+        case 2: output[i] = component[1](data, supportFunctions);
+      }
     }
     return output.join('');
   }
 
-  function createLiteralFunction(literal) {
-    return literalFunction;
-
-    function literalFunction() {
-      return literal;
-    }
+  function createLiteralComponent(literal) {
+    return [0, literal];
   }
 
-  function createIndexedFunction(idx) {
-    return indexedFunction;
-
-    function indexedFunction(data) {
-      return stringify(data[idx]);
-    }
+  function createIndexedComponent(idx) {
+    return [1, idx];
   }
 
-  function createPipedFunction(idx, formatters) {
+  function createPipedComponent(idx, formatters) {
     var funcs = formatters.reverse();
     var flen = funcs.length - 1;
 
@@ -171,7 +168,7 @@ function buildFormatter(formatStr) {
       requiredFunctions[funcName] = true;
     });
 
-    return pipedFunction;
+    return [2, pipedFunction];
 
     function pipedFunction(data, supportFunctions) {
       var value = data[idx];
@@ -251,7 +248,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule = null;
 var generateFunction = null;
 
-var CURRENT_VERSION = "1.0.0";
+var CURRENT_VERSION = "1.0.1";
 
 // Bootstrap
 
