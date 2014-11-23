@@ -52,6 +52,8 @@ interpol.createStringWriter = writers.createStringWriter;
 var util = require('./util');
 var types = require('./types');
 
+var nullWriter = require('./writers/null').createNullWriter();
+
 var objectKeys = util.objectKeys;
 var each = util.each;
 var bind = util.bind;
@@ -64,9 +66,6 @@ var Params = "%((%)|(" + Digits + ")|(" + Ident + "))?(([|]" + Ident + ")*)?";
              /* "%" ( "%" | digits | identifier )? ( "|" identifier )* */
 
 var ParamRegex = new RegExp(Params, "m");
-
-var emptyObject = {};
-var nullWriter;
 
 /**
  * Builds a closure that will be used internally to support Interpol's
@@ -171,11 +170,6 @@ function buildFormatter(formatStr) {
     each(funcs, function (funcName) {
       requiredFunctions[funcName] = true;
     });
-
-    if ( !nullWriter ) {
-      var createNullWriter = require('./writers/null').createNullWriter;
-      nullWriter = createNullWriter();
-    }
 
     return pipedFunction;
 
