@@ -79,8 +79,13 @@ exports.interpolation = nodeunit.testCase({
     var script2 = 'from string import upper\n' +
                   '"The Title is %|upper"("big")';
 
+    var script3 = 'from string import upper\n' +
+                  "let a = 'The Title is %|upper'\n" +
+                  'a("big")';
+
     test.equal(evaluate(script1, this.data), "Result is Title Case String");
     test.equal(evaluate(script2, this.data), "The Title is BIG");
+    test.equal(evaluate(script3, this.data), "The Title is BIG");
     test.done();
   },
 

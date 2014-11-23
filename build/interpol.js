@@ -76,7 +76,7 @@ var nullWriter;
  *
  * @param {String} formatStr the String to be used for interpolation
  */
-function buildLocalFormatter(formatStr) {
+function buildFormatter(formatStr) {
   var funcs = [];
   var requiredIndexes = {};
   var requiredFunctions = {};
@@ -126,46 +126,25 @@ function buildLocalFormatter(formatStr) {
   }
   flen = funcs.length;
 
-  templateFunction.__intRequiredIndexes = objectKeys(requiredIndexes);
-  templateFunction.__intRequiredFunctions = objectKeys(requiredFunctions);
-  templateFunction.toString = toString;
-  return templateFunction;
+  formatFunction.__intRequiredIndexes = objectKeys(requiredIndexes);
+  formatFunction.__intRequiredFunctions = objectKeys(requiredFunctions);
+  formatFunction.toString = toString;
+  return formatFunction;
 
   function toString() {
     return formatStr;
   }
 
-  function templateFunction(supportFunctions, data) {
-    if ( data === undefined ) {
-      execInterface.__intFunction = 'format';
-      execInterface.toString = toString;
-      return execInterface;
-    }
-
+  function formatFunction(supportFunctions, writer, data) {
     if ( typeof data !== 'object' || data === null ) {
       data = [data];
     }
 
-    return processTemplate(data);
-
-    function execInterface(writer, data) {
-      if ( data === undefined ) {
-        return processTemplate(emptyObject);
-      }
-      else if ( typeof data !== 'object' || data === null ) {
-        data = [data];
-      }
-
-      return processTemplate(data);
+    var output = [];
+    for ( var i = 0; i < flen; i++ ) {
+      output[i] = funcs[i](data, supportFunctions);
     }
-
-    function processTemplate(data) {
-      var output = [];
-      for ( var i = 0; i < flen; i++ ) {
-        output[i] = funcs[i](data, supportFunctions);
-      }
-      return output.join('');
-    }
+    return output.join('');
   }
 
   function createLiteralFunction(literal) {
@@ -220,14 +199,40 @@ function buildLocalFormatter(formatStr) {
   }
 }
 
-function buildGlobalFormatter(formatStr) {
-  var formatter = buildLocalFormatter(formatStr);
-  return formatter();
+function buildDeferredFormatter(formatStr, supportFunctions) {
+  var formatter = buildFormatter(formatStr);
+  if ( supportFunctions !== undefined ) {
+    var bound = bind(formatter, supportFunctions);
+    bound.__intFunction = 'format';
+    bound.toString = formatter.toString;
+    return bound;
+  }
+  return deferredFormatter;
+
+  function deferredFormatter(supportFunctions) {
+    var bound = bind(formatter, supportFunctions);
+    bound.__intFunction = 'format';
+    bound.toString = formatter.toString;
+    return bound;
+  }
+}
+
+function buildImmediateFormatter(formatStr, supportFunctions) {
+  var formatter = buildFormatter(formatStr);
+  if ( supportFunctions !== undefined ) {
+    return bind(formatter, supportFunctions, undefined);
+  }
+  return immediateFormatter;
+
+  function immediateFormatter(supportFunctions, data) {
+    return formatter(supportFunctions, undefined, data);
+  }
 }
 
 // Exported Functions
-exports.buildLocalFormatter = buildLocalFormatter;
-exports.buildGlobalFormatter = buildGlobalFormatter;
+exports.buildFormatter = buildFormatter;
+exports.buildDeferredFormatter = buildDeferredFormatter;
+exports.buildImmediateFormatter = buildImmediateFormatter;
 
 },{"./types":14,"./util":15,"./writers/null":18}],4:[function(require,module,exports){
 /*
@@ -901,13 +906,13 @@ var format = require('../../format');
 var types = require('../../types');
 var wrap = require('./wrap');
 
-var buildLocalFormatter = format.buildLocalFormatter;
+var buildDeferredFormatter = format.buildDeferredFormatter;
 var stringify = types.stringify;
 
 // `build(value, supportFunctions)` converts the provided string and
 // supportFunctions Object into an Interpol interpolation function.
 function build(writer, value, supportFunctions) {
-  var formatter = buildLocalFormatter(stringify(value));
+  var formatter = buildDeferredFormatter(stringify(value));
   return formatter(supportFunctions);
 }
 
@@ -1047,8 +1052,9 @@ function createRuntime(interpol, runtimeOptions) {
     isTruthy: types.isTruthy,
     isFalsy: types.isFalsy,
 
-    localFormatter: format.buildLocalFormatter,
-    globalFormatter: format.buildGlobalFormatter,
+    immediateFormatter: format.buildImmediateFormatter,
+    deferredFormatter: format.buildDeferredFormatter,
+
     matches: match.matches,
     matcher: match.matcher,
 
