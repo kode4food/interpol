@@ -1,7 +1,7 @@
 # Change History
 
 ## Version 1.0.1 - Formatter Refactoring
-Refactored the format module a bit to reducing the number of functions invoked.
+Refactored the format module a bit to reduce the number of functions invoked.
 
 ## Version 1.0 - Major Changes
 This is version 1.0 of Interpol.  It introduces several changes that I've been wanting to make for quite a while.  These changes needed to happen with 1.0 to avoid forever being married to the old way of doing things.  Therefore 1.0 is *not* backward compatible to the 0.x releases.
