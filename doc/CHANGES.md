@@ -1,5 +1,8 @@
 # Change History
 
+## Version 1.0.2 - Blessing Strings
+External Strings can now be blessed using `interpol.bless()` which will allow them to pass through the system without being escaped.  As before, if the value is not a String or a Function, an Exception will be raised.
+
 ## Version 1.0.1 - Formatter Refactoring
 Refactored the format module a bit to reduce the number of functions invoked.
 
