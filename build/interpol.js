@@ -1372,7 +1372,7 @@ var EscapeChars = {
  *
  * @param {Mixed} value the value to stringify
  */
-var stringify = bind(stringifyImpl, null);
+var stringify = bind(stringifyImpl, {}, null);
 
 /**
  * Escape the provided value for the purposes of rendering it as an HTML
@@ -1380,7 +1380,7 @@ var stringify = bind(stringifyImpl, null);
  *
  * @param {Mixed} value the value to escape
  */
-var escapeAttribute = bind(stringifyImpl, (/[&<>'"]/gm));
+var escapeAttribute = bind(stringifyImpl, {}, (/[&<>'"]/gm));
 
 /**
  * Escape the provided value for the purposes of rendering it as HTML
@@ -1388,18 +1388,34 @@ var escapeAttribute = bind(stringifyImpl, (/[&<>'"]/gm));
  *
  * @param {Mixed} value the value to escape
  */
-var escapeContent = bind(stringifyImpl, (/[&<>]/gm));
+var escapeContent = bind(stringifyImpl, {}, (/[&<>]/gm));
 
-function stringifyImpl(escapeRegex, value) {
+var escapeCacheMax = 8192;
+var escapeCacheSize = 0;
+
+function stringifyImpl(escapeCache, escapeRegex, value) {
   var type = typeof value;
   switch ( type ) {
     case 'string':
-      if ( escapeRegex ) {
-        return value.replace(escapeRegex, function(ch) {
-          return EscapeChars[ch];
-        });
+      if ( !escapeRegex ) {
+        return value;
       }
-      return value;
+
+      var result = escapeCache[value];
+      if ( result ) {
+        return result;
+      }
+      if ( escapeCacheSize >= escapeCacheMax ) {
+        escapeCache = {};
+        escapeCacheSize = 0;
+      }
+      else {
+        escapeCacheSize += 1;
+      }
+      result = escapeCache[value] = value.replace(escapeRegex, function(ch) {
+        return EscapeChars[ch];
+      });
+      return result;
 
     case 'number':
       return value.toString();
@@ -1411,7 +1427,7 @@ function stringifyImpl(escapeRegex, value) {
       if ( isArray(value) ) {
         var result = [];
         for ( var i = 0, len = value.length; i < len; i++ ) {
-          result[i] = stringifyImpl(escapeRegex, value[i]);
+          result[i] = stringifyImpl(escapeCache, escapeRegex, value[i]);
         }
         return result.join(' ');
       }
@@ -1869,12 +1885,12 @@ function createStringWriter() {
     comment: comment,
     docType: docType,
     content: content,
-    raw: Function.prototype.bind ? arr.push.bind(arr) : raw
+    raw: raw
   };
 
   function endRender() {
     var result = arr.join('');
-    arr.length = 0;
+    arr = [];
     return result;
   }
 

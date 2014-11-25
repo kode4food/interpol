@@ -1,18 +1,18 @@
 # Interpol (Templates Sans Facial Hair)
 
-## Introduction
+## Why Interpol?
 There are a lot of templating systems out there and they're all similar.  In truth, Interpol isn't so different, which might beg the question:
 
     Why the hell another templating system?
 
-The answer is simple.  I'm sick of looking at a template and being unable to read the thing, even if I wrote it yesterday.  That's why I developed Interpol.
+The answer is simple.  I was sick of looking at a template and being unable to read the thing, even if I wrote it yesterday.  That's why I developed Interpol.
 
-That said, Interpol's goals are modest.  It should:
+That said, Interpol's goals are modest.  It:
 
-  * Provide templates where *meaning* takes a front seat
-  * Work well in both Node.js and the Browser
+  * Provides templates where *meaning* takes a front seat
+  * Works well in both Node.js and the Browser 
 
-Also, it *will not* participate in the member-measuring and micro-optimization that seem to be so important to some developers.  Specifically, Interpol has:
+Also, it *does not* participate in the member-measuring and micro-optimization that seem to be so important to some developers.  Specifically, Interpol has:
 
   * No desire to have the 'smallest' minified footprint
   * No desire to be the 'fastest' template processor
