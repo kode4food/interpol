@@ -131,5 +131,19 @@ exports.basics = nodeunit.testCase({
     test.equal(evaluate(script1, data), "Thom is 42\n");
     test.equal(evaluate(script2, data), "Thom is 42\n");
     test.done();
+  },
+
+  "Blessed Strings": function (test) {
+    var data = {
+      rawString: interpol.bless("<b>it's bold!</b>"),
+      escapedString: "<b>it's not bold!</b>"
+    };
+
+    test.equal(evaluate("rawString", data), "<b>it's bold!</b>");
+
+    test.equal(evaluate("escapedString", data),
+               "&lt;b&gt;it's not bold!&lt;/b&gt;");
+
+    test.done();
   }
 });
