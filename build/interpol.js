@@ -1338,25 +1338,36 @@ function isInterpolPartial(func) {
 }
 
 /**
- * 'bless' a Function as being Interpol-compatible.  This essentially means
- * that the Function must accept a Writer instance as the first argument, as
- * a writer will be passed to it by the compiled template.
+ * 'bless' a Function or String as being Interpol-compatible.  For a Function
+ * this essentially means that it must accept a Writer instance as the first
+ * argument, as a writer will be passed to it by the compiled template.  For
+ * a String, it will mark the String as capable of being rendered without
+ * escaping.
  *
- * @param {Function} func the Function to 'bless'
+ * @param {Function|String} value the String or Function to 'bless'
  */
-function bless(func) {
-  if ( typeof func !== 'function' ) {
-    throw new Error("Argument to bless must be a Function");
-  }
+function bless(value) {
+  var type = typeof value;
 
-  if ( func.__intFunction ) {
-    return func;
-  }
+  switch ( type ) {
+    case 'string':
+      var blessString = function () { return value; };
+      blessString.toString = blessString;
+      blessString.__intFunction = 'string';
+      return blessString;
 
-  var blessed = bind(func);
-  blessed.__intFunction = 'wrap';
-  blessed.toString = emptyString;
-  return blessed;
+    case 'function':
+      if ( value.__intFunction ) {
+        return value;
+      }
+      var blessedFunc = bind(value);
+      blessedFunc.__intFunction = 'wrap';
+      blessedFunc.toString = emptyString;
+      return blessedFunc;
+
+    default:
+      throw new Error("Argument to bless must be a Function or String");
+  }
 }
 
 var EscapeChars = {
