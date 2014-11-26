@@ -78,5 +78,18 @@ exports.lists = nodeunit.testCase({
     test.equal(evaluate("import list\nlist.values(62)"), "");
 
     test.done();
+  },
+
+  "Expression Keys": function (test) {
+    var data = {
+      name: 'hello',
+      value: 9,
+      blessed: interpol.bless('isBlessed')
+    };
+
+    test.equal(evaluate("[(name + '1') = value + 1]['hello1']", data), "10");
+    test.equal(evaluate("[(blessed) = value]['isBlessed']", data), "9");
+
+    test.done();
   }
 });
