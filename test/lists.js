@@ -88,6 +88,7 @@ exports.lists = nodeunit.testCase({
     };
 
     test.equal(evaluate("[(name + '1') = value + 1]['hello1']", data), "10");
+    test.equal(evaluate("[name + '2' = value + 1]['hello2']", data), "10");
     test.equal(evaluate("[(blessed) = value]['isBlessed']", data), "9");
 
     test.done();
