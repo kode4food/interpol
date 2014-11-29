@@ -1392,14 +1392,14 @@ var escapeCacheMax = 8192;
 var escapeCacheSize = 0;
 
 function stringifyImpl(escapeCache, escapeRegex, value) {
-  var type = typeof value;
-  switch ( type ) {
+  var result;
+  switch ( typeof value ) {
     case 'string':
       if ( !escapeRegex ) {
         return value;
       }
 
-      var result = escapeCache[value];
+      result = escapeCache[value];
       if ( result ) {
         return result;
       }
@@ -1423,7 +1423,7 @@ function stringifyImpl(escapeCache, escapeRegex, value) {
 
     case 'object':
       if ( isArray(value) ) {
-        var result = [];
+        result = [];
         for ( var i = 0, len = value.length; i < len; i++ ) {
           result[i] = stringifyImpl(escapeCache, escapeRegex, value[i]);
         }
