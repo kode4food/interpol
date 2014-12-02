@@ -18,7 +18,7 @@ exports.lists = nodeunit.testCase({
     var script2 = "let l = ['thom', 'is', 'cool']\n" +
                   "let r = [(i)=i + ' so' for i in l]\n" +
                   "r['thom']";
-    
+
     test.equal(evaluate(script1), "2 4 6");
     test.equal(evaluate(script2), "thom so");
     test.done();
