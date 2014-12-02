@@ -13,6 +13,17 @@ var interpol = require('../lib');
 var evaluate = interpol.evaluate;
 
 exports.lists = nodeunit.testCase({
+  "List comprehensions": function (test) {
+    var script1 = "let l = [1,2,3]\n[i * 2 for i in l]";
+    var script2 = "let l = ['thom', 'is', 'cool']\n" +
+                  "let r = [(i)=i + ' so' for i in l]\n" +
+                  "r['thom']";
+
+    test.equal(evaluate(script1), "2 4 6");
+    test.equal(evaluate(script2), "thom so");
+    test.done();
+  },
+
   "Expression lists": function (test) {
     test.equal(evaluate("[9,8,'Hello',7,3][2]"), "Hello");
     test.equal(evaluate("[9,8,'Hello',7,3].length"), 5);
@@ -76,6 +87,20 @@ exports.lists = nodeunit.testCase({
     test.equal(evaluate("import list\nlist.values([name='Thom',age=42])"),
                "Thom 42");
     test.equal(evaluate("import list\nlist.values(62)"), "");
+
+    test.done();
+  },
+
+  "Expression Keys": function (test) {
+    var data = {
+      name: 'hello',
+      value: 9,
+      blessed: interpol.bless('isBlessed')
+    };
+
+    test.equal(evaluate("[(name + '1') = value + 1]['hello1']", data), "10");
+    test.equal(evaluate("[name + '2' = value + 1]['hello2']", data), "10");
+    test.equal(evaluate("[(blessed) = value]['isBlessed']", data), "9");
 
     test.done();
   }

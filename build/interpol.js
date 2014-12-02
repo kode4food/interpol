@@ -1121,7 +1121,6 @@ function createRuntime(interpol, runtimeOptions) {
 function defineModule(template) {
   var exportedContext;
   templateInterface.__intModule = true;
-  templateInterface.configure = configureTemplate;
   templateInterface.exports = templateExports;
   return templateInterface;
 
@@ -1147,18 +1146,6 @@ function defineModule(template) {
       // Re-raise if no callback
       throw err;
     }
-  }
-
-  /**
-   * Returns a preconfigured version of the runtime template with a
-   * default obj and options.  Convenient if you're doing DOM writing
-   * or need to repeatedly call the template with the same Object.
-   *
-   * @param {Object} defaultObj default context Object to use
-   * @param {Object} defaultOptions default Options to provide
-   */
-  function configureTemplate(defaultObj, defaultOptions) {
-    return configure(template, 0, slice(arguments, 0));
   }
 
   /**
@@ -1405,14 +1392,14 @@ var escapeCacheMax = 8192;
 var escapeCacheSize = 0;
 
 function stringifyImpl(escapeCache, escapeRegex, value) {
-  var type = typeof value;
-  switch ( type ) {
+  var result;
+  switch ( typeof value ) {
     case 'string':
       if ( !escapeRegex ) {
         return value;
       }
 
-      var result = escapeCache[value];
+      result = escapeCache[value];
       if ( result ) {
         return result;
       }
@@ -1436,7 +1423,7 @@ function stringifyImpl(escapeCache, escapeRegex, value) {
 
     case 'object':
       if ( isArray(value) ) {
-        var result = [];
+        result = [];
         for ( var i = 0, len = value.length; i < len; i++ ) {
           result[i] = stringifyImpl(escapeCache, escapeRegex, value[i]);
         }
