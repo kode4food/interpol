@@ -13,6 +13,17 @@ var interpol = require('../lib');
 var evaluate = interpol.evaluate;
 
 exports.lists = nodeunit.testCase({
+  "List comprehensions": function (test) {
+    var script1 = "let l = [1,2,3]\n[i * 2 for i in l]";
+    var script2 = "let l = ['thom', 'is', 'cool']\n" +
+                  "let r = [(i)=i + ' so' for i in l]\n" +
+                  "r['thom']";
+    
+    test.equal(evaluate(script1), "2 4 6");
+    test.equal(evaluate(script2), "thom so");
+    test.done();
+  },
+
   "Expression lists": function (test) {
     test.equal(evaluate("[9,8,'Hello',7,3][2]"), "Hello");
     test.equal(evaluate("[9,8,'Hello',7,3].length"), 5);
