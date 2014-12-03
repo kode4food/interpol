@@ -14,17 +14,32 @@ var evaluate = interpol.evaluate;
 
 exports.lists = nodeunit.testCase({
   "List comprehensions": function (test) {
-    var script1 = "let l = [1,2,3]\n[i * 2 for i in l]";
-    var script2 = "let l = ['thom', 'is', 'cool']\n" +
-                  "let r = [(i)=i + ' so' for i in l]\n" +
-                  "r['thom']";
+    var data = {
+      y: [10, 20, 30, 50, 51, 75, 90, 100],
+      yl: [10, 20, 30, 50, 51, 75, 90, 100],
+      xl: [
+        { val: 5, friend: 51 },
+        { val: 10, friend: 30 },
+        { val: 20, friend: 90 },
+        { val: 30, friend: 75 }
+      ]
+    };
 
-    test.equal(evaluate(script1), "2 4 6");
-    test.equal(evaluate(script2), "thom so");
+    var script1 = "[x * 2 for x in y]";
+    var script2 = "[x * 2 for x in y when x gt 50]";
+    var script3 = "[x * 2: x * 4 for x in y when x gt 50][102]";
+    var script4 = "[x: x * 2 for x in y][51]";
+    var script5 = "[x.val * y for y in yl, x in xl when x.friend == y]";
+
+    test.equal(evaluate(script1, data), "20 40 60 100 102 150 180 200");
+    test.equal(evaluate(script2, data), "102 150 180 200");
+    test.equal(evaluate(script3, data), "204");
+    test.equal(evaluate(script4, data), "102");
+    test.equal(evaluate(script5, data), "300 255 2250 1800");
     test.done();
   },
 
-  "Expression lists": function (test) {
+  "Vector lists": function (test) {
     test.equal(evaluate("[9,8,'Hello',7,3][2]"), "Hello");
     test.equal(evaluate("[9,8,'Hello',7,3].length"), 5);
     test.equal(evaluate("[3 * 3, 2 * 4, 'Hel'+'lo', 14 / 2, 9 / 3][2]"), "Hello");
@@ -34,9 +49,18 @@ exports.lists = nodeunit.testCase({
   },
 
   "Dictionary lists": function (test) {
+    var data = {
+      name: 'hello',
+      value: 9,
+      blessed: interpol.bless('isBlessed')
+    };
+
     test.equal(evaluate("[name='Thom',age=42].age"), "42");
     test.equal(evaluate("[name='Thom',age=21*2].age"), "42");
     test.equal(evaluate("[age=21*2].age"), "42");
+    test.equal(evaluate("[name + '1': value + 1]['hello1']", data), "10");
+    test.equal(evaluate("[name + '2': value + 1]['hello2']", data), "10");
+    test.equal(evaluate("[blessed: value]['isBlessed']", data), "9");
     test.done();
   },
 
@@ -87,20 +111,6 @@ exports.lists = nodeunit.testCase({
     test.equal(evaluate("import list\nlist.values([name='Thom',age=42])"),
                "Thom 42");
     test.equal(evaluate("import list\nlist.values(62)"), "");
-
-    test.done();
-  },
-
-  "Expression Keys": function (test) {
-    var data = {
-      name: 'hello',
-      value: 9,
-      blessed: interpol.bless('isBlessed')
-    };
-
-    test.equal(evaluate("[(name + '1') = value + 1]['hello1']", data), "10");
-    test.equal(evaluate("[name + '2' = value + 1]['hello2']", data), "10");
-    test.equal(evaluate("[(blessed) = value]['isBlessed']", data), "9");
 
     test.done();
   }
