@@ -1,5 +1,42 @@
 # Change History
 
+## Version 1.1 - List Comprehensions
+List Comprehensions are now supported for both vector and dictionary backed lists.  They work similarly to Python except that they support multiple ranges as well as guards (because they're backed by Interpol `for` loops).  Here's a vector comprehension:
+
+```python
+let source = [10, 20, 30, 40, 50]
+let result = [val * 2 for val in source when val gt 20]
+result
+```
+
+This will display `60 80 100`.  And here's a dictionary comprehension:
+
+```python
+let source = [10, 20, 30, 40, 50]
+let result = [val + '_key': val*val for val in source]
+result['30_key']
+```
+
+This will display `900`.
+
+To support generating new dictionaries via comprehensions, a new syntax has been introduced that allows you to synthesize dictionary keys using expressions.  This will work both in list comprehensions and literal list constructions.  It's performed using a separating colon `:` rather than an equal sign `=`.
+
+```python
+[
+  name = 'Interpol',   # this will still work, binding name
+  99: 'ninety nine',   # 99 now maps to 'ninety nine'
+  var + '_test': var   # concatenated var maps to var
+]
+```
+
+An interpolation escape can now be terminated with a semi-colon `;`.  This will allow you to concatenate interpolations to literals without being forced to separate them with a space or other non-identifying character.  Example:
+
+```
+"%attr;_class" [ attr = 'first' ]  # will display 'first_class'
+```
+
+Of course it means you'll have to double your semi-colons if you plan to use one after an interpolation, but how often are you going to do that?
+
 ## Version 1.0.2 - Blessing Strings
 External Strings can now be blessed using `interpol.bless()` which will allow them to pass through the system without being escaped.  As before, if the value is not a String or a Function, an Exception will be raised.
 
