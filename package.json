@@ -22,7 +22,7 @@
       "email": "thom@kode4food.it"
     }
   ],
-  "repository": "git@bitbucket.org:kode4food/interpol.git",
+  "repository": "git@github.com:kode4food/interpol.git",
   "scripts": {
     "build-parser": "pegjs -o speed lib/compiler/parser.pegjs build/parser.js",
     "bundle-standard": "browserify --ignore './compiler' browserify/standard.js > build/interpol.js && uglifyjs -m --preamble \"`cat doc/preamble.js`\" build/interpol.js -o build/interpol.min.js",

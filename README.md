@@ -156,7 +156,7 @@ For [Express](http://expressjs.com/) or [hapi](http://hapijs.com/) View Renderin
 npm install interpol-views --save
 ```
 
-You can then follow the instructions available at the [interpol-views](https://bitbucket.org/kode4food/interpol-views) Bitbucket page.
+You can then follow the instructions available at the [interpol-views](http://github.com/kode4food/interpol-views) GitHub page.
 
 ## Interpol and the Browser
 To add Interpol as a Bower dependency to your project, do the following:
