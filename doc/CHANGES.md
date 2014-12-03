@@ -31,7 +31,7 @@ To support generating new dictionaries via comprehensions, a new syntax has been
 
 An interpolation escape can now be terminated with a semi-colon `;`.  This will allow you to concatenate interpolations to literals without being forced to separate them with a space or other non-identifying character.  Example:
 
-```
+```ruby
 "%attr;_class" [ attr = 'first' ]  # will display 'first_class'
 ```
 
@@ -52,7 +52,7 @@ Lists are now constructed using square brackets rather than parentheses.  I did 
 
 The '%' operator has been removed.  Allowing arbitrary interpolation was a potential security risk and also a completely useless syntax.  Now all literal strings that contain escapes will be treated as capable of being interpolated.  They can then be called as a function, either using the pipe operator or a normal function call.  For example:
 
-```python
+```ruby
 let person = [name = 'Bob', age = 42]
 person | "my name is %name and I am %age"
 # or
@@ -63,13 +63,13 @@ Keep in mind that if they're not involved in a function call, double quoted stri
 
 Literal lists can be applied to literal strings as an Interpolation shorthand:
 
-```python
+```ruby
 "my name is %name and I am %age" [name = 'Bob', age = 42]
 ```
 
 Note that this *only* applies to literal strings and lists, and is basically syntactic sugar for:
 
-```python
+```ruby
 "my name is %name and I am %age"([name = 'Bob', age = 42])
 ```
 
@@ -77,7 +77,7 @@ If you still absolutely need to perform arbitrary interpolation, you can use the
 
 Indexed Interpolation is now zero-based so that it is consistent with indexed retrieval from lists.  So, you'd perform the interpolation like so:
 
-```python
+```ruby
 "%1 is the new %0" ['black', 'red']
 ```
 
