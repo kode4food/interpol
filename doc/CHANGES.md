@@ -3,7 +3,7 @@
 ## Version 1.1 - List Comprehensions
 List Comprehensions are now supported for both vector and dictionary backed lists.  They work similarly to Python except that they support multiple ranges as well as guards (because they're backed by Interpol `for` loops).  Here's a vector comprehension:
 
-```python
+```ruby
 let source = [10, 20, 30, 40, 50]
 let result = [val * 2 for val in source when val gt 20]
 result
@@ -11,7 +11,7 @@ result
 
 This will display `60 80 100`.  And here's a dictionary comprehension:
 
-```python
+```ruby
 let source = [10, 20, 30, 40, 50]
 let result = [val + '_key': val*val for val in source]
 result['30_key']
@@ -21,7 +21,7 @@ This will display `900`.
 
 To support generating new dictionaries via comprehensions, a new syntax has been introduced that allows you to synthesize dictionary keys using expressions.  This will work both in list comprehensions and literal list constructions.  It's performed using a separating colon `:` rather than an equal sign `=`.
 
-```python
+```ruby
 [
   name = 'Interpol',   # this will still work, binding name
   99: 'ninety nine',   # 99 now maps to 'ninety nine'
@@ -113,7 +113,7 @@ Test coverage has been greatly increased, from about 50% to 90%.  Corrected quit
 
 The 'using' construct can now be applied to individual expressions.
 
-```python
+```ruby
 let result = "%name and %age" using person, profile
 ```
 
@@ -154,7 +154,7 @@ Refactored the parser/compiler and began to introduce optimizations to the JSON 
 
 The 'using' statement has been introduced.  It creates a new scope where the properties of any specified expressions are mixed in and made available as local variables.  For example, `name` and `age` may be taken from the `person` instance, while summary might be taken from the `profile` instance.
 
-```python
+```ruby
 def renderPerson(person, profile)
   using person, profile
     <div>name</div>
@@ -168,7 +168,7 @@ The 'array' module has been renamed to 'list'.  The Tuple, Array, and Dictionary
 
 For Loops have been extended to support range guards as well as an `else` clause.  You can define an `else` clause for those cases where the for loop finds no matches:
 
-```python
+```ruby
 for person in people, brother in person.brothers
   renderItem(person, brother)
 else
@@ -178,7 +178,7 @@ end
 
 This becomes especially important if you apply guards to your ranges:
 
-```python
+```ruby
 for person in people when person.type == 'stooge',
     brother in person.brothers when brother.living
   renderItem(person, brother)
@@ -189,7 +189,7 @@ end
 
 Added *very crude* pattern matching capability to Partial Definitions in order to facilitate what are essentially inline-guards.  For example:
 
-```python
+```ruby
 def renderItem(type, name)
   "This is a %type named %name"
 end
@@ -197,7 +197,7 @@ end
 
 This partial can be extended to deal with specific type values:
 
-```python
+```ruby
 def renderItem("developer", name)
   <b>"Developers rock! Especially %name"</b>
 end
@@ -205,7 +205,7 @@ end
 
 In this case, no local argument name is bound to the value.  You can simply treat it as discarded.  Under the hood, what is actually happening is something like this:
 
-```python
+```ruby
 def renderItem(self[0], name) when self[0] like "developer"
   <b>"Developers rock! Especially %name"</b>
 end
@@ -225,7 +225,7 @@ The logical negation `!` operator has been renamed `not`.
 
 The conditional operator is now pythonesque rather than derived from C.
 
-```python
+```ruby
 # <true_value> if <condition> else <false_value>
 "you are happy!" if happy else "awwwwwww"
 
@@ -239,7 +239,7 @@ If the argument names for partials with extended guards differed, the context pa
 ## Version 0.3.10 - Function and Partial Binding
 A new binding operator (@) is now supported, replacing the `.configure()` method.  While `configure()` against system functions was only useful for currying, binding against partials is useful when you want to pass the partial around for later invocation.  For example:
 
-```python
+```ruby
 from layouts import mainLayout
 from partials import renderList
 let renderItems = @renderList(items)
@@ -248,7 +248,7 @@ mainLayout("A Title", renderItems)
 
 Now, if mainLayout invokes `renderItems()` with no parameters, the bound list in `items` will be rendered.  As a result of the general-purpose nature of this operator, if you use it for functions that will be curried into a pipeline, those functions will now require a placeholder as the first argument:
 
-```python
+```ruby
 from list import join
 let j = @join(nil, " -- ")
 let a = ('joined','with','dashes')
@@ -261,7 +261,7 @@ Version 0.3.8 failed to publish build artifacts.  This version corrects that iss
 ## Version 0.3.8 - Basic Guard Support
 The ability to define a guard clause using the `when` keyword has been added to Partial Definitions.  This allows Partial Definitions to be 're-opened' with additional conditions.
 
-```python
+```ruby
 def renderList(people)
   <ul>
   for person in people, sibling in person.siblings
@@ -311,7 +311,7 @@ Also, if you plan to use Interpol as your default view engine, you can configure
 ## Version 0.3.5 - Extended lists
 lists now allow name/value pairs as well as the ability to force a single-element list (rather than treating the parentheses as a precedence operator).  Name/Value lists are always exposed as a Dictionary.  The name must be a valid identifier, while the value is any valid expression.
 
-```python
+```ruby
 (
   theMachine = 'Deep Thought',
   theAnswer = (28 - 7) * 2
@@ -340,7 +340,7 @@ See [The Interpol Guide](http://interpoljs.io/guide) for more information.
 ## Version 0.3.3 - Configurable Imports
 Modules exposed by the system resolver now allow their functions to be configured.  This enables the developer to generate pre-configured pipeline functions.  For example:
 
-```python
+```ruby
 from list import join
 let j = join.configure(" -- ")
 let a = ('joined','with','dashes')
@@ -368,7 +368,7 @@ Piped interpolation can now retrieve functions from the local scope if they're n
 ### Piped Calls
 Basic Piped Calls are now supported.  This is useful to create filtering and formatting chains against helper functions.  For example:
 
-```python
+```ruby
 from list import join
 from string import title
 ('single', 'title', 'cased', 'string') | join | title
@@ -379,7 +379,7 @@ The pipe operator has a relatively high precedence.  It is higher than unary, bu
 ### Piped Interpolation
 A limited form of the operator is also supported in string interpolation.
 
-```python
+```ruby
 from string import title
 "My name is %name|title"
 ```
@@ -413,7 +413,7 @@ Partials are now conditionally hoisted to the top of their scope.  The condition
 
 For example, this is a valid hoist:
 
-```python
+```ruby
 # content will already be available for calling
 content()
 
@@ -424,7 +424,7 @@ end
 
 While this is not a valid hoist:
 
-```python
+```ruby
 let content = "hello"
 
 # error that you're calling a non-partial
@@ -446,7 +446,7 @@ Also added a very simple Express example in the `examples` directory.
 ## Version 0.1.5 - Import Revisited
 To reduce ambiguity and context pollution, the `import <module>` statement now imports a module as a single variable rather than automatically importing all of its exported properties.  This will require drilling into its membership.  You can also alias the imported module using `as`.  For example:
 
-```python
+```ruby
 import myModule as myAlias
 myAlias.myPartial(someContext)
 ```
