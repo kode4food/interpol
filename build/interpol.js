@@ -60,8 +60,10 @@ var isInterpolFunction = types.isInterpolFunction;
 
 var Digits = "0|[1-9][0-9]*";
 var Ident = "[$_a-zA-Z][$_a-zA-Z0-9]*";
-var Params = "%((%)|(" + Digits + ")|(" + Ident + "))?(([|]" + Ident + ")*)?";
-             /* "%" ( "%" | digits | identifier )? ( "|" identifier )* */
+var Pipes = "([|]" + Ident + ")*";
+var Term = ";?";
+var Params = "%((%)|(" + Digits + ")|(" + Ident + "))?(" + Pipes + ")?" + Term;
+             /* "%" ( "%" | digits | identifier )? ( "|" identifier )* ";"? */
 
 var ParamRegex = new RegExp(Params, "m");
 

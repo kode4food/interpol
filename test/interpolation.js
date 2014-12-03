@@ -61,6 +61,10 @@ exports.interpolation = nodeunit.testCase({
                "This  will interpolate badly");
     test.equal(evaluate('"the answer is %val%% (percent)"', { val: 88 }),
                "the answer is 88% (percent)");
+    test.equal(evaluate('"%val;_continue"', { val:'1'}), "1_continue");
+    test.equal(evaluate('"%val;;_continue"', { val:'2'}), "2;_continue");
+    test.equal(evaluate('"%val;;;_continue"', { val:'3'}), "3;;_continue");
+    test.equal(evaluate('"%;is %" ["th", "works"]'), "this works");
     test.done();
   },
 
@@ -87,10 +91,15 @@ exports.interpolation = nodeunit.testCase({
                    "let a = 'The Title is %|upper'\n" +
                    'a()';
 
+    var script5 = 'from string import upper\n' +
+                  "let a = 'The Title is %|upper;_continue'\n" +
+                  'a("big")';
+
     test.equal(evaluate(script1, this.data), "Result is Title Case String");
     test.equal(evaluate(script2, this.data), "The Title is BIG");
     test.equal(evaluate(script3, this.data), "The Title is BIG");
     test.equal(evaluate(script4), "The Title is ");
+    test.equal(evaluate(script5, this.data), "The Title is BIG_continue");
     test.done();
   },
 
