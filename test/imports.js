@@ -128,6 +128,23 @@ function createFileImportTests(compile, monitor) {
       callback();
     },
 
+    "Module Retrieval": function (test) {
+      var result = "<!-- A Test Script -->\n<h2></h2>\n<b>There are no people!</b>\n\n";
+      var found1 = runtime.resolveModule('test');
+      var found2 = runtime.resolveModule('test');
+      var found3 = runtime.resolveExports('test');
+      var notFound1 = runtime.resolveModule('unknown');
+      var notFound2 = runtime.resolveModule('unknown');
+      var notFound3 = runtime.resolveExports('unknown');
+      test.equal(found1(), result);
+      test.equal(found2(), result);
+      test.equal(typeof found3, 'object');
+      test.equal(notFound1, undefined);
+      test.equal(notFound2, undefined);
+      test.equal(notFound3, undefined);
+      test.done();
+    },
+
     "File Import": function (test) {
       var script = "import test as t\n" +
                    "t.renderTest('Curly')";

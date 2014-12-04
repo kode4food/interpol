@@ -38,25 +38,14 @@ exports.html = nodeunit.testCase({
 
     var script8 = '<tag attr=true />';
 
-    test.equal(evaluate(script1, data),
-      '<htmlBody someAttr=\"aValue\" litAttr=\"attr\">\n</htmlBody>');
-    
-    test.equal(evaluate(script2, data),
-      '<!DOCTYPE any>\n<start>someAttr</start>');
-    
+    test.equal(evaluate(script1, data), '<htmlBody someAttr=\"aValue\" litAttr=\"attr\">\n</htmlBody>');
+    test.equal(evaluate(script2, data), '<!DOCTYPE any>\n<start>someAttr</start>');
     test.equal(evaluate(script3, data), '<aTag boolAttr>');
-    
     test.equal(evaluate(script4, data), '<selfClosingTag />');
-  
     test.equal(evaluate(script5), '<tag attr=\"&#39;&lt;&gt;\">');
-
-    test.equal(evaluate(script6),
-               '<tag>str&lt;&gt;ing1 s&lt;&gt;tring2</tag>');
-
+    test.equal(evaluate(script6), '<tag>str&lt;&gt;ing1 s&lt;&gt;tring2</tag>');
     test.equal(evaluate(script7), '<tag attr="static dynamic strings added">');
-
     test.equal(evaluate(script8), '<tag attr />');
-
     test.done();
   }
 });
