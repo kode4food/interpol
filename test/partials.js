@@ -100,6 +100,24 @@ exports.partials = nodeunit.testCase({
     test.done();
   },
 
+  "External Guard Clauses": function (test) {
+    var data = { value: 20, colors: ['red', 'black'] };
+
+    var script = 'let val = 20\n' +
+                 'partialCall()\n' +
+                 'def partialCall()\n' +
+                 '  "first %val"\n' +
+                 'end\n' +
+                 'def partialCall() where val == 20\n\n' +
+                 '  for color in colors\n' +
+                 '    "%color %val"\n' +
+                 '  end\n' +
+                 'end';
+
+    test.equal(evaluate(script, data), "red 20\nblack 20\n\n");
+    test.done();
+  },
+
   "Inline Guards": function (test) {
     var script = 'partialCall(type, name)\n' +
                  'def partialCall(type, name)\n' +
