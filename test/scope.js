@@ -76,7 +76,19 @@ exports.scope = nodeunit.testCase({
 
     test.equal(evaluate(script, { a: 'parent', b: true }),
                "parent\nchild\nchild");
+    test.done();
+  },
 
+  "Passing self": function (test) {
+    var script = "def part1(name, value)\n" +
+                 "  part2(self)\n" +
+                 "end\n" +
+                 "def part2(context)\n" +
+                 "  '%name and %value'(context)\n" +
+                 "end\n" +
+                 "part1('k', 'v')";
+
+    test.equal(evaluate(script), "k and v\n\n");
     test.done();
   }
 });
