@@ -34,6 +34,7 @@ exports.imports = nodeunit.testCase({
     setUp: function (callback) {
       runtime = interpol.runtime({ resolvers: [] });
       resolvers.createMemoryResolver(runtime);
+      runtime.registerModule('hello', "'hello world!'");
       runtime.registerModule('helpers', {
         testHelper: function testHelper(writer, arg1, arg2) {
           writer.content("arg1=" + arg1 + ":arg2=" + arg2);
@@ -43,15 +44,32 @@ exports.imports = nodeunit.testCase({
       callback();
     },
 
+    tearDown: function (callback) {
+      runtime.unregisterModule('helpers');
+      runtime.unregisterModule('hello');
+      callback();
+    },
+
     "Helper Import": function (test) {
       var script1 = "import helpers\n" +
-        "helpers.testHelper(1,2)";
+                    "helpers.testHelper(1,2)";
 
       var script2 = "from helpers import testHelper as test\n" +
-        "test(5,6)";
+                    "test(5,6)";
 
+      var module1 = runtime.resolveModule('hello');
+      var exports1 = runtime.resolveExports('hello');
+      var module2 = runtime.resolveModule('helpers');
+      var exports2 = runtime.resolveExports('helpers');
+      test.equal(typeof module1, 'function');
+      test.equal(typeof module2, 'function');
+      test.equal(typeof exports1, 'object');
+      test.equal(typeof exports2, 'object');
       test.equal(evaluate(script1), "arg1=1:arg2=2");
       test.equal(evaluate(script2), "arg1=5:arg2=6");
+      test.throws(function () {
+        runtime.registerModule(99);
+      }, "Registering nonsense should explode");
       test.done();
     }
   }),

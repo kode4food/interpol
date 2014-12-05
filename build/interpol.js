@@ -575,11 +575,26 @@ function createMemoryResolver(runtime) {
 
     // *Object* - A hash of Helpers (name->Function)
     if ( typeof module === 'object' && module !== null && !isArray(module) ) {
-      cache[name] = { moduleExports: blessModule(module) };
+      cache[name] = { module: createModuleStub(module) };
       return;
     }
 
     throw new Error("Module not provided");
+  }
+
+  function createModuleStub(moduleExports) {
+    moduleExports = blessModule(moduleExports);
+    templateInterface.__intModule = true;
+    templateInterface.exports = templateExports;
+    return templateInterface;
+
+    function templateInterface() {
+      // NO-OP
+    }
+
+    function templateExports() {
+      return moduleExports;
+    }
   }
 }
 
