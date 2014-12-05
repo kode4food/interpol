@@ -621,6 +621,7 @@ function blessModule(module) {
 // Exported Functions
 exports.createMemoryResolver = createMemoryResolver;
 exports.blessModule = blessModule;
+
 },{"../types":14,"../util":15}],8:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)

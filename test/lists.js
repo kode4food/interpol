@@ -15,7 +15,6 @@ var evaluate = interpol.evaluate;
 exports.lists = nodeunit.testCase({
   "List comprehensions": function (test) {
     var data = {
-      y: [10, 20, 30, 50, 51, 75, 90, 100],
       yl: [10, 20, 30, 50, 51, 75, 90, 100],
       xl: [
         { val: 5, friend: 51 },
@@ -25,17 +24,19 @@ exports.lists = nodeunit.testCase({
       ]
     };
 
-    var script1 = "[x * 2 for x in y]";
-    var script2 = "[x * 2 for x in y when x gt 50]";
-    var script3 = "[x * 2: x * 4 for x in y when x gt 50][102]";
-    var script4 = "[x: x * 2 for x in y][51]";
+    var script1 = "[y * 2 for y in yl]";
+    var script2 = "[y * 2 for y in yl when y gt 50]";
+    var script3 = "[y * 2: y * 4 for y in yl when y gt 50][102]";
+    var script4 = "[y: y * 2 for y in yl][51]";
     var script5 = "[x.val * y for y in yl, x in xl when x.friend == y]";
+    var script6 = "[val = y for y in yl]['val']";
 
     test.equal(evaluate(script1, data), "20 40 60 100 102 150 180 200");
     test.equal(evaluate(script2, data), "102 150 180 200");
     test.equal(evaluate(script3, data), "204");
     test.equal(evaluate(script4, data), "102");
     test.equal(evaluate(script5, data), "300 255 2250 1800");
+    test.equal(evaluate(script6, data), "100");
     test.done();
   },
 
