@@ -86,10 +86,10 @@ exports.lists = nodeunit.testCase({
     test.equal(evaluate("import list\nlist.join(['this','is','interpol'])"),
                         "this is interpol");
 
-    test.equal(evaluate("import list\nlist.join(['this','is','interpol'], '-=-')"),
+    test.equal(evaluate("import list\nlist.join('-=-', ['this','is','interpol'])"),
                         "this-=-is-=-interpol");
 
-    test.equal(evaluate("import list\nlist.join('hello', '-=-')"), "hello");
+    test.equal(evaluate("import list\nlist.join('-=-', 'hello')"), "hello");
 
     test.equal(evaluate("import list\nlist.first([1,2,3])"), "1");
     test.equal(evaluate("import list\nlist.first([9])"), "9");
