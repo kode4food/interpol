@@ -30,7 +30,7 @@ exports.strings = nodeunit.testCase({
   "Functions": function (test) {
     var script1 = "from string import lower\nlower('CAP STRING')";
     var script2 = "from string import split\nsplit('1\\n2\\n3')[2]";
-    var script3 = "from string import split\nsplit('1-2-3', '-', 1)";
+    var script3 = "from string import split\nsplit('-', '1-2-3')[1]";
     var script4 = "from string import build\nbuild(template)([name='Bob'])";
     test.equal(evaluate(script1), "cap string");
     test.equal(evaluate(script2), "3");

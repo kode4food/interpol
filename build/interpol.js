@@ -250,7 +250,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule;
 var generateFunction;
 
-var CURRENT_VERSION = "1.1.0";
+var CURRENT_VERSION = "1.2.0";
 
 // Bootstrap
 
@@ -690,12 +690,16 @@ function first(writer, value) {
   return value[0];
 }
 
-// `join(value, delim)` returns the result of joining the elements of the
+// `join(delim, value)` returns the result of joining the elements of the
 // provided array. Each element will be concatenated into a string separated
 // by the specified delimiter (or ' ').
-function join(writer, value, delim) {
+function join(writer, delim, value) {
+  if ( value === undefined ) {
+    value = delim;
+    delim = ' ';
+  }
   if ( isArray(value) ) {
-    return value.join(delim || ' ');
+    return value.join(delim);
   }
   return value;
 }
@@ -931,12 +935,15 @@ function lower(writer, value) {
   return stringify(value).toLowerCase();
 }
 
-// `split(value, delim, idx)` splits the provided string wherever the
+// `split(delim, value)` splits the provided string wherever the
 // specified delimiter (or whitespace) is encountered and returns the
 // result.
-function split(writer, value, delim, idx) {
-  var val = stringify(value).split(delim || /\s*/);
-  return idx !== undefined ? val[idx] : val;
+function split(writer, delim, value) {
+  if ( value === undefined ) {
+    value = delim;
+    delim = /\s*/;
+  }
+  return stringify(value).split(delim);
 }
 
 // `title(value)` converts the provided string to title-case and returns
@@ -1014,11 +1021,11 @@ var bless = types.bless;
 
 var util = require('./util');
 var isArray = util.isArray;
+var slice = util.slice;
 var mixin = util.mixin;
 var extendObject = util.extendObject;
 var objectKeys = util.objectKeys;
 var bind = util.bind;
-var configure = util.configure;
 
 var internalResolvers = require('./resolvers/internal');
 var createSystemResolver = internalResolvers.createSystemResolver;
@@ -1229,10 +1236,17 @@ function bindPartial(ctx, func, callArgs) {
     throw new Error("Attempting to bind an unblessed function");
   }
 
-  var bound = configure(func, 1, callArgs);
-  bound.__intFunction = func.__intFunction;
-  bound.toString = emptyString;
-  return bound;
+  var argTemplate = [undefined].concat(callArgs);
+  boundPartial.__intFunction = func.__intFunction;
+  boundPartial.toString = func.toString;
+  return boundPartial;
+
+  function boundPartial(writer) {
+    /* jshint validthis:true */
+    var applyArgs = slice(argTemplate).concat(slice(arguments, 1));
+    applyArgs[0] = writer;
+    return func.apply(this, applyArgs);
+  }
 }
 
 function loop(data, loopCallback) {
@@ -1613,27 +1627,6 @@ else {
   };
 }
 
-/**
- * Returns a 'configured' version of the provided function.  By configured,
- * this means that the wrapper can provide default values for any arguments
- * that aren't required.
- *
- * @param {Function} func the Function to configure
- * @param {Number} requiredCount the number of arguments that are required
- * @param {Array} defaultArgs default values for the rest of the arguments
- */
-function configure(func, requiredCount, defaultArgs) {
-  var argTemplate = new Array(requiredCount).concat(defaultArgs);
-  return configuredWrapper;
-
-  function configuredWrapper() {
-    /* jshint validthis:true */
-    var args = slice(arguments, 0);
-    var applyArgs = args.concat(argTemplate.slice(args.length));
-    return func.apply(this, applyArgs);
-  }
-}
-
 var each;
 /* istanbul ignore else: won't happen in node */
 if ( Array.prototype.forEach ) {
@@ -1726,7 +1719,6 @@ exports.extendObject = extendObject;
 exports.objectKeys = objectKeys;
 exports.mixin = mixin;
 exports.bind = bind;
-exports.configure = configure;
 
 exports.each = each;
 exports.map = map;
