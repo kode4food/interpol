@@ -1026,7 +1026,6 @@ var mixin = util.mixin;
 var extendObject = util.extendObject;
 var objectKeys = util.objectKeys;
 var bind = util.bind;
-var configure = util.configure;
 
 var internalResolvers = require('./resolvers/internal');
 var createSystemResolver = internalResolvers.createSystemResolver;
