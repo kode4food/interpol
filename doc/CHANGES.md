@@ -1,5 +1,18 @@
 # Change History
 
+## Version 1.2 - Corrected @bind Behavior
+The binding operator `@` was brain dead and worked in a way that completely deviated from what you might expect from it.  So I've corrected that.  It now works more or less like JavaScript's `bind()` function, where all arguments will be hard-wired as initial arguments for the resulting bound function.
+
+Two of the system functions have also been changed to accommodate the new binding method, they are `string.split()` and `list.join()`.  Specificaly, the `delimiter` argument is now the first argument, but is considered optional.  This will allow you to pre-bind a delimiter without the `nil` placeholder that was previously required.  Example:
+
+```ruby
+from list import join
+let myJoin = @join(' and ')
+['red', 'green', 'blue'] | myJoin
+```
+
+This will result in: `red and green and blue`.
+
 ## Version 1.1 - List Comprehensions
 List Comprehensions are now supported for both vector and dictionary backed lists.  They work similarly to Python except that they support multiple ranges as well as guards (because they're backed by Interpol `for` loops).  Here's a vector comprehension:
 
