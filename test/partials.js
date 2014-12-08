@@ -164,9 +164,20 @@ exports.partials = nodeunit.testCase({
                   "end\n" +
                   "let bound = @partial('you')\n" +
                   "bound";
+    var script3 = "def partial\n" +
+                  "  <b>\n" +
+                  "end\n" +
+                  "partial";
+
+    var script4 = "def partial\n" +
+                  "  <b>\n" +
+                  "end\n" +
+                  "partial + 'unsafe'";
 
     test.equal(evaluate(script1), "hello \n");
     test.equal(evaluate(script2), "hello you\n");
+    test.equal(evaluate(script3), "<b>\n");
+    test.equal(evaluate(script4), "&lt;b&gt;\nunsafe");
     test.done();
   }
 });
