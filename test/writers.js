@@ -14,9 +14,8 @@ var writers = require('../lib/writers');
 
 function testStringWriter(test, expected, renderCallback) {
   var writer = writers.createStringWriter();
-  writer.startRender();
   renderCallback(writer);
-  var result = writer.endRender();
+  var result = writer.done();
   test.equal(result, expected);
 }
 

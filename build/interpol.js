@@ -1143,9 +1143,8 @@ function createToString(func) {
 
   function toString() {
     var writer = createStringWriter();
-    writer.startRender();
     func(writer);
-    return writer.endRender();
+    return writer.done();
   }
 }
 
@@ -1165,9 +1164,8 @@ function defineModule(template) {
     var writer = templateOptions.writer || createStringWriter();
 
     try {
-      writer.startRender();
       template(ctx, writer);
-      return writer.endRender();
+      return writer.done();
     }
     catch ( err ) {
       if ( typeof templateOptions.errorCallback === 'function' ) {
@@ -1770,34 +1768,33 @@ var INSERT = createDOMWriter.INSERT = 'insert';
 /* istanbul ignore next: browser-only */
 function createDOMWriter(parentElement, renderMode) {
   var writer = createStringWriter();
-  var writerEndRender = writer.endRender;
-  var endRender;
+  var writerDone = writer.done;
+  var done;
 
   switch ( renderMode ) {
-    case APPEND:  endRender = appendEndRender; break;
-    case INSERT:  endRender = insertEndRender; break;
-    // case REPLACE: endRender = replaceEndRender; break;
-    default:      endRender = replaceEndRender;
+    case APPEND: done = appendEndRender; break;
+    case INSERT: done = insertEndRender; break;
+    default:     done = replaceEndRender;
   }
 
   return mixin({}, writer, {
-    endRender: endRender
+    done: done
   });
 
   function appendEndRender() {
     var container = document.createElement("span");
-    container.innerHTML = writerEndRender();
+    container.innerHTML = writerDone();
     parentElement.appendChild(container);
   }
 
   function insertEndRender() {
     var container = document.createElement("span");
-    container.innerHTML = writerEndRender();
+    container.innerHTML = writerDone();
     parentElement.insertBefore(container, parentElement.firstChild);
   }
 
   function replaceEndRender() {
-    parentElement.innerHTML = writerEndRender();
+    parentElement.innerHTML = writerDone();
   }
 }
 
@@ -1846,8 +1843,7 @@ function noOp() {}
  */
 function createNullWriter() {
   return {
-    startRender: noOp,
-    endRender: noOp,
+    done: noOp,
     startElement: noOp,
     selfCloseElement: noOp,
     endElement: noOp,
@@ -1879,20 +1875,17 @@ var stringify = types.stringify;
 var escapeAttribute = types.escapeAttribute;
 var escapeContent = types.escapeContent;
 
-function noOp() {}
-
 /**
  * Creates a StringWriter.  Interpol will create one by default if it is not
  * provided as an option to a compiled template.  A StringWriter manages the
  * writing of content as an underlying Array of Strings.  This Array is joined
- * and returned when the `endRender()` function is called.
+ * and returned when the `done()` function is called.
  */
 function createStringWriter() {
   var arr = [];
 
   return {
-    startRender: noOp,
-    endRender: endRender,
+    done: done,
     startElement: startElement,
     selfCloseElement: selfCloseElement,
     endElement: endElement,
@@ -1902,7 +1895,7 @@ function createStringWriter() {
     raw: raw
   };
 
-  function endRender() {
+  function done() {
     var result = arr.join('');
     arr = [];
     return result;
