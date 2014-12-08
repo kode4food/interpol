@@ -152,5 +152,21 @@ exports.partials = nodeunit.testCase({
                "This is a cricket named Jim\n\n");
 
     test.done();
+  },
+
+  "toString Functionality": function (test) {
+    var script1 = "def partial(arg)\n" +
+                  '  "hello %arg"\n' +
+                  "end\n" +
+                  "partial";
+    var script2 = "def partial(arg)\n" +
+                  '  "hello %arg"\n' +
+                  "end\n" +
+                  "let bound = @partial('you')\n" +
+                  "bound";
+
+    test.equal(evaluate(script1), "hello \n");
+    test.equal(evaluate(script2), "hello you\n");
+    test.done();
   }
 });
