@@ -1,5 +1,8 @@
 # Change History
 
+## Version 1.2.2 - StringWriter Improvement
+String concatenation is significantly faster in many JavaScript engines than Array.join().
+
 ## Version 1.2.1 - Partial toString()
 Stringify-ing a partial now results in something other than an empty string.  Specifically, it invokes the partial and returns the content it produced.  The reasoning: If a String can be a Function, then a Function should also be a String.  Also works with bound partials.
 

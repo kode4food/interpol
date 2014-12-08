@@ -141,16 +141,16 @@ function buildFormatter(formatStr) {
       data = [data];
     }
 
-    var output = [];
+    var result = '';
     for ( var i = 0; i < clen; i++ ) {
       var component = components[i];
       switch ( component[0] ) {
-        case 0: output[i] = component[1]; break;
-        case 1: output[i] = stringify(data[component[1]]); break;
-        case 2: output[i] = component[1](data, supportFunctions);
+        case 0: result += component[1]; break;
+        case 1: result += stringify(data[component[1]]); break;
+        case 2: result += component[1](data, supportFunctions);
       }
     }
-    return output.join('');
+    return result;
   }
 
   function createLiteralComponent(literal) {
@@ -250,7 +250,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule;
 var generateFunction;
 
-var CURRENT_VERSION = "1.2.1";
+var CURRENT_VERSION = "1.2.2";
 
 // Bootstrap
 
