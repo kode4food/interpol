@@ -1744,7 +1744,6 @@ exports.selfMap = selfMap;
 var util = require('../util');
 var string = require('./string');
 
-var mixin = util.mixin;
 var createStringWriter = string.createStringWriter;
 
 var REPLACE = createDOMWriter.REPLACE = 'replace';
@@ -1769,17 +1768,27 @@ var INSERT = createDOMWriter.INSERT = 'insert';
 function createDOMWriter(parentElement, renderMode) {
   var writer = createStringWriter();
   var writerDone = writer.done;
-  var done;
 
-  switch ( renderMode ) {
-    case APPEND: done = appendEndRender; break;
-    case INSERT: done = insertEndRender; break;
-    default:     done = replaceEndRender;
+  if ( renderMode === undefined ) {
+    renderMode = REPLACE;
   }
 
-  return mixin({}, writer, {
-    done: done
-  });
+  switch ( renderMode ) {
+    case APPEND:
+      writer.done = appendEndRender;
+      break;
+
+    case INSERT:
+      writer.done = insertEndRender;
+      break;
+
+    case REPLACE:
+      writer.done = replaceEndRender;
+      break;
+
+    default:
+      throw new Error("Invalid renderMode: " + renderMode);
+  }
 
   function appendEndRender() {
     var container = document.createElement("span");
@@ -1882,7 +1891,7 @@ var escapeContent = types.escapeContent;
  * and returned when the `done()` function is called.
  */
 function createStringWriter() {
-  var arr = [];
+  var buffer = '';
 
   return {
     done: done,
@@ -1896,8 +1905,8 @@ function createStringWriter() {
   };
 
   function done() {
-    var result = arr.join('');
-    arr = [];
+    var result = buffer;
+    buffer = '';
     return result;
   }
 
@@ -1905,45 +1914,45 @@ function createStringWriter() {
     for ( var key in attributes ) {
       var val = attributes[key];
       if ( typeof val !== 'boolean' ) {
-        arr.push(" ", stringify(key), "=\"", escapeAttribute(val), "\"");
+        buffer += " " + stringify(key) + "=\"" + escapeAttribute(val) + "\"";
         continue;
       }
       if ( val ) {
-        arr.push(" ", stringify(key));
+        buffer += " " + stringify(key);
       }
     }
   }
 
   function startElement(tagName, attributes) {
-    arr.push("<", stringify(tagName));
+    buffer += "<" + stringify(tagName);
     writeAttributes(attributes);
-    arr.push(">");
+    buffer += ">";
   }
 
   function selfCloseElement(tagName, attributes) {
-    arr.push("<", stringify(tagName));
+    buffer += "<" + stringify(tagName);
     writeAttributes(attributes);
-    arr.push(" />");
+    buffer += " />";
   }
 
   function endElement(tagName) {
-    arr.push("</", stringify(tagName), ">");
+    buffer += "</" + stringify(tagName) + ">";
   }
 
   function comment(content) {
-    arr.push("<!--", content, "-->");
+    buffer += "<!--" + content + "-->";
   }
 
   function docType(rootElement) {
-    arr.push("<!DOCTYPE ", stringify(rootElement), ">");
+    buffer += "<!DOCTYPE " + stringify(rootElement) + ">";
   }
 
   function content(value) {
-    arr.push(escapeContent(value));
+    buffer += escapeContent(value);
   }
 
   function raw(value) {
-    arr.push(value);
+    buffer += value;
   }
 }
 
