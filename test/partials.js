@@ -159,11 +159,13 @@ exports.partials = nodeunit.testCase({
                   '  "hello %arg"\n' +
                   "end\n" +
                   "partial";
+
     var script2 = "def partial(arg)\n" +
                   '  "hello %arg"\n' +
                   "end\n" +
                   "let bound = @partial('you')\n" +
                   "bound";
+                  
     var script3 = "def partial\n" +
                   "  <b>\n" +
                   "end\n" +
