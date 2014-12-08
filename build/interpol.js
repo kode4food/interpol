@@ -1038,10 +1038,6 @@ var nullWriter = writers.createNullWriter();
 var noOp = bless(function () {});
 var defaultOptions = {};
 
-function emptyString() {
-  return '';
-}
-
 function createRuntime(interpol, runtimeOptions) {
   if ( isInterpolRuntime(runtimeOptions) ) {
     return runtimeOptions;
@@ -1142,6 +1138,17 @@ function createRuntime(interpol, runtimeOptions) {
   }
 }
 
+function createToString(func) {
+  return toString;
+
+  function toString() {
+    var writer = createStringWriter();
+    writer.startRender();
+    func(writer);
+    return writer.endRender();
+  }
+}
+
 function defineModule(template) {
   var exportedContext;
   templateInterface.__intModule = true;
@@ -1199,7 +1206,7 @@ function defineModule(template) {
 
 function definePartial(partial) {
   partial.__intFunction = 'part';
-  partial.toString = emptyString;
+  partial.toString = createToString(partial);
   return partial;
 }
 
@@ -1238,7 +1245,7 @@ function bindPartial(ctx, func, callArgs) {
 
   var argTemplate = [undefined].concat(callArgs);
   boundPartial.__intFunction = func.__intFunction;
-  boundPartial.toString = func.toString;
+  boundPartial.toString = createToString(boundPartial);
   return boundPartial;
 
   function boundPartial(writer) {
