@@ -1406,7 +1406,35 @@ var EscapeChars = {
  *
  * @param {Mixed} value the value to stringify
  */
-var stringify = createStringifier();
+function stringify(value) {
+  switch ( typeof value ) {
+    case 'string':
+      return value;
+
+    case 'number':
+      return value.toString();
+
+    case 'boolean':
+      return value ? 'true' : 'false';
+
+    case 'object':
+      if ( isArray(value) ) {
+        var result = [];
+        for ( var i = 0, len = value.length; i < len; i++ ) {
+          result[i] = stringify(value[i]);
+        }
+        return result.join(' ');
+      }
+      return value !== null ? value.toString() : '';
+
+    case 'function':
+      return value.__intFunction ? value.toString() : '';
+
+    default:
+      // catches 'undefined'
+      return '';
+  }
+}
 
 /**
  * Escape the provided value for the purposes of rendering it as an HTML
@@ -1414,7 +1442,7 @@ var stringify = createStringifier();
  *
  * @param {Mixed} value the value to escape
  */
-var escapeAttribute = createStringifier(/[&<>'"]/gm);
+var escapeAttribute = createEscapedStringifier(/[&<>'"]/gm);
 
 /**
  * Escape the provided value for the purposes of rendering it as HTML
@@ -1422,20 +1450,18 @@ var escapeAttribute = createStringifier(/[&<>'"]/gm);
  *
  * @param {Mixed} value the value to escape
  */
-var escapeContent = createStringifier(/[&<>]/gm);
+var escapeContent = createEscapedStringifier(/[&<>]/gm);
 
 var escapeCacheMax = 8192;
-var escapeCacheSize = 0;
 
-// Yes, there is duplicated code here but it performs significantly better
-function createStringifier(escapeRegex) {
+function createEscapedStringifier(escapeRegex) {
   var escapeCache = {};
-  return escapeRegex ? escapedStringifier : normalStringifier;
+  var escapeCacheSize = 0;
+  return escapedStringifier;
 
   function escapedStringifier(value) {
-    var type = typeof value;
     var result;
-    switch ( type ) {
+    switch ( typeof value ) {
       case 'string':
         result = escapeCache[value];
         if ( result ) {
@@ -1464,38 +1490,6 @@ function createStringifier(escapeRegex) {
           result = [];
           for ( var i = 0, len = value.length; i < len; i++ ) {
             result[i] = escapedStringifier(value[i]);
-          }
-          return result.join(' ');
-        }
-        return value !== null ? value.toString() : '';
-
-      case 'function':
-        return value.__intFunction ? value.toString() : '';
-
-      default:
-        // catches 'undefined'
-        return '';
-    }
-  }
-
-  function normalStringifier(value) {
-    var type = typeof value;
-    var result;
-    switch ( type ) {
-      case 'string':
-        return value;
-
-      case 'number':
-        return value.toString();
-
-      case 'boolean':
-        return value ? 'true' : 'false';
-
-      case 'object':
-        if ( isArray(value) ) {
-          result = [];
-          for ( var i = 0, len = value.length; i < len; i++ ) {
-            result[i] = normalStringifier(value[i]);
           }
           return result.join(' ');
         }
