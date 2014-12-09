@@ -8,6 +8,7 @@
 
 "use strict";
 
+exports.api = require('./api').api;
 exports.basics = require('./basics').basics;
 exports.calls = require('./calls').calls;
 exports.cli = require('./cli').cli;

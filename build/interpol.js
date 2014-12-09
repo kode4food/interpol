@@ -1393,14 +1393,6 @@ function bless(value) {
   }
 }
 
-var EscapeChars = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#39;'
-};
-
 /**
  * Stringify the provided value for Interpol's purposes.
  *
@@ -1425,7 +1417,7 @@ function stringify(value) {
         }
         return result.join(' ');
       }
-      return value !== null ? value.toString() : '';
+      return '';
 
     case 'function':
       return value.__intFunction ? value.toString() : '';
@@ -1435,6 +1427,14 @@ function stringify(value) {
       return '';
   }
 }
+
+var EscapeChars = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;'
+};
 
 /**
  * Escape the provided value for the purposes of rendering it as an HTML
@@ -1493,7 +1493,7 @@ function createEscapedStringifier(escapeRegex) {
           }
           return result.join(' ');
         }
-        return value !== null ? value.toString() : '';
+        return '';
 
       case 'function':
         return value.__intFunction ? value.toString() : '';
