@@ -250,7 +250,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule;
 var generateFunction;
 
-var CURRENT_VERSION = "1.2.2";
+var CURRENT_VERSION = "1.2.3";
 
 // Bootstrap
 
@@ -1406,7 +1406,7 @@ var EscapeChars = {
  *
  * @param {Mixed} value the value to stringify
  */
-var stringify = bind(stringifyImpl, {}, null);
+var stringify = createStringifier();
 
 /**
  * Escape the provided value for the purposes of rendering it as an HTML
@@ -1414,7 +1414,7 @@ var stringify = bind(stringifyImpl, {}, null);
  *
  * @param {Mixed} value the value to escape
  */
-var escapeAttribute = bind(stringifyImpl, {}, (/[&<>'"]/gm));
+var escapeAttribute = createStringifier(/[&<>'"]/gm);
 
 /**
  * Escape the provided value for the purposes of rendering it as HTML
@@ -1422,57 +1422,92 @@ var escapeAttribute = bind(stringifyImpl, {}, (/[&<>'"]/gm));
  *
  * @param {Mixed} value the value to escape
  */
-var escapeContent = bind(stringifyImpl, {}, (/[&<>]/gm));
+var escapeContent = createStringifier(/[&<>]/gm);
 
 var escapeCacheMax = 8192;
 var escapeCacheSize = 0;
 
-function stringifyImpl(escapeCache, escapeRegex, value) {
-  var result;
-  switch ( typeof value ) {
-    case 'string':
-      if ( !escapeRegex ) {
-        return value;
-      }
+// Yes, there is duplicated code here but it performs significantly better
+function createStringifier(escapeRegex) {
+  var escapeCache = {};
+  return escapeRegex ? escapedStringifier : normalStringifier;
 
-      result = escapeCache[value];
-      if ( result ) {
-        return result;
-      }
-      if ( escapeCacheSize >= escapeCacheMax ) {
-        escapeCache = {};
-        escapeCacheSize = 0;
-      }
-      else {
-        escapeCacheSize += 1;
-      }
-      result = escapeCache[value] = value.replace(escapeRegex, function(ch) {
-        return EscapeChars[ch];
-      });
-      return result;
-
-    case 'number':
-      return value.toString();
-
-    case 'boolean':
-      return value ? 'true' : 'false';
-
-    case 'object':
-      if ( isArray(value) ) {
-        result = [];
-        for ( var i = 0, len = value.length; i < len; i++ ) {
-          result[i] = stringifyImpl(escapeCache, escapeRegex, value[i]);
+  function escapedStringifier(value) {
+    var type = typeof value;
+    var result;
+    switch ( type ) {
+      case 'string':
+        result = escapeCache[value];
+        if ( result ) {
+          return result;
         }
-        return result.join(' ');
-      }
-      return value !== null ? value.toString() : '';
+        if ( escapeCacheSize >= escapeCacheMax ) {
+          escapeCache = {};
+          escapeCacheSize = 0;
+        }
+        else {
+          escapeCacheSize += 1;
+        }
+        result = escapeCache[value] = value.replace(escapeRegex, function(ch) {
+          return EscapeChars[ch];
+        });
+        return result;
 
-    case 'function':
-      return value.__intFunction ? value.toString() : '';
+      case 'number':
+        return value.toString();
 
-    default:
-      // catches 'undefined'
-      return '';
+      case 'boolean':
+        return value ? 'true' : 'false';
+
+      case 'object':
+        if ( isArray(value) ) {
+          result = [];
+          for ( var i = 0, len = value.length; i < len; i++ ) {
+            result[i] = escapedStringifier(value[i]);
+          }
+          return result.join(' ');
+        }
+        return value !== null ? value.toString() : '';
+
+      case 'function':
+        return value.__intFunction ? value.toString() : '';
+
+      default:
+        // catches 'undefined'
+        return '';
+    }
+  }
+
+  function normalStringifier(value) {
+    var type = typeof value;
+    var result;
+    switch ( type ) {
+      case 'string':
+        return value;
+
+      case 'number':
+        return value.toString();
+
+      case 'boolean':
+        return value ? 'true' : 'false';
+
+      case 'object':
+        if ( isArray(value) ) {
+          result = [];
+          for ( var i = 0, len = value.length; i < len; i++ ) {
+            result[i] = normalStringifier(value[i]);
+          }
+          return result.join(' ');
+        }
+        return value !== null ? value.toString() : '';
+
+      case 'function':
+        return value.__intFunction ? value.toString() : '';
+
+      default:
+        // catches 'undefined'
+        return '';
+    }
   }
 }
 

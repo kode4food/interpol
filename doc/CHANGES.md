@@ -1,5 +1,8 @@
 # Change History
 
+## Version 1.2.3 - Stringify Improvement
+The stringify implementation was doing a lot of conditional branching.  Broke it out into two separate versions, one that escapes and one that doesn't.  This has improved performance quite a bit.
+
 ## Version 1.2.2 - StringWriter Improvement
 String concatenation is significantly faster in many JavaScript engines than Array.join().
 
