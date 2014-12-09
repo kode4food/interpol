@@ -1404,7 +1404,7 @@ function stringify(value) {
       return value;
 
     case 'number':
-      return value.toString();
+      return '' + value;
 
     case 'boolean':
       return value ? 'true' : 'false';
@@ -1480,7 +1480,7 @@ function createEscapedStringifier(escapeRegex) {
         return result;
 
       case 'number':
-        return value.toString();
+        return '' + value;
 
       case 'boolean':
         return value ? 'true' : 'false';
@@ -1545,9 +1545,9 @@ exports.isInterpolNodeModule = isInterpolNodeModule;
 exports.isInterpolModule = isInterpolModule;
 exports.isInterpolFunction = isInterpolFunction;
 exports.isInterpolPartial = isInterpolPartial;
+exports.stringify = stringify;
 exports.escapeAttribute = escapeAttribute;
 exports.escapeContent = escapeContent;
-exports.stringify = stringify;
 exports.bless = bless;
 exports.isTruthy = isTruthy;
 exports.isFalsy = isFalsy;
