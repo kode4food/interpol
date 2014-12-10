@@ -61,6 +61,7 @@ exports.imports = nodeunit.testCase({
       var exports1 = runtime.resolveExports('hello');
       var module2 = runtime.resolveModule('helpers');
       var exports2 = runtime.resolveExports('helpers');
+
       test.equal(typeof module1, 'function');
       test.equal(typeof module2, 'function');
       test.equal(typeof exports1, 'object');
@@ -87,6 +88,18 @@ exports.imports = nodeunit.testCase({
 
     "System Import": function (test) {
       test.equal(evaluate("import math\nmath.round(9.5)"), "10");
+
+      var list = runtime.resolveModule('list');
+      var listExports = runtime.resolveExports('list');
+
+      test.equal(typeof list, 'function');
+      test.equal(typeof listExports, 'object');
+      test.equal(typeof listExports.join, 'function');
+      test.equal(list(), undefined);
+      test.equal(listExports.first(null, 'hello'), 'hello');
+      test.equal(listExports.last(null, 'hello'), 'hello');
+      test.equal(listExports.length(null, 37), 0);
+      test.equal(listExports.length(null, { name: 'interpol', age: 1 }), 2);
       test.done();
     },
 

@@ -1,5 +1,8 @@
 # Change History
 
+## Version 1.2.4 - Improved Member Retrieval
+There have been internal changes to the way membership paths are resolved.  If multiple depths of properties are traversed, only a single function call will be invoked.
+
 ## Version 1.2.3 - Stringify Improvement
 The stringify implementation was doing a lot of conditional branching.  Broke it out into two separate versions, one that escapes and one that doesn't.  This has improved performance quite a bit.
 

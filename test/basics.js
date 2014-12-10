@@ -145,5 +145,23 @@ exports.basics = nodeunit.testCase({
                "&lt;b&gt;it's not bold!&lt;/b&gt;");
 
     test.done();
+  },
+
+  "Deep Paths": function (test) {
+    var data = {
+      root: [{
+        colors: ['red', 'green', 'blue'],
+        info: {
+          description: "this is a description"
+        }
+      }]
+    };
+
+    test.equal(evaluate("root[0].colors[1]", data), "green");
+    test.equal(evaluate("root[0].info.description", data), "this is a description");
+    test.equal(evaluate("root[0].info['description']", data), "this is a description");
+    test.equal(evaluate("root[1].info['description']", data), "");
+    test.equal(evaluate("root[0].info.notThere", data), "");
+    test.done();
   }
 });

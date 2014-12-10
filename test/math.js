@@ -63,6 +63,7 @@ exports.math = nodeunit.testCase({
     test.equal(evaluate("import math\nmath.avg([1,2,3])"), "2");
     test.equal(evaluate("import math\nmath.avg([])"), "0");
     test.equal(evaluate("import math\nmath.avg(['non_num'])"), "NaN");
+    test.equal(evaluate("import math\nmath.avg('non_num')"), "NaN");
     test.equal(evaluate("import math\nmath.avg(1)"), "1");
 
     test.equal(evaluate("import math\nmath.sum([1,2,3])"), "6");
