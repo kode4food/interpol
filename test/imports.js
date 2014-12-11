@@ -33,7 +33,7 @@ exports.imports = nodeunit.testCase({
   "helper imports": nodeunit.testCase({
     setUp: function (callback) {
       runtime = interpol.runtime({ resolvers: [] });
-      resolvers.createMemoryResolver(runtime);
+      resolvers.createMemoryResolver(runtime, true);
       runtime.registerModule('hello', "'hello world!'");
       runtime.registerModule('helpers', {
         testHelper: function testHelper(writer, arg1, arg2) {

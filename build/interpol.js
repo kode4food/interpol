@@ -1,6 +1,6 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /*
- * Interpol (Templates Sans Facial Hair)
+ * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -23,7 +23,7 @@ interpol.createStringWriter = writers.createStringWriter;
 
 },{"../lib/interpol":4,"../lib/writers":18}],2:[function(require,module,exports){
 /*
- * Interpol (Templates Sans Facial Hair)
+ * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -40,7 +40,7 @@ interpol.createStringWriter = writers.createStringWriter;
 
 },{}],3:[function(require,module,exports){
 /*
- * Interpol (Templates Sans Facial Hair)
+ * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -67,7 +67,7 @@ var Params = "%((%)|(" + Digits + ")|(" + Ident + "))?(" + Pipes + ")?" + Term;
 
 var ParamRegex = new RegExp(Params, "m");
 
-var nullWriter = require('./writers/null').createNullWriter;
+var nullWriter = require('./writers/null').createNullWriter();
 
 /**
  * Builds a closure that will be used internally to support Interpol's
@@ -229,7 +229,7 @@ exports.buildImmediateFormatter = buildImmediateFormatter;
 
 },{"./types":15,"./util":16,"./writers/null":19}],4:[function(require,module,exports){
 /*
- * Interpol (Templates Sans Facial Hair)
+ * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -330,7 +330,7 @@ module.exports = interpol;
 
 },{"./compiler/stub":2,"./runtime":14,"./types":15,"./util":16}],5:[function(require,module,exports){
 /*
- * Interpol (Templates Sans Facial Hair)
+ * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -467,83 +467,7 @@ exports.matcher = buildMatcher;
 
 },{"./util":16}],6:[function(require,module,exports){
 /*
- * Interpol (Templates Sans Facial Hair)
- * Licensed under the MIT License
- * see doc/LICENSE.md
- *
- * @author Thomas S. Bradford (kode4food.it)
- */
-
-"use strict";
-
-var util = require('../util');
-var types = require('../types');
-var slice = util.slice;
-var bless = types.bless;
-
-/**
- * Creates a 'blessed' module where are Functions are made to be both
- * Interpol-compatible and configurable.
- *
- * @param {Object} module the Module to bless
- */
-function blessModule(module) {
-  var result = {};
-  for ( var key in module ) {
-    var value = module[key];
-    if ( typeof value === 'function') {
-      result[key] = bless(value);
-    }
-    else {
-      result[key] = value;
-    }
-  }
-  return result;
-}
-
-/**
- * Takes a hash of Functions, blesses them, and creates a stub module for
- * them that can be returned by the `resolveModule()` call.
- *
- * @param {Object} moduleExports the hash of Functions to stub
- */
-function createModuleStub(moduleExports) {
-  moduleExports = blessModule(moduleExports);
-  templateInterface.__intModule = true;
-  templateInterface.exports = templateExports;
-  return templateInterface;
-
-  function templateInterface() {
-    return '';
-  }
-
-  function templateExports() {
-    return moduleExports;
-  }
-}
-
-/**
- * Wraps a Function in an envelope that accepts a Writer (but discards it).
- *
- * @param {Function} func the Function to wrap
- */
-function wrap(func) {
-  return bless(wrappedFunction);
-
-  function wrappedFunction(writer) {
-    /* jshint validthis:true */
-    return func.apply(this, slice(arguments, 1));
-  }
-}
-
-// Exported Functions
-exports.blessModule = blessModule;
-exports.createModuleStub = createModuleStub;
-exports.wrap = wrap;
-
-},{"../types":15,"../util":16}],7:[function(require,module,exports){
-/*
- * Interpol (Templates Sans Facial Hair)
+ * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -559,9 +483,9 @@ var system = require('./system');
 exports.createMemoryResolver = memory.createMemoryResolver;
 exports.createSystemResolver = system.createSystemResolver;
 
-},{"./memory":8,"./system":9}],8:[function(require,module,exports){
+},{"./memory":7,"./system":9}],7:[function(require,module,exports){
 /*
- * Interpol (Templates Sans Facial Hair)
+ * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -572,12 +496,11 @@ exports.createSystemResolver = system.createSystemResolver;
 
 var types = require('../types');
 var util = require('../util');
-var helpers = require('./helpers');
 
 var isInterpolModule = types.isInterpolModule;
 var isArray = util.isArray;
-var createModuleStub = helpers.createModuleStub;
-var blessModule = helpers.blessModule;
+var slice = util.slice;
+var bless = types.bless;
 
 /**
  * Creates a new MemoryResolver.  As its name implies, this resolver
@@ -588,7 +511,7 @@ var blessModule = helpers.blessModule;
  *
  * @param {Runtime} [runtime] Runtime owner for MemoryResolver
  */
-function createMemoryResolver(runtime) {
+function createMemoryResolver(runtime, addRuntimeEntries) {
   var interpol = runtime.interpol;
   var cache = {};
 
@@ -600,8 +523,10 @@ function createMemoryResolver(runtime) {
   };
 
   runtime.resolvers().push(resolver);
-  runtime.registerModule = registerModule;
-  runtime.unregisterModule = unregisterModule;
+  if ( addRuntimeEntries ) {
+    runtime.registerModule = registerModule;
+    runtime.unregisterModule = unregisterModule;
+  }
   return resolver;
 
   function resolveModule(name) {
@@ -661,12 +586,53 @@ function createMemoryResolver(runtime) {
   }
 }
 
+/**
+ * Creates a 'blessed' module where are Functions are made to be both
+ * Interpol-compatible and configurable.
+ *
+ * @param {Object} module the Module to bless
+ */
+function blessModule(module) {
+  var result = {};
+  for ( var key in module ) {
+    var value = module[key];
+    if ( typeof value === 'function') {
+      result[key] = bless(value);
+    }
+    else {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
+/**
+ * Takes a hash of Functions, blesses them, and creates a stub module for
+ * them that can be returned by the `resolveModule()` call.
+ *
+ * @param {Object} moduleExports the hash of Functions to stub
+ */
+function createModuleStub(moduleExports) {
+  moduleExports = blessModule(moduleExports);
+  templateInterface.__intModule = true;
+  templateInterface.exports = templateExports;
+  return templateInterface;
+
+  function templateInterface() {
+    return '';
+  }
+
+  function templateExports() {
+    return moduleExports;
+  }
+}
+
 // Exported Functions
 exports.createMemoryResolver = createMemoryResolver;
 
-},{"../types":15,"../util":16,"./helpers":6}],9:[function(require,module,exports){
+},{"../types":15,"../util":16}],8:[function(require,module,exports){
 /*
- * Interpol (Templates Sans Facial Hair)
+ * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -675,54 +641,70 @@ exports.createMemoryResolver = createMemoryResolver;
 
 "use strict";
 
+var types = require('../../types');
 var util = require('../../util');
-var helpers = require('../helpers');
 
-var each = util.each;
-var objectKeys = util.objectKeys;
-var createModuleStub = helpers.createModuleStub;
+var bless = types.bless;
+var slice = util.slice;
+
+/**
+ * Wraps a Function in an envelope that accepts a Writer (but discards it).
+ *
+ * @param {Function} func the Function to wrap
+ */
+function wrap(func) {
+  return bless(wrappedFunction);
+
+  function wrappedFunction(writer) {
+    /* jshint validthis:true */
+    return func.apply(this, slice(arguments, 1));
+  }
+}
+
+// Exported Functions
+exports.wrap = wrap;
+
+},{"../../types":15,"../../util":16}],9:[function(require,module,exports){
+/*
+ * Interpol (Logicful HTML Templates)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thomas S. Bradford (kode4food.it)
+ */
+
+"use strict";
+
+var memory = require('../memory');
 
 var math = require('./math');
 var list = require('./list');
 var render = require('./render');
 var string = require('./string');
 
+var createMemoryResolver = memory.createMemoryResolver;
+
 function createSystemResolver(runtime) {
-  var modules = {
-    'math': createModuleStub(math),
-    'list': createModuleStub(list),
-    'render': createModuleStub(render),
-    'string': createModuleStub(string)
-  };
+  var resolver = createMemoryResolver(runtime);
 
-  var moduleExports = {};
-  each(objectKeys(modules), function (name) {
-    moduleExports[name] = modules[name].exports();
-  });
+  resolver.registerModule('math', math);
+  resolver.registerModule('list', list);
+  resolver.registerModule('render', render);
+  resolver.registerModule('string', string);
 
-  var resolver = {
-    resolveModule: resolveModule,
-    resolveExports: resolveExports
-  };
+  delete resolver.registerModule;
+  delete resolver.unregisterModule;
 
   runtime.resolvers().push(resolver);
   return resolver;
-
-  function resolveModule(name) {
-    return modules[name];
-  }
-
-  function resolveExports(name) {
-    return moduleExports[name];
-  }
 }
 
 // Exported Functions
 exports.createSystemResolver = createSystemResolver;
 
-},{"../../util":16,"../helpers":6,"./list":10,"./math":11,"./render":12,"./string":13}],10:[function(require,module,exports){
+},{"../memory":7,"./list":10,"./math":11,"./render":12,"./string":13}],10:[function(require,module,exports){
 /*
- * Interpol (Templates Sans Facial Hair)
+ * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -827,7 +809,7 @@ exports.values = values;
 
 },{"../../util":16}],11:[function(require,module,exports){
 /*
- * Interpol (Templates Sans Facial Hair)
+ * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -838,7 +820,7 @@ exports.values = values;
 
 var util = require('../../util');
 var isArray = util.isArray;
-var helpers = require('../helpers');
+var helpers = require('./helpers');
 
 var wrap = helpers.wrap;
 
@@ -965,9 +947,9 @@ exports.median = median;
 exports.min = min;
 exports.sum = sum;
 
-},{"../../util":16,"../helpers":6}],12:[function(require,module,exports){
+},{"../../util":16,"./helpers":8}],12:[function(require,module,exports){
 /*
- * Interpol (Templates Sans Facial Hair)
+ * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -1041,7 +1023,7 @@ exports.separator = separator;
 
 },{"../../types":15}],13:[function(require,module,exports){
 /*
- * Interpol (Templates Sans Facial Hair)
+ * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -1052,7 +1034,7 @@ exports.separator = separator;
 
 var format = require('../../format');
 var types = require('../../types');
-var helpers = require('../helpers');
+var helpers = require('./helpers');
 
 var buildDeferredFormatter = format.buildDeferredFormatter;
 var stringify = types.stringify;
@@ -1107,9 +1089,9 @@ exports.split = split;
 exports.title = title;
 exports.upper = upper;
 
-},{"../../format":3,"../../types":15,"../helpers":6}],14:[function(require,module,exports){
+},{"../../format":3,"../../types":15,"./helpers":8}],14:[function(require,module,exports){
 /*
- * Interpol (Templates Sans Facial Hair)
+ * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -1194,7 +1176,7 @@ function createRuntime(interpol, runtimeOptions) {
 
   if ( createResolvers ) {
     createSystemResolver(runtime);
-    createMemoryResolver(runtime);
+    createMemoryResolver(runtime, true);
   }
 
   return runtime;
@@ -1413,9 +1395,9 @@ function exec(ctx, func, args) {
 // Exported Functions
 exports.createRuntime = createRuntime;
 
-},{"./format":3,"./match":5,"./resolvers/internal":7,"./types":15,"./util":16,"./writers":18}],15:[function(require,module,exports){
+},{"./format":3,"./match":5,"./resolvers/internal":6,"./types":15,"./util":16,"./writers":18}],15:[function(require,module,exports){
 /*
- * Interpol (Templates Sans Facial Hair)
+ * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -1673,7 +1655,7 @@ exports.isFalsy = isFalsy;
 
 },{"./util":16}],16:[function(require,module,exports){
 /*
- * Interpol (Templates Sans Facial Hair)
+ * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -1880,7 +1862,7 @@ exports.selfMap = selfMap;
 
 },{}],17:[function(require,module,exports){
 /*
- * Interpol (Templates Sans Facial Hair)
+ * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -1960,7 +1942,7 @@ exports.createDOMWriter = createDOMWriter;
 
 },{"../util":16,"./string":20}],18:[function(require,module,exports){
 /*
- * Interpol (Templates Sans Facial Hair)
+ * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -1980,7 +1962,7 @@ exports.createStringWriter = stringWriter.createStringWriter;
 
 },{"./dom":17,"./null":19,"./string":20}],19:[function(require,module,exports){
 /*
- * Interpol (Templates Sans Facial Hair)
+ * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -2016,7 +1998,7 @@ exports.createNullWriter = createNullWriter;
 
 },{"../util":16}],20:[function(require,module,exports){
 /*
- * Interpol (Templates Sans Facial Hair)
+ * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
