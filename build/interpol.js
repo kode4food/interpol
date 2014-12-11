@@ -21,7 +21,7 @@ interpol.createDOMWriter = writers.createDOMWriter;
 interpol.createNullWriter = writers.createNullWriter;
 interpol.createStringWriter = writers.createStringWriter;
 
-},{"../lib/interpol":4,"../lib/writers":17}],2:[function(require,module,exports){
+},{"../lib/interpol":4,"../lib/writers":18}],2:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -227,7 +227,7 @@ exports.buildFormatter = buildFormatter;
 exports.buildDeferredFormatter = buildDeferredFormatter;
 exports.buildImmediateFormatter = buildImmediateFormatter;
 
-},{"./types":14,"./util":15,"./writers/null":18}],4:[function(require,module,exports){
+},{"./types":15,"./util":16,"./writers/null":19}],4:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -328,7 +328,7 @@ function getRuntime(options) {
 // Exported Functions
 module.exports = interpol;
 
-},{"./compiler/stub":2,"./runtime":13,"./types":14,"./util":15}],5:[function(require,module,exports){
+},{"./compiler/stub":2,"./runtime":14,"./types":15,"./util":16}],5:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -465,7 +465,7 @@ function buildObjectMatcher(template) {
 exports.matches = isMatchingObject;
 exports.matcher = buildMatcher;
 
-},{"./util":15}],6:[function(require,module,exports){
+},{"./util":16}],6:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -501,6 +501,12 @@ function blessModule(module) {
   return result;
 }
 
+/**
+ * Takes a hash of Functions, blesses them, and creates a stub module for
+ * them that can be returned by the `resolveModule()` call.
+ *
+ * @param {Object} moduleExports the hash of Functions to stub
+ */
 function createModuleStub(moduleExports) {
   moduleExports = blessModule(moduleExports);
   templateInterface.__intModule = true;
@@ -508,7 +514,7 @@ function createModuleStub(moduleExports) {
   return templateInterface;
 
   function templateInterface() {
-    // NO-OP
+    return '';
   }
 
   function templateExports() {
@@ -516,6 +522,11 @@ function createModuleStub(moduleExports) {
   }
 }
 
+/**
+ * Wraps a Function in an envelope that accepts a Writer (but discards it).
+ *
+ * @param {Function} func the Function to wrap
+ */
 function wrap(func) {
   return bless(wrappedFunction);
 
@@ -530,7 +541,7 @@ exports.blessModule = blessModule;
 exports.createModuleStub = createModuleStub;
 exports.wrap = wrap;
 
-},{"../types":14,"../util":15}],7:[function(require,module,exports){
+},{"../types":15,"../util":16}],7:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -653,7 +664,7 @@ function createMemoryResolver(runtime) {
 // Exported Functions
 exports.createMemoryResolver = createMemoryResolver;
 
-},{"../types":14,"../util":15,"./helpers":6}],9:[function(require,module,exports){
+},{"../types":15,"../util":16,"./helpers":6}],9:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -673,12 +684,14 @@ var createModuleStub = helpers.createModuleStub;
 
 var math = require('./math');
 var list = require('./list');
+var render = require('./render');
 var string = require('./string');
 
 function createSystemResolver(runtime) {
   var modules = {
     'math': createModuleStub(math),
     'list': createModuleStub(list),
+    'render': createModuleStub(render),
     'string': createModuleStub(string)
   };
 
@@ -707,7 +720,7 @@ function createSystemResolver(runtime) {
 // Exported Functions
 exports.createSystemResolver = createSystemResolver;
 
-},{"../../util":15,"../helpers":6,"./list":10,"./math":11,"./string":12}],10:[function(require,module,exports){
+},{"../../util":16,"../helpers":6,"./list":10,"./math":11,"./render":12,"./string":13}],10:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -812,7 +825,7 @@ exports.empty = empty;
 exports.keys = keys;
 exports.values = values;
 
-},{"../../util":15}],11:[function(require,module,exports){
+},{"../../util":16}],11:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -952,7 +965,81 @@ exports.median = median;
 exports.min = min;
 exports.sum = sum;
 
-},{"../../util":15,"../helpers":6}],12:[function(require,module,exports){
+},{"../../util":16,"../helpers":6}],12:[function(require,module,exports){
+/*
+ * Interpol (Templates Sans Facial Hair)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thomas S. Bradford (kode4food.it)
+ */
+
+"use strict";
+
+var types = require('../../types');
+var bless = types.bless;
+
+var noOp = bless(function () {});
+
+function counter(writer, start, increment) {
+  if ( typeof start !== 'number' || isNaN(start) ) {
+    start = 0;
+  }
+  if ( typeof increment !== 'number' || isNaN(increment) ) {
+    increment = 1;
+  }
+  return bless(counterInstance);
+
+  function counterInstance() {
+    var result = start;
+    start += increment;
+    return result;
+  }
+}
+
+function evenOdd(writer, even, odd) {
+  if ( typeof even === 'undefined' ) {
+    even = 'even';
+  }
+  if ( typeof odd === 'undefined' ) {
+    odd = 'odd';
+  }
+  var current = true;
+  return bless(evenOddInstance);
+
+  function evenOddInstance() {
+    current = !current;
+    return current ? odd : even;
+  }
+}
+
+function separator(writer, sep) {
+  var empty = '';
+  if ( sep === undefined ) {
+    sep = ', ';
+  }
+  else if ( typeof sep === 'function' ) {
+    empty = noOp;
+  }
+
+  var first = true;
+  return bless(separatorInstance);
+
+  function separatorInstance() {
+    if ( first ) {
+      first = false;
+      return empty;
+    }
+    return sep;
+  }
+}
+
+// Exports
+exports.counter = counter;
+exports.evenOdd = evenOdd;
+exports.separator = separator;
+
+},{"../../types":15}],13:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1020,7 +1107,7 @@ exports.split = split;
 exports.title = title;
 exports.upper = upper;
 
-},{"../../format":3,"../../types":14,"../helpers":6}],13:[function(require,module,exports){
+},{"../../format":3,"../../types":15,"../helpers":6}],14:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1326,7 +1413,7 @@ function exec(ctx, func, args) {
 // Exported Functions
 exports.createRuntime = createRuntime;
 
-},{"./format":3,"./match":5,"./resolvers/internal":7,"./types":14,"./util":15,"./writers":17}],14:[function(require,module,exports){
+},{"./format":3,"./match":5,"./resolvers/internal":7,"./types":15,"./util":16,"./writers":18}],15:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1584,7 +1671,7 @@ exports.bless = bless;
 exports.isTruthy = isTruthy;
 exports.isFalsy = isFalsy;
 
-},{"./util":15}],15:[function(require,module,exports){
+},{"./util":16}],16:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1791,7 +1878,7 @@ exports.map = map;
 exports.filter = filter;
 exports.selfMap = selfMap;
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1871,7 +1958,7 @@ function createDOMWriter(parentElement, renderMode) {
 // Exported Functions
 exports.createDOMWriter = createDOMWriter;
 
-},{"../util":15,"./string":19}],17:[function(require,module,exports){
+},{"../util":16,"./string":20}],18:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1891,7 +1978,7 @@ exports.createDOMWriter = domWriter.createDOMWriter;
 exports.createNullWriter = nullWriter.createNullWriter;
 exports.createStringWriter = stringWriter.createStringWriter;
 
-},{"./dom":16,"./null":18,"./string":19}],18:[function(require,module,exports){
+},{"./dom":17,"./null":19,"./string":20}],19:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -1927,7 +2014,7 @@ function createNullWriter() {
 // Exported Functions
 exports.createNullWriter = createNullWriter;
 
-},{"../util":15}],19:[function(require,module,exports){
+},{"../util":16}],20:[function(require,module,exports){
 /*
  * Interpol (Templates Sans Facial Hair)
  * Licensed under the MIT License
@@ -2020,4 +2107,4 @@ function createStringWriter() {
 // Exported Functions
 exports.createStringWriter = createStringWriter;
 
-},{"../types":14,"../util":15}]},{},[1]);
+},{"../types":15,"../util":16}]},{},[1]);

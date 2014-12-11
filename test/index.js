@@ -20,6 +20,7 @@ exports.like = require('./like').like;
 exports.lists = require('./lists').lists;
 exports.loops = require('./loops').loops;
 exports.partials = require('./partials').partials;
+exports.render = require('./render').render;
 exports.scope = require('./scope').scope;
 exports.strings = require('./strings').strings;
 exports.math = require('./math').math;

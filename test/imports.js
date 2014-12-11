@@ -95,7 +95,7 @@ exports.imports = nodeunit.testCase({
       test.equal(typeof list, 'function');
       test.equal(typeof listExports, 'object');
       test.equal(typeof listExports.join, 'function');
-      test.equal(list(), undefined);
+      test.equal(list(), '');
       test.equal(listExports.first(null, 'hello'), 'hello');
       test.equal(listExports.last(null, 'hello'), 'hello');
       test.equal(listExports.length(null, 37), 0);

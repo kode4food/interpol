@@ -10,11 +10,7 @@
 
 var nodeunit = require('nodeunit');
 var interpol = require('../lib');
-
-function evaluate(str, ctx) {
-  var template = interpol(str);
-  return template(ctx);
-}
+var evaluate = interpol.evaluate;
 
 exports.basics = nodeunit.testCase({
   setUp: function (callback) {
