@@ -1,4 +1,4 @@
-# Interpol (Templates Sans Facial Hair)
+# Interpol (Logicful HTML Templates)
 
 ## Why Interpol?
 There are a lot of templating systems out there and they're all similar.  In truth, Interpol isn't so different, which might beg the question:

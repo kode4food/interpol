@@ -1,5 +1,5 @@
 /*
- * Interpol (Templates Sans Facial Hair)
+ * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *

@@ -1,4 +1,4 @@
-Interpol (Templates Sans Facial Hair)
+Interpol (Logicful HTML Templates)
 Copyright (c) 2014 Thomas S. Bradford
 
 Permission is hereby granted, free of charge, to any person obtaining
