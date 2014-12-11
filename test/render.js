@@ -72,8 +72,19 @@ exports.render = nodeunit.testCase({
                   '  [s(), color] | "%;%"\n' +
                   "end";
 
+    var script3 = "let colors = ['red', 'green', 'blue']\n" +
+                  "from render import separator\n" +
+                  "def sep\n" +
+                  "  '---'\n" +
+                  "end\n" +
+                  "let s = separator(sep)\n" +
+                  "for color in colors\n" +
+                  '  [s(), color] | "%;%"\n' +
+                  "end";
+
     test.equal(evaluate(script1), "red\n, green\n, blue\n");
     test.equal(evaluate(script2), "red\n---green\n---blue\n");
+    test.equal(evaluate(script3), "red\n---\ngreen\n---\nblue\n");
     test.done();
   }
 });
