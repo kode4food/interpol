@@ -1496,6 +1496,14 @@ function bless(value) {
   }
 }
 
+function arrayStringifier(value, stringify) {
+  var result = [];
+  for ( var i = 0, len = value.length; i < len; i++ ) {
+    result[i] = stringify(value[i]);
+  }
+  return result.join(' ');
+}
+
 /**
  * Stringify the provided value for Interpol's purposes.
  *
@@ -1506,27 +1514,22 @@ function stringify(value) {
     case 'string':
       return value;
 
-    case 'number':
+    case 'number':   
       return '' + value;
 
-    case 'boolean':
+    case 'boolean':  
       return value ? 'true' : 'false';
 
-    case 'object':
-      if ( isArray(value) ) {
-        var result = [];
-        for ( var i = 0, len = value.length; i < len; i++ ) {
-          result[i] = stringify(value[i]);
-        }
-        return result.join(' ');
-      }
-      return value.toString();
-
-    case 'function':
+    case 'function': 
       return value.__intFunction ? value.toString() : '';
 
+    case 'object':
+        if ( isArray(value) ) {
+          return arrayStringifier(value, stringify);
+        }
+        return value === null ? '' : value.toString();
+
     default:
-      // catches 'undefined'
       return '';
   }
 }
@@ -1563,10 +1566,9 @@ function createEscapedStringifier(escapeRegex) {
 
   // This is very similar to 'stringify' with the exception of 'string'
   function escapedStringifier(value) {
-    var result;
     switch ( typeof value ) {
       case 'string':
-        result = escapeCache[value];
+        var result = escapeCache[value];
         if ( result ) {
           return result;
         }
@@ -1585,24 +1587,19 @@ function createEscapedStringifier(escapeRegex) {
       case 'number':
         return '' + value;
 
-      case 'boolean':
+      case 'boolean': 
         return value ? 'true' : 'false';
+
+      case 'function': 
+        return value.__intFunction ? value.toString() : '';
 
       case 'object':
         if ( isArray(value) ) {
-          result = [];
-          for ( var i = 0, len = value.length; i < len; i++ ) {
-            result[i] = escapedStringifier(value[i]);
-          }
-          return result.join(' ');
+          return arrayStringifier(value, escapedStringifier);
         }
-        return escapedStringifier(value.toString());
-
-      case 'function':
-        return value.__intFunction ? value.toString() : '';
-
+        return value === null ? '' : value.toString();
+        
       default:
-        // catches 'undefined'
         return '';
     }
   }
