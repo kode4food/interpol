@@ -1496,7 +1496,7 @@ function bless(value) {
   }
 }
 
-function arrayStringifier(value, stringify) {
+function stringifyArray(value, stringify) {
   var result = [];
   for ( var i = 0, len = value.length; i < len; i++ ) {
     result[i] = stringify(value[i]);
@@ -1514,20 +1514,20 @@ function stringify(value) {
     case 'string':
       return value;
 
-    case 'number':   
+    case 'number':
       return '' + value;
 
-    case 'boolean':  
+    case 'boolean':
       return value ? 'true' : 'false';
 
-    case 'function': 
+    case 'function':
       return value.__intFunction ? value.toString() : '';
 
     case 'object':
-        if ( isArray(value) ) {
-          return arrayStringifier(value, stringify);
-        }
-        return value === null ? '' : value.toString();
+      if ( isArray(value) ) {
+        return stringifyArray(value, stringify);
+      }
+      return value === null ? '' : value.toString();
 
     default:
       return '';
@@ -1587,15 +1587,15 @@ function createEscapedStringifier(escapeRegex) {
       case 'number':
         return '' + value;
 
-      case 'boolean': 
+      case 'boolean':
         return value ? 'true' : 'false';
 
-      case 'function': 
+      case 'function':
         return value.__intFunction ? value.toString() : '';
 
       case 'object':
         if ( isArray(value) ) {
-          return arrayStringifier(value, escapedStringifier);
+          return stringifyArray(value, escapedStringifier);
         }
         return value === null ? '' : value.toString();
         
