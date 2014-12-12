@@ -31,7 +31,7 @@ exports.api = nodeunit.testCase({
     test.equal(types.stringify(function () {}), "");
     test.equal(types.stringify(47), "47");
     test.equal(types.stringify([1,2,3]), "1 2 3");
-    test.equal(types.stringify({}), "");
+    test.equal(types.stringify({}), "[object Object]");
     test.equal(types.stringify(intFunction), "hello!");
     test.done();
   },
@@ -43,7 +43,7 @@ exports.api = nodeunit.testCase({
     test.equal(types.escapeContent(function () {}), "");
     test.equal(types.escapeContent(47), "47");
     test.equal(types.escapeContent([1,2,3]), "1 2 3");
-    test.equal(types.escapeContent({}), "");
+    test.equal(types.escapeContent({}), "[object Object]");
     test.equal(types.escapeContent(intFunction), "hello!");
     test.done();
   },

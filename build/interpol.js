@@ -510,6 +510,7 @@ var bless = types.bless;
  * modules and native JavaScript helpers.
  *
  * @param {Runtime} [runtime] Runtime owner for MemoryResolver
+ * @param {boolean} [addRuntimeEntries] whether to add registerModule
  */
 function createMemoryResolver(runtime, addRuntimeEntries) {
   var interpol = runtime.interpol;
@@ -986,6 +987,7 @@ function evenOdd(writer, even, odd) {
   if ( typeof odd === 'undefined' ) {
     odd = 'odd';
   }
+
   var current = true;
   return bless(evenOddInstance);
 
@@ -1518,7 +1520,7 @@ function stringify(value) {
         }
         return result.join(' ');
       }
-      return '';
+      return value.toString();
 
     case 'function':
       return value.__intFunction ? value.toString() : '';
@@ -1594,7 +1596,7 @@ function createEscapedStringifier(escapeRegex) {
           }
           return result.join(' ');
         }
-        return '';
+        return escapedStringifier(value.toString());
 
       case 'function':
         return value.__intFunction ? value.toString() : '';
@@ -1894,6 +1896,7 @@ var INSERT = createDOMWriter.INSERT = 'insert';
  * @param {Element} parentElement the Element to which this DOMWriter attaches
  * @param {String} [renderMode] the DOM rendering mode: REPLACE|APPEND|INSERT
  */
+ 
 /* istanbul ignore next: browser-only */
 function createDOMWriter(parentElement, renderMode) {
   var writer = createStringWriter();

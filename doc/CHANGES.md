@@ -1,5 +1,16 @@
 # Change History
 
+## Version 1.2.6 - Render Helpers
+Added three helpers for rendering to a new system module called `render`.  They are `counter(start, increment)`, `evenOdd(evenVal, oddVal)` and `separator(sep)`.  They basically do what you'd expect them to do except that calling each returns a new evaluable function that acts as a generator for values in their sequences.  For example:
+
+```ruby
+from render import counter
+let c = counter(100, 10)
+for item in list
+  "#% - %" [c(), item.name]
+end
+```
+
 ## Version 1.2.4, 1.2.5 - Improved Member Retrieval
 There have been internal changes to the way membership paths are resolved.  If multiple depths of properties are traversed, only a single function call will be invoked.
 
