@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Guide to Interpol</title>
+  <link href='//fonts.googleapis.com/css?family=Roboto:400,400italic,700' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/syntax.css">
+  <link rel="stylesheet" href="/css/wide.css">
+
+</head>
+<body>
+  <div class="container">
+    <h1>
+      <a href="./">A Guide to Interpol</a>
+    </h1>
+  </div>
+  <div class="container">
+    <h2 id="all-about-partials">All About Partials</h2>
+
+<p>Partials are reusable procedures that can be applied in a variety of contexts, such as in loops and conditionals.  For example, one might write a partial to render a list of items:</p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">def</span> <span class="nf">renderItem</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+  <span class="o">&lt;</span><span class="n">ul</span><span class="o">&gt;</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="k">in</span> <span class="n">items</span>
+    <span class="o">&lt;</span><span class="n">li</span><span class="o">&gt;</span>
+      <span class="n">item</span> <span class="o">|</span> <span class="s1">&#39;%name is the name of the item&#39;</span>
+    <span class="o">&lt;</span><span class="sr">/li&gt;</span>
+<span class="sr">    end</span>
+<span class="sr">  &lt;/u</span><span class="n">l</span><span class="o">&gt;</span>
+<span class="k">end</span>
+</code></pre></div>
+<p>Partials are first-class elements of Interpol, meaning they can be passed around and assigned to variables.  In certain situations, they are also hoisted to the top of their scope, so you can call them in your code even before they&#39;ve been defined.  More on &#39;hoisting&#39; later.</p>
+
+<h3 id="guarded-partials">Guarded Partials</h3>
+
+<p>The definition of a partial can also be &#39;re-opened&#39; to apply guard clauses, or to shadow the partial if no guard clause is provided.  The order in which partials are defined determines the order in which the guard clauses are evaluated, where the most recently defined will be evaluated first.  For example:</p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">def</span> <span class="nf">renderList</span><span class="p">(</span><span class="n">people</span><span class="p">)</span>
+  <span class="o">&lt;</span><span class="n">ul</span><span class="o">&gt;</span>
+  <span class="k">for</span> <span class="n">person</span> <span class="k">in</span> <span class="n">people</span><span class="p">,</span> <span class="n">sibling</span> <span class="k">in</span> <span class="n">person</span><span class="o">.</span><span class="n">siblings</span>
+    <span class="n">renderItem</span><span class="p">(</span><span class="n">person</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">sibling</span><span class="p">)</span>
+  <span class="k">end</span>
+  <span class="o">&lt;</span><span class="sr">/ul&gt;</span>
+<span class="sr">end</span>
+
+<span class="sr">def renderList(people) when not people</span>
+<span class="sr">  &lt;b&gt;&quot;There are no people to render!&quot;&lt;/</span><span class="n">b</span><span class="o">&gt;</span>
+<span class="k">end</span>
+
+<span class="n">renderList</span><span class="p">(</span><span class="n">people</span><span class="p">)</span>
+</code></pre></div>
+<p>In this case, if <code>people</code> was an empty array, the second variation of renderList would be executed.  Otherwise control would fall-through to the first.  If the unguarded version of renderList had been defined last, it would shadow the previous definition, thus short-circuiting its possible evaluation.</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">Re-opening a partial applies only to the current scope (and any of its nested scopes).  If you import a partial from a module and then re-open it with a guard, the re-opened version *will not* be applied globally.
+</code></pre></div>
+<h3 id="inline-guards">Inline-Guards</h3>
+
+<p>Interpol supports <em>very crude</em> pattern matching capability in Partial Definitions.  This facilitates what are essentially inline-guards.  For example:</p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">def</span> <span class="nf">renderItem</span><span class="p">(</span><span class="n">type</span><span class="p">,</span> <span class="nb">name</span><span class="p">)</span>
+  <span class="s2">&quot;This is a %type named %name&quot;</span>
+<span class="k">end</span>
+</code></pre></div>
+<p>This partial can be extended to deal with specific type values:</p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">def</span> <span class="nf">renderItem</span><span class="p">(</span><span class="s1">&#39;developer&#39;</span><span class="p">,</span> <span class="nb">name</span><span class="p">)</span>
+  <span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="s2">&quot;Developers rock! Especially %name&quot;</span><span class="o">&lt;</span><span class="sr">/b&gt;</span>
+<span class="sr">end</span>
+</code></pre></div>
+<p>In this case, no local argument name is bound to the value.  You can simply treat it as discarded.  On the other hand, sometimes you&#39;re performing matching against lists and you may need access to the entire list in the body of your partial.  To do this, you can alias it like so:</p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">def</span> <span class="nf">renderPerson</span><span class="p">(</span><span class="o">[</span><span class="n">type</span><span class="o">=</span><span class="s1">&#39;developer&#39;</span><span class="o">]</span> <span class="n">as</span> <span class="n">person</span><span class="p">)</span>
+  <span class="n">person</span> <span class="o">|</span> <span class="s1">&#39;%name writes code&#39;</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="nf">renderPerson</span><span class="p">(</span><span class="o">[</span><span class="n">type</span><span class="o">=</span><span class="s1">&#39;banker&#39;</span><span class="o">]</span> <span class="n">as</span> <span class="n">person</span><span class="p">)</span>
+  <span class="n">person</span> <span class="o">|</span> <span class="s1">&#39;%name steals money&#39;</span>
+<span class="k">end</span>
+
+<span class="n">let</span> <span class="n">me</span> <span class="o">=</span> <span class="o">[</span><span class="nb">name</span><span class="o">=</span><span class="s1">&#39;Thom&#39;</span><span class="p">,</span> <span class="n">type</span><span class="o">=</span><span class="s1">&#39;developer&#39;</span><span class="p">,</span> <span class="n">age</span><span class="o">=</span><span class="mi">42</span><span class="o">]</span>
+<span class="n">renderPerson</span><span class="p">(</span><span class="n">me</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="function-and-partial-calls">Function and Partial Calls</h3>
+
+<p>Like a function call in JavaScript.  A library function will either produce some template output or return a value, depending on its purpose.  A partial will aways return <code>Nil</code>.</p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">for</span> <span class="n">item</span> <span class="k">in</span> <span class="n">list</span>
+  <span class="n">renderItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div>
+<h3 id="call-binding-(@)">Call Binding (@)</h3>
+
+<p>Interpol supports a binding operator <code>@</code>.  This is a special unary operator that allows you to perform argument binding on both functions and partials.  This is useful against functions for constructing piped calls.  For Example:</p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">from</span> <span class="n">list</span> <span class="n">import</span> <span class="n">join</span>
+<span class="n">let</span> <span class="n">j</span> <span class="o">=</span> <span class="vi">@join</span><span class="p">(</span><span class="s1">&#39; -- &#39;</span><span class="p">)</span>
+<span class="n">let</span> <span class="n">a</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;joined&#39;</span><span class="p">,</span><span class="s1">&#39;with&#39;</span><span class="p">,</span><span class="s1">&#39;dashes&#39;</span><span class="o">]</span>
+<span class="s2">&quot;Result is %a|j&quot;</span>
+</code></pre></div>
+<p>Binding is also useful against partials when you want to pass them around for later invocation:</p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">from</span> <span class="n">layouts</span> <span class="n">import</span> <span class="n">mainLayout</span>
+<span class="n">from</span> <span class="n">partials</span> <span class="n">import</span> <span class="n">renderList</span>
+<span class="n">let</span> <span class="n">renderItems</span> <span class="o">=</span> <span class="vi">@renderList</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+<span class="n">mainLayout</span><span class="p">(</span><span class="s1">&#39;A Title&#39;</span><span class="p">,</span> <span class="n">renderItems</span><span class="p">)</span>
+</code></pre></div>
+<p>Now, when mainLayout invokes <code>renderItems()</code>, the bound list in <code>items</code> will be rendered.</p>
+
+<h3 id="piped-calls-(|)">Piped Calls (|)</h3>
+
+<p>A piped call is an operator where the left operand is passed as the sole argument to the right operand.  The right operand must evaluate to a callable function.  These calls can be chained from left to right, where the result of each call is passed into the next right-hand operand.</p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">from</span> <span class="n">list</span> <span class="n">import</span> <span class="n">join</span>
+<span class="n">from</span> <span class="n">string</span> <span class="n">import</span> <span class="n">title</span>
+<span class="n">classes</span> <span class="o">|</span> <span class="n">join</span> <span class="o">|</span> <span class="n">title</span>
+</code></pre></div>
+<h3 id="hoisting">Hoisting</h3>
+
+<p>Under certain conditions, Partials are subject to something called &#39;hoisting&#39;.  What this means is that the partial&#39;s definition will appear to have been defined at the top of the scope.  The conditions for this are rather simple: To be hoistable, all partial definitions must appear at the end of the current scope without other types of statements interspersed.  The Interpol rewriter will not attempt to infer your intent otherwise.</p>
+
+<p>So, for example, these partials will be hoisted:</p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">partial1</span><span class="p">(</span><span class="n">partial2</span><span class="p">)</span>  <span class="c1"># call partial1 with a reference to partial2</span>
+
+<span class="k">def</span> <span class="nf">partial1</span><span class="p">(</span><span class="n">someValue</span><span class="p">)</span>
+  <span class="n">someValue</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="nf">partial2</span>
+  <span class="s2">&quot;hello there!&quot;</span>
+<span class="k">end</span>
+</code></pre></div>
+<p>But these will not be hoisted:</p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">partial1</span><span class="p">()</span>  <span class="c1"># call partial1 (won&#39;t work)</span>
+
+<span class="k">def</span> <span class="nf">partial1</span>
+  <span class="s2">&quot;hello&quot;</span>
+<span class="k">end</span>
+
+<span class="n">partial2</span><span class="p">()</span>  <span class="c1"># makes hoisting invalid (won&#39;t work)</span>
+
+<span class="k">def</span> <span class="nf">partial2</span>
+  <span class="s2">&quot;there!&quot;</span>
+<span class="k">end</span>
+</code></pre></div>
+<p>So why hoisting?  There are some people who believe hoisting, in general, is bad.  For variables declarations I would definitely agree.  But for partials, I&#39;m not so convinced.  I also think it&#39;s stylistically horrible to define nested partials at the top of a scope when that scope is also performing other statements that serve as the scope&#39;s true essence.  Because then you have to scroll down to find out what the partial actually does.  I hate scrolling.</p>
+
+  </div>
+<div class="navigate">
+  <span class="prev"><a href="06-looping.html">Previous Chapter</a></span>
+  <span class="index"><a href="index.html">Table of Contents</a></span>
+  <span class="next"><a href="08-imports.html">Next Chapter</a></span>
+</div>
+
+
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Guide to Interpol</title>
+  <link href='//fonts.googleapis.com/css?family=Roboto:400,400italic,700' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/syntax.css">
+  <link rel="stylesheet" href="/css/wide.css">
+
+</head>
+<body>
+  <div class="container">
+    <h1>
+      <a href="./">A Guide to Interpol</a>
+    </h1>
+  </div>
+  <div class="container">
+    <h2 id="the-interpol-api">The Interpol API</h2>
+
+<p>The primary Interpol API is a single JavaScript module that exposes a single function.  The signature for this function is:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">interpol(template, runtime);
+</code></pre></div>
+<p>The purpose of this function is to compile template strings into executable JavaScript functions.  The runtime argument can either be a Runtime instance or an Object as passed into the <code>interpol.runtime()</code> Function.  If nothing is provided, the Global Runtime will be used.  Here is an example of using the <code>interpol()</code> function:</p>
+<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">interpol</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;interpol&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">template</span> <span class="o">=</span> <span class="nx">interpol</span><span class="p">(</span><span class="s2">&quot;name | &#39;Hello, %!&#39;&quot;</span><span class="p">);</span>
+<span class="nx">template</span><span class="p">({</span> <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;World&#39;</span> <span class="p">});</span> <span class="c1">//-&gt; Hello, World!</span>
+</code></pre></div>
+<p>There are several support structures and functions attached to the <code>interpol()</code> function.  By default, they are as follows:</p>
+
+<ul>
+<li><code>VERSION</code> - The current version of Interpol, represented as a String.</li>
+<li><code>evaluate(source, obj, options)</code> - Compiles and evaluates the specified source against the provided context object.</li>
+<li><code>compile(source, options)</code> - compiles a string template, returning an Object that contains the generated JavaScript function body and any errors or warnings that occurred during compilation.</li>
+<li><code>runtime(options)</code> - creates a new Interpol Runtime instance.  A Runtime manages common resources between a set of Interpol templates and modules and can be used to create an isolated import resolution sandbox.  If options are not passed, the default Interpol Runtime instance is returned.</li>
+<li><code>bless(value)</code> - Blesses a Function or String as being Interpol-safe.</li>
+</ul>
+
+<h2 id="compilation">Compilation</h2>
+
+<p>The <code>interpol()</code> function will parse, compile, and generate a function for your template all in one pass.  But there are cases where you may want the compiled JavaScript for a template rather than a function.  In these cases, you&#39;ll want to call <code>interpol.compile()</code>.</p>
+
+<h2 id="runtime-processing">Runtime Processing</h2>
+
+<p>Each compiled function also attaches additional functions, the most important being called <code>resolveExports()</code>.  This function is used by resolvers to retrieve partials and variables when the template is loaded as a module.</p>
+
+<h2 id="blessing-stuff">Blessing Stuff</h2>
+
+<p>Certain security considerations went into the design of Interpol.  It was important that Interpol avoid script injection attacks and the execution of arbitrary content.  That said, there are times when you need to bypass these limitations, but please do so with great care.</p>
+
+<h3 id="functions">Functions</h3>
+
+<p>Interpol <em>does not</em> allow arbitrary functions to be called from data passed to it.  To work around this security requirement and allow a function to be called from within Interpol, you must &#39;bless&#39; that function using <code>interpol.bless(func)</code>.  The function you bless should expect to accept a Writer instance as its first argument, followed by any arguments passed from the calling template.</p>
+
+<h3 id="strings">Strings</h3>
+
+<p>Interpol <em>does not</em> internally support the ability to send values to the resulting HTML content without escaping those values to avoid script injection attacks.  To work around this security requirement and allow a string to be displayed with embedded HTML tags, you must &#39;bless&#39; that string using <code>interpol.bless(str)</code>.</p>
+
+<h2 id="resolvers">Resolvers</h2>
+
+<p>A resolver is an interface used by Interpol to resolve an imported module.  There are two available for developer use, and one automatically registered for apps bundled by the command-line interface.</p>
+
+<h3 id="memory">Memory</h3>
+
+<p>A memory resolver allows you to register templates as named modules.  These templates can be strings to be compiled, compiled Interpol Module functions, or Objects containing JavaScript functions.  An instance of this resolver is registered by default in each Runtime.  It can be accessed like so:</p>
+<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nx">interpol</span><span class="p">.</span><span class="nx">runtime</span><span class="p">().</span><span class="nx">registerModule</span><span class="p">(</span><span class="s1">&#39;myModule&#39;</span><span class="p">,</span>
+  <span class="s2">&quot;def hello(name)\n&quot;</span> <span class="o">+</span>
+  <span class="s1">&#39;  &quot;Hello, %name!&quot;\n&#39;</span> <span class="o">+</span>
+  <span class="s2">&quot;end&quot;</span>
+<span class="p">);</span>
+</code></pre></div>
+<p>This will register a module in Interpol&#39;s default Runtime instance.  You can then resolve the module in your template:</p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">from</span> <span class="n">myModule</span> <span class="n">import</span> <span class="n">hello</span>
+<span class="n">hello</span><span class="p">(</span><span class="s1">&#39;World&#39;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="file-(node.js-only)">File (Node.js only)</h3>
+
+<p>A file resolver allows you to monitor a set of directories on disk as a source for your templates.  It&#39;s a little more complicated to use than the memory resolver because it requires a target path, and so it&#39;s not registered by default.  To create one:</p>
+<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">interpol</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;interpol&#39;</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">resolvers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;interpol/lib/resolvers&#39;</span><span class="p">);</span>
+
+<span class="nx">resolvers</span><span class="p">.</span><span class="nx">createFileResolver</span><span class="p">(</span><span class="nx">interpol</span><span class="p">.</span><span class="nx">runtime</span><span class="p">(),</span> <span class="p">{</span>
+  <span class="nx">path</span><span class="o">:</span> <span class="s2">&quot;./my_templates&quot;</span><span class="p">,</span>
+  <span class="nx">compile</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span> <span class="c1">// default: false</span>
+  <span class="nx">monitor</span><span class="o">:</span> <span class="kc">true</span>  <span class="c1">// default: false</span>
+<span class="p">});</span>
+</code></pre></div>
+<p>If you wanted to import from a module named &#39;myModule&#39;, Interpol will check for <code>./my_templates/myModule.int.js</code>.  If that file doesn&#39;t exist, and if <code>compile</code> is set to true, then Interpol will check for <code>./my_templates/myModule.int</code>.</p>
+
+<p>The <code>path</code> property of createFileResolver&#39;s options can also take an Array of paths.  The <code>compile</code> flag tells the resolver that it should compile Interpol templates (in-memory only) if a JavaScript file can&#39;t be found.  The <code>monitor</code> flag tells the resolver that it should monitor the directories for changes and reload the modules automatically.</p>
+
+  </div>
+<div class="navigate">
+  <span class="prev"><a href="09-realworld.html">Previous Chapter</a></span>
+  <span class="index"><a href="index.html">Table of Contents</a></span>
+  <span class="next"><a href="a1-system.html">Next Chapter</a></span>
+</div>
+
+
+</body>
+</html>

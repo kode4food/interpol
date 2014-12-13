@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Guide to Interpol</title>
+  <link href='//fonts.googleapis.com/css?family=Roboto:400,400italic,700' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/syntax.css">
+  <link rel="stylesheet" href="/css/wide.css">
+
+</head>
+<body>
+  <div class="container">
+    <h1>
+      <a href="./">A Guide to Interpol</a>
+    </h1>
+  </div>
+  <div class="container">
+    <h2 id="an-interpol-introduction">An Interpol Introduction</h2>
+
+<p>Interpol is Logicful HTML Template System.  Its purpose is to convert this:</p>
+<div class="highlight"><pre><code class="language-json" data-lang="json"><span class="p">{</span>
+  <span class="nt">&quot;items&quot;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span> <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;tool&quot;</span><span class="p">,</span> <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Hammer&quot;</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;tool&quot;</span><span class="p">,</span> <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Screwdriver&quot;</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;device&quot;</span><span class="p">,</span> <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Mobile Phone&quot;</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;device&quot;</span><span class="p">,</span> <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Computer&quot;</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;furniture&quot;</span><span class="p">,</span> <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Table&quot;</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;furniture&quot;</span><span class="p">,</span> <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Chair&quot;</span> <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Into this:</p>
+<div class="highlight"><pre><code class="language-html" data-lang="html">  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;tool&quot;</span><span class="nt">&gt;</span>Hammer<span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;tool&quot;</span><span class="nt">&gt;</span>Screwdriver<span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;device&quot;</span><span class="nt">&gt;</span>Mobile Phone<span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;device&quot;</span><span class="nt">&gt;</span>Computer<span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;furniture&quot;</span><span class="nt">&gt;</span>Table<span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;furniture&quot;</span><span class="nt">&gt;</span>Chair<span class="nt">&lt;/div&gt;</span>
+</code></pre></div>
+<p>By doing this:</p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">for</span> <span class="n">item</span> <span class="k">in</span> <span class="n">items</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="n">item</span><span class="o">.</span><span class="n">type</span><span class="o">&gt;</span><span class="n">item</span><span class="o">.</span><span class="n">name</span><span class="o">&lt;</span><span class="sr">/div&gt;</span>
+<span class="sr">end</span>
+</code></pre></div>
+<p>It does quite a bit more than that, but I&#39;m sure you get the idea.</p>
+
+<h3 id="why-interpol?">Why Interpol?</h3>
+
+<p>Stuff you write should &#39;mean&#39; something.  Not only at the time it&#39;s written, but years later.  It should also mean something to new eyes.  The arguments for terseness haven&#39;t flown since we stopped using punch cards, so why do we keep churning out languages that are replete with cryptic operators and grammatical constructs?  That said, Interpol&#39;s goals are modest.  It should:</p>
+
+<ul>
+<li>Provide templates where <em>meaning</em> takes a front seat</li>
+<li>Work well in both Node.js and the Browser</li>
+</ul>
+
+<h3 id="hello,-interpol!">Hello, Interpol!</h3>
+
+<p>Alright, let&#39;s get started.  We&#39;re going to use Node for this example, so make sure you&#39;ve installed it.  After it&#39;s installed, you can install Interpol globally like so:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">npm -g install interpol
+</code></pre></div>
+<p><strong>Note:</strong> Depending on your operating system&#39;s permissions, you may have to use &#39;sudo&#39; for this call to work.</p>
+
+<p>Once Interpol is installed, you can start the Node REPL by typing <code>node</code> in your Terminal.  After that, type this stuff in:</p>
+<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">interpol</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;interpol&#39;</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">template</span> <span class="o">=</span> <span class="s1">&#39;&lt;b&gt;&quot;Hello, %name!&quot;&lt;/b&gt;&#39;</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">interpol</span><span class="p">.</span><span class="nx">evaluate</span><span class="p">(</span><span class="nx">template</span><span class="p">,</span> <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;World&#39;</span> <span class="p">});</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span>
+</code></pre></div>
+<p>These four lines of JavaScript code should display:</p>
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;b&gt;</span>Hello, World!<span class="nt">&lt;/b&gt;</span>
+</code></pre></div>
+<p>Let&#39;s discuss what was happening here.  On the first line, we&#39;re pulling Interpol in as a dependency:</p>
+<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">interpol</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;interpol&#39;</span><span class="p">);</span>
+</code></pre></div>
+<p>The second line, you can probably guess, is just creating a string that contains the source of an Interpol template.</p>
+<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">template</span> <span class="o">=</span> <span class="s1">&#39;&lt;b&gt;&quot;Hello, %name!&quot;&lt;/b&gt;&#39;</span><span class="p">;</span>
+</code></pre></div>
+<p>It&#39;s the third line that&#39;s doing the real work:</p>
+<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">interpol</span><span class="p">.</span><span class="nx">evaluate</span><span class="p">(</span><span class="nx">template</span><span class="p">,</span> <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;World&#39;</span> <span class="p">});</span>
+</code></pre></div>
+<p><code>interpol.evaluate()</code> is a convenience function that allows you to immediately compile and evaluate an Interpol template against a provided context.  Generally, you don&#39;t want to use this function in a real application because there&#39;s a lot of overhead in compiling a template every time it&#39;s needed.  Instead, it&#39;s better to compile your template ahead of time:</p>
+<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">interpol</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;interpol&#39;</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">template</span> <span class="o">=</span> <span class="nx">interpol</span><span class="p">(</span><span class="s1">&#39;&lt;b&gt;&quot;Hello, %name!&quot;&lt;/b&gt;&#39;</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">template</span><span class="p">({</span> <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;World&#39;</span> <span class="p">});</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span>
+</code></pre></div>
+<p>In this case, we&#39;re using the <code>interpol()</code> module to compile our template into a JavaScript function.  We can then call it as many times we like.</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">Going Forward, the Templates are going to get a bit more complex and it will become increasingly difficult to type them into the Node REPL.  So instead, I&#39;ll be including a JSFiddle link for each example.
+</code></pre></div>
+<h4 id="worth-noting">Worth Noting</h4>
+
+<p>Like JavaScript, Interpol is case-sensitive.  Though we haven&#39;t seen any yet, all keywords in Interpol are lower-case.  Additionally, new lines are mostly ignored, but it&#39;s important to avoid them before a comma (<code>,</code>) that is used to continue a statement (such as <code>let</code> or <code>import</code>).</p>
+
+  </div>
+<div class="navigate">
+  <span class="prev"><a href="index.html">Previous Chapter</a></span>
+  <span class="index"><a href="index.html">Table of Contents</a></span>
+  <span class="next"><a href="02-data.html">Next Chapter</a></span>
+</div>
+
+
+</body>
+</html>

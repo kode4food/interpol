@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Guide to Interpol</title>
+  <link href='//fonts.googleapis.com/css?family=Roboto:400,400italic,700' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/syntax.css">
+  <link rel="stylesheet" href="/css/wide.css">
+
+</head>
+<body>
+  <div class="container">
+    <h1>
+      <a href="./">A Guide to Interpol</a>
+    </h1>
+  </div>
+  <div class="container">
+    <h2 id="string-interpolation">String Interpolation</h2>
+
+<p>Quite simply, interpolation allows you to parameterize a string.  This is accomplished by adding interpolation escapes to a string (prefixed by <code>%</code>).  Interpolation can be performed positionally, by index, and by name.</p>
+
+<p>Once a string contains these escapes, it can be called as if it were a function, either using the pipe operator or normal function calling syntax.  For example:</p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">person</span> <span class="o">|</span> <span class="s1">&#39;My name is %name&#39;</span>
+</code></pre></div>
+<p>is the same as:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">&#39;My name is %name&#39;(person)
+</code></pre></div>
+<p>Interpolation only cares about the first argument you provide to it.  Any additional arguments will be ignored.  For this reason, I prefer the first (piped) calling convention.</p>
+
+<h3 id="positional-interpolation">Positional Interpolation</h3>
+
+<p>In its most basic form, you&#39;d be merging a single parameter into a string.  This can be done using positional interpolation.</p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">people</span><span class="o">.</span><span class="n">length</span> <span class="o">|</span> <span class="s1">&#39;There are % stooges&#39;</span>
+</code></pre></div>
+<p>If you have more than one parameter, you need to provide a list to the left side of the operator:</p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="o">[</span><span class="n">people</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">people</span><span class="o">.</span><span class="n">best</span><span class="o">]</span> <span class="o">|</span> <span class="s1">&#39;There are % stooges, and % is the best&#39;</span>
+</code></pre></div>
+<p>In truth, the positional approach is rather limited, particularly since you could accomplish the same thing with multiple Expression Statements.  Where interpolation becomes important is when you&#39;re trying to localize an application and you need to parameterize a string from an expression on the left side of the operator.  Let&#39;s say you have the following string table called <code>str</code>:</p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">let</span> <span class="n">str</span> <span class="o">=</span> <span class="o">[</span>
+  <span class="n">en</span><span class="o">=[</span>
+    <span class="n">stooge_summary</span><span class="o">=</span><span class="s1">&#39;There are % stooges, and % is the best&#39;</span>
+  <span class="o">]</span><span class="p">,</span>
+  <span class="n">de</span><span class="o">=[</span>
+    <span class="n">stooge_summary</span><span class="o">=</span><span class="s1">&#39;Es gibt % Stooges und % ist die beste&#39;</span>
+  <span class="o">]</span>
+<span class="o">]</span>
+</code></pre></div>
+<p>You could perform interpolation against an entry in the table by doing the following:</p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="o">[</span><span class="n">people</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">people</span><span class="o">.</span><span class="n">best</span><span class="o">]</span> <span class="o">|</span> <span class="n">str</span><span class="o">[</span><span class="n">lang</span><span class="o">].</span><span class="n">stooge_summary</span>
+</code></pre></div>
+<h3 id="indexed-interpolation">Indexed Interpolation</h3>
+
+<p>If your parameters always appear in the same order, then simple <code>%</code> characters embedded into strings will work fine.  But what if the ordering is not consistent?  Then you have to explicitly identify the index of the parameter you&#39;d like to use, keeping in mind that they&#39;re zero-based:</p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">let</span> <span class="n">str</span> <span class="o">=</span> <span class="o">[</span>
+  <span class="n">en</span><span class="o">=[</span>
+    <span class="n">stooge_summary</span><span class="o">=</span><span class="s1">&#39;%1 is the best of the %0 Stooges&#39;</span>
+  <span class="o">]</span><span class="p">,</span>
+  <span class="n">de</span><span class="o">=[</span>
+    <span class="n">stooge_summary</span><span class="o">=</span><span class="s1">&#39;Es gibt %0 Stooges und %1 ist die beste&#39;</span>
+  <span class="o">]</span>
+<span class="o">]</span>
+</code></pre></div>
+<p>You could perform interpolation against an entry in the table by doing the following:</p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="o">[</span><span class="n">people</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">people</span><span class="o">.</span><span class="n">best</span><span class="o">]</span> <span class="o">|</span> <span class="n">str</span><span class="o">[</span><span class="n">lang</span><span class="o">].</span><span class="n">stooge_summary</span>
+</code></pre></div>
+<h3 id="named-interpolation">Named Interpolation</h3>
+
+<p>Rather than simple values or lists, an object can be passed to the right side of the interpolation operator.  This will allow you to interpolate its properties by name.  To do this, follow the embedded <code>%</code> by a valid Interpol identifier:</p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">people</span> <span class="o">|</span> <span class="s1">&#39;There are %length stooges&#39;</span>
+</code></pre></div>
+<p>Here, the <code>length</code> property of <code>people</code> will be interpolated into the resulting string.</p>
+
+<h3 id="automatic-interpolation">Automatic Interpolation</h3>
+
+<p>Strings surrounded by double quotes rather than single quotes are subject to automatic interpolation.  This means that if they contain named Interpolation escapes and no explicit Interpolation operator is present, then Interpol will resolve those variables from its current scope.</p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">let</span> <span class="nb">name</span> <span class="o">=</span> <span class="s1">&#39;Bill&#39;</span>
+<span class="n">let</span> <span class="n">age</span> <span class="o">=</span> <span class="mi">42</span>
+<span class="s2">&quot;%name is %age years old&quot;</span>
+</code></pre></div>
+<h2 id="piped-interpolation">Piped Interpolation</h2>
+
+<p>The Interpolation feature also supports a restricted form of the piped call operator.  The restrictions in using this method are that the pipe character <em>can not</em> be surrounded by spaces and the right-hand operands can only be identifiers.  For example:</p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">from</span> <span class="n">string</span> <span class="n">import</span> <span class="n">title</span>
+<span class="s2">&quot;User Profile - %name|title&quot;</span>
+</code></pre></div>
+<p>This will display the value of name in Title Case, as returned by the <code>title()</code> function.</p>
+
+  </div>
+<div class="navigate">
+  <span class="prev"><a href="03-html.html">Previous Chapter</a></span>
+  <span class="index"><a href="index.html">Table of Contents</a></span>
+  <span class="next"><a href="05-branching.html">Next Chapter</a></span>
+</div>
+
+
+</body>
+</html>

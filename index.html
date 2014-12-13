@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interpol</title>
+  <link href='//fonts.googleapis.com/css?family=Roboto:400,400italic,700' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/syntax.css">
+  <link rel="stylesheet" href="/css/solo.css">
+
+</head>
+<body>
+  <div class="container">
+    <img src="/interpol/images/logo-small.png" width="145" height="200" align="right">
+    <h1><a href="./">Interpol</a></h1>
+    <h2 id="logicful-html-templates">Logicful HTML Templates</h2>
+
+<p>Interpol is a Logicful Template System.  What can you do with it?  Stuff like this:</p>
+<div class="highlight"><pre><code class="language-html" data-lang="html">let label = &#39;%0 is a friend of %1&#39;
+
+def renderPeople(people)
+  <span class="nt">&lt;ul&gt;</span>
+  for person in people, friend in person.friends
+    <span class="nt">&lt;li&gt;</span>
+    [person.name, friend.name] | label
+    <span class="nt">&lt;/li&gt;</span>
+  end
+  <span class="nt">&lt;/ul&gt;</span>
+end
+
+def renderPeople(people) when not people
+  <span class="nt">&lt;b&gt;</span> &#39;There are no people to render&#39; <span class="nt">&lt;/b&gt;</span>
+end
+</code></pre></div>
+<p><code>renderPeople</code> is a partial.  Its first form renders a list of interpolated strings resulting from a set of nested loops.  The second form is a guarded version that catches the case when there is no <code>people</code> value or it is empty.  How easy is that to do with your current template system?  I suspect pretty difficult.  Maybe not possible at all.</p>
+
+<h3 id="so-why-logicful-templates?">So Why Logicful Templates?</h3>
+
+<p>There has been a lot of noise about logic-less templates in recent years.  The sales pitch is that they enforce separation of concerns, so that business logic doesn&#39;t taint the presentation layer.  Fair enough, I agree, separation of concerns is a good thing.</p>
+
+<p>In reality the separation of concerns is still violated in many cases, except that it&#39;s now your business logic that&#39;s often tainted with presentation-specific mapping acrobatics to massage your data into a form the template system will accept.  You&#39;re also having to leverage helpers extensively, backfilling the &#39;logic&#39; a logic-less template system refused to provide in the first place.</p>
+
+<p>That being the case, what&#39;s the benefit of a logic-less template system?  None that I can see.  Especially when a developer can <em>still</em> choose to separate concerns in their design.  And trust me, most developers are smart enough to make that decision on their own.  You don&#39;t have to force their hands by giving them tools that paint them into a corner.</p>
+
+<p>Interpol lets <em>you</em> decide and makes sure you&#39;re not crippled as a result of your decision.</p>
+
+<h3 id="more-about-interpolation">More About Interpolation</h3>
+
+<p>You might ask why the interpolation was so involved.  After all, in other systems you could just embed the values directly into the resulting content.  You can do something like that in Interpol as well.  It would look like this: </p>
+<div class="highlight"><pre><code class="language-html" data-lang="html">person.name &#39;is a friend of&#39; friend.name
+</code></pre></div>
+<p>But that approach falls down once you start localizing your application (and you probably will).  Interpol was designed with localization in mind.  In a real Interpol application, you&#39;d probably define such a <code>label</code> in a single module of localized strings and then pull them into your template with an <code>import</code> statement.</p>
+
+<p>You could have also performed the interpolation using named indexes rather than positional ones: </p>
+<div class="highlight"><pre><code class="language-html" data-lang="html">let label = &#39;%pname is a friend of %fname&#39;
+# ... and then inside the for loop ...
+[pname = person.name, fname = friend.name] | label
+</code></pre></div>
+<h2 id="interpol-and-node.js">Interpol and Node.js</h2>
+
+<p>To use Interpol directly from Node.js applications, NPM install it like so:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">npm install interpol --save
+</code></pre></div>
+<p>You can then include it in your Node code like so:</p>
+<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">interpol</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;interpol&#39;</span><span class="p">);</span>
+</code></pre></div>
+<h3 id="express-/-hapi-integration">Express / hapi Integration</h3>
+
+<p>For <a href="http://expressjs.com/">Express</a> or <a href="http://hapijs.com/">hapi</a> View Rendering, you can install the <code>interpol-views</code> package with NPM:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">npm install interpol-views --save
+</code></pre></div>
+<p>You can then follow the instructions available at the <a href="http://github.com/kode4food/interpol-views">interpol-views</a> GitHub page.</p>
+
+<h2 id="interpol-and-the-browser">Interpol and the Browser</h2>
+
+<p>To add Interpol as a Bower dependency to your project, do the following:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">bower install interpol --save
+</code></pre></div>
+<h3 id="inclusion-in-a-web-page">Inclusion in a Web Page</h3>
+
+<p>There are two ways to include Interpol templates in a browser-based application.  One is to compile raw templates using the Interpol compiler.  Another is to load the templates from pre-compiled bundles.  The PEG.js parser used by the compiler is <em>massive</em> and slower than loading JavaScript, but it may be necessary if you want to compile ad-hoc templates.</p>
+
+<p><em>Note:</em> The entry point function for Interpol in the browser is <em>always</em> named <code>interpol()</code>.</p>
+
+<h3 id="pre-compiled-javascript-bundles">Pre-Compiled JavaScript Bundles</h3>
+
+<p>Application bundles can be pre-compiled and automatically registered with Interpol.  This will allow you to bypass the loading of the compiler and PEG.js parser.  Instead, you can load sets of pre-compiled templates from your server for faster initialization.</p>
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;build/interpol.min.js&quot;</span>
+        <span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;your_bundle.js&quot;</span>
+        <span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</code></pre></div>
+<p><em>Note:</em> The Interpol command-line interface generates pre-compiled bundles.  You can install this globally using <code>npm -g install</code> and can then invoke the tools at your terminal by typing <code>interpol</code>.</p>
+
+<h3 id="including-the-peg.js-compiler">Including the PEG.js Compiler</h3>
+
+<p>If you <em>must</em> parse raw templates in the browser, you will need to load the version of Interpol that includes the compiler (and its PEG.js parser).</p>
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;build/interpol-parser.min.js&quot;</span>
+        <span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</code></pre></div>
+<h2 id="resources">Resources</h2>
+
+<p>For the latest releases, see the <a href="http://github.com/kode4food/interpol">Interpol GitHub Page</a></p>
+
+<p>For more information about the Interpol Language and API, please see the <a href="http://interpoljs.io/guide/">Interpol Guide</a> (a work in progress).</p>
+
+<p>For a brief introduction to Interpol and its motivations, see this <a href="http://slid.es/kode4food/interpol-introduction">Presentation</a></p>
+
+<p>To play around with Interpol, go to the <a href="http://jsfiddle.net/kode4food/Py2xq/">JSFiddle Example</a></p>
+
+  </div>
+
+</body>
+</html>
