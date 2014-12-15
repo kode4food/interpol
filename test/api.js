@@ -12,7 +12,6 @@ var nodeunit = require('nodeunit');
 var interpol = require('../lib');
 var types = require('../lib/types');
 
-
 function intFunction() {}
 intFunction.__intFunction = 'part';
 intFunction.toString = function () { return 'hello!'; };
