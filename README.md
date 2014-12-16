@@ -1,7 +1,7 @@
 # Interpol (Logicful HTML Templates)
 Interpol is a Logicful Template System.  What can you do with it?  Stuff like this:
 
-```html
+```ruby
 let label = '%0 is a friend of %1'
 
 def renderPeople(people)
@@ -33,7 +33,7 @@ Interpol lets *you* decide and makes sure you're not crippled as a result of you
 ## More About Interpolation
 You might ask why the interpolation was so involved.  After all, in other systems you could just embed the values directly into the resulting content.  You can do something like that in Interpol as well.  It would look like this: 
 
-```html
+```ruby
 person.name 'is a friend of' friend.name
 ```
 
@@ -41,7 +41,7 @@ But that approach falls down once you start localizing your application (and you
 
 You could have also performed the interpolation using named indexes rather than positional ones: 
 
-```html
+```ruby
 let label = '%pname is a friend of %fname'
  ... and then inside the for loop ...
 [pname = person.name, fname = friend.name] | label
