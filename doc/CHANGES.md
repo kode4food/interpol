@@ -1,5 +1,8 @@
 # Change History
 
+## Version 1.2.7 - More Consistent Lists
+The two types of lists (vectors and dictionaries) are now more consistent with one another in terms of behavior.  Now, a dictionary must have at least one pair to be considered 'truthy'.  Also, the `length()`, `first()` and `last()` functions operate against dictionaries similarly.
+
 ## Version 1.2.6 - Render Helpers
 Added three helpers for rendering to a new system module called `render`.  They are `counter(start, increment)`, `evenOdd(evenVal, oddVal)` and `separator(sep)`.  They basically do what you'd expect them to do except that calling each returns a new evaluable function that acts as a generator for values in their sequences.  For example:
 
