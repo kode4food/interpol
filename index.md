@@ -52,14 +52,14 @@ let label = '%pname is a friend of %fname'
 [pname = person.name, fname = friend.name] | label
 ```
 
-## Interpol and Node.js
-To use Interpol directly from Node.js applications, NPM install it like so:
+## Interpol and node.js
+To use Interpol directly from node.js applications, NPM install it like so:
 
 ```bash
 npm install interpol --save
 ```
 
-You can then include it in your Node code like so:
+You can then include it in your node code like so:
 
 ```javascript
 var interpol = require('interpol');

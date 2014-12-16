@@ -45,7 +45,7 @@ It does quite a bit more than that, but I'm sure you get the idea.
 Stuff you write should 'mean' something.  Not only at the time it's written, but years later.  It should also mean something to new eyes.  The arguments for terseness haven't flown since we stopped using punch cards, so why do we keep churning out languages that are replete with cryptic operators and grammatical constructs?  That said, Interpol's goals are modest.  It should:
 
   * Provide templates where *meaning* takes a front seat
-  * Work well in both Node.js and the Browser
+  * Work well in both node.js and the Browser
 
 ### Hello, Interpol!
 Alright, let's get started.  We're going to use Node for this example, so make sure you've installed it.  After it's installed, you can install Interpol globally like so:
