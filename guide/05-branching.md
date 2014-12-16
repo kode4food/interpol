@@ -56,10 +56,10 @@ Interpol conditionals always test whether an expression is 'truthy' or 'falsy'. 
 In Interpol 'truthy' is any value that matches the following criteria:
 
   * Vectors with at least one element
+  * Dictionaries with at least one pair
   * Strings with at least one character
   * The boolean 'true'
   * Non-Zero Numbers
-  * Dictionaries
 
 Falsy is any value that is not 'truthy'.
 
