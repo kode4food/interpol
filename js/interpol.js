@@ -250,7 +250,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule;
 var generateFunction;
 
-var CURRENT_VERSION = "1.2.6";
+var CURRENT_VERSION = "1.2.8";
 
 // Bootstrap
 
@@ -721,10 +721,14 @@ var isArray = util.isArray;
 // `first(value)` returns the first item of the provided array (or `null` if
 // the array is empty).
 function first(writer, value) {
-  if ( !isArray(value) ) {
-    return value;
+  if ( isArray(value) ) {
+    return value[0];
   }
-  return value[0];
+  if ( typeof value === 'object' && value !== null ) {
+    var key = objectKeys(value)[0];
+    return value[key];
+  }
+  return value;
 }
 
 // `join(delim, value)` returns the result of joining the elements of the
@@ -744,13 +748,15 @@ function join(writer, delim, value) {
 // `last(value)` returns the last item of the provided array (or `null` if
 // the array is empty).
 function last(writer, value) {
-  if ( !isArray(value) ) {
-    return value;
-  }
-  if ( value.length ) {
+  if ( isArray(value) ) {
     return value[value.length - 1];
   }
-  return undefined;
+  if ( typeof value === 'object' && value !== null ) {
+    var keys = objectKeys(value);
+    var key = keys[keys.length - 1];
+    return value[key];
+  }
+  return value;
 }
 
 // `length(value)` if it is an array, returns the length of the provided
@@ -759,7 +765,7 @@ function length(writer, value) {
   if ( isArray(value) ) {
     return value.length;
   }
-  else if ( typeof value === 'object' && value !== null ) {
+  if ( typeof value === 'object' && value !== null ) {
     return objectKeys(value).length;
   }
   return 0;
@@ -770,6 +776,9 @@ function length(writer, value) {
 function empty(writer, value) {
   if ( isArray(value) ) {
     return !value.length;
+  }
+  if ( typeof value === 'object' && value !== null ) {
+    return !objectKeys(value).length;
   }
   return true;
 }
@@ -981,10 +990,10 @@ function counter(writer, start, increment) {
 }
 
 function evenOdd(writer, even, odd) {
-  if ( typeof even === 'undefined' ) {
+  if ( even === undefined ) {
     even = 'even';
   }
-  if ( typeof odd === 'undefined' ) {
+  if ( odd === undefined ) {
     odd = 'odd';
   }
 
@@ -1128,7 +1137,6 @@ var createStringWriter = writers.createStringWriter;
 var nullWriter = writers.createNullWriter();
 
 var noOp = bless(function () {});
-var defaultOptions = {};
 
 function createRuntime(interpol, runtimeOptions) {
   if ( isInterpolRuntime(runtimeOptions) ) {
@@ -1232,17 +1240,38 @@ function createRuntime(interpol, runtimeOptions) {
 }
 
 function createToString(func) {
+  var stringWriters = [];
+  var stringWritersAvail = 0;
   return toString;
 
   function toString() {
-    var writer = createStringWriter();
-    func(writer);
-    return writer.done();
+    var writer;
+    if ( stringWritersAvail ) {
+      writer = stringWriters[--stringWritersAvail];
+    }
+    else {
+      writer = createStringWriter();
+    }
+    try {
+      func(writer);
+      var result = writer.done();
+      stringWriters[stringWritersAvail++] = writer;
+      return result;
+    }
+    catch ( err ) {
+      writer.reset();
+      stringWriters[stringWritersAvail++] = writer;
+      throw err;
+    }
   }
 }
 
 function defineModule(template) {
+  var stringWriters = [];
+  var stringWritersAvail = 0;
+  var defaultOptions = {};
   var exportedContext;
+
   templateInterface.__intModule = true;
   templateInterface.exports = templateExports;
   return templateInterface;
@@ -1254,13 +1283,30 @@ function defineModule(template) {
     }
 
     // If no Writer is provided, create a throw-away Array Writer
-    var writer = templateOptions.writer || createStringWriter();
+    var writer = templateOptions.writer;
+    var useStringWriter = !writer;
 
     try {
+      if ( useStringWriter ) {
+        if ( stringWritersAvail ) {
+          writer = stringWriters[--stringWritersAvail];
+        }
+        else {
+          writer = createStringWriter();
+        }
+        template(ctx, writer);
+        var result = writer.done();
+        stringWriters[stringWritersAvail++] = writer;
+        return result;
+      }
       template(ctx, writer);
       return writer.done();
     }
     catch ( err ) {
+      writer.reset();
+      if ( useStringWriter ) {
+        stringWriters[stringWritersAvail++] = writer;
+      }
       if ( typeof templateOptions.errorCallback === 'function' ) {
         templateOptions.errorCallback(err);
         return;
@@ -1411,6 +1457,7 @@ exports.createRuntime = createRuntime;
 var util = require('./util');
 
 var isArray = util.isArray;
+var objectKeys = util.objectKeys;
 var bind = util.bind;
 
 function emptyString() {
@@ -1496,6 +1543,14 @@ function bless(value) {
   }
 }
 
+function stringifyArray(value, stringifier) {
+  var result = [];
+  for ( var i = 0, len = value.length; i < len; i++ ) {
+    result[i] = stringifier(value[i]);
+  }
+  return result.join(' ');
+}
+
 /**
  * Stringify the provided value for Interpol's purposes.
  *
@@ -1512,21 +1567,16 @@ function stringify(value) {
     case 'boolean':
       return value ? 'true' : 'false';
 
-    case 'object':
-      if ( isArray(value) ) {
-        var result = [];
-        for ( var i = 0, len = value.length; i < len; i++ ) {
-          result[i] = stringify(value[i]);
-        }
-        return result.join(' ');
-      }
-      return '';
-
     case 'function':
       return value.__intFunction ? value.toString() : '';
 
+    case 'object':
+      if ( isArray(value) ) {
+        return stringifyArray(value, stringify);
+      }
+      return value === null ? '' : value.toString();
+
     default:
-      // catches 'undefined'
       return '';
   }
 }
@@ -1563,10 +1613,9 @@ function createEscapedStringifier(escapeRegex) {
 
   // This is very similar to 'stringify' with the exception of 'string'
   function escapedStringifier(value) {
-    var result;
     switch ( typeof value ) {
       case 'string':
-        result = escapeCache[value];
+        var result = escapeCache[value];
         if ( result ) {
           return result;
         }
@@ -1588,21 +1637,16 @@ function createEscapedStringifier(escapeRegex) {
       case 'boolean':
         return value ? 'true' : 'false';
 
-      case 'object':
-        if ( isArray(value) ) {
-          result = [];
-          for ( var i = 0, len = value.length; i < len; i++ ) {
-            result[i] = escapedStringifier(value[i]);
-          }
-          return result.join(' ');
-        }
-        return '';
-
       case 'function':
         return value.__intFunction ? value.toString() : '';
 
+      case 'object':
+        if ( isArray(value) ) {
+          return stringifyArray(value, escapedStringifier);
+        }
+        return value === null ? '' : value.toString();
+        
       default:
-        // catches 'undefined'
         return '';
     }
   }
@@ -1622,6 +1666,9 @@ function isTruthy(value) {
   if ( isArray(value) ) {
     return value.length > 0;
   }
+  if ( typeof value === 'object' && value !== null ) {
+    return objectKeys(value).length > 0;
+  }
   return true;
 }
 
@@ -1638,6 +1685,9 @@ function isFalsy(value) {
   }
   if ( isArray(value) ) {
     return value.length === 0;
+  }
+  if ( typeof value === 'object' && value !== null ) {
+    return objectKeys(value).length === 0;
   }
   return false;
 }
@@ -1986,6 +2036,7 @@ function noOp() {}
 function createNullWriter() {
   return {
     done: noOp,
+    reset: noOp,
     startElement: noOp,
     selfCloseElement: noOp,
     endElement: noOp,
@@ -2028,6 +2079,7 @@ function createStringWriter() {
 
   return {
     done: done,
+    reset: reset,
     startElement: startElement,
     selfCloseElement: selfCloseElement,
     endElement: endElement,
@@ -2041,6 +2093,10 @@ function createStringWriter() {
     var result = buffer;
     buffer = '';
     return result;
+  }
+
+  function reset() {
+    buffer = '';
   }
 
   function writeAttributes(attributes) {
