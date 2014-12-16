@@ -43,7 +43,7 @@ You could have also performed the interpolation using named indexes rather than 
 
 ```ruby
 let label = '%pname is a friend of %fname'
- ... and then inside the for loop ...
+# ... and then inside the for loop ...
 [pname = person.name, fname = friend.name] | label
 ```
 
