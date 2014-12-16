@@ -1137,7 +1137,6 @@ var createStringWriter = writers.createStringWriter;
 var nullWriter = writers.createNullWriter();
 
 var noOp = bless(function () {});
-var defaultOptions = {};
 
 function createRuntime(interpol, runtimeOptions) {
   if ( isInterpolRuntime(runtimeOptions) ) {
@@ -1240,18 +1239,36 @@ function createRuntime(interpol, runtimeOptions) {
   }
 }
 
+var stringWriters = [];
+var stringWritersAvail = 0;
+
 function createToString(func) {
   return toString;
 
   function toString() {
-    var writer = createStringWriter();
-    func(writer);
-    return writer.done();
+    var writer;
+    if ( stringWritersAvail ) {
+      writer = stringWriters[--stringWritersAvail];
+    }
+    else {
+      writer = createStringWriter();
+    }
+    try {
+      func(writer);
+      var result = writer.done();
+      stringWriters[stringWritersAvail++] = writer;
+      return result;
+    }
+    catch ( err ) {
+      writer.reset();
+      stringWriters[stringWritersAvail++] = writer;
+      throw err;
+    }
   }
 }
 
 function defineModule(template) {
-  var stringWriter = createStringWriter();
+  var defaultOptions = {};
   var exportedContext;
 
   templateInterface.__intModule = true;
@@ -1265,14 +1282,30 @@ function defineModule(template) {
     }
 
     // If no Writer is provided, create a throw-away Array Writer
-    var writer = templateOptions.writer || stringWriter;
+    var writer = templateOptions.writer;
+    var useStringWriter = !writer;
 
     try {
+      if ( useStringWriter ) {
+        if ( stringWritersAvail ) {
+          writer = stringWriters[--stringWritersAvail];
+        }
+        else {
+          writer = createStringWriter();
+        }
+        template(ctx, writer);
+        var result = writer.done();
+        stringWriters[stringWritersAvail++] = writer;
+        return result;
+      }
       template(ctx, writer);
       return writer.done();
     }
     catch ( err ) {
-      writer.cancel();
+      writer.reset();
+      if ( useStringWriter ) {
+        stringWriters[stringWritersAvail++] = writer;
+      }
       if ( typeof templateOptions.errorCallback === 'function' ) {
         templateOptions.errorCallback(err);
         return;
@@ -2002,7 +2035,7 @@ function noOp() {}
 function createNullWriter() {
   return {
     done: noOp,
-    cancel: noOp,
+    reset: noOp,
     startElement: noOp,
     selfCloseElement: noOp,
     endElement: noOp,
@@ -2045,7 +2078,7 @@ function createStringWriter() {
 
   return {
     done: done,
-    cancel: cancel,
+    reset: reset,
     startElement: startElement,
     selfCloseElement: selfCloseElement,
     endElement: endElement,
@@ -2061,7 +2094,7 @@ function createStringWriter() {
     return result;
   }
 
-  function cancel() {
+  function reset() {
     buffer = '';
   }
 
