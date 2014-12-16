@@ -1,5 +1,8 @@
 # Change History
 
+## Version 1.2.8 - StringWriter Pool
+The Runtime now maintains an internal StringWriter pool to avoid excessive object creation when a writer isn't provided as part of a Template's options.
+
 ## Version 1.2.7 - More Consistent Lists
 The two types of lists (vectors and dictionaries) are now more consistent with one another in terms of behavior.  Now, a dictionary must have at least one pair to be considered 'truthy'.  Also, the `length()`, `first()` and `last()` functions operate against dictionaries similarly.
 
