@@ -10,7 +10,7 @@
 "use strict";
 
 // This module is used to collect the requirements for a minimal
-// Browserify build.  It's of no interest to Node.js
+// Browserify build.  It's of no interest to node.js
 
 // Set the Interpol browser global
 var interpol = window.interpol = require('../lib/interpol');
@@ -34,7 +34,7 @@ interpol.createStringWriter = writers.createStringWriter;
 
 /**
  * This is a stub that will be populated by the 'real' compiler functionality
- * should it be loaded by either Node.js or Browserify.  It's here because
+ * should it be loaded by either node.js or Browserify.  It's here because
  * we shouldn't have to rely on Browserify's `--ignore` option.
  */
 
