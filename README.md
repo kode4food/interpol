@@ -1,140 +1,51 @@
 # Interpol (Logicful HTML Templates)
-
-## Why Interpol?
-There are a lot of templating systems out there and they're all similar.  In truth, Interpol isn't so different, which might beg the question:
-
-    Why the hell another templating system?
-
-The answer is simple.  I was sick of looking at a template and being unable to read the thing, even if I wrote it yesterday.  That's why I developed Interpol.
-
-That said, Interpol's goals are modest.  It:
-
-  * Provides templates where *meaning* takes a front seat
-  * Works well in both Node.js and the Browser 
-
-Also, it *does not* participate in the member-measuring and micro-optimization that seem to be so important to some developers.  Specifically, Interpol has:
-
-  * No desire to have the 'smallest' minified footprint
-  * No desire to be the 'fastest' template processor
-
-Interpol will be as *small* and *fast* as possible, but no more, especially if those considerations would require compromising the aforementioned goal of providing *meaning*.
-
-## Interpol Seeks 'Meaning'
-Stuff you write should 'mean' something.  Not only at the time it's written, but years later.  It should also mean something to new eyes.  The arguments for terseness haven't flown since we stopped using punch cards.  So, assuming you know some HTML, take a look at this Interpol template to understand what I suggest by *meaning*:
+Interpol is a Logicful Template System.  What can you do with it?  Stuff like this:
 
 ```html
-<html>
-  <body>
-  for person in people when person.active
-    <div class="person">
-      <div class="name"> person.name </div>
-      <div class="address"> person.address </div>
-      <div class="telephone"> person.telephone </div>
-    </div>
-  else
-    <div class="empty">
-      "Nobody to render!"
-    </div>
-  end
-  </body>
-</html>
-```
-
-In looking at this, you can probably understand why "Nobody to render!" must be quoted.  It's because Interpol focuses on producing the structure and content of dynamic HTML documents.  It's a "path of least resistance" approach that forgoes static content 'escaping' methods such as `{` braces `}`.  Static content is becoming less frequent in a world of localized web apps, so Interpol chooses to shift the resistance in that direction.
-
-This template is actually completely dynamic, including the HTML tags and attributes. It just so happens that these tags consist of literals, but you could also generate tags based on variables.  For example:
-
-```html
-<div class="person">
-  for field in ['name', 'address', 'telephone']
-    <div class=field> person[field] </div>
-  end
-</div>
-```
-
-Here the `class` attribute of the second div, rather than being a literal string, is retrieved from the field names that are processed.
-
-## Don't Repeat Yourself
-What if you find that you need the ability to re-use the rendering of people?  Both groups and individuals?  You can break them out into partials:
-
-```html
-<html>
-  <body>
-    renderPeople(people)
-  </body>
-</html>
+let label = '%0 is a friend of %1'
 
 def renderPeople(people)
-  for person in people when person.active
-    renderPerson(person)
-  else
-    <div class="empty">
-      "Nobody to render!"
-    </div>
+  <ul>
+  for person in people, friend in person.friends
+    <li>
+    [person.name, friend.name] | label
+    </li>
   end
+  </ul>
 end
 
-def renderPerson(person)
-  <div class="person">
-    for field in ['name', 'address', 'telephone']
-      <div class=field> person[field] </div>
-    end
-  </div>
+def renderPeople(people) when not people
+  <b> 'There are no people to render' </b>
 end
 ```
 
-What if you need to do a special rendering for people who don't want their demographic data presented?  You can add a guarded version of the partial:
+`renderPeople` is a partial.  Its first form renders a list of interpolated strings resulting from a set of nested loops.  The second form is a guarded version that catches the case when there is no `people` value or it is empty.  How easy is that to do with your current template system?  I suspect pretty difficult.  Maybe not possible at all.
+
+## So Why Logicful Templates?
+There has been a lot of noise about logic-less templates in recent years.  The sales pitch is that they enforce separation of concerns, so that business logic doesn't taint the presentation layer.  Fair enough, I agree, separation of concerns is a good thing.
+
+In reality the separation of concerns is still violated in many cases, except that it's now your business logic that's often tainted with presentation-specific mapping acrobatics to massage your data into a form the template system will accept.  You're also having to leverage helpers extensively, backfilling the 'logic' a logic-less template system refused to provide in the first place.
+
+That being the case, what's the benefit of a logic-less template system?  None that I can see.  Especially when a developer can *still* choose to separate concerns in their design.  And trust me, most developers are smart enough to make that decision on their own.  You don't have to force their hands by giving them tools that paint them into a corner.
+
+Interpol lets *you* decide and makes sure you're not crippled as a result of your decision.
+
+## More About Interpolation
+You might ask why the interpolation was so involved.  After all, in other systems you could just embed the values directly into the resulting content.  You can do something like that in Interpol as well.  It would look like this: 
 
 ```html
-def renderPerson(person) when person.likesPrivacy
-  <div class="person">
-    <div class="name"> person.name </div>
-  </div>
-end
+person.name 'is a friend of' friend.name
 ```
 
-## No, Really, Don't Repeat Yourself
-What if you use these partials in multiple templates?  Then you can move them out into their own module, maybe called `people.int`.
+But that approach falls down once you start localizing your application (and you probably will).  Interpol was designed with localization in mind.  In a real Interpol application, you'd probably define such a `label` in a single module of localized strings and then pull them into your template with an `import` statement.
+
+You could have also performed the interpolation using named indexes rather than positional ones: 
 
 ```html
-# this is people.int
-def renderPeople(people)
-  for person in people when person.active
-    renderPerson(person)
-  else
-    <div class="empty">
-      "Nobody to render!"
-    </div>
-  end
-end
-
-def renderPerson(person)
-  <div class="person">
-    for field in ['name', 'address', 'telephone']
-      <div class=field> person[field] </div>
-    end
-  </div>
-end
-
-def renderPerson(person) when person.likesPrivacy
-  <div class="person">
-    <div class="name"> person.name </div>
-  </div>
-end
+let label = '%pname is a friend of %fname'
+ ... and then inside the for loop ...
+[pname = person.name, fname = friend.name] | label
 ```
-
-And import them like so:
-
-```html
-from people import renderPeople
-<html>
-  <body>
-    renderPeople(people)
-  </body>
-</html>
-```
-
-Easy as pie!  And your primary template gets right to the point.
 
 ## Interpol and Node.js
 To use Interpol directly from Node.js applications, NPM install it like so:
@@ -209,6 +120,9 @@ console.log(
   })
 );
 ```
+
+## More Information
+More information about Interpol can by found at the [Interpol Web Site](http://www.interpoljs.io/) and in the [Interpol Guide](http://www.interpoljs.io/guide).
 
 ## License (MIT License)
 Copyright (c) 2014 Thomas S. Bradford
