@@ -721,10 +721,14 @@ var isArray = util.isArray;
 // `first(value)` returns the first item of the provided array (or `null` if
 // the array is empty).
 function first(writer, value) {
-  if ( !isArray(value) ) {
-    return value;
+  if ( isArray(value) ) {
+    return value[0];
   }
-  return value[0];
+  if ( typeof value === 'object' && value !== null ) {
+    var key = objectKeys(value)[0];
+    return value[key];
+  }
+  return value;
 }
 
 // `join(delim, value)` returns the result of joining the elements of the
@@ -744,13 +748,15 @@ function join(writer, delim, value) {
 // `last(value)` returns the last item of the provided array (or `null` if
 // the array is empty).
 function last(writer, value) {
-  if ( !isArray(value) ) {
-    return value;
-  }
-  if ( value.length ) {
+  if ( isArray(value) ) {
     return value[value.length - 1];
   }
-  return undefined;
+  if ( typeof value === 'object' && value !== null ) {
+    var keys = objectKeys(value);
+    var key = keys[keys.length - 1];
+    return value[key];
+  }
+  return value;
 }
 
 // `length(value)` if it is an array, returns the length of the provided
@@ -759,7 +765,7 @@ function length(writer, value) {
   if ( isArray(value) ) {
     return value.length;
   }
-  else if ( typeof value === 'object' && value !== null ) {
+  if ( typeof value === 'object' && value !== null ) {
     return objectKeys(value).length;
   }
   return 0;
@@ -770,6 +776,9 @@ function length(writer, value) {
 function empty(writer, value) {
   if ( isArray(value) ) {
     return !value.length;
+  }
+  if ( typeof value === 'object' && value !== null ) {
+    return !objectKeys(value).length;
   }
   return true;
 }
@@ -1411,6 +1420,7 @@ exports.createRuntime = createRuntime;
 var util = require('./util');
 
 var isArray = util.isArray;
+var objectKeys = util.objectKeys;
 var bind = util.bind;
 
 function emptyString() {
@@ -1619,6 +1629,9 @@ function isTruthy(value) {
   if ( isArray(value) ) {
     return value.length > 0;
   }
+  if ( typeof value === 'object' && value !== null ) {
+    return objectKeys(value).length > 0;
+  }
   return true;
 }
 
@@ -1635,6 +1648,9 @@ function isFalsy(value) {
   }
   if ( isArray(value) ) {
     return value.length === 0;
+  }
+  if ( typeof value === 'object' && value !== null ) {
+    return objectKeys(value).length === 0;
   }
   return false;
 }

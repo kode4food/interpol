@@ -51,13 +51,15 @@ exports.api = nodeunit.testCase({
     test.equal(types.isTruthy(null), false);
     test.equal(types.isTruthy(), false);
     test.equal(types.isTruthy([]), false);
-    test.equal(types.isTruthy({}), true);
+    test.equal(types.isTruthy({}), false);
+    test.equal(types.isTruthy({ name: 'Interpol' }), true);
     test.equal(types.isTruthy("hello"), true);
     test.equal(types.isTruthy([1]), true);
     test.equal(types.isFalsy(null), true);
     test.equal(types.isFalsy(), true);
     test.equal(types.isFalsy([]), true);
-    test.equal(types.isFalsy({}), false);
+    test.equal(types.isFalsy({}), true);
+    test.equal(types.isFalsy({ name: 'Interpol' }), false);
     test.equal(types.isFalsy("hello"), false);
     test.equal(types.isFalsy([1]), false);
     test.done();
