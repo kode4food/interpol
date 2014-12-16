@@ -1135,8 +1135,6 @@ var createMemoryResolver = internalResolvers.createMemoryResolver;
 var writers = require('./writers');
 var createStringWriter = writers.createStringWriter;
 var nullWriter = writers.createNullWriter();
-var stringWriters = [];
-var stringWritersAvail = 0;
 
 var noOp = bless(function () {});
 
@@ -1242,6 +1240,8 @@ function createRuntime(interpol, runtimeOptions) {
 }
 
 function createToString(func) {
+  var stringWriters = [];
+  var stringWritersAvail = 0;
   return toString;
 
   function toString() {
@@ -1267,6 +1267,8 @@ function createToString(func) {
 }
 
 function defineModule(template) {
+  var stringWriters = [];
+  var stringWritersAvail = 0;
   var defaultOptions = {};
   var exportedContext;
 
