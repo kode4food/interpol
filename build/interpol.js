@@ -1251,7 +1251,9 @@ function createToString(func) {
 }
 
 function defineModule(template) {
+  var stringWriter = createStringWriter();
   var exportedContext;
+
   templateInterface.__intModule = true;
   templateInterface.exports = templateExports;
   return templateInterface;
@@ -1263,13 +1265,14 @@ function defineModule(template) {
     }
 
     // If no Writer is provided, create a throw-away Array Writer
-    var writer = templateOptions.writer || createStringWriter();
+    var writer = templateOptions.writer || stringWriter;
 
     try {
       template(ctx, writer);
       return writer.done();
     }
     catch ( err ) {
+      writer.cancel();
       if ( typeof templateOptions.errorCallback === 'function' ) {
         templateOptions.errorCallback(err);
         return;
@@ -1999,6 +2002,7 @@ function noOp() {}
 function createNullWriter() {
   return {
     done: noOp,
+    cancel: noOp,
     startElement: noOp,
     selfCloseElement: noOp,
     endElement: noOp,
@@ -2041,6 +2045,7 @@ function createStringWriter() {
 
   return {
     done: done,
+    cancel: cancel,
     startElement: startElement,
     selfCloseElement: selfCloseElement,
     endElement: endElement,
@@ -2054,6 +2059,10 @@ function createStringWriter() {
     var result = buffer;
     buffer = '';
     return result;
+  }
+
+  function cancel() {
+    buffer = '';
   }
 
   function writeAttributes(attributes) {
