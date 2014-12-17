@@ -61,7 +61,7 @@ from myModule import hello
 hello('World')
 ```
 
-#### File (Node.js only)
+#### File (node.js only)
 A file resolver allows you to monitor a set of directories on disk as a source for your templates.  It's a little more complicated to use than the memory resolver, and so is not registered by default.  To create one:
 
 ```javascript

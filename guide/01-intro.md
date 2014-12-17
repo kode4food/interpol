@@ -48,7 +48,7 @@ Stuff you write should 'mean' something.  Not only at the time it's written, but
   * Work well in both node.js and the Browser
 
 ### Hello, Interpol!
-Alright, let's get started.  We're going to use Node for this example, so make sure you've installed it.  After it's installed, you can install Interpol globally like so:
+Alright, let's get started.  We're going to use node.js for this example, so make sure you've installed it.  After it's installed, you can install Interpol globally like so:
 
 ```bash
 npm -g install interpol
@@ -56,7 +56,7 @@ npm -g install interpol
 
 **Note:** Depending on your operating system's permissions, you may have to use 'sudo' for this call to work.
 
-Once Interpol is installed, you can start the Node REPL by typing `node` in your Terminal.  After that, type this stuff in:
+Once Interpol is installed, you can start the node.js REPL by typing `node` in your Terminal.  After that, type this stuff in:
 
 ```javascript
 var interpol = require('interpol');
@@ -100,7 +100,7 @@ console.log(result);
 
 In this case, we're using the `interpol()` module to compile our template into a JavaScript function.  We can then call it as many times we like.
 
-    Going Forward, the Templates are going to get a bit more complex and it will become increasingly difficult to type them into the Node REPL.  So instead, I'll be including a JSFiddle link for each example.
+    Going Forward, the Templates are going to get a bit more complex and it will become increasingly difficult to type them into the node.js REPL.  So instead, I'll be including a JSFiddle link for each example.
 
 #### Worth Noting
 Like JavaScript, Interpol is case-sensitive.  Though we haven't seen any yet, all keywords in Interpol are lower-case.  Additionally, new lines are mostly ignored, but it's important to avoid them before a comma (`,`) that is used to continue a statement (such as `let` or `import`).
