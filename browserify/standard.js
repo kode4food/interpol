@@ -9,7 +9,7 @@
 "use strict";
 
 // This module is used to collect the requirements for a minimal
-// Browserify build.  It's of no interest to Node.js
+// Browserify build.  It's of no interest to node.js
 
 // Set the Interpol browser global
 var interpol = window.interpol = require('../lib/interpol');

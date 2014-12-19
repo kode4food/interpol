@@ -1,5 +1,8 @@
 # Change History
 
+## Version 1.2.8 - StringWriter Pool
+The Runtime now maintains an internal StringWriter pool to avoid excessive object creation when a writer isn't provided as part of a Template's options.
+
 ## Version 1.2.7 - More Consistent Lists
 The two types of lists (vectors and dictionaries) are now more consistent with one another in terms of behavior.  Now, a dictionary must have at least one pair to be considered 'truthy'.  Also, the `length()`, `first()` and `last()` functions operate against dictionaries similarly.
 
@@ -324,7 +327,7 @@ npm install interpol-express
 ```
 
 ## Version 0.3.6 - Module Organization
-The FileResolver and Bundled Apps now support resolving a file called `index.int` as the stand-in for a module that is otherwise represented as a directory.  This should be familiar to Node.js (`index.js`) and Python (`__init__.py`) developers.  The resolver will first attempt to load the module as a file.  If no file is found, it will test for a directory and associated `index.int` file in order to resolve the module.
+The FileResolver and Bundled Apps now support resolving a file called `index.int` as the stand-in for a module that is otherwise represented as a directory.  This should be familiar to node.js (`index.js`) and Python (`__init__.py`) developers.  The resolver will first attempt to load the module as a file.  If no file is found, it will test for a directory and associated `index.int` file in order to resolve the module.
 
 ### Kraken Support
 Added a [Kraken](http://krakenjs.com/) entry point.  In order to use Interpol in a Kraken app, you will have to modify `config/app.json` to include the following:
@@ -507,11 +510,11 @@ Getting close to a usable system
 
 `unless` is syntactic sugar for `if !(...)`
 
-Importing now works against the three available resolvers: file (Node.js only), helpers, and memory.  See [The Interpol Guide](http://interpoljs.io/guide) for more information.
+Importing now works against the three available resolvers: file (node.js only), helpers, and memory.  See [The Interpol Guide](http://interpoljs.io/guide) for more information.
 
 Compiled templates now have an `exports()` function that returns functions and variables defined in their root context.  The results are evaluated against the global context *only*.
 
-The Command-Line interface can now generate a self-contained bundle of pre-compiled templates that can easily be loaded into a web page or Node.js environment.
+The Command-Line interface can now generate a self-contained bundle of pre-compiled templates that can easily be loaded into a web page or node.js environment.
 
 `self` refers to the variables of the current scope, and can be passed around.
 

@@ -10,7 +10,7 @@
 "use strict";
 
 // This module is used to collect the requirements for a minimal
-// Browserify build.  It's of no interest to Node.js
+// Browserify build.  It's of no interest to node.js
 
 // Set the Interpol browser global
 var interpol = window.interpol = require('../lib/interpol');
@@ -34,7 +34,7 @@ interpol.createStringWriter = writers.createStringWriter;
 
 /**
  * This is a stub that will be populated by the 'real' compiler functionality
- * should it be loaded by either Node.js or Browserify.  It's here because
+ * should it be loaded by either node.js or Browserify.  It's here because
  * we shouldn't have to rely on Browserify's `--ignore` option.
  */
 
@@ -250,7 +250,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule;
 var generateFunction;
 
-var CURRENT_VERSION = "1.2.7";
+var CURRENT_VERSION = "1.2.8";
 
 // Bootstrap
 
@@ -1137,7 +1137,6 @@ var createStringWriter = writers.createStringWriter;
 var nullWriter = writers.createNullWriter();
 
 var noOp = bless(function () {});
-var defaultOptions = {};
 
 function createRuntime(interpol, runtimeOptions) {
   if ( isInterpolRuntime(runtimeOptions) ) {
@@ -1241,17 +1240,36 @@ function createRuntime(interpol, runtimeOptions) {
 }
 
 function createToString(func) {
+  var stringWriters = [];
+  var stringWritersAvail = 0;
   return toString;
 
   function toString() {
-    var writer = createStringWriter();
-    func(writer);
-    return writer.done();
+    var writer;
+    if ( stringWritersAvail ) {
+      writer = stringWriters[--stringWritersAvail];
+    }
+    else {
+      writer = createStringWriter();
+    }
+    try {
+      func(writer);
+      var result = writer.done();
+      stringWriters[stringWritersAvail++] = writer;
+      return result;
+    }
+    catch ( err ) {
+      writer.reset();
+      stringWriters[stringWritersAvail++] = writer;
+      throw err;
+    }
   }
 }
 
 function defineModule(template) {
-  var stringWriter = createStringWriter();
+  var stringWriters = [];
+  var stringWritersAvail = 0;
+  var defaultOptions = {};
   var exportedContext;
 
   templateInterface.__intModule = true;
@@ -1265,14 +1283,30 @@ function defineModule(template) {
     }
 
     // If no Writer is provided, create a throw-away Array Writer
-    var writer = templateOptions.writer || stringWriter;
+    var writer = templateOptions.writer;
+    var useStringWriter = !writer;
 
     try {
+      if ( useStringWriter ) {
+        if ( stringWritersAvail ) {
+          writer = stringWriters[--stringWritersAvail];
+        }
+        else {
+          writer = createStringWriter();
+        }
+        template(ctx, writer);
+        var result = writer.done();
+        stringWriters[stringWritersAvail++] = writer;
+        return result;
+      }
       template(ctx, writer);
       return writer.done();
     }
     catch ( err ) {
-      writer.cancel();
+      writer.reset();
+      if ( useStringWriter ) {
+        stringWriters[stringWritersAvail++] = writer;
+      }
       if ( typeof templateOptions.errorCallback === 'function' ) {
         templateOptions.errorCallback(err);
         return;
@@ -1547,13 +1581,11 @@ function stringify(value) {
   }
 }
 
-var EscapeChars = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#39;'
-};
+var ampRegex = /&/g;
+var ltRegex = /</g;
+var gtRegex = />/g;
+var quoteRegex = /\"/g;
+var aposRegex = /\'/g;
 
 /**
  * Escape the provided value for the purposes of rendering it as an HTML
@@ -1561,7 +1593,7 @@ var EscapeChars = {
  *
  * @param {Mixed} value the value to escape
  */
-var escapeAttribute = createEscapedStringifier(/[&<>'"]/gm);
+var escapeAttribute = createEscapedStringifier(/[&<>'"]/g, replaceAttribute);
 
 /**
  * Escape the provided value for the purposes of rendering it as HTML
@@ -1569,33 +1601,33 @@ var escapeAttribute = createEscapedStringifier(/[&<>'"]/gm);
  *
  * @param {Mixed} value the value to escape
  */
-var escapeContent = createEscapedStringifier(/[&<>]/gm);
+var escapeContent = createEscapedStringifier(/[&<>]/g, replaceContent);
 
-function createEscapedStringifier(escapeRegex) {
-  var escapeCacheMax = 8192;
-  var escapeCache = {};
-  var escapeCacheSize = 0;
+function replaceAttribute(value) {
+  return value.replace(ampRegex, '&amp;')
+              .replace(ltRegex, '&lt;')
+              .replace(gtRegex, '&gt;')
+              .replace(quoteRegex, '&quot;')
+              .replace(aposRegex, '&#39;');
+}
+
+function replaceContent(value) {
+  return value.replace(ampRegex, '&amp;')
+              .replace(ltRegex, '&lt;')
+              .replace(gtRegex, '&gt;');
+}
+
+function createEscapedStringifier(escapeRegex, replaceFunction) {
   return escapedStringifier;
 
   // This is very similar to 'stringify' with the exception of 'string'
   function escapedStringifier(value) {
     switch ( typeof value ) {
       case 'string':
-        var result = escapeCache[value];
-        if ( result ) {
-          return result;
-        }
-        if ( escapeCacheSize >= escapeCacheMax ) {
-          escapeCache = {};
-          escapeCacheSize = 0;
-        }
-        else {
-          escapeCacheSize += 1;
-        }
-        result = escapeCache[value] = value.replace(escapeRegex, function(ch) {
-          return EscapeChars[ch];
-        });
-        return result;
+      if ( !escapeRegex.test(value) ) {
+        return value;
+      }
+        return escapeRegex.test(value) ? replaceFunction(value) : value;
 
       case 'number':
         return '' + value;
@@ -2002,7 +2034,7 @@ function noOp() {}
 function createNullWriter() {
   return {
     done: noOp,
-    cancel: noOp,
+    reset: noOp,
     startElement: noOp,
     selfCloseElement: noOp,
     endElement: noOp,
@@ -2045,7 +2077,7 @@ function createStringWriter() {
 
   return {
     done: done,
-    cancel: cancel,
+    reset: reset,
     startElement: startElement,
     selfCloseElement: selfCloseElement,
     endElement: endElement,
@@ -2061,7 +2093,7 @@ function createStringWriter() {
     return result;
   }
 
-  function cancel() {
+  function reset() {
     buffer = '';
   }
 
