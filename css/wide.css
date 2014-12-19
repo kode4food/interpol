@@ -180,11 +180,22 @@ code {
   margin-right: .75em;
 }
 
+a.read-more {
+  white-space: nowrap;
+}
+
 a.back-link:link {
   transition-property: color font-size;
   transition-duration: .1s;
   text-decoration: none;
   color: #111;
+}
+
+a.read-more:link {
+  transition-property: color;
+  transition-duration: .1s;
+  text-decoration: none;
+  color: #115;
 }
 
 a.back-link:hover,
@@ -193,7 +204,15 @@ a.back-link:focus {
   transition-duration: .1s;
   text-decoration: none;
   font-size: 101%;
-  color: #444;
+  color: #445;
+}
+
+a.read-more:hover,
+a.read-more:focus {
+  transition-property: color;
+  transition-duration: .1s;
+  text-decoration: none;
+  color: #449;
 }
 
 .by-line {
