@@ -12,8 +12,6 @@ home: /
     <a class="more" href="{{ post.url }}">read more...</a>
     </p>
   </div>
-  <span class="by-line">
-    {{ post.date | date: "%B %e, %Y" }}
-  </span>
+  {% include by-line.html %}
 </article>  
 {% endfor %}
