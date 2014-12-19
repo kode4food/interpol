@@ -93,10 +93,12 @@ exports.lists = nodeunit.testCase({
 
     test.equal(evaluate("import list\nlist.first([1,2,3])"), "1");
     test.equal(evaluate("import list\nlist.first([9])"), "9");
+    test.equal(evaluate("import list\nlist.first([name='Bill',age=42]).value"), 'Bill');
 
     test.equal(evaluate("import list\nlist.last([1,2,3])"), "3");
     test.equal(evaluate("import list\nlist.last([])"), "");
     test.equal(evaluate("import list\nlist.last([9])"), "9");
+    test.equal(evaluate("import list\nlist.last([name='Bill',age=42]).value"), '42');
 
     test.equal(evaluate("import list\nlist.length([1,2,3])"), "3");
     test.equal(evaluate("import list\nlist.length([9])"), "1");
@@ -104,6 +106,7 @@ exports.lists = nodeunit.testCase({
     test.equal(evaluate("import list\nlist.empty([1,2,3])"), "false");
     test.equal(evaluate("import list\nlist.empty([])"), "true");
     test.equal(evaluate("import list\nlist.empty(9)"), "true");
+    test.equal(evaluate("import list\nlist.empty([name='Bill'])"), 'false');
 
     test.equal(evaluate("import list\nlist.keys([name='Thom',age=42])"),
                "name age");

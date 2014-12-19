@@ -725,8 +725,12 @@ function first(writer, value) {
     return value[0];
   }
   if ( typeof value === 'object' && value !== null ) {
-    var key = objectKeys(value)[0];
-    return value[key];
+    var name = objectKeys(value)[0];
+    var val = value[name];
+    return {
+        name: name,
+        value: val === null ? undefined : val
+    };
   }
   return value;
 }
@@ -753,8 +757,12 @@ function last(writer, value) {
   }
   if ( typeof value === 'object' && value !== null ) {
     var keys = objectKeys(value);
-    var key = keys[keys.length - 1];
-    return value[key];
+    var name = keys[keys.length - 1];
+    var val = value[name];
+    return {
+        name: name,
+        value: val === null ? undefined : val
+    };
   }
   return value;
 }
@@ -1601,7 +1609,7 @@ var escapeAttribute = createEscapedStringifier(/[&<>'"]/g, replaceAttribute);
  *
  * @param {Mixed} value the value to escape
  */
-var escapeContent = createEscapedStringifier(/[&<>]/gm, replaceContent);
+var escapeContent = createEscapedStringifier(/[&<>]/g, replaceContent);
 
 function replaceAttribute(value) {
   return value.replace(ampRegex, '&amp;')
@@ -1618,38 +1626,16 @@ function replaceContent(value) {
 }
 
 function createEscapedStringifier(escapeRegex, replaceFunction) {
-  var escapeCacheMax = 8192;
-  var escapeCache = {};
-  var escapeCacheSize = 0;
   return escapedStringifier;
 
   // This is very similar to 'stringify' with the exception of 'string'
   function escapedStringifier(value) {
     switch ( typeof value ) {
       case 'string':
-        // if it's cached, return it
-        var result = escapeCache[value];
-        if ( result ) {
-          return result;
-        }
-
-        // maybe we need to flush the cache
-        if ( escapeCacheSize >= escapeCacheMax ) {
-          escapeCache = {};
-          escapeCacheSize = 0;
-        }
-        else {
-          escapeCacheSize += 1;
-        }
-
-        // ok, guess we have to do some work
-        if ( escapeRegex.test(value) ) {
-          result = escapeCache[value] = replaceFunction(value);
-        }
-        else {
-          result = escapeCache[value] = value;
-        }
-        return result;
+      if ( !escapeRegex.test(value) ) {
+        return value;
+      }
+        return escapeRegex.test(value) ? replaceFunction(value) : value;
 
       case 'number':
         return '' + value;
