@@ -1,6 +1,7 @@
 ---
 title: A Guide to Interpol
 layout: interpol_title
+home: /
 ---
 ## Table of Contents
 

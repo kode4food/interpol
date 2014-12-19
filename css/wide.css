@@ -180,3 +180,24 @@ code {
   margin-right: .75em;
 }
 
+a.back-link:link {
+  transition-property: color font-size;
+  transition-duration: .1s;
+  text-decoration: none;
+  color: #111;
+}
+
+a.back-link:hover,
+a.back-link:focus {
+  transition-property: color font-size;
+  transition-duration: .1s;
+  text-decoration: none;
+  font-size: 101%;
+  color: #444;
+}
+
+.by-line {
+  float: right;
+  font-size: small;
+  font-style: italic;
+}

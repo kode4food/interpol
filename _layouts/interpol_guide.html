@@ -1,3 +1,6 @@
+---
+home: /guide
+---
 <!DOCTYPE html>
 <html>
 <head>
@@ -13,11 +16,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>
-      <a href="./">{{ page.title }}</a>
-    </h1>
-  </div>
-  <div class="container">
+    {% include title.html %}
     {{ content }}
   </div>
 {% include guide.html %}

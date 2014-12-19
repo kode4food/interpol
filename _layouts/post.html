@@ -1,0 +1,13 @@
+---
+layout: wide
+home: /blog
+---
+<article class="post">
+  <div class="entry">
+    {{ content }}
+  </div>
+
+  <div class="by-line">
+    {{ page.date | date: "%B %e, %Y" }}
+  </div>
+</article>
