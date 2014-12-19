@@ -725,8 +725,12 @@ function first(writer, value) {
     return value[0];
   }
   if ( typeof value === 'object' && value !== null ) {
-    var key = objectKeys(value)[0];
-    return value[key];
+    var name = objectKeys(value)[0];
+    var val = value[name];
+    return {
+        name: name,
+        value: val === null ? undefined : val
+    };
   }
   return value;
 }
@@ -753,8 +757,12 @@ function last(writer, value) {
   }
   if ( typeof value === 'object' && value !== null ) {
     var keys = objectKeys(value);
-    var key = keys[keys.length - 1];
-    return value[key];
+    var name = keys[keys.length - 1];
+    var val = value[name];
+    return {
+        name: name,
+        value: val === null ? undefined : val
+    };
   }
   return value;
 }
