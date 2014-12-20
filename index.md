@@ -107,7 +107,7 @@ If you *must* parse raw templates in the browser, you will need to load the vers
 ```
 
 ## Resources
-For the latest releases, see the [Interpol GitHub Page](http://github.com/kode4food/interpol)
+For the latest releases, see the [Interpol GitHub Page](http://github.com/kode4food/interpol) or the [Interpol Blog](http://blog.interpoljs.io/).
 
 For more information about the Interpol Language and API, please see the [Interpol Guide](http://interpoljs.io/guide/) (a work in progress).
 
