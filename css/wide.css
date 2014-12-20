@@ -195,7 +195,7 @@ a.read-more:link {
   transition-property: color;
   transition-duration: .1s;
   text-decoration: none;
-  color: #115;
+  color: #119;
 }
 
 a.back-link:hover,
@@ -212,7 +212,7 @@ a.read-more:focus {
   transition-property: color;
   transition-duration: .1s;
   text-decoration: none;
-  color: #449;
+  color: #44F;
 }
 
 .by-line {
