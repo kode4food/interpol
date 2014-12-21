@@ -1,5 +1,18 @@
 # Change History
 
+## Version 1.2.9 - Generators
+`for` Statements and List Comprehensions can now leverage pseudo-generators for their results.  I say pseudo-generators because I wasn't going to polyfill the entire generator infrastructure of ES6.  Instead I created a simpler mechanism that is similar to Python's Iterators.
+
+Specifically, if your function is blessed with a type of 'gen' then the for loop will continue to call it until `lib/types.generatorSentinal` is returned or until an instance of `lib/types.StopIteration` is thrown.
+
+In order to bless a function with a specific type, the `interpol.bless()` takes a second argument.  In this case, it must be the string `'gen'`.  See `lib/resolvers/system/math.range()` for an example.
+
+```ruby
+from math import range
+[ "key_%i" for i in range(1,10) ]
+# results in: key_1 key_2 key_3 key_4 ...
+```
+
 ## Version 1.2.8 - StringWriter Pool
 The Runtime now maintains an internal StringWriter pool to avoid excessive object creation when a writer isn't provided as part of a Template's options.
 

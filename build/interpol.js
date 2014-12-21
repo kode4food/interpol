@@ -250,7 +250,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule;
 var generateFunction;
 
-var CURRENT_VERSION = "1.2.8";
+var CURRENT_VERSION = "1.2.9";
 
 // Bootstrap
 
@@ -838,12 +838,38 @@ exports.values = values;
 
 var util = require('../../util');
 var isArray = util.isArray;
-var helpers = require('./helpers');
 
+var types = require('../../types');
+var bless = types.bless;
+var generatorSentinel = types.generatorSentinel;
+
+var helpers = require('./helpers');
 var wrap = helpers.wrap;
 
 function numberSort(left, right) {
   return left > right;
+}
+
+// `range(start, end)` creates an integer range generator
+function range(writer, start, end) {
+  start = Math.floor(start);
+  end = Math.floor(end);
+  var increment = end > start ? 1 : -1;
+  return bless(rangeInstance, 'gen');
+  
+  function rangeInstance() {
+    if ( start === generatorSentinel ) {
+      return generatorSentinel;
+    }
+    var result = start;
+    if ( start === end ) {
+      start = generatorSentinel;
+    }
+    else {
+      start += increment;
+    }
+    return result;
+  }
 }
 
 // `avg(value)` if an Array, returns the average (mathematical mean) of
@@ -959,13 +985,14 @@ exports.SQRT1_2 = Math.SQRT1_2;
 exports.SQRT2 = Math.SQRT2;
 
 // Exported Functions
+exports.range = range;
 exports.avg = avg;
 exports.max = max;
 exports.median = median;
 exports.min = min;
 exports.sum = sum;
 
-},{"../../util":16,"./helpers":8}],12:[function(require,module,exports){
+},{"../../types":15,"../../util":16,"./helpers":8}],12:[function(require,module,exports){
 /*
  * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License
@@ -1124,8 +1151,11 @@ var match = require('./match');
 
 var types = require('./types');
 var isInterpolRuntime = types.isInterpolRuntime;
-var isInterpolPartial = types.isInterpolPartial;
 var isInterpolFunction = types.isInterpolFunction;
+var isInterpolPartial = types.isInterpolPartial;
+var isInterpolGenerator = types.isInterpolGenerator;
+var StopIteration = types.StopIteration;
+var generatorSentinel = types.generatorSentinel;
 var bless = types.bless;
 
 var util = require('./util');
@@ -1412,19 +1442,17 @@ function bindPartial(ctx, func, callArgs) {
 }
 
 function loop(data, loopCallback) {
-  var i, len, name, value;
-
-  if ( data === null || typeof data !== 'object' ) {
-    return;
-  }
+  var i, len, name, value, sentinel;
 
   if ( isArray(data) ) {
     for ( i = 0, len = data.length; i < len; i++ ) {
       value = data[i];
       loopCallback(value === null ? undefined : value);
     }
+    return;
   }
-  else {
+  
+  if ( typeof data === 'object' && data !== null ) {
     var items = objectKeys(data);
     for ( i = 0, len = items.length; i < len; i++ ) {
       name = items[i];
@@ -1433,6 +1461,21 @@ function loop(data, loopCallback) {
         name: name,
         value: value === null ? undefined : value
       });
+    }
+    return;
+  }
+  
+  if ( isInterpolGenerator(data) ) {
+    sentinel = data.__intGeneratorSentinel || generatorSentinel;
+    try {
+      for ( value = data(); value !== sentinel; value = data() ) {
+        loopCallback(value);
+      }
+    }
+    catch ( err ) {
+      if ( !(err instanceof StopIteration) ) {
+        throw err;
+      }
     }
   }
 }
@@ -1471,6 +1514,12 @@ var bind = util.bind;
 function emptyString() {
   return '';
 }
+
+function StopIteration() {
+  this.__intSentinel = true;
+}
+
+var generatorSentinel = new StopIteration();
 
 /**
  * Returns whether or not an Object is an Interpol Runtime instance.
@@ -1519,6 +1568,16 @@ function isInterpolPartial(func) {
 }
 
 /**
+ * Same as isInterpolFunction except that it's checking specifically for
+ * a generator.
+ *
+ * @param {Function} func the Function to check
+ */
+function isInterpolGenerator(func) {
+  return typeof func === 'function' && func.__intFunction === 'gen';
+}
+
+/**
  * 'bless' a Function or String as being Interpol-compatible.  For a Function
  * this essentially means that it must accept a Writer instance as the first
  * argument, as a writer will be passed to it by the compiled template.  For
@@ -1526,8 +1585,9 @@ function isInterpolPartial(func) {
  * escaping.
  *
  * @param {Function|String} value the String or Function to 'bless'
+ * @param {String} [funcType] the blessed type ('wrap' or 'string' by default) 
  */
-function bless(value) {
+function bless(value, funcType) {
   var type = typeof value;
 
   switch ( type ) {
@@ -1542,7 +1602,7 @@ function bless(value) {
         return value;
       }
       var blessedFunc = bind(value);
-      blessedFunc.__intFunction = 'wrap';
+      blessedFunc.__intFunction = funcType || 'wrap';
       blessedFunc.toString = emptyString;
       return blessedFunc;
 
@@ -1699,11 +1759,14 @@ function isFalsy(value) {
 }
 
 // Exported Functions
+exports.StopIteration = StopIteration;
+exports.generatorSentinel = generatorSentinel;
 exports.isInterpolRuntime = isInterpolRuntime;
 exports.isInterpolNodeModule = isInterpolNodeModule;
 exports.isInterpolModule = isInterpolModule;
 exports.isInterpolFunction = isInterpolFunction;
 exports.isInterpolPartial = isInterpolPartial;
+exports.isInterpolGenerator = isInterpolGenerator;
 exports.stringify = stringify;
 exports.escapeAttribute = escapeAttribute;
 exports.escapeContent = escapeContent;
