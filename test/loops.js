@@ -79,5 +79,20 @@ exports.loops = nodeunit.testCase({
     test.equal(evaluate(script7, this.data),
                "-\nCurly-Moe\nCurly-Shemp\nMoe-Curly\nMoe-Shemp\n");
     test.done();
+  },
+  
+  "Generator Loops": function (test) {
+    var script1 = "from math import range\nfor i in range(1, 10)\ni\nend";
+    var script2 = "from math import range\nfor i in range(10, 2)\ni\nend";
+    var script3 = "from math import range\nfor i in range(5, -5)\ni\nend";
+    var script4 = "from math import range\nfor i in range(0, 0)\ni\nend";
+    var script5 = "from math import range\nfor i in range(0.5, 10.1)\ni\nend";
+
+    test.equal(evaluate(script1), "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n");
+    test.equal(evaluate(script2), "10\n9\n8\n7\n6\n5\n4\n3\n2\n");
+    test.equal(evaluate(script3), "5\n4\n3\n2\n1\n0\n-1\n-2\n-3\n-4\n-5\n");
+    test.equal(evaluate(script4), "0\n");
+    test.equal(evaluate(script5), "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n");
+    test.done();
   }
 });
