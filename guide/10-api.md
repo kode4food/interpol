@@ -23,10 +23,10 @@ template({ name: 'World' }); //-> Hello, World!
 There are several support structures and functions attached to the `interpol()` function.  By default, they are as follows:
 
   * `VERSION` - The current version of Interpol, represented as a String.
-  * `evaluate(source, obj, options)` - Compiles and evaluates the specified source against the provided context object.
-  * `compile(source, options)` - compiles a string template, returning an Object that contains the generated JavaScript function body and any errors or warnings that occurred during compilation.
-  * `runtime(options)` - creates a new Interpol Runtime instance.  A Runtime manages common resources between a set of Interpol templates and modules and can be used to create an isolated import resolution sandbox.  If options are not passed, the default Interpol Runtime instance is returned.
-  * `bless(value)` - Blesses a Function or String as being Interpol-safe.
+  * `evaluate(source, [obj], [options])` - Compiles and evaluates the specified source against the provided context object.
+  * `compile(source, [options])` - compiles a string template, returning an Object that contains the generated JavaScript function body and any errors or warnings that occurred during compilation.
+  * `runtime([options])` - creates a new Interpol Runtime instance.  A Runtime manages common resources between a set of Interpol templates and modules and can be used to create an isolated import resolution sandbox.  If options are not passed, the default Interpol Runtime instance is returned.
+  * `bless(value, [funcType])` - Blesses a Function or String as being Interpol-safe.  The funcType is optional and only applies to blessed Functions.
 
 ## Compilation
 The `interpol()` function will parse, compile, and generate a function for your template all in one pass.  But there are cases where you may want the compiled JavaScript for a template rather than a function.  In these cases, you'll want to call `interpol.compile()`.
