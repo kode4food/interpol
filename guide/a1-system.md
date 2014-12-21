@@ -115,6 +115,9 @@ Returns x raised to the power of y.
 #### random()
 Returns a random number between 0 (inclusive) and 1 (exclusive).
 
+#### range(start, end)
+Creates an integer range generator.  When iterated over, will yield all of the integer numbers in the defined range (inclusive).
+
 #### round(number)
 Rounds the provided number to the nearest integer and returns the result.
 
