@@ -1,11 +1,11 @@
 # Change History
 
-## Version 1.2.9 - Generators
+## Version 1.2.9, 1.2.10 - Generators
 `for` Statements and List Comprehensions can now leverage pseudo-generators for their results.  I say pseudo-generators because I wasn't going to polyfill the entire generator infrastructure of ES6.  Instead I created a simpler mechanism that is similar to Python's Iterators.
 
-Specifically, if your function is blessed with a type of 'gen' then the for loop will continue to call it until `lib/types.generatorSentinal` is returned or until an instance of `lib/types.StopIteration` is thrown.
+Specifically, if your function is blessed with a type of 'gen' then the for loop will continue to call it until `lib/types.generatorSentinel` is returned.
 
-In order to bless a function with a specific type, the `interpol.bless()` takes a second argument.  In this case, it must be the string `'gen'`.  See `lib/resolvers/system/math.range()` for an example.
+In order to bless a function with a specific type, `interpol.bless()` takes a second argument.  In this case, it must be the string `'gen'`.  See `lib/resolvers/system/math.range()` for an example.
 
 ```ruby
 from math import range

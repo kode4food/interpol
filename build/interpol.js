@@ -250,7 +250,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule;
 var generateFunction;
 
-var CURRENT_VERSION = "1.2.9";
+var CURRENT_VERSION = "1.2.10";
 
 // Bootstrap
 
@@ -1154,7 +1154,6 @@ var isInterpolRuntime = types.isInterpolRuntime;
 var isInterpolFunction = types.isInterpolFunction;
 var isInterpolPartial = types.isInterpolPartial;
 var isInterpolGenerator = types.isInterpolGenerator;
-var StopIteration = types.StopIteration;
 var generatorSentinel = types.generatorSentinel;
 var bless = types.bless;
 
@@ -1467,15 +1466,8 @@ function loop(data, loopCallback) {
   
   if ( isInterpolGenerator(data) ) {
     sentinel = data.__intGeneratorSentinel || generatorSentinel;
-    try {
-      for ( value = data(); value !== sentinel; value = data() ) {
-        loopCallback(value);
-      }
-    }
-    catch ( err ) {
-      if ( !(err instanceof StopIteration) ) {
-        throw err;
-      }
+    for ( value = data(); value !== sentinel; value = data() ) {
+      loopCallback(value);
     }
   }
 }
@@ -1515,11 +1507,9 @@ function emptyString() {
   return '';
 }
 
-function StopIteration() {
-  this.__intSentinel = true;
-}
-
-var generatorSentinel = new StopIteration();
+var generatorSentinel = {
+  __intSentinel: true
+};
 
 /**
  * Returns whether or not an Object is an Interpol Runtime instance.
@@ -1759,7 +1749,6 @@ function isFalsy(value) {
 }
 
 // Exported Functions
-exports.StopIteration = StopIteration;
 exports.generatorSentinel = generatorSentinel;
 exports.isInterpolRuntime = isInterpolRuntime;
 exports.isInterpolNodeModule = isInterpolNodeModule;
