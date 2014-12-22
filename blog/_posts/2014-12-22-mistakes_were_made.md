@@ -36,3 +36,5 @@ In version 1.3, the unary operators `+` and `-` can be used to explicitly mark a
 let str1 = -"%name is no longer auto-interpolated"
 let str2 = +'%name is now auto-interpolated'
 ```
+
+This will *only* work on Interpolated Strings.  For regular Strings, it will behave as JavaScript does, where it attempts converting the String to a Number before applying the unary operator.
