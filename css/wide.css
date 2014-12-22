@@ -184,22 +184,24 @@ a.read-more {
   white-space: nowrap;
 }
 
-a.back-link:link {
+a.big-link:link,
+a.big-link:visited {
   transition-property: color font-size;
   transition-duration: .1s;
   text-decoration: none;
   color: #111;
 }
 
-a.read-more:link {
+a.read-more:link,
+a.read-more:visited {
   transition-property: color;
   transition-duration: .1s;
   text-decoration: none;
   color: #119;
 }
 
-a.back-link:hover,
-a.back-link:focus {
+a.big-link:hover,
+a.big-link:focus {
   transition-property: color font-size;
   transition-duration: .1s;
   text-decoration: none;
