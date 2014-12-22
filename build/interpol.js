@@ -1442,7 +1442,7 @@ function bindPartial(ctx, func, callArgs) {
 }
 
 function loop(data, loopCallback) {
-  var i, len, name, value, sentinel;
+  var i, len, name, value;
 
   if ( isArray(data) ) {
     for ( i = 0, len = data.length; i < len; i++ ) {

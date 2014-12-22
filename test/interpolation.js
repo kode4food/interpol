@@ -55,7 +55,7 @@ exports.interpolation = nodeunit.testCase({
     test.equal(evaluate('"Hello, %name!"', { name: 'World'}), "Hello, World!");
     test.equal(evaluate('"""Hello\n%name!"""', { name: 'World'}), "Hello\nWorld!");
     test.equal(evaluate('"Hello, %name! %"', { name: 'World'}), "Hello, World! ");
-    test.equal(evaluate("'Hello, %name! %'", { name: 'Wordl'}), "Hello, %name! %");
+    test.equal(evaluate("'Hello, %name! %'", { name: 'World'}), "Hello, %name! %");
     test.equal(evaluate('"%% %name"', { name: 'World'}), "% World");
     test.equal(evaluate('"This % will interpolate badly"'),
                "This  will interpolate badly");
