@@ -117,7 +117,9 @@ exports.interpolation = nodeunit.testCase({
 
   "Explicit Interpolation": function (test) {
     test.equal(evaluate("+'%% %%%% % %% %%%%%% %'"), "% %%  % %%% ");
+    test.equal(evaluate('+-"%% %%%% % %% %%%%%% %"'), "% %%  % %%% ");
     test.equal(evaluate('-"%% %%%% % %% %%%%%% %"'), "%% %%%% % %% %%%%%% %");
+    test.equal(evaluate("-+'%% %%%% % %% %%%%%% %'"), "%% %%%% % %% %%%%%% %");
     test.equal(evaluate("+'Hello, %name!'", { name: 'World'}), "Hello, World!");
     test.equal(evaluate('+"Hello, %name!"', { name: 'World'}), "Hello, World!");
     test.equal(evaluate("-'Hello, %name!'", { name: 'World'}), "Hello, %name!");
