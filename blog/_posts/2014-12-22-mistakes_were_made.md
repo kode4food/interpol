@@ -1,6 +1,7 @@
 ---
 title: Mistakes Were Made
 layout: post
+author: Thom
 ---
 I made quite a few mistakes while designing Interpol.  Most of those mistakes were caught and corrected early, like the goofy interpolation operator, but some of them needed to remain in the project, at least for the first version.  So here are a few of the changes I plan to make for the next major releases of Interpol.  Some of them are breaking changes, so it's good to be aware of them now.
 
