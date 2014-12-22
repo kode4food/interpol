@@ -1682,9 +1682,6 @@ function createEscapedStringifier(escapeRegex, replaceFunction) {
   function escapedStringifier(value) {
     switch ( typeof value ) {
       case 'string':
-      if ( !escapeRegex.test(value) ) {
-        return value;
-      }
         return escapeRegex.test(value) ? replaceFunction(value) : value;
 
       case 'number':
