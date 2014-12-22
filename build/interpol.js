@@ -1501,7 +1501,6 @@ var util = require('./util');
 
 var isArray = util.isArray;
 var objectKeys = util.objectKeys;
-var bind = util.bind;
 
 function emptyString() {
   return '';
@@ -1591,10 +1590,9 @@ function bless(value, funcType) {
       if ( value.__intFunction ) {
         return value;
       }
-      var blessedFunc = bind(value);
-      blessedFunc.__intFunction = funcType || 'wrap';
-      blessedFunc.toString = emptyString;
-      return blessedFunc;
+      value.__intFunction = funcType || 'wrap';
+      value.toString = emptyString;
+      return value;
 
     default:
       throw new Error("Argument to bless must be a Function or String");
