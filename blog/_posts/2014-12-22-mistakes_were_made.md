@@ -20,7 +20,7 @@ The contract for a blessed function is different than that of a blessed generato
 ### Override Auto-Interpolation
 Right now, a double-quoted string is automatically interpolated, while a single quoted string must be explicitly invoked as a function for interpolation to work.  There's no way to override this behavior.
 
-In version 1.3, the unary operators `+` and `-` can be used to explicitly mark a string as being auto-interpolated.  Including single-quoted strings.  The default behavior will remain the same.  So for example:
+In version 1.3, the unary operators `+` and `-` can be used to explicitly mark a string as being auto-interpolated (or not).  Including single-quoted strings.  The default behavior will remain the same.  So for example:
 
 ```ruby
 let str1 = -"%name is no longer auto-interpolated"
