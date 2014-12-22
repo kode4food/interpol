@@ -250,7 +250,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule;
 var generateFunction;
 
-var CURRENT_VERSION = "1.2.10";
+var CURRENT_VERSION = "1.2.11";
 
 // Bootstrap
 
@@ -259,6 +259,7 @@ interpol.bless = bless;
 interpol.evaluate = evaluate;
 interpol.compile = compile;
 interpol.runtime = getRuntime;
+interpol.stopIteration = types.stopIteration;
 
 // Core Interpol Implementation
 
@@ -841,7 +842,7 @@ var isArray = util.isArray;
 
 var types = require('../../types');
 var bless = types.bless;
-var generatorSentinel = types.generatorSentinel;
+var stopIteration = types.stopIteration;
 
 var helpers = require('./helpers');
 var wrap = helpers.wrap;
@@ -858,12 +859,12 @@ function range(writer, start, end) {
   return bless(rangeInstance, 'gen');
   
   function rangeInstance() {
-    if ( start === generatorSentinel ) {
-      return generatorSentinel;
+    if ( start === stopIteration ) {
+      return stopIteration;
     }
     var result = start;
     if ( start === end ) {
-      start = generatorSentinel;
+      start = stopIteration;
     }
     else {
       start += increment;
@@ -1154,7 +1155,7 @@ var isInterpolRuntime = types.isInterpolRuntime;
 var isInterpolFunction = types.isInterpolFunction;
 var isInterpolPartial = types.isInterpolPartial;
 var isInterpolGenerator = types.isInterpolGenerator;
-var generatorSentinel = types.generatorSentinel;
+var stopIteration = types.stopIteration;
 var bless = types.bless;
 
 var util = require('./util');
@@ -1465,8 +1466,7 @@ function loop(data, loopCallback) {
   }
   
   if ( isInterpolGenerator(data) ) {
-    sentinel = data.__intGeneratorSentinel || generatorSentinel;
-    for ( value = data(); value !== sentinel; value = data() ) {
+    for ( value = data(); value !== stopIteration; value = data() ) {
       loopCallback(value);
     }
   }
@@ -1507,8 +1507,8 @@ function emptyString() {
   return '';
 }
 
-var generatorSentinel = {
-  __intSentinel: true
+var stopIteration = {
+  __intStopIteration: true
 };
 
 /**
@@ -1642,8 +1642,8 @@ function stringify(value) {
 var ampRegex = /&/g;
 var ltRegex = /</g;
 var gtRegex = />/g;
-var quoteRegex = /\"/g;
-var aposRegex = /\'/g;
+var quoteRegex = /"/g;
+var aposRegex = /'/g;
 
 /**
  * Escape the provided value for the purposes of rendering it as an HTML
@@ -1749,7 +1749,7 @@ function isFalsy(value) {
 }
 
 // Exported Functions
-exports.generatorSentinel = generatorSentinel;
+exports.stopIteration = stopIteration;
 exports.isInterpolRuntime = isInterpolRuntime;
 exports.isInterpolNodeModule = isInterpolNodeModule;
 exports.isInterpolModule = isInterpolModule;
