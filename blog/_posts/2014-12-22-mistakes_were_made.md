@@ -17,6 +17,15 @@ The compiler is massive and slow, and so it makes more sense to do the work ahea
 ### More Blessings
 The contract for a blessed function is different than that of a blessed generator.  So there should be two APIs for blessing them.  As of Version 2.0, `interpol.bless()` will become three functions:  `blessString()`, `blessFunction()`, and `blessGenerator()`.
 
+### Functions
+Very basic functions will be supported as of Version 2.0.  An Interpol function will return the result of the first expression statement it encounteres.  They will *not* be capable of writing directly to the template results and will not support any kind of `return` statement since returning is implicit.  But they *will* be capable of being re-opened and using guards.
+
+```ruby
+func addArguments(arg1, arg2)
+  arg1 + arg2
+end
+```
+
 ### Override Auto-Interpolation
 Right now, a double-quoted string is automatically interpolated, while a single quoted string must be explicitly invoked as a function for interpolation to work.  There's no way to override this behavior.
 
