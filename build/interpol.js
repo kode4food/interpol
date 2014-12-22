@@ -1567,11 +1567,10 @@ function isInterpolGenerator(func) {
 }
 
 /**
- * 'bless' a Function or String as being Interpol-compatible.  For a Function
- * this essentially means that it must accept a Writer instance as the first
- * argument, as a writer will be passed to it by the compiled template.  For
- * a String, it will mark the String as capable of being rendered without
- * escaping.
+ * 'bless' a Function or String as being Interpol-compatible.  In the case of
+ * a String, it will mark the String as capable of being rendered without 
+ * escaping.  With the exception of generators, all Functions in will be 
+ * passed a Writer instance as the first argument. 
  *
  * @param {Function|String} value the String or Function to 'bless'
  * @param {String} [funcType] the blessed type ('wrap' or 'string' by default) 
