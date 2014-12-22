@@ -113,5 +113,18 @@ exports.interpolation = nodeunit.testCase({
     test.equal(evaluate(script, { val1: 'test1', val3: 'test3' }),
                "test1 test4 test2 test3\n");
     test.done();
+  },
+
+  "Explicit Interpolation": function (test) {
+    test.equal(evaluate("+'%% %%%% % %% %%%%%% %'"), "% %%  % %%% ");
+    test.equal(evaluate('-"%% %%%% % %% %%%%%% %"'), "%% %%%% % %% %%%%%% %");
+    test.equal(evaluate("+'Hello, %name!'", { name: 'World'}), "Hello, World!");
+    test.equal(evaluate('+"Hello, %name!"', { name: 'World'}), "Hello, World!");
+    test.equal(evaluate("-'Hello, %name!'", { name: 'World'}), "Hello, %name!");
+    test.equal(evaluate('-"Hello, %name!"', { name: 'World'}), "Hello, %name!");
+    test.equal(evaluate('+"Hello, Literal"'), "NaN");
+    test.equal(evaluate('-"10"'), "-10");
+    test.equal(evaluate('+"10"'), "10");
+    test.done();
   }
 });
