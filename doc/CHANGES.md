@@ -1,5 +1,7 @@
 # Change History
 
+## Version 1.3 - Explicit Interpolation
+
 ## Version 1.2.9, 1.2.10, 1.2.11 - Generators
 `for` Statements and List Comprehensions can now leverage pseudo-generators for their results.  I say pseudo-generators because I wasn't going to polyfill the entire generator infrastructure of ES6.  Instead I created a simpler mechanism that is similar to Python's Iterators.
 

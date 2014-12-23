@@ -250,7 +250,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule;
 var generateFunction;
 
-var CURRENT_VERSION = "1.2.11";
+var CURRENT_VERSION = "1.3.0";
 
 // Bootstrap
 
@@ -264,7 +264,6 @@ interpol.stopIteration = types.stopIteration;
 // Core Interpol Implementation
 
 var globalRuntime = createRuntime(interpol);
-
 
 /**
  * Main Interpol entry point.  Takes a template and returns a closure
