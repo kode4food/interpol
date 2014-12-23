@@ -7443,11 +7443,12 @@ function generateModuleBody(strippedTree, literals, options) {
   }
 
   function defer(func) {
-    var args = arguments;
+    var args;
     if ( typeof func === 'function' ) {
       args = slice(arguments, 1);
     }
     else {
+      args = slice(arguments, 0);
       func = createEvaluator;
     }
 
