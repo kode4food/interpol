@@ -91,6 +91,15 @@ let age = 42
 "%name is %age years old"
 ```
 
+Automatic Interpolation can be overridden using the `+` and `-` unary operators.  The `+` prefix will force auto-interpolation, while the `-` prefix will disable it.  This applies to both single and double quoted strings.  So for example:
+
+```ruby
+let str1 = -"%name is no longer auto-interpolated"
+let str2 = +'%name is now auto-interpolated'
+```
+
+This will *only* work on Interpolated Strings.  For regular Strings, it will behave as JavaScript does, where it attempts converting the String to a Number before applying the unary operator.
+
 ## Piped Interpolation
 The Interpolation feature also supports a restricted form of the piped call operator.  The restrictions in using this method are that the pipe character *can not* be surrounded by spaces and the right-hand operands can only be identifiers.  For example:
 
