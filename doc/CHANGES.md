@@ -1,6 +1,18 @@
 # Change History
 
-## Version 1.3 - Explicit Interpolation
+## Version 1.3 - Override Auto-Interpolation
+Interpol now seems to work properly on Internet Explorer 9, but your mileage may vary.
+
+Previously, a double-quoted string was automatically interpolated, while a single quoted string had to be explicitly invoked as a function for interpolation to work.  There was no way to override this behavior.
+
+Now, the unary operators `+` and `-` can be used to explicitly mark a string as being auto-interpolated (or not).  Including single-quoted strings.  The default behavior will remain the same.  So for example:
+
+```ruby
+let str1 = -"%name is no longer auto-interpolated"
+let str2 = +'%name is now auto-interpolated'
+```
+
+This will *only* work on Interpolated Strings.  For regular Strings, it will behave as JavaScript does, where it attempts converting the String to a Number before applying the unary operator.
 
 ## Version 1.2.9, 1.2.10, 1.2.11 - Generators
 `for` Statements and List Comprehensions can now leverage pseudo-generators for their results.  I say pseudo-generators because I wasn't going to polyfill the entire generator infrastructure of ES6.  Instead I created a simpler mechanism that is similar to Python's Iterators.
