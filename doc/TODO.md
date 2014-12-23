@@ -2,10 +2,6 @@
 
 * Ongoing - Improving [the Interpol Guide](http://interpoljs.io/guide)
 
-## Version 1.3
-* Ability to override Auto-Interpolation
-* Internet Explorer 9 Compatibility
-
 ## Version 1.4
 * Better Debugging Output (Source Maps)
 

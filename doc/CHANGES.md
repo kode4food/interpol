@@ -14,7 +14,7 @@ let str2 = +'%name is now auto-interpolated'
 
 This will *only* work on Interpolated Strings.  For regular Strings, it will behave as JavaScript does, where it attempts converting the String to a Number before applying the unary operator.
 
-## Version 1.2.9, 1.2.10, 1.2.11 - Generators
+## Version 1.2.11 - Generators
 `for` Statements and List Comprehensions can now leverage pseudo-generators for their results.  I say pseudo-generators because I wasn't going to polyfill the entire generator infrastructure of ES6.  Instead I created a simpler mechanism that is similar to Python's Iterators.
 
 Specifically, if your function is blessed with a type of 'gen' then the for loop will continue to call it until `interpol.stopIteration` is returned.
