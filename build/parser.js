@@ -465,17 +465,13 @@ module.exports = (function() {
               return buildBinaryChain(head, tail);
             },
         peg$c266 = function(op, expr) {
-              if ( op === 'no' || !isInterpolated(expr) ) {
+              if ( op === 'no' || !isInterpolated(expr) || expr.marked ) {
                 return [sym(op), expr];
               }
 
-              if ( op === 'ne' ) {
-                expr.type = 'int';
-                return expr;
-              }
-
-              if ( op === 'po' ) {
-                expr.type = 'auto';
+              if ( op === 'ne' || op === 'po' ) {
+                expr.type = op === 'ne' ? 'int' : 'auto';
+                expr.marked = true;
                 return expr;
               }
 
