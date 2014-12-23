@@ -10,7 +10,7 @@
 "use strict";
 
 // This module is used to collect the requirements for a minimal
-// Browserify build.  It's of no interest to Node.js
+// Browserify build.  It's of no interest to node.js
 
 // Set the Interpol browser global
 var interpol = window.interpol = require('../lib/interpol');
@@ -34,7 +34,7 @@ interpol.createStringWriter = writers.createStringWriter;
 
 /**
  * This is a stub that will be populated by the 'real' compiler functionality
- * should it be loaded by either Node.js or Browserify.  It's here because
+ * should it be loaded by either node.js or Browserify.  It's here because
  * we shouldn't have to rely on Browserify's `--ignore` option.
  */
 
@@ -250,7 +250,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule;
 var generateFunction;
 
-var CURRENT_VERSION = "1.2.8";
+var CURRENT_VERSION = "1.3.0";
 
 // Bootstrap
 
@@ -259,11 +259,11 @@ interpol.bless = bless;
 interpol.evaluate = evaluate;
 interpol.compile = compile;
 interpol.runtime = getRuntime;
+interpol.stopIteration = types.stopIteration;
 
 // Core Interpol Implementation
 
 var globalRuntime = createRuntime(interpol);
-
 
 /**
  * Main Interpol entry point.  Takes a template and returns a closure
@@ -725,8 +725,12 @@ function first(writer, value) {
     return value[0];
   }
   if ( typeof value === 'object' && value !== null ) {
-    var key = objectKeys(value)[0];
-    return value[key];
+    var name = objectKeys(value)[0];
+    var val = value[name];
+    return {
+        name: name,
+        value: val === null ? undefined : val
+    };
   }
   return value;
 }
@@ -753,8 +757,12 @@ function last(writer, value) {
   }
   if ( typeof value === 'object' && value !== null ) {
     var keys = objectKeys(value);
-    var key = keys[keys.length - 1];
-    return value[key];
+    var name = keys[keys.length - 1];
+    var val = value[name];
+    return {
+        name: name,
+        value: val === null ? undefined : val
+    };
   }
   return value;
 }
@@ -830,12 +838,38 @@ exports.values = values;
 
 var util = require('../../util');
 var isArray = util.isArray;
-var helpers = require('./helpers');
 
+var types = require('../../types');
+var bless = types.bless;
+var stopIteration = types.stopIteration;
+
+var helpers = require('./helpers');
 var wrap = helpers.wrap;
 
 function numberSort(left, right) {
   return left > right;
+}
+
+// `range(start, end)` creates an integer range generator
+function range(writer, start, end) {
+  start = Math.floor(start);
+  end = Math.floor(end);
+  var increment = end > start ? 1 : -1;
+  return bless(rangeInstance, 'gen');
+  
+  function rangeInstance() {
+    if ( start === stopIteration ) {
+      return stopIteration;
+    }
+    var result = start;
+    if ( start === end ) {
+      start = stopIteration;
+    }
+    else {
+      start += increment;
+    }
+    return result;
+  }
 }
 
 // `avg(value)` if an Array, returns the average (mathematical mean) of
@@ -951,13 +985,14 @@ exports.SQRT1_2 = Math.SQRT1_2;
 exports.SQRT2 = Math.SQRT2;
 
 // Exported Functions
+exports.range = range;
 exports.avg = avg;
 exports.max = max;
 exports.median = median;
 exports.min = min;
 exports.sum = sum;
 
-},{"../../util":16,"./helpers":8}],12:[function(require,module,exports){
+},{"../../types":15,"../../util":16,"./helpers":8}],12:[function(require,module,exports){
 /*
  * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License
@@ -1116,8 +1151,10 @@ var match = require('./match');
 
 var types = require('./types');
 var isInterpolRuntime = types.isInterpolRuntime;
-var isInterpolPartial = types.isInterpolPartial;
 var isInterpolFunction = types.isInterpolFunction;
+var isInterpolPartial = types.isInterpolPartial;
+var isInterpolGenerator = types.isInterpolGenerator;
+var stopIteration = types.stopIteration;
 var bless = types.bless;
 
 var util = require('./util');
@@ -1406,17 +1443,15 @@ function bindPartial(ctx, func, callArgs) {
 function loop(data, loopCallback) {
   var i, len, name, value;
 
-  if ( data === null || typeof data !== 'object' ) {
-    return;
-  }
-
   if ( isArray(data) ) {
     for ( i = 0, len = data.length; i < len; i++ ) {
       value = data[i];
       loopCallback(value === null ? undefined : value);
     }
+    return;
   }
-  else {
+  
+  if ( typeof data === 'object' && data !== null ) {
     var items = objectKeys(data);
     for ( i = 0, len = items.length; i < len; i++ ) {
       name = items[i];
@@ -1425,6 +1460,13 @@ function loop(data, loopCallback) {
         name: name,
         value: value === null ? undefined : value
       });
+    }
+    return;
+  }
+  
+  if ( isInterpolGenerator(data) ) {
+    for ( value = data(); value !== stopIteration; value = data() ) {
+      loopCallback(value);
     }
   }
 }
@@ -1458,11 +1500,14 @@ var util = require('./util');
 
 var isArray = util.isArray;
 var objectKeys = util.objectKeys;
-var bind = util.bind;
 
 function emptyString() {
   return '';
 }
+
+var stopIteration = {
+  __intStopIteration: true
+};
 
 /**
  * Returns whether or not an Object is an Interpol Runtime instance.
@@ -1511,15 +1556,25 @@ function isInterpolPartial(func) {
 }
 
 /**
- * 'bless' a Function or String as being Interpol-compatible.  For a Function
- * this essentially means that it must accept a Writer instance as the first
- * argument, as a writer will be passed to it by the compiled template.  For
- * a String, it will mark the String as capable of being rendered without
- * escaping.
+ * Same as isInterpolFunction except that it's checking specifically for
+ * a generator.
+ *
+ * @param {Function} func the Function to check
+ */
+function isInterpolGenerator(func) {
+  return typeof func === 'function' && func.__intFunction === 'gen';
+}
+
+/**
+ * 'bless' a Function or String as being Interpol-compatible.  In the case of
+ * a String, it will mark the String as capable of being rendered without 
+ * escaping.  With the exception of generators, all Functions in Interpol
+ *  will be passed a Writer instance as the first argument. 
  *
  * @param {Function|String} value the String or Function to 'bless'
+ * @param {String} [funcType] the blessed type ('wrap' or 'string' by default) 
  */
-function bless(value) {
+function bless(value, funcType) {
   var type = typeof value;
 
   switch ( type ) {
@@ -1533,10 +1588,9 @@ function bless(value) {
       if ( value.__intFunction ) {
         return value;
       }
-      var blessedFunc = bind(value);
-      blessedFunc.__intFunction = 'wrap';
-      blessedFunc.toString = emptyString;
-      return blessedFunc;
+      value.__intFunction = funcType || 'wrap';
+      value.toString = emptyString;
+      return value;
 
     default:
       throw new Error("Argument to bless must be a Function or String");
@@ -1581,13 +1635,11 @@ function stringify(value) {
   }
 }
 
-var EscapeChars = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#39;'
-};
+var ampRegex = /&/g;
+var ltRegex = /</g;
+var gtRegex = />/g;
+var quoteRegex = /"/g;
+var aposRegex = /'/g;
 
 /**
  * Escape the provided value for the purposes of rendering it as an HTML
@@ -1595,7 +1647,7 @@ var EscapeChars = {
  *
  * @param {Mixed} value the value to escape
  */
-var escapeAttribute = createEscapedStringifier(/[&<>'"]/gm);
+var escapeAttribute = createEscapedStringifier(/[&<>'"]/g, replaceAttribute);
 
 /**
  * Escape the provided value for the purposes of rendering it as HTML
@@ -1603,33 +1655,30 @@ var escapeAttribute = createEscapedStringifier(/[&<>'"]/gm);
  *
  * @param {Mixed} value the value to escape
  */
-var escapeContent = createEscapedStringifier(/[&<>]/gm);
+var escapeContent = createEscapedStringifier(/[&<>]/g, replaceContent);
 
-function createEscapedStringifier(escapeRegex) {
-  var escapeCacheMax = 8192;
-  var escapeCache = {};
-  var escapeCacheSize = 0;
+function replaceAttribute(value) {
+  return value.replace(ampRegex, '&amp;')
+              .replace(ltRegex, '&lt;')
+              .replace(gtRegex, '&gt;')
+              .replace(quoteRegex, '&quot;')
+              .replace(aposRegex, '&#39;');
+}
+
+function replaceContent(value) {
+  return value.replace(ampRegex, '&amp;')
+              .replace(ltRegex, '&lt;')
+              .replace(gtRegex, '&gt;');
+}
+
+function createEscapedStringifier(escapeRegex, replaceFunction) {
   return escapedStringifier;
 
   // This is very similar to 'stringify' with the exception of 'string'
   function escapedStringifier(value) {
     switch ( typeof value ) {
       case 'string':
-        var result = escapeCache[value];
-        if ( result ) {
-          return result;
-        }
-        if ( escapeCacheSize >= escapeCacheMax ) {
-          escapeCache = {};
-          escapeCacheSize = 0;
-        }
-        else {
-          escapeCacheSize += 1;
-        }
-        result = escapeCache[value] = value.replace(escapeRegex, function(ch) {
-          return EscapeChars[ch];
-        });
-        return result;
+        return escapeRegex.test(value) ? replaceFunction(value) : value;
 
       case 'number':
         return '' + value;
@@ -1693,11 +1742,13 @@ function isFalsy(value) {
 }
 
 // Exported Functions
+exports.stopIteration = stopIteration;
 exports.isInterpolRuntime = isInterpolRuntime;
 exports.isInterpolNodeModule = isInterpolNodeModule;
 exports.isInterpolModule = isInterpolModule;
 exports.isInterpolFunction = isInterpolFunction;
 exports.isInterpolPartial = isInterpolPartial;
+exports.isInterpolGenerator = isInterpolGenerator;
 exports.stringify = stringify;
 exports.escapeAttribute = escapeAttribute;
 exports.escapeContent = escapeContent;
