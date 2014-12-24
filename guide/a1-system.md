@@ -137,7 +137,7 @@ Returns the tangent of the provided number (in radians).
 Converts the provided value to a number and returns the result (or NaN).
 
 ### render
-Provides helper functionality for rendering variable content inside of loops.
+Provides helper functionality for rendering variable content inside of loops.  These functions *do not* implement the generator interface because they produce unbounded sequences.
 
 #### counter([start, [increment]])
 Creates a counter function where the sequence starts at `start` (or 0) and increments by `increment` (or 1).  Each call to the returned function will yield the next value in the sequence.
