@@ -1775,25 +1775,16 @@ exports.isFalsy = isFalsy;
 "use strict";
 
 // Interpol-specific utilities and polyfills.  These are implemented *as*
-// Interpol uses them rather than being strictly ES5 compatible.  For example,
-// `bind()` doesn't care about the `this` parameter.
+// Interpol uses them rather than being strictly ES5 compatible.
 
-var canBindCalls = !!Object.prototype.toString.call.bind;
 var toString = Object.prototype.toString;
 
-var slice;
-/* istanbul ignore else: won't happen in node */
-if ( canBindCalls ) {
-  slice = Array.prototype.slice.call.bind(Array.prototype.slice);
-}
-else {
-  slice = (function () {
-    var inner = Array.prototype.slice;
-    return function _slice(value, begin, end) {
-      return inner.call(value, begin, end);
-    };
-  })();
-}
+var slice = (function () {
+  var inner = Array.prototype.slice;
+  return function _slice(value, begin) {
+    return inner.call(value, begin);
+  };
+})();
 
 var isArray = Array.isArray;
 /* istanbul ignore if: won't happen in node */
@@ -1856,18 +1847,12 @@ function mixin(target) {
 var each;
 /* istanbul ignore else: won't happen in node */
 if ( Array.prototype.forEach ) {
-  /* istanbul ignore else: won't happen in node */
-  if ( canBindCalls ) {
-    each = Array.prototype.forEach.call.bind(Array.prototype.forEach);
-  }
-  else {
-    each = (function () {
-      var inner = Array.prototype.forEach;
-      return function _each(value, callback) {
-        return inner.call(value, callback);
-      };
-    })();
-  }
+  each = (function () {
+    var inner = Array.prototype.forEach;
+    return function _each(value, callback) {
+      return inner.call(value, callback);
+    };
+  })();
 }
 else {
   each = function _each(arr, callback) {
@@ -1880,18 +1865,12 @@ else {
 var map;
 /* istanbul ignore else: won't happen in node */
 if ( Array.prototype.map ) {
-  /* istanbul ignore else: won't happen in node */
-  if ( canBindCalls ) {
-    map = Array.prototype.map.call.bind(Array.prototype.map);
-  }
-  else {
-    map = (function () {
-      var inner = Array.prototype.map;
-      return function _map(value, callback) {
-        return inner.call(value, callback);
-      };
-    })();
-  }
+  map = (function () {
+    var inner = Array.prototype.map;
+    return function _map(value, callback) {
+      return inner.call(value, callback);
+    };
+  })();
 }
 else {
   map = function _map(arr, callback) {
@@ -1906,18 +1885,12 @@ else {
 var filter;
 /* istanbul ignore else: won't happen in node */
 if ( Array.prototype.filter ) {
-  /* istanbul ignore else: won't happen in node */
-  if ( canBindCalls ) {
-    filter = Array.prototype.filter.call.bind(Array.prototype.filter);
-  }
-  else {
-    filter = (function () {
-      var inner = Array.prototype.filter;
-      return function _filter(value, callback) {
-        return inner.call(value, callback);
-      };
-    })();
-  }
+  filter = (function () {
+    var inner = Array.prototype.filter;
+    return function _filter(value, callback) {
+      return inner.call(value, callback);
+    };
+  })();
 }
 else {
   filter = function _filter(arr, callback) {
