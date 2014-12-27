@@ -503,7 +503,6 @@ var util = require('../util');
 
 var isInterpolModule = types.isInterpolModule;
 var isArray = util.isArray;
-var slice = util.slice;
 var bless = types.bless;
 
 /**
@@ -647,10 +646,9 @@ exports.createMemoryResolver = createMemoryResolver;
 "use strict";
 
 var types = require('../../types');
-var util = require('../../util');
-
 var bless = types.bless;
-var slice = util.slice;
+
+var slice = Array.prototype.slice;
 
 /**
  * Wraps a Function in an envelope that accepts a Writer (but discards it).
@@ -662,14 +660,14 @@ function wrap(func) {
 
   function wrappedFunction(writer) {
     /* jshint validthis:true */
-    return func.apply(this, slice(arguments, 1));
+    return func.apply(this, slice.call(arguments, 1));
   }
 }
 
 // Exported Functions
 exports.wrap = wrap;
 
-},{"../../types":15,"../../util":16}],9:[function(require,module,exports){
+},{"../../types":15}],9:[function(require,module,exports){
 /*
  * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License
@@ -1163,7 +1161,6 @@ var bless = types.bless;
 
 var util = require('./util');
 var isArray = util.isArray;
-var slice = util.slice;
 var mixin = util.mixin;
 var extendObject = util.extendObject;
 var objectKeys = util.objectKeys;
@@ -1177,6 +1174,8 @@ var createStringWriter = writers.createStringWriter;
 var nullWriter = writers.createNullWriter();
 
 var noOp = bless(function () {});
+
+var slice = Array.prototype.slice;
 
 function createRuntime(interpol, runtimeOptions) {
   if ( isInterpolRuntime(runtimeOptions) ) {
@@ -1441,7 +1440,7 @@ function bindPartial(ctx, func, callArgs) {
 
   function boundPartial(writer) {
     /* jshint validthis:true */
-    var applyArgs = slice(argTemplate).concat(slice(arguments, 1));
+    var applyArgs = argTemplate.slice(0).concat(slice.call(arguments, 1));
     applyArgs[0] = writer;
     return func.apply(this, applyArgs);
   }
@@ -1779,13 +1778,6 @@ exports.isFalsy = isFalsy;
 
 var toString = Object.prototype.toString;
 
-var slice = (function () {
-  var inner = Array.prototype.slice;
-  return function _slice(value, begin) {
-    return inner.call(value, begin);
-  };
-})();
-
 var isArray = Array.isArray;
 /* istanbul ignore if: won't happen in node */
 if ( !isArray ) {
@@ -1913,7 +1905,6 @@ function selfMap(arr, callback) {
 
 // Exported Functions
 exports.isArray = isArray;
-exports.slice = slice;
 exports.extendObject = extendObject;
 exports.objectKeys = objectKeys;
 exports.mixin = mixin;
