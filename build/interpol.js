@@ -54,7 +54,6 @@ var types = require('./types');
 
 var objectKeys = util.objectKeys;
 var each = util.each;
-var bind = util.bind;
 var stringify = types.stringify;
 var isInterpolFunction = types.isInterpolFunction;
 
@@ -194,29 +193,34 @@ function buildFormatter(formatStr) {
 
 function buildDeferredFormatter(formatStr, supportFunctions) {
   var formatter = buildFormatter(formatStr);
+  supportedFormatter.__intFunction = 'format';
+  supportedFormatter.toString = formatter.toString;
   if ( supportFunctions !== undefined ) {
-    var bound = bind(formatter, supportFunctions);
-    bound.__intFunction = 'format';
-    bound.toString = formatter.toString;
-    return bound;
+    return supportedFormatter;
   }
   return deferredFormatter;
 
-  function deferredFormatter(supportFunctions) {
-    var bound = bind(formatter, supportFunctions);
-    bound.__intFunction = 'format';
-    bound.toString = formatter.toString;
-    return bound;
+  function supportedFormatter(writer, data) {
+    return formatter(supportFunctions, writer, data);
+  }
+  
+  function deferredFormatter(_supportFunctions) {
+    supportFunctions = _supportFunctions;
+    return supportedFormatter;
   }
 }
 
 function buildImmediateFormatter(formatStr, supportFunctions) {
   var formatter = buildFormatter(formatStr);
   if ( supportFunctions !== undefined ) {
-    return bind(formatter, supportFunctions, undefined);
+    return supportedFormatter;
   }
   return immediateFormatter;
 
+  function supportedFormatter(data) {
+    return formatter(supportFunctions, undefined, data);
+  }
+  
   function immediateFormatter(supportFunctions, data) {
     return formatter(supportFunctions, undefined, data);
   }
@@ -499,7 +503,6 @@ var util = require('../util');
 
 var isInterpolModule = types.isInterpolModule;
 var isArray = util.isArray;
-var slice = util.slice;
 var bless = types.bless;
 
 /**
@@ -643,10 +646,9 @@ exports.createMemoryResolver = createMemoryResolver;
 "use strict";
 
 var types = require('../../types');
-var util = require('../../util');
-
 var bless = types.bless;
-var slice = util.slice;
+
+var slice = Array.prototype.slice;
 
 /**
  * Wraps a Function in an envelope that accepts a Writer (but discards it).
@@ -658,14 +660,14 @@ function wrap(func) {
 
   function wrappedFunction(writer) {
     /* jshint validthis:true */
-    return func.apply(this, slice(arguments, 1));
+    return func.apply(this, slice.call(arguments, 1));
   }
 }
 
 // Exported Functions
 exports.wrap = wrap;
 
-},{"../../types":15,"../../util":16}],9:[function(require,module,exports){
+},{"../../types":15}],9:[function(require,module,exports){
 /*
  * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License
@@ -1159,11 +1161,9 @@ var bless = types.bless;
 
 var util = require('./util');
 var isArray = util.isArray;
-var slice = util.slice;
 var mixin = util.mixin;
 var extendObject = util.extendObject;
 var objectKeys = util.objectKeys;
-var bind = util.bind;
 
 var internalResolvers = require('./resolvers/internal');
 var createSystemResolver = internalResolvers.createSystemResolver;
@@ -1175,6 +1175,8 @@ var nullWriter = writers.createNullWriter();
 
 var noOp = bless(function () {});
 
+var slice = Array.prototype.slice;
+
 function createRuntime(interpol, runtimeOptions) {
   if ( isInterpolRuntime(runtimeOptions) ) {
     return runtimeOptions;
@@ -1182,11 +1184,11 @@ function createRuntime(interpol, runtimeOptions) {
 
   var options = mixin({}, runtimeOptions);
   var cacheModules = options.cache;
-  var createResolvers = !options.resolvers;
-  var resolvers = createResolvers ? [] : options.resolvers;
+  var createDefaultResolvers = !options.resolvers;
+  var resolvers = createDefaultResolvers ? [] : options.resolvers;
 
-  var resolveExports = bind(resolve, 'resolveExports');
-  var resolveModule = bind(resolve, 'resolveModule');
+  var resolveExports = createResolver('resolveExports');
+  var resolveModule = createResolver('resolveModule');
 
   var runtime = {
     __intRuntime: true,
@@ -1221,7 +1223,7 @@ function createRuntime(interpol, runtimeOptions) {
     exec: exec
   };
 
-  if ( createResolvers ) {
+  if ( createDefaultResolvers ) {
     createSystemResolver(runtime);
     createMemoryResolver(runtime, true);
   }
@@ -1236,14 +1238,18 @@ function createRuntime(interpol, runtimeOptions) {
     return resolvers;
   }
 
-  function resolve(methodName, moduleName) {
-    for ( var i = resolvers.length - 1; i >= 0; i-- ) {
-      var module = resolvers[i][methodName](moduleName);
-      if ( module ) {
-        return module;
+  function createResolver(methodName) {
+    return resolve;
+
+    function resolve(moduleName) {
+      for ( var i = resolvers.length - 1; i >= 0; i-- ) {
+        var module = resolvers[i][methodName](moduleName);
+        if ( module ) {
+          return module;
+        }
       }
+      return undefined;
     }
-    return undefined;
   }
 
   // where exports are actually resolved. raiseError will be false
@@ -1434,7 +1440,7 @@ function bindPartial(ctx, func, callArgs) {
 
   function boundPartial(writer) {
     /* jshint validthis:true */
-    var applyArgs = slice(argTemplate).concat(slice(arguments, 1));
+    var applyArgs = argTemplate.slice(0).concat(slice.call(arguments, 1));
     applyArgs[0] = writer;
     return func.apply(this, applyArgs);
   }
@@ -1768,25 +1774,9 @@ exports.isFalsy = isFalsy;
 "use strict";
 
 // Interpol-specific utilities and polyfills.  These are implemented *as*
-// Interpol uses them rather than being strictly ES5 compatible.  For example,
-// `bind()` doesn't care about the `this` parameter.
+// Interpol uses them rather than being strictly ES5 compatible.
 
-var canBindCalls = !!Object.prototype.toString.call.bind;
 var toString = Object.prototype.toString;
-
-var slice;
-/* istanbul ignore else: won't happen in node */
-if ( canBindCalls ) {
-  slice = Array.prototype.slice.call.bind(Array.prototype.slice);
-}
-else {
-  slice = (function () {
-    var inner = Array.prototype.slice;
-    return function _slice(value, begin, end) {
-      return inner.call(value, begin, end);
-    };
-  })();
-}
 
 var isArray = Array.isArray;
 /* istanbul ignore if: won't happen in node */
@@ -1846,40 +1836,15 @@ function mixin(target) {
   return target;
 }
 
-var bind;
-/* istanbul ignore else: won't happen in node */
-if ( Function.prototype.bind ) {
-  bind = function _bind(func) {
-    var args = [null].concat(slice(arguments, 1));
-    return func.bind.apply(func, args);
-  };
-}
-else {
-  bind = function _bind(func) {
-    var outerArgs = slice(arguments, 0);
-    return _bound;
-
-    function _bound() {
-      return func.apply(null, outerArgs.concat(slice(arguments, 0)));
-    }
-  };
-}
-
 var each;
 /* istanbul ignore else: won't happen in node */
 if ( Array.prototype.forEach ) {
-  /* istanbul ignore else: won't happen in node */
-  if ( canBindCalls ) {
-    each = Array.prototype.forEach.call.bind(Array.prototype.forEach);
-  }
-  else {
-    each = (function () {
-      var inner = Array.prototype.forEach;
-      return function _each(value, callback) {
-        return inner.call(value, callback);
-      };
-    })();
-  }
+  each = (function () {
+    var inner = Array.prototype.forEach;
+    return function _each(value, callback) {
+      return inner.call(value, callback);
+    };
+  })();
 }
 else {
   each = function _each(arr, callback) {
@@ -1892,18 +1857,12 @@ else {
 var map;
 /* istanbul ignore else: won't happen in node */
 if ( Array.prototype.map ) {
-  /* istanbul ignore else: won't happen in node */
-  if ( canBindCalls ) {
-    map = Array.prototype.map.call.bind(Array.prototype.map);
-  }
-  else {
-    map = (function () {
-      var inner = Array.prototype.map;
-      return function _map(value, callback) {
-        return inner.call(value, callback);
-      };
-    })();
-  }
+  map = (function () {
+    var inner = Array.prototype.map;
+    return function _map(value, callback) {
+      return inner.call(value, callback);
+    };
+  })();
 }
 else {
   map = function _map(arr, callback) {
@@ -1918,18 +1877,12 @@ else {
 var filter;
 /* istanbul ignore else: won't happen in node */
 if ( Array.prototype.filter ) {
-  /* istanbul ignore else: won't happen in node */
-  if ( canBindCalls ) {
-    filter = Array.prototype.filter.call.bind(Array.prototype.filter);
-  }
-  else {
-    filter = (function () {
-      var inner = Array.prototype.filter;
-      return function _filter(value, callback) {
-        return inner.call(value, callback);
-      };
-    })();
-  }
+  filter = (function () {
+    var inner = Array.prototype.filter;
+    return function _filter(value, callback) {
+      return inner.call(value, callback);
+    };
+  })();
 }
 else {
   filter = function _filter(arr, callback) {
@@ -1952,11 +1905,9 @@ function selfMap(arr, callback) {
 
 // Exported Functions
 exports.isArray = isArray;
-exports.slice = slice;
 exports.extendObject = extendObject;
 exports.objectKeys = objectKeys;
 exports.mixin = mixin;
-exports.bind = bind;
 
 exports.each = each;
 exports.map = map;
