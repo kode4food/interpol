@@ -54,7 +54,6 @@ var types = require('./types');
 
 var objectKeys = util.objectKeys;
 var each = util.each;
-var bind = util.bind;
 var stringify = types.stringify;
 var isInterpolFunction = types.isInterpolFunction;
 
@@ -194,29 +193,34 @@ function buildFormatter(formatStr) {
 
 function buildDeferredFormatter(formatStr, supportFunctions) {
   var formatter = buildFormatter(formatStr);
+  supportedFormatter.__intFunction = 'format';
+  supportedFormatter.toString = formatter.toString;
   if ( supportFunctions !== undefined ) {
-    var bound = bind(formatter, supportFunctions);
-    bound.__intFunction = 'format';
-    bound.toString = formatter.toString;
-    return bound;
+    return supportedFormatter;
   }
   return deferredFormatter;
 
-  function deferredFormatter(supportFunctions) {
-    var bound = bind(formatter, supportFunctions);
-    bound.__intFunction = 'format';
-    bound.toString = formatter.toString;
-    return bound;
+  function supportedFormatter(writer, data) {
+    return formatter(supportFunctions, writer, data);
+  }
+  
+  function deferredFormatter(_supportFunctions) {
+    supportFunctions = _supportFunctions;
+    return supportedFormatter;
   }
 }
 
 function buildImmediateFormatter(formatStr, supportFunctions) {
   var formatter = buildFormatter(formatStr);
   if ( supportFunctions !== undefined ) {
-    return bind(formatter, supportFunctions, undefined);
+    return supportedFormatter;
   }
   return immediateFormatter;
 
+  function supportedFormatter(data) {
+    return formatter(supportFunctions, undefined, data);
+  }
+  
   function immediateFormatter(supportFunctions, data) {
     return formatter(supportFunctions, undefined, data);
   }
@@ -1163,7 +1167,6 @@ var slice = util.slice;
 var mixin = util.mixin;
 var extendObject = util.extendObject;
 var objectKeys = util.objectKeys;
-var bind = util.bind;
 
 var internalResolvers = require('./resolvers/internal');
 var createSystemResolver = internalResolvers.createSystemResolver;
@@ -1182,11 +1185,11 @@ function createRuntime(interpol, runtimeOptions) {
 
   var options = mixin({}, runtimeOptions);
   var cacheModules = options.cache;
-  var createResolvers = !options.resolvers;
-  var resolvers = createResolvers ? [] : options.resolvers;
+  var createDefaultResolvers = !options.resolvers;
+  var resolvers = createDefaultResolvers ? [] : options.resolvers;
 
-  var resolveExports = bind(resolve, 'resolveExports');
-  var resolveModule = bind(resolve, 'resolveModule');
+  var resolveExports = createResolver('resolveExports');
+  var resolveModule = createResolver('resolveModule');
 
   var runtime = {
     __intRuntime: true,
@@ -1221,7 +1224,7 @@ function createRuntime(interpol, runtimeOptions) {
     exec: exec
   };
 
-  if ( createResolvers ) {
+  if ( createDefaultResolvers ) {
     createSystemResolver(runtime);
     createMemoryResolver(runtime, true);
   }
@@ -1236,14 +1239,18 @@ function createRuntime(interpol, runtimeOptions) {
     return resolvers;
   }
 
-  function resolve(methodName, moduleName) {
-    for ( var i = resolvers.length - 1; i >= 0; i-- ) {
-      var module = resolvers[i][methodName](moduleName);
-      if ( module ) {
-        return module;
+  function createResolver(methodName) {
+    return resolve;
+
+    function resolve(moduleName) {
+      for ( var i = resolvers.length - 1; i >= 0; i-- ) {
+        var module = resolvers[i][methodName](moduleName);
+        if ( module ) {
+          return module;
+        }
       }
+      return undefined;
     }
-    return undefined;
   }
 
   // where exports are actually resolved. raiseError will be false
@@ -1846,25 +1853,6 @@ function mixin(target) {
   return target;
 }
 
-var bind;
-/* istanbul ignore else: won't happen in node */
-if ( Function.prototype.bind ) {
-  bind = function _bind(func) {
-    var args = [null].concat(slice(arguments, 1));
-    return func.bind.apply(func, args);
-  };
-}
-else {
-  bind = function _bind(func) {
-    var outerArgs = slice(arguments, 0);
-    return _bound;
-
-    function _bound() {
-      return func.apply(null, outerArgs.concat(slice(arguments, 0)));
-    }
-  };
-}
-
 var each;
 /* istanbul ignore else: won't happen in node */
 if ( Array.prototype.forEach ) {
@@ -1956,7 +1944,6 @@ exports.slice = slice;
 exports.extendObject = extendObject;
 exports.objectKeys = objectKeys;
 exports.mixin = mixin;
-exports.bind = bind;
 
 exports.each = each;
 exports.map = map;
