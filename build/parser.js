@@ -489,14 +489,14 @@ module.exports = (function() {
             },
         peg$c269 = function(sel) { return sel; },
         peg$c270 = function(elem) {
-              return [sym('mb'), sym(elem.value, 'lit')];
+              return [sym('mb'), [sym(elem.value, 'lit')]];
             },
         peg$c271 = "[",
         peg$c272 = { type: "literal", value: "[", description: "\"[\"" },
         peg$c273 = "]",
         peg$c274 = { type: "literal", value: "]", description: "\"]\"" },
         peg$c275 = function(elem) {
-              return [sym('mb'), elem];
+              return [sym('mb'), [elem]];
             },
         peg$c276 = function(args) {
               return [sym('ca'), args];
