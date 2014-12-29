@@ -25,7 +25,7 @@ var preamble = [
   "/*!", 
   pkg.name, "v"+pkg.version, "|", 
   "(c)", new Date().getFullYear(), pkg.author, "|",
-  pkg.homepage + "license",
+  "interpoljs.io/license",
   "*/\n"
 ].join(' ');
 
