@@ -24,26 +24,29 @@
   ],
   "repository": "git@github.com:kode4food/interpol.git",
   "scripts": {
-    "build-parser": "pegjs -o size lib/compiler/parser.pegjs build/parser.js",
-    "bundle-standard": "browserify --ignore './compiler' browserify/standard.js > build/interpol.js && uglifyjs -m --preamble \"`cat doc/preamble.js`\" build/interpol.js -o build/interpol.min.js",
-    "bundle-parser": "browserify browserify/compiler.js | uglifyjs -m --preamble \"`cat doc/preamble.js`\" -o build/interpol-parser.min.js",
-    "bundle-debug": "browserify --debug browserify/compiler.js > build/interpol-debug.js",
-    "build": "mkdir -p build && npm run-script build-parser && npm run-script bundle-standard && npm run-script bundle-parser && npm run-script bundle-debug && npm run-script coverage && npm run-script plato",
-    "test": "nodeunit test/index.js",
-    "coverage": "istanbul cover -x '**/build/**' node_modules/nodeunit/bin/nodeunit test/index.js",
-    "plato": "plato -r -l .jshintrc -d report index.js lib"
+    "build": "mkdir -p build && gulp"
   },
   "dependencies": {
     "glob": "^4.3.2",
     "mkdirp": "^0.5.0"
   },
   "devDependencies": {
+    "aliasify": "^1.5.1",
     "browserify": "^7.0.3",
-    "istanbul": "^0.3.5",
+    "del": "^1.1.1",
+    "gulp": "^3.8.10",
+    "gulp-concat": "^2.4.3",
+    "gulp-inject-string": "0.0.2",
+    "gulp-istanbul": "^0.5.0",
+    "gulp-istanbul-enforcer": "^1.0.3",
+    "gulp-jshint": "^1.9.0",
+    "gulp-nodeunit": "0.0.5",
+    "gulp-peg": "^0.1.2",
+    "gulp-rename": "^1.2.0",
+    "gulp-uglify": "^1.0.2",
     "nodeunit": "^0.9.0",
-    "pegjs": "^0.8.0",
     "plato": "^1.3.0",
-    "uglify-js": "^2.4.16"
+    "vinyl-source-stream": "^1.0.0"
   },
   "browser": {
     "vm": false
