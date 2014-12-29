@@ -130,7 +130,9 @@ gulp.task('bundle-compiler', ['browser-parser'], function (done) {
       .bundle()
       .pipe(source('interpol-parser.js'))
       .pipe(gulp.dest('./build'))
-      .on('end', done);
+      .on('end', function () {
+        del(['./build/browser-parser.js'], done);
+      });
 });
 
 gulp.task('minify-standard', ['bundle-standard'], function (done) {
@@ -148,9 +150,7 @@ gulp.task('minify-compiler', ['bundle-compiler'], function (done) {
       .pipe(uglify(uglifyConfig))
       .pipe(rename('interpol-parser.min.js'))
       .pipe(gulp.dest('./build/'))
-      .on('end', function () {
-        del(['./build/browser-parser.js'], done);
-      });
+      .on('end', done);
 });
 
 gulp.task('complexity', function (done) {
