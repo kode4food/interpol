@@ -24,7 +24,7 @@
   ],
   "repository": "git@github.com:kode4food/interpol.git",
   "scripts": {
-    "build": "mkdir -p build && gulp"
+    "build": "gulp"
   },
   "dependencies": {
     "glob": "^4.3.2",
