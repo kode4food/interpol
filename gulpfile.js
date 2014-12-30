@@ -16,7 +16,7 @@ var jshint = require('gulp-jshint');
 var nodeunit = require('gulp-nodeunit');
 var istanbul = require('gulp-istanbul');
 var enforcer = require('gulp-istanbul-enforcer');
-var uglify = require('gulp-uglify');
+var minify = require('gulp-esmangle');
 var pegjs = require('gulp-peg');
 var rename = require('gulp-rename');
 var source = require('vinyl-source-stream');
@@ -78,10 +78,9 @@ var platoConfig = {
   recurse: true
 };
 
-var uglifyConfig = {
-  mangle: true,
-  compress: false,
-  preserveComments: 'some'
+var minifyConfig = {
+  legacy: false,
+  escapeless: false
 };
 
 var enforcerConfig = {
@@ -130,8 +129,8 @@ function createBrowserifier(profile) {
 
 function createMinifier(profile) {
   return gulp.src(buildDir(profile.browserified))
+        .pipe(minify(minifyConfig))
         .pipe(inject.prepend(preamble))
-        .pipe(uglify(uglifyConfig))
         .pipe(rename(profile.minified))
         .pipe(gulp.dest(buildDir()));
 }
@@ -144,11 +143,11 @@ gulp.task('lint', function (done) {
 });
 
 gulp.task('node-parser', function (done) {
-  createParser('speed', standard.parser).on('end', done);
+  createParser('size', standard.parser).on('end', done);
 });
 
 gulp.task('browser-parser', function (done) {
-  createParser('size', compiler.parser).on('end', done);
+  createParser('speed', compiler.parser).on('end', done);
 });
 
 gulp.task('test', ['node-parser'], function (done) {
