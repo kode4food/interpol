@@ -7,6 +7,7 @@
  */
 
 var fs = require('fs');
+var path = require('path');
 
 var gulp = require('gulp');
 var concat = require('gulp-concat');
@@ -27,19 +28,30 @@ var plato = require('plato');
 
 var pkg = require('./package.json');
 
-var buildDir = './build/';
 var reportDir = './report';
 var coverageFiles = ['./index.js', './lib/**/*.js'];
 var sourceFiles = ['./index.js', './lib/**/*.js', './test/**/*.js'];
 var testFiles = ['./test/index.js'];
 var parserFile = ['./lib/compiler/parser.pegjs'];
 
+var standard = {
+  source: browserifyDir('standard.js'),
+  browserified: 'interpol.js',
+  parser: 'parser.js',
+  minified: 'interpol.js.min'
+};
+
+var compiler = {
+  source: browserifyDir('compiler.js'),
+  browserified: 'interpol-parser.js',
+  parser: 'browser-parser.js',
+  minified: 'interpol-parser.min.js'
+};
+
 var preamble = [
-  "/*!", 
-  pkg.name, "v"+pkg.version, "|", 
+  "/*!", pkg.name, "v"+pkg.version, "|",
   "(c)", new Date().getFullYear(), pkg.author, "|",
-  "interpoljs.io/license",
-  "*/\n"
+  "interpoljs.io/license", "*/\n"
 ].join(' ');
 
 var aliasifyConfig = {
@@ -66,9 +78,9 @@ var platoConfig = {
   recurse: true
 };
 
-var uglifyConfig = { 
-  mangle: true, 
-  compress: false, 
+var uglifyConfig = {
+  mangle: true,
+  compress: false,
   preserveComments: 'some'
 };
 
@@ -83,15 +95,45 @@ var enforcerConfig = {
   rootDirectory: ''
 };
 
-function unitTests() {
+function buildDir(filename) {
+  if ( filename ) {
+    return './' + path.join('./build', filename);
+  }
+  return './build';
+}
+
+function browserifyDir(filename) {
+  if ( filename ) {
+    return './' + path.join('./browserify', filename);
+  }
+  return './browserify';
+}
+
+function createUnitTests() {
   return gulp.src(testFiles).pipe(nodeunit(nodeUnitConfig));
 }
 
 function createParser(optimization, filename) {
   return gulp.src(parserFile)
-             .pipe(pegjs({ optimize: optimization }))
-             .pipe(rename(filename))
-             .pipe(gulp.dest(buildDir));
+        .pipe(pegjs({ optimize: optimization }))
+        .pipe(rename(filename))
+        .pipe(gulp.dest(buildDir()));
+}
+
+function createBrowserifier(profile) {
+  return browserify(profile.source)
+        .transform(aliasify.configure(aliasifyConfig))
+        .bundle()
+        .pipe(source(profile.browserified))
+        .pipe(gulp.dest(buildDir()));
+}
+
+function createMinifier(profile) {
+  return gulp.src(buildDir(profile.browserified))
+        .pipe(inject.prepend(preamble))
+        .pipe(uglify(uglifyConfig))
+        .pipe(rename(profile.minified))
+        .pipe(gulp.dest(buildDir()));
 }
 
 gulp.task('lint', function (done) {
@@ -102,15 +144,15 @@ gulp.task('lint', function (done) {
 });
 
 gulp.task('node-parser', function (done) {
-  createParser('speed', 'parser.js').on('end', done);
+  createParser('speed', standard.parser).on('end', done);
 });
 
 gulp.task('browser-parser', function (done) {
-  createParser('size', 'browser-parser.js').on('end', done);
+  createParser('size', compiler.parser).on('end', done);
 });
 
 gulp.task('test', ['node-parser'], function (done) {
-  unitTests().on('end', done);
+  createUnitTests().on('end', done);
 });
 
 gulp.task('coverage', ['node-parser'], function (done) {
@@ -118,8 +160,7 @@ gulp.task('coverage', ['node-parser'], function (done) {
       .pipe(istanbul())
       .pipe(istanbul.hookRequire())
       .on('finish', function () {
-        unitTests().pipe(istanbul.writeReports())
-                   .on('end', done);
+        createUnitTests().pipe(istanbul.writeReports()).on('end', done);
       });
 });
 
@@ -130,46 +171,27 @@ gulp.task('enforce', ['lint', 'coverage'], function (done) {
 });
 
 gulp.task('bundle-standard', function (done) {
-  browserify('./browserify/standard.js')
-      .bundle()
-      .pipe(source('interpol.js'))
-      .pipe(gulp.dest(buildDir))
-      .on('end', done);
+  createBrowserifier(standard).on('end', done);
 });
 
 gulp.task('bundle-compiler', ['browser-parser'], function (done) {
-  browserify('./browserify/compiler.js')
-      .transform(aliasify.configure(aliasifyConfig))
-      .bundle()
-      .pipe(source('interpol-parser.js'))
-      .pipe(gulp.dest(buildDir))
-      .on('end', function () {
-        del(['./build/browser-parser.js'], done);
-      });
+  createBrowserifier(compiler).on('end', function () {
+    del(buildDir(compiler.parser), done);
+  });
 });
 
 gulp.task('minify-standard', ['bundle-standard'], function (done) {
-  gulp.src(['./build/interpol.js'])
-      .pipe(inject.prepend(preamble))
-      .pipe(uglify(uglifyConfig))
-      .pipe(rename('interpol.min.js'))
-      .pipe(gulp.dest(buildDir))
-      .on('end', done);
+  createMinifier(standard).on('end', done);
 });
 
 gulp.task('minify-compiler', ['bundle-compiler'], function (done) {
-  gulp.src(['./build/interpol-parser.js'])
-      .pipe(inject.prepend(preamble))
-      .pipe(uglify(uglifyConfig))
-      .pipe(rename('interpol-parser.min.js'))
-      .pipe(gulp.dest(buildDir))
-      .on('end', done);
+  createMinifier(compiler).on('end', done);
 });
 
 gulp.task('complexity', function (done) {
   plato.inspect(coverageFiles, reportDir, platoConfig, function () {
     done();
-  });  
+  });
 });
 
 gulp.task('browserify', ['bundle-standard', 'bundle-compiler']);
