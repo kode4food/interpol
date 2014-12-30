@@ -38,7 +38,7 @@ var standard = {
   source: browserifyDir('standard.js'),
   browserified: 'interpol.js',
   parser: 'parser.js',
-  minified: 'interpol.js.min'
+  minified: 'interpol.min.js'
 };
 
 var compiler = {
