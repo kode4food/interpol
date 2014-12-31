@@ -21,7 +21,6 @@ var rename = require('gulp-rename');
 var source = require('vinyl-source-stream');
 
 var browserify = require('browserify');
-var del = require('del');
 var plato = require('plato');
 
 var pkg = require('./package.json');
