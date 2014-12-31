@@ -34,14 +34,12 @@ var parserOutput = 'parser.js';
 
 var standard = {
   source: browserifyDir('standard.js'),
-  browserified: 'interpol.js',
-  minified: 'interpol.min.js'
+  browserified: 'interpol.js'
 };
 
 var compiler = {
   source: browserifyDir('compiler.js'),
-  browserified: 'interpol-parser.js',
-  minified: 'interpol-parser.min.js'
+  browserified: 'interpol-parser.js'
 };
 
 var preamble = [
@@ -109,7 +107,7 @@ function createMinifier(profile) {
   return gulp.src(buildDir(profile.browserified))
         .pipe(minify(minifyConfig))
         .pipe(inject.prepend(preamble))
-        .pipe(rename(profile.minified))
+        .pipe(rename({ suffix: '.min' }))
         .pipe(gulp.dest(buildDir()));
 }
 
