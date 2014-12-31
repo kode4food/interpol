@@ -8737,7 +8737,7 @@ exports.createModule = createModule;
 
 var util = require('../util');
 var formatter = require('../format');
-var generatedParser = require('./../../build/browser-parser.js');
+var generatedParser = require('../../build/parser');
 
 var isArray = util.isArray;
 var mixin = util.mixin;
@@ -8901,7 +8901,7 @@ exports.isLiteral = isLiteral;
 exports.formatSyntaxError = formatSyntaxError;
 exports.formatWarning = formatWarning;
 
-},{"../format":11,"../util":24,"./../../build/browser-parser.js":3}],9:[function(require,module,exports){
+},{"../../build/parser":3,"../format":11,"../util":24}],9:[function(require,module,exports){
 /*
  * Interpol (Logicful HTML Templates)
  * Licensed under the MIT License

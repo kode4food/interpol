@@ -10,7 +10,6 @@ var fs = require('fs');
 var path = require('path');
 
 var gulp = require('gulp');
-var concat = require('gulp-concat');
 var inject = require('gulp-inject-string');
 var jshint = require('gulp-jshint');
 var nodeunit = require('gulp-nodeunit');
@@ -22,7 +21,6 @@ var rename = require('gulp-rename');
 var source = require('vinyl-source-stream');
 
 var browserify = require('browserify');
-var aliasify = require('aliasify');
 var del = require('del');
 var plato = require('plato');
 
@@ -33,18 +31,17 @@ var coverageFiles = ['./index.js', './lib/**/*.js'];
 var sourceFiles = ['./index.js', './lib/**/*.js', './test/**/*.js'];
 var testFiles = ['./test/index.js'];
 var parserFile = ['./lib/compiler/parser.pegjs'];
+var parserOutput = 'parser.js';
 
 var standard = {
   source: browserifyDir('standard.js'),
   browserified: 'interpol.js',
-  parser: 'parser.js',
   minified: 'interpol.min.js'
 };
 
 var compiler = {
   source: browserifyDir('compiler.js'),
   browserified: 'interpol-parser.js',
-  parser: 'browser-parser.js',
   minified: 'interpol-parser.min.js'
 };
 
@@ -53,15 +50,6 @@ var preamble = [
   "(c)", new Date().getFullYear(), pkg.author, "|",
   "interpoljs.io/license", "*/\n"
 ].join(' ');
-
-var aliasifyConfig = {
-  aliases: {
-    "vm": false,
-    "../../build/parser": "./build/browser-parser.js"
-  },
-  verbose: true,
-  configDir: __dirname
-};
 
 var nodeUnitConfig = {
   reporter: 'default',
@@ -79,8 +67,7 @@ var platoConfig = {
 };
 
 var minifyConfig = {
-  legacy: false,
-  escapeless: false
+  legacy: false
 };
 
 var enforcerConfig = {
@@ -112,16 +99,8 @@ function createUnitTests() {
   return gulp.src(testFiles).pipe(nodeunit(nodeUnitConfig));
 }
 
-function createParser(optimization, filename) {
-  return gulp.src(parserFile)
-        .pipe(pegjs({ optimize: optimization }))
-        .pipe(rename(filename))
-        .pipe(gulp.dest(buildDir()));
-}
-
 function createBrowserifier(profile) {
   return browserify(profile.source)
-        .transform(aliasify.configure(aliasifyConfig))
         .bundle()
         .pipe(source(profile.browserified))
         .pipe(gulp.dest(buildDir()));
@@ -142,19 +121,19 @@ gulp.task('lint', function (done) {
       .on('end', done);
 });
 
-gulp.task('node-parser', function (done) {
-  createParser('size', standard.parser).on('end', done);
+gulp.task('parser', function (done) {
+  gulp.src(parserFile)
+      .pipe(pegjs())
+      .pipe(rename(parserOutput))
+      .pipe(gulp.dest(buildDir()))
+      .on('end', done);
 });
 
-gulp.task('browser-parser', function (done) {
-  createParser('speed', compiler.parser).on('end', done);
-});
-
-gulp.task('test', ['node-parser'], function (done) {
+gulp.task('test', ['parser'], function (done) {
   createUnitTests().on('end', done);
 });
 
-gulp.task('coverage', ['node-parser'], function (done) {
+gulp.task('coverage', ['parser'], function (done) {
   gulp.src(coverageFiles)
       .pipe(istanbul())
       .pipe(istanbul.hookRequire())
@@ -173,10 +152,8 @@ gulp.task('bundle-standard', function (done) {
   createBrowserifier(standard).on('end', done);
 });
 
-gulp.task('bundle-compiler', ['browser-parser'], function (done) {
-  createBrowserifier(compiler).on('end', function () {
-    del(buildDir(compiler.parser), done);
-  });
+gulp.task('bundle-compiler', ['parser'], function (done) {
+  createBrowserifier(compiler).on('end', done);
 });
 
 gulp.task('minify-standard', ['bundle-standard'], function (done) {
