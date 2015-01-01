@@ -1801,8 +1801,8 @@ if ( !objectKeys ) {
 }
 
 var extendObject;
-/* istanbul ignore else: won't happen in node */
 var testProto = { __proto__: { works: true } };           // jshint ignore:line
+/* istanbul ignore else: won't happen in node */
 if ( testProto.works && objectKeys(testProto).length === 0 ) {
   extendObject = function _fastExtendObject(obj) {
     return { __proto__: obj };                            // jshint ignore:line
