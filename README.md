@@ -1,5 +1,6 @@
 # Interpol (Logicful HTML Templates)
 [![Build Status](https://travis-ci.org/kode4food/interpol.svg)](https://travis-ci.org/kode4food/interpol)
+
 Interpol is a Logicful Template System.  What can you do with it?  Stuff like this:
 
 ```ruby
