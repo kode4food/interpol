@@ -127,7 +127,7 @@ console.log(
 More information about Interpol can by found at the [Interpol Web Site](http://www.interpoljs.io/) and in the [Interpol Guide](http://www.interpoljs.io/guide).
 
 ## License (MIT License)
-Copyright (c) 2014 Thomas S. Bradford
+Copyright (c) 2014, 2015 Thomas S. Bradford
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation

@@ -1,5 +1,8 @@
 # Change History
 
+## Version 1.4 - Gulp Build System
+The build system has been converted to using gulp rather than the crude `npm run-script` system that I had previously thrown together.  The process of building is still the same, you can type `npm install && npm run-script build` but if you have gulp installed globally, you can also call it directly.
+
 ## Version 1.3 - Override Auto-Interpolation
 Interpol now seems to work properly on Internet Explorer 9, but your mileage may vary.
 
