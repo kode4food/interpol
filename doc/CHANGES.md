@@ -1,5 +1,8 @@
 # Change History
 
+## Version 1.4.1 - List Comprehension Optimizations
+List Comprehensions and the boolean `and` and `or` operators have been optimized a little bit.  List comprehensions no longer create an immediately invoked function, while the two boolean operators no longer evaluate the first operand twice.
+
 ## Version 1.4 - Gulp Build System
 The build system has been converted to using gulp rather than the crude `npm run-script` system that I had previously thrown together.  The process of building is still the same, you can type `npm install && npm run-script build` but if you have gulp installed globally, you can also call it directly.
 
