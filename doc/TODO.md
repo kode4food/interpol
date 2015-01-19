@@ -7,3 +7,4 @@
 * System modules will be extracted into separate package
 * Removing client-side parser and compiler
 * Ability to define Functions
+* Immutable 'let' Assignments

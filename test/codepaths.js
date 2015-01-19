@@ -168,12 +168,18 @@ exports.codepaths = nodeunit.testCase({
                   "  'hello!'\n" +
                   "end";
 
+    var script4 = "let a = 10\n" +
+                  "if not (a like 10) or not (a like 8)\n" +
+                  "  'hello!'\n" +
+                  "end";
+    
     test.equals(evaluate(script1),
                 "<outer><inner>hello</inner></outer>goodbye");
 
     test.equals(evaluate(script2), "hello!\n");
     test.equals(evaluate(script3), "hello!\n");
-
+    test.equals(evaluate(script4), "hello!\n");
+    
     test.done();
   }
 });
