@@ -254,7 +254,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule;
 var generateFunction;
 
-var CURRENT_VERSION = "1.4.0";
+var CURRENT_VERSION = "1.4.1";
 
 // Bootstrap
 
@@ -1216,9 +1216,15 @@ function createRuntime(interpol, runtimeOptions) {
     defineGuardedPartial: defineGuardedPartial,
     cleanseArguments: cleanseArguments,
 
+    escapeContent: types.escapeContent,
+    escapeAttribute: types.escapeAttribute,
+    stringify: types.stringify,
+
     getProperty: getProperty,
     getPath: getPath,
     bindPartial: bindPartial,
+    isArray: util.isArray,
+    
     loop: loop,
     exec: exec
   };
