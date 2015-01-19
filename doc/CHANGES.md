@@ -1,5 +1,8 @@
 # Change History
 
+## Version 1.4.2 - Dictionary Creation Optimizations
+Creation of a Dictionary from non-literal expressions has now been optimized to no longer create an immediately invoked function.
+
 ## Version 1.4.1 - List Comprehension Optimizations
 List Comprehensions and the boolean `and` and `or` operators have been optimized a little bit.  List comprehensions no longer create an immediately invoked function, while the two boolean operators no longer evaluate the first operand twice.
 

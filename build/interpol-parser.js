@@ -7701,7 +7701,6 @@ function generateModuleBody(strippedTree, literals, options) {
 
   // generate an evaluator that performs list comprehensions
   function createListCompEvaluator(rangeNodes, valueNode, nameNode) {
-    var annotations = createListCompEvaluator.getAnnotations(arguments);
     var isDictionary = !!nameNode;
     var genContainer = isDictionary ? gen.dictionary : gen.vector;
     var createBody = isDictionary ? createNameValueBody: createValueBody;
@@ -8699,14 +8698,25 @@ function createModule(globals) {
     }
 
     if ( expressions.length ) {
-      write('(function(o){');
-      each(expressions, function (item) {
-        var name = item[2] ? item[0] : globals.literal(item[0]);
-        write('o[', name, ']=', item[1], ';');
+      var dictVar = anonymous();
+      var components = [];      
+
+      components.push(function () {
+        anonymous(dictVar, writeLiterals);
       });
-      write('return o;}(');
-      writeLiterals();
-      write('))');
+
+      each(expressions, function (item) {
+        components.push(function () {
+          var name = item[2] ? item[0] : globals.literal(item[0]);
+          write(dictVar, '[', name, ']=', item[1]);          
+        });
+      });
+      
+      components.push(function () {
+        anonymous(dictVar);
+      });
+      
+      compoundExpression(components);
     }
     else {
       writeLiterals();
@@ -9890,7 +9900,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule;
 var generateFunction;
 
-var CURRENT_VERSION = "1.4.1";
+var CURRENT_VERSION = "1.4.2";
 
 // Bootstrap
 

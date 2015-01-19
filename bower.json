@@ -2,7 +2,7 @@
   "name": "interpol",
   "description": "Logicful HTML Templates",
   "authors": ["Thomas S. Bradford"],
-  "version": "1.4.1",
+  "version": "1.4.2",
   "main": "build/interpol.min.js",
   "license": "MIT",
   "homepage": "http://www.interpoljs.io/",
