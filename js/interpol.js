@@ -254,7 +254,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule;
 var generateFunction;
 
-var CURRENT_VERSION = "1.3.0";
+var CURRENT_VERSION = "1.4.2";
 
 // Bootstrap
 
@@ -1216,9 +1216,15 @@ function createRuntime(interpol, runtimeOptions) {
     defineGuardedPartial: defineGuardedPartial,
     cleanseArguments: cleanseArguments,
 
+    escapeContent: types.escapeContent,
+    escapeAttribute: types.escapeAttribute,
+    stringify: types.stringify,
+
     getProperty: getProperty,
     getPath: getPath,
     bindPartial: bindPartial,
+    isArray: util.isArray,
+    
     loop: loop,
     exec: exec
   };
@@ -1801,8 +1807,8 @@ if ( !objectKeys ) {
 }
 
 var extendObject;
-/* istanbul ignore else: won't happen in node */
 var testProto = { __proto__: { works: true } };           // jshint ignore:line
+/* istanbul ignore else: won't happen in node */
 if ( testProto.works && objectKeys(testProto).length === 0 ) {
   extendObject = function _fastExtendObject(obj) {
     return { __proto__: obj };                            // jshint ignore:line

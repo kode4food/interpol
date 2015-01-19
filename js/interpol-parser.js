@@ -7544,7 +7544,9 @@ function generateModuleBody(strippedTree, literals, options) {
             gen.call(
               getProperty,
               [
-                function () { gen.anonymous(anon); },
+                function () {
+                  gen.anonymous(anon);
+                },
                 globals.literal(aliasMap[1])
               ]
             );
@@ -7699,22 +7701,24 @@ function generateModuleBody(strippedTree, literals, options) {
 
   // generate an evaluator that performs list comprehensions
   function createListCompEvaluator(rangeNodes, valueNode, nameNode) {
-    var annotations = createListCompEvaluator.getAnnotations(arguments);
     var isDictionary = !!nameNode;
     var genContainer = isDictionary ? gen.dictionary : gen.vector;
     var createBody = isDictionary ? createNameValueBody: createValueBody;
-    var listVar;
+    var listVar = gen.anonymous();
 
-    gen.compoundExpression(function () {
-      listVar = gen.anonymous();
-      gen.assignments([
-        [listVar, defer(function () {
+    gen.compoundExpression([
+      function () {
+        gen.anonymous(listVar, defer(function () {
           genContainer([]);
-        })]
-      ]);
-      createLoopEvaluator(rangeNodes, createBody);
-      gen.returnStatement(listVar);
-    }, annotations);
+        }));
+      },
+      function () {
+        createLoopEvaluator(rangeNodes, createBody);
+      },
+      function () {
+        gen.anonymous(listVar);
+      }
+    ]);
 
     function createValueBody() {
       gen.vectorAppend(listVar, defer(valueNode));
@@ -7736,15 +7740,21 @@ function generateModuleBody(strippedTree, literals, options) {
       gen.assignments([
         [successVar, globals.literal(false)]
       ]);
-      createLoopEvaluator(rangeNodes, createBody, createSub, successVar);
+      gen.statement(function () {
+        createLoopEvaluator(rangeNodes, createBody, createSub, successVar);
+      });
       gen.ifStatement(
-        function () { gen.anonymous(successVar); },
+        function () { 
+          gen.anonymous(successVar);
+        },
         null,
         defer(createStatementsEvaluator, elseNodes)
       );
     }
     else {
-      createLoopEvaluator(rangeNodes, createBody, createSub);
+      gen.statement(function () {
+        createLoopEvaluator(rangeNodes, createBody, createSub);
+      });
     }
 
     function createBody() {
@@ -7758,19 +7768,21 @@ function generateModuleBody(strippedTree, literals, options) {
       return;
     }
 
-    gen.statement(function () {
-      gen.subcontext(
-        function () {
+    gen.subcontext(
+      function () {
+        gen.statement(function () {
           processRange(0);
-        },
-        annotations
-      );
-    });
+        });
+      },
+      annotations
+    );
 
     function processRange(i) {
       if ( i === rangeNodes.length ) {
         if ( successVar ) {
-          gen.anonymous(successVar, globals.literal(true));
+          gen.statement(function () {
+            gen.anonymous(successVar, globals.literal(true));
+          });
         }
         createBody();
         return;
@@ -7793,15 +7805,24 @@ function generateModuleBody(strippedTree, literals, options) {
         };
       }
 
-      gen.loopStatement(
-        itemName,
-        defer(rangeNode[1]),
-        prolog,
-        function () {
-          processRange(i + 1);
-        },
-        annotations
-      );
+      if ( i === 0 ) {
+        genLoopExpression();
+      }
+      else {
+        gen.statement(genLoopExpression);
+      }
+
+      function genLoopExpression() {
+        gen.loopExpression(
+          itemName,
+          defer(rangeNode[1]),
+          prolog,
+          function () {
+            processRange(i + 1);
+          },
+          annotations
+        );
+      }
     }
   }
 
@@ -7825,12 +7846,36 @@ function generateModuleBody(strippedTree, literals, options) {
 
   // generate an 'or' evaluator
   function createOrEvaluator(leftNode, rightNode) {
-    createTernaryEvaluator(leftNode, leftNode, rightNode);
+    var leftAnon = gen.anonymous();
+    gen.compoundExpression([
+      function () { 
+        gen.anonymous(leftAnon, defer(leftNode));
+      },
+      function () {
+        gen.conditionalOperator(
+          leftAnon,
+          leftAnon,
+          defer(rightNode)
+        );
+      }
+    ]);
   }
 
   // generate an 'and' evaluator
   function createAndEvaluator(leftNode, rightNode) {
-    createTernaryEvaluator(leftNode, rightNode, leftNode);
+    var leftAnon = gen.anonymous();
+    gen.compoundExpression([
+      function () {
+        gen.anonymous(leftAnon, defer(leftNode));
+      },
+      function () {
+        gen.conditionalOperator(
+          leftAnon,
+          defer(rightNode),
+          leftAnon
+        );
+      }
+    ]);
   }
 
   // generate a match evaluator
@@ -8245,7 +8290,7 @@ function createModule(globals) {
     conditionalOperator: conditionalOperator,
     statement: statement,
     ifStatement: ifStatement,
-    loopStatement: loopStatement,
+    loopExpression: loopExpression,
     func: func,
     subcontext: subcontext,
     compoundExpression: compoundExpression,
@@ -8325,7 +8370,7 @@ function createModule(globals) {
       write(names[name]);
       return;
     }
-    write(names[name], '=', value, ';');
+    write(names[name], '=', value);
   }
 
   function isAnonymous(name) {
@@ -8450,7 +8495,7 @@ function createModule(globals) {
   function statement(bodyCallback) {
     write(code(bodyCallback), ';');
   }
-
+  
   function ifStatement(condition, thenBranch, elseBranch) {
     var condWrapperName = 'isTruthy';
     if ( !thenBranch ) {
@@ -8469,19 +8514,17 @@ function createModule(globals) {
     scopeInfo.conditionDepth -= 1;
   }
 
-  function loopStatement(itemName, collection, loopGuard,
-                         loopBody, annotations) {
+  function loopExpression(itemName, collection, loopGuard,
+                          loopBody, annotations) {
     var loop = globals.runtimeImport('loop');
     annotate(annotations, 'javascript', 'bypassCleanse');
 
-    statement(function () {
-      call(loop, [
-        collection,
-        function () {
-          func([], [itemName], loopGuard, loopBody, annotations);
-        }
-      ]);
-    });
+    call(loop, [
+      collection,
+      function () {
+        func([], [itemName], loopGuard, loopBody, annotations);
+      }
+    ]);
   }
 
   function func(internalArgs, contextArgs, funcProlog, funcBody, annotations) {
@@ -8601,23 +8644,12 @@ function createModule(globals) {
     popLocalScope();
   }
 
-  function compoundExpression(bodyCallback, annotations) {
-    var parentNames = names;
-
-    pushLocalScope();
-    scopeInfo.annotations = annotations;
-
-    var bodyContent = code(function () {
-      generate(bodyCallback);
-    });
-
-    write('(function(){');
-    writeLocalVariables(parentNames);
-    write(bodyContent);
-    popLocalScope();
-    write('}())');
+  function compoundExpression(expressions) {
+    write('(');
+    writeDelimited(expressions);
+    write(')');
   }
-
+  
   function returnStatement(bodyCallback) {
     if ( bodyCallback === undefined ) {
       write('return;');
@@ -8666,14 +8698,25 @@ function createModule(globals) {
     }
 
     if ( expressions.length ) {
-      write('(function(o){');
-      each(expressions, function (item) {
-        var name = item[2] ? item[0] : globals.literal(item[0]);
-        write('o[', name, ']=', item[1], ';');
+      var dictVar = anonymous();
+      var components = [];      
+
+      components.push(function () {
+        anonymous(dictVar, writeLiterals);
       });
-      write('return o;}(');
-      writeLiterals();
-      write('))');
+
+      each(expressions, function (item) {
+        components.push(function () {
+          var name = item[2] ? item[0] : globals.literal(item[0]);
+          write(dictVar, '[', name, ']=', item[1]);          
+        });
+      });
+      
+      components.push(function () {
+        anonymous(dictVar);
+      });
+      
+      compoundExpression(components);
     }
     else {
       writeLiterals();
@@ -9474,7 +9517,7 @@ function rewriteSyntaxTree(syntaxTree, warnings) {
     }
 
     var op = hasOperator(node);
-    var newOp = op === 'an' && 'or' || 'an';
+    var newOp = op === 'an' ? 'or' : 'an';
     return [ sym('no', left), [sym(newOp, node), left[1], right[1]] ];
   }
 
@@ -9857,7 +9900,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule;
 var generateFunction;
 
-var CURRENT_VERSION = "1.3.0";
+var CURRENT_VERSION = "1.4.2";
 
 // Bootstrap
 
@@ -10819,9 +10862,15 @@ function createRuntime(interpol, runtimeOptions) {
     defineGuardedPartial: defineGuardedPartial,
     cleanseArguments: cleanseArguments,
 
+    escapeContent: types.escapeContent,
+    escapeAttribute: types.escapeAttribute,
+    stringify: types.stringify,
+
     getProperty: getProperty,
     getPath: getPath,
     bindPartial: bindPartial,
+    isArray: util.isArray,
+    
     loop: loop,
     exec: exec
   };
@@ -11404,8 +11453,8 @@ if ( !objectKeys ) {
 }
 
 var extendObject;
-/* istanbul ignore else: won't happen in node */
 var testProto = { __proto__: { works: true } };           // jshint ignore:line
+/* istanbul ignore else: won't happen in node */
 if ( testProto.works && objectKeys(testProto).length === 0 ) {
   extendObject = function _fastExtendObject(obj) {
     return { __proto__: obj };                            // jshint ignore:line
