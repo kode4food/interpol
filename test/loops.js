@@ -89,7 +89,6 @@ exports.loops = nodeunit.testCase({
                   'end\n' +
                   'name';
 
-    console.log(interpol.compile(script5).templateBody);
     test.equal(evaluate(script5, this.data),
                "Curly-Moe\nCurly-Shemp\nMoe-Curly\nMoe-Shemp\nBobby");
     
