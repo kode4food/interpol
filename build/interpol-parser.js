@@ -7714,7 +7714,7 @@ function generateModuleBody(strippedTree, literals, options) {
         }));
       },
       function () {
-        createLoopEvaluator(rangeNodes, createBody);
+        createLoopEvaluator(rangeNodes, createBody, annotations);
       },
       function () {
         gen.anonymous(listVar);
@@ -7741,7 +7741,8 @@ function generateModuleBody(strippedTree, literals, options) {
         [successVar, globals.literal(false)]
       ]);
       gen.statement(function () {
-        createLoopEvaluator(rangeNodes, createBody, annotations, successVar);
+        createLoopEvaluator(rangeNodes, createBody, annotations, 
+                            true, successVar);
       });
       gen.ifStatement(
         function () {
@@ -7753,7 +7754,7 @@ function generateModuleBody(strippedTree, literals, options) {
     }
     else {
       gen.statement(function () {
-        createLoopEvaluator(rangeNodes, createBody, annotations);
+        createLoopEvaluator(rangeNodes, createBody, annotations, true);
       });
     }
 
@@ -7762,20 +7763,16 @@ function generateModuleBody(strippedTree, literals, options) {
     }
   }
 
-  function createLoopEvaluator(rangeNodes, createBody, annotations, successVar) {
-    if ( !annotations ) {
+  function createLoopEvaluator(rangeNodes, createBody, annotations,
+                               createSubContext, successVar) {
+    if ( !createSubContext ) {
       processRange(0);
       return;
     }
     
-    gen.subcontext(
-      function () {
-        gen.statement(function () {
-          processRange(0);
-        });
-      },
-      annotations
-    );
+    gen.subcontext(function () {
+      processRange(0);
+    }, annotations);
 
     function processRange(i) {
       if ( i === rangeNodes.length ) {
@@ -9900,7 +9897,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule;
 var generateFunction;
 
-var CURRENT_VERSION = "1.4.2";
+var CURRENT_VERSION = "1.4.3";
 
 // Bootstrap
 

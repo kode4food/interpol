@@ -1,5 +1,8 @@
 # Change History
 
+## Version 1.4.3 - For Loop Scope Fixed
+Contextual scope in `for` loops was leaking into the parent scope for shadowed variables.  This has been corrected.
+
 ## Version 1.4.2 - Dictionary Creation Optimizations
 Creation of a Dictionary from non-literal expressions has now been optimized to no longer create an immediately invoked function.
 
