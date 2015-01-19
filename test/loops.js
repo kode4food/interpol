@@ -81,6 +81,21 @@ exports.loops = nodeunit.testCase({
     test.done();
   },
   
+  "Shadowing Loops": function (test) {
+    var script5 = 'let name = "Bobby"\n' +
+                  'for person in people, brother in person.brothers\n' +
+                  '  let name = person.name\n' +
+                  '  "%name-%brother"\n' +
+                  'end\n' +
+                  'name';
+
+    console.log(interpol.compile(script5).templateBody);
+    test.equal(evaluate(script5, this.data),
+               "Curly-Moe\nCurly-Shemp\nMoe-Curly\nMoe-Shemp\nBobby");
+    
+    test.done();
+  },
+  
   "Generator Loops": function (test) {
     var script1 = "from math import range\nfor i in range(1, 10)\ni\nend";
     var script2 = "from math import range\nfor i in range(10, 2)\ni\nend";

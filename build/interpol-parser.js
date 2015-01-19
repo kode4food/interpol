@@ -7701,6 +7701,7 @@ function generateModuleBody(strippedTree, literals, options) {
 
   // generate an evaluator that performs list comprehensions
   function createListCompEvaluator(rangeNodes, valueNode, nameNode) {
+    var annotations = createListCompEvaluator.getAnnotations(arguments);
     var isDictionary = !!nameNode;
     var genContainer = isDictionary ? gen.dictionary : gen.vector;
     var createBody = isDictionary ? createNameValueBody: createValueBody;
@@ -7732,7 +7733,6 @@ function generateModuleBody(strippedTree, literals, options) {
   // generate an evaluator that performs for looping over ranges
   function createForEvaluator(rangeNodes, statementNodes, elseNodes) {
     var annotations = createForEvaluator.getAnnotations(arguments);
-    var createSub = hasAnnotation(annotations, 'self', 'read');
     var successVar;
 
     if ( elseNodes && elseNodes.length ) {
@@ -7741,10 +7741,10 @@ function generateModuleBody(strippedTree, literals, options) {
         [successVar, globals.literal(false)]
       ]);
       gen.statement(function () {
-        createLoopEvaluator(rangeNodes, createBody, createSub, successVar);
+        createLoopEvaluator(rangeNodes, createBody, annotations, successVar);
       });
       gen.ifStatement(
-        function () { 
+        function () {
           gen.anonymous(successVar);
         },
         null,
@@ -7753,7 +7753,7 @@ function generateModuleBody(strippedTree, literals, options) {
     }
     else {
       gen.statement(function () {
-        createLoopEvaluator(rangeNodes, createBody, createSub);
+        createLoopEvaluator(rangeNodes, createBody, annotations);
       });
     }
 
@@ -7762,12 +7762,12 @@ function generateModuleBody(strippedTree, literals, options) {
     }
   }
 
-  function createLoopEvaluator(rangeNodes, createBody, createSub, successVar) {
-    if ( !createSub ) {
+  function createLoopEvaluator(rangeNodes, createBody, annotations, successVar) {
+    if ( !annotations ) {
       processRange(0);
       return;
     }
-
+    
     gen.subcontext(
       function () {
         gen.statement(function () {
