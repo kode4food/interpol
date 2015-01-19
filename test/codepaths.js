@@ -163,22 +163,26 @@ exports.codepaths = nodeunit.testCase({
                   "  'hello!'\n" +
                   "end";
 
-    var script3 = "let a = 5\n" +
-                  "if not (a like 10) and not (a like 8)\n" +
-                  "  'hello!'\n" +
+    var script3 = "if not (a like 10) and not (b like 8)\n" +
+                  "  'yes'\n" +
+                  "else\n" +
+                  "  'no'\n" +
                   "end";
 
-    var script4 = "let a = 10\n" +
-                  "if not (a like 10) or not (a like 8)\n" +
-                  "  'hello!'\n" +
+    var script4 = "if not (a like 10) or not (b like 8)\n" +
+                  "  'yes'\n" +
+                  "else\n" +
+                  "  'no'\n" +
                   "end";
     
     test.equals(evaluate(script1),
                 "<outer><inner>hello</inner></outer>goodbye");
 
     test.equals(evaluate(script2), "hello!\n");
-    test.equals(evaluate(script3), "hello!\n");
-    test.equals(evaluate(script4), "hello!\n");
+    test.equals(evaluate(script3, { a: 5, b: 4 }), "yes\n");
+    test.equals(evaluate(script3, { a: 10, b: 4 }), "no\n");
+    test.equals(evaluate(script4, { a: 10, b: 8 }), "no\n");
+    test.equals(evaluate(script4, { a: 5, b: 8 }), "yes\n");
     
     test.done();
   }
