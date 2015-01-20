@@ -10842,8 +10842,13 @@ function createRuntime(interpol, runtimeOptions) {
 
     extendObject: util.extendObject,
     mixin: util.mixin,
+    isArray: util.isArray,
+
     isTruthy: types.isTruthy,
     isFalsy: types.isFalsy,
+    escapeContent: types.escapeContent,
+    escapeAttribute: types.escapeAttribute,
+    stringify: types.stringify,
 
     immediateFormatter: format.buildImmediateFormatter,
     deferredFormatter: format.buildDeferredFormatter,
@@ -10859,14 +10864,9 @@ function createRuntime(interpol, runtimeOptions) {
     defineGuardedPartial: defineGuardedPartial,
     cleanseArguments: cleanseArguments,
 
-    escapeContent: types.escapeContent,
-    escapeAttribute: types.escapeAttribute,
-    stringify: types.stringify,
-
     getProperty: getProperty,
     getPath: getPath,
     bindPartial: bindPartial,
-    isArray: util.isArray,
     
     loop: loop,
     exec: exec
