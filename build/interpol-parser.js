@@ -8204,13 +8204,13 @@ function createGlobals() {
     builder: builder,
     toString: toString
   };
-
+  
   function nextId(prefix) {
     var next = globals[prefix];
     if ( typeof next !== 'number' ) {
       next = 0;  // seed it
     }
-    var id = prefix + next;
+    var id = prefix + next.toString(36);
     globals[prefix] = next + 1;
     return id;
   }
@@ -8552,15 +8552,13 @@ function createModule(globals) {
         return;
       }
 
-      statement(function () {
-        subcontext(
-          function () {
-            contextAssignments(contextArgs);
-            generate(funcBody);
-          },
-          annotations
-        );
-      });
+      subcontext(
+        function () {
+          contextAssignments(contextArgs);
+          generate(funcBody);
+        },
+        annotations
+      );
     });
 
     var prologContent = code(function () {
