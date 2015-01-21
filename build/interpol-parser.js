@@ -7722,11 +7722,15 @@ function generateModuleBody(strippedTree, literals, options) {
     ]);
 
     function createValueBody() {
-      gen.vectorAppend(listVar, defer(valueNode));
+      gen.statement(function () {
+        gen.vectorAppend(listVar, defer(valueNode));
+      });
     }
 
     function createNameValueBody() {
-      gen.dictionarySet(listVar, defer(nameNode), defer(valueNode));
+      gen.statement(function () {
+        gen.dictionarySet(listVar, defer(nameNode), defer(valueNode));
+      });
     }
   }
 
@@ -8671,9 +8675,7 @@ function createModule(globals) {
   }
 
   function vectorAppend(vector, value) {
-    statement(function () {
-      write(vector, '.push(', value, ')');
-    });
+    write(vector, '.push(', value, ')');
   }
 
   function dictionary(items, ordered) {
@@ -8730,11 +8732,9 @@ function createModule(globals) {
   }
 
   function dictionarySet(dict, name, value) {
-    statement(function () {
-      write(dict, '[', name, ']=', value);
-    });
+    write(dict, '[', name, ']=', value);
   }
-
+  
   function code(value) {
     if ( value === undefined ) {
       return code(body);
