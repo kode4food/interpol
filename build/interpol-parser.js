@@ -7745,8 +7745,7 @@ function generateModuleBody(strippedTree, literals, options) {
         [successVar, globals.literal(false)]
       ]);
       gen.statement(function () {
-        createLoopEvaluator(rangeNodes, createBody, annotations, 
-                            true, successVar);
+        createLoopEvaluator(rangeNodes, createBody, annotations, successVar);
       });
       gen.ifStatement(
         function () {
@@ -7758,7 +7757,7 @@ function generateModuleBody(strippedTree, literals, options) {
     }
     else {
       gen.statement(function () {
-        createLoopEvaluator(rangeNodes, createBody, annotations, true);
+        createLoopEvaluator(rangeNodes, createBody, annotations);
       });
     }
 
@@ -7767,19 +7766,11 @@ function generateModuleBody(strippedTree, literals, options) {
     }
   }
 
-  function createLoopEvaluator(rangeNodes, createBody, annotations,
-                               createSubContext, successVar) {
-    if ( !createSubContext ) {
-      processRange(0);
-      return;
-    }
-    
-    gen.subcontext(function () {
-      processRange(0);
-    }, annotations);
+  function createLoopEvaluator(ranges, createBody, annotations, successVar) {
+    processRange(0);
 
     function processRange(i) {
-      if ( i === rangeNodes.length ) {
+      if ( i === ranges.length ) {
         if ( successVar ) {
           gen.statement(function () {
             gen.anonymous(successVar, globals.literal(true));
@@ -7789,7 +7780,7 @@ function generateModuleBody(strippedTree, literals, options) {
         return;
       }
 
-      var rangeNode = rangeNodes[i];
+      var rangeNode = ranges[i];
       var itemName = literals[rangeNode[0]];
       var prolog;
 
@@ -9895,7 +9886,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule;
 var generateFunction;
 
-var CURRENT_VERSION = "1.4.3";
+var CURRENT_VERSION = "1.4.4";
 
 // Bootstrap
 
