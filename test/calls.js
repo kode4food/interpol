@@ -15,7 +15,12 @@ var evaluate = interpol.evaluate;
 exports.calls = nodeunit.testCase({
   setUp: function (callback) {
     this.data = {
-      "name": ["title", "case"]
+      "name": ["title", "case"],
+      "people": [
+        { name: 'Bill', age: 19 },
+        { name: 'Fred', age: 42 },
+        { name: 'Bob', age: 99 }
+      ]
     };
 
     callback();
@@ -40,6 +45,41 @@ exports.calls = nodeunit.testCase({
 
     test.equal(evaluate(script1, this.data), "Hello, Title Case!");
 
+    test.done();
+  },
+  
+  "With Calls": function (test) {
+    var script1 = 'def renderList(items, renderer)\n' +
+                  '  for item in items\n' +
+                  '    renderer(item)\n' +
+                  '  end\n' +
+                  'end\n' +
+                  'renderList(people) with(item)\n' +
+                  '  item | "name is %name and age is %age"\n' +
+                  'end';
+    
+    var script2 = 'def header(block)\n' +
+                  '  <h1> block </h1>\n' +
+                  'end\n' +
+                  'header with\n' +
+                  '  "hello there"\n' +
+                  'end';
+    
+    var script3 = 'def classyHeader(classes, block)\n' +
+                  '  <h1 class=classes> block </h1>\n' +
+                  'end\n' +
+                  'classyHeader(["title"]) with\n' +
+                  '  "hello there"\n' +
+                  'end';
+    
+    test.equal(evaluate(script1, this.data),
+               "name is Bill and age is 19\n\n" +
+               "name is Fred and age is 42\n\n" +
+               "name is Bob and age is 99\n\n");
+
+    test.equal(evaluate(script2), "<h1> hello there\n </h1>\n");
+    test.equal(evaluate(script3), "<h1 class=\"title\"> hello there\n </h1>\n");
+    
     test.done();
   }
 });

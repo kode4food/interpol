@@ -1,5 +1,53 @@
 # Change History
 
+## Version 1.5 - Partials Called 'with' Statements
+A partial call can now be made to leverage a block of statements attached to it.  These statements produce an inline partial which is treated as the final passed argument.  For example:
+
+```ruby
+def header(block)
+  <h1> block </h1>
+end
+
+header with
+  "hello there"
+end
+
+# results in: <h1> hello there </h1>
+```
+
+This will call the `header()` partial with the provided statement block (in this case `"hello there"`).
+
+```ruby
+def classyHeader(classes, block)
+  <h1 class=classes> block </h1>
+end
+
+classyHeader(['title']) with
+  "hello there"
+end
+
+# results in: <h1 class='title'> hello there </h1>
+```
+
+This will call the `classyHeader()` partial with an array of classes and the provided block of statements.
+
+```ruby
+def renderList(title, items, renderer)
+  <h1>title</h1>
+  for item in items
+    renderer(item)
+  end
+end
+
+renderList("People", people) with(item)
+  item | "Name is %name and age is %age"
+end
+```
+
+In this case, the `renderList()` partial will loop over the provided items, invoking the `renderer` block of statements for each.  It will also pass the item into the block.
+
+*Note:* If you're familiar with Ruby's blocks, this behavior may seem similar, but greatly simplified.  The block of statements is treated as the final *passed* argument, not as a specially marked argument in the partial's declaration.
+
 ## Version 1.4.3, 1.4.4 - For Loop Scope Fixed
 Contextual scope in `for` loops was leaking into the parent scope for shadowed variables.  This has been corrected.
 
