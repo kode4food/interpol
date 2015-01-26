@@ -8034,7 +8034,7 @@ function generateModuleBody(strippedTree, literals, options) {
   function createOrEvaluator(leftNode, rightNode) {
     var leftAnon = gen.anonymous();
     gen.compoundExpression([
-      function () { 
+      function () {
         gen.anonymous(leftAnon, defer(leftNode));
       },
       function () {
@@ -8758,8 +8758,12 @@ function createModule(globals) {
     write('function(', argNames.join(','), '){');
 
     if ( contextArgs.length && cleanse ) {
-      var cleanseArguments = globals.runtimeImport('cleanseArguments');
-      write(cleanseArguments, '(arguments, ', internalArgs.length, ');');
+      var nullVar = globals.literal(null);
+      var undefinedVar = globals.literal(undefined);
+      each(localNames, function (localName) {
+        write('if(', localName, '===', nullVar, ')');
+        write('{', localName, '=', undefinedVar, ';}');
+      }); 
     }
 
     write(prologContent);
@@ -8881,7 +8885,7 @@ function createModule(globals) {
 
     if ( expressions.length ) {
       var dictVar = anonymous();
-      var components = [];      
+      var components = [];
 
       components.push(function () {
         anonymous(dictVar, writeLiterals);
@@ -8890,7 +8894,7 @@ function createModule(globals) {
       each(expressions, function (item) {
         components.push(function () {
           var name = item[2] ? item[0] : globals.literal(item[0]);
-          write(dictVar, '[', name, ']=', item[1]);          
+          write(dictVar, '[', name, ']=', item[1]);
         });
       });
       
@@ -11046,7 +11050,6 @@ function createRuntime(interpol, runtimeOptions) {
     defineModule: defineModule,
     definePartial: definePartial,
     defineGuardedPartial: defineGuardedPartial,
-    cleanseArguments: cleanseArguments,
 
     getProperty: getProperty,
     getPath: getPath,
@@ -11228,15 +11231,6 @@ function defineGuardedPartial(originalPartial, envelope) {
     originalPartial = noOp;
   }
   return definePartial(envelope(originalPartial));
-}
-
-/* istanbul ignore next: sanity checker */
-function cleanseArguments(arr, startIdx) {
-  for ( var i = startIdx, len = arr.length; i < len; i++ ) {
-    if ( arr[i] === null ) {
-      arr[i] = undefined;
-    }
-  }
 }
 
 function getProperty(obj, property) {

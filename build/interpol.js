@@ -1216,7 +1216,6 @@ function createRuntime(interpol, runtimeOptions) {
     defineModule: defineModule,
     definePartial: definePartial,
     defineGuardedPartial: defineGuardedPartial,
-    cleanseArguments: cleanseArguments,
 
     getProperty: getProperty,
     getPath: getPath,
@@ -1398,15 +1397,6 @@ function defineGuardedPartial(originalPartial, envelope) {
     originalPartial = noOp;
   }
   return definePartial(envelope(originalPartial));
-}
-
-/* istanbul ignore next: sanity checker */
-function cleanseArguments(arr, startIdx) {
-  for ( var i = startIdx, len = arr.length; i < len; i++ ) {
-    if ( arr[i] === null ) {
-      arr[i] = undefined;
-    }
-  }
 }
 
 function getProperty(obj, property) {
