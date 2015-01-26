@@ -254,7 +254,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule;
 var generateFunction;
 
-var CURRENT_VERSION = "1.4.2";
+var CURRENT_VERSION = "1.5.0";
 
 // Bootstrap
 
@@ -1199,6 +1199,8 @@ function createRuntime(interpol, runtimeOptions) {
 
     extendObject: util.extendObject,
     mixin: util.mixin,
+    isArray: util.isArray,
+
     isTruthy: types.isTruthy,
     isFalsy: types.isFalsy,
 
@@ -1214,16 +1216,10 @@ function createRuntime(interpol, runtimeOptions) {
     defineModule: defineModule,
     definePartial: definePartial,
     defineGuardedPartial: defineGuardedPartial,
-    cleanseArguments: cleanseArguments,
-
-    escapeContent: types.escapeContent,
-    escapeAttribute: types.escapeAttribute,
-    stringify: types.stringify,
 
     getProperty: getProperty,
     getPath: getPath,
     bindPartial: bindPartial,
-    isArray: util.isArray,
     
     loop: loop,
     exec: exec
@@ -1401,15 +1397,6 @@ function defineGuardedPartial(originalPartial, envelope) {
     originalPartial = noOp;
   }
   return definePartial(envelope(originalPartial));
-}
-
-/* istanbul ignore next: sanity checker */
-function cleanseArguments(arr, startIdx) {
-  for ( var i = startIdx, len = arr.length; i < len; i++ ) {
-    if ( arr[i] === null ) {
-      arr[i] = undefined;
-    }
-  }
 }
 
 function getProperty(obj, property) {
