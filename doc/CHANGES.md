@@ -1,6 +1,6 @@
 # Change History
 
-## Version 1.5 - Partials Called With 'do' Statements
+## Version 1.5 - Partials Called 'with' Statements
 A partial call can now be made to leverage a block of statements attached to it.  These statements produce an inline partial which is treated as the final passed argument.  For example:
 
 ```ruby
@@ -8,7 +8,7 @@ def header(block)
   <h1> block </h1>
 end
 
-header do
+header with
   "hello there"
 end
 
@@ -22,7 +22,7 @@ def classyHeader(classes, block)
   <h1 class=classes> block </h1>
 end
 
-classyHeader(['title']) do
+classyHeader(['title']) with
   "hello there"
 end
 
@@ -39,7 +39,7 @@ def renderList(title, items, renderer)
   end
 end
 
-renderList("People", people) do |item|
+renderList("People", people) with |item|
   item | "Name is %name and age is %age"
 end
 ```

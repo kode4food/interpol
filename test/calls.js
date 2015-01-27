@@ -54,21 +54,21 @@ exports.calls = nodeunit.testCase({
                   '    renderer(item)\n' +
                   '  end\n' +
                   'end\n' +
-                  'renderList(people) do |item|\n' +
+                  'renderList(people) with |item|\n' +
                   '  item | "name is %name and age is %age"\n' +
                   'end';
     
     var script2 = 'def header(block)\n' +
                   '  <h1> block </h1>\n' +
                   'end\n' +
-                  'header do\n' +
+                  'header with\n' +
                   '  "hello there"\n' +
                   'end';
     
     var script3 = 'def classyHeader(classes, block)\n' +
                   '  <h1 class=classes> block </h1>\n' +
                   'end\n' +
-                  'classyHeader(["title"]) do\n' +
+                  'classyHeader(["title"]) with\n' +
                   '  "hello there"\n' +
                   'end';
     
