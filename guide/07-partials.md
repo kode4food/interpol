@@ -118,7 +118,7 @@ classes | join | title
 ### Calling With Blocks
 A partial call can be made to leverage a block of statements attached to it.  These statements produce an inline partial which is treated as the final passed argument.  For example:
 
-```ruby
+```html
 def header(block)
   <h1> block </h1>
 end
@@ -132,7 +132,7 @@ end
 
 This will call the `header()` partial with the provided statement block (in this case `"hello there"`).
 
-```ruby
+```html
 def classyHeader(classes, block)
   <h1 class=classes> block </h1>
 end
@@ -146,7 +146,7 @@ end
 
 This will call the `classyHeader()` partial with an array of classes and the provided block of statements.
 
-```ruby
+```html
 def renderList(title, items, renderer)
   <h1>title</h1>
   for item in items
@@ -164,7 +164,7 @@ In this case, the `renderList()` partial will loop over the provided items, invo
 
 If you're familiar with Ruby's blocks, this behavior may seem similar, but it's greatly simplified.  The block of statements is treated as the final *passed* argument, not as a specially marked argument in the partial's declaration.  In fact, it's really just syntactic sugar for:
 
-```ruby
+```html
 def renderList(title, items, renderer)
   <h1>title</h1>
   for item in items
@@ -181,7 +181,7 @@ renderList("People", people, renderItem)
 
 Because it's treated like nothing special, a block can even be bound to a call and then called later.
 
-```ruby
+```html
 def renderList(renderer, items)
   <ul>
   for item in items
