@@ -47,7 +47,7 @@ end
 
 In this case, the `renderList()` partial will loop over the provided items, invoking the `renderer` block of statements for each.  It will also pass the item into the block.
 
-*Note:* If you're familiar with Ruby's blocks, this behavior may seem similar, but greatly simplified.  The block of statements is treated as the final *passed* argument, not as a specially marked argument in the partial's declaration.
+See [the Interpol Guide](http://interpoljs.io/guide) for more information.
 
 ## Version 1.4.3, 1.4.4 - For Loop Scope Fixed
 Contextual scope in `for` loops was leaking into the parent scope for shadowed variables.  This has been corrected.

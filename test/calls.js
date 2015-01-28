@@ -71,6 +71,16 @@ exports.calls = nodeunit.testCase({
                   'classyHeader(["title"]) with\n' +
                   '  "hello there"\n' +
                   'end';
+
+    var script4 = 'def renderList(renderer, items)\n' +
+                  '  for item in items\n' +
+                  '    renderer(item) <br/>\n' +
+                  '  end\n' +
+                  'end\n' +
+                  'let colorList = @renderList do |item|\n' +
+                  '  "color: %item"\n' +
+                  'end\n' +
+                  'colorList(["red", "green", "blue"])';
     
     test.equal(evaluate(script1, this.data),
                "name is Bill and age is 19\n\n" +
@@ -79,7 +89,11 @@ exports.calls = nodeunit.testCase({
 
     test.equal(evaluate(script2), "<h1> hello there\n </h1>\n");
     test.equal(evaluate(script3), "<h1 class=\"title\"> hello there\n </h1>\n");
-    
+    test.equal(evaluate(script4),
+               "color: red\n <br />\n" +
+               "color: green\n <br />\n" +
+               "color: blue\n <br />\n");
+
     test.done();
   }
 });
