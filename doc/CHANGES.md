@@ -3,7 +3,7 @@
 ## Version 1.5 - Partials Called With 'do' Statements
 A partial call can now be made to leverage a block of statements attached to it.  These statements produce an inline partial which is treated as the final passed argument.  For example:
 
-```ruby
+```html
 def header(block)
   <h1> block </h1>
 end
@@ -17,7 +17,7 @@ end
 
 This will call the `header()` partial with the provided statement block (in this case `"hello there"`).
 
-```ruby
+```html
 def classyHeader(classes, block)
   <h1 class=classes> block </h1>
 end
@@ -31,7 +31,7 @@ end
 
 This will call the `classyHeader()` partial with an array of classes and the provided block of statements.
 
-```ruby
+```html
 def renderList(title, items, renderer)
   <h1>title</h1>
   for item in items
