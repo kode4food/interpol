@@ -61,7 +61,7 @@ exports.calls = nodeunit.testCase({
     var script2 = 'def header(block)\n' +
                   '  <h1> block </h1>\n' +
                   'end\n' +
-                  'header with\n' +
+                  'header do\n' +
                   '  "hello there"\n' +
                   'end';
     
