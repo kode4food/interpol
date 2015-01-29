@@ -5,6 +5,7 @@ Interpol is a Logicful Template System.  What can you do with it?  Stuff like th
 
 ```ruby
 let label = '%0 is a friend of %1'
+renderPeople(people)
 
 def renderPeople(people)
   <ul>
