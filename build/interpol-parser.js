@@ -7676,7 +7676,6 @@ var annotations = require('./annotations');
 var util = require('../util');
 
 var getAnnotations = annotations.getAnnotations;
-var hasAnnotation = annotations.hasAnnotation;
 
 var isArray = util.isArray;
 var objectKeys = util.objectKeys;
@@ -10252,7 +10251,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule;
 var generateFunction;
 
-var CURRENT_VERSION = "1.5.0";
+var CURRENT_VERSION = "1.5.1";
 
 // Bootstrap
 
@@ -11005,6 +11004,7 @@ exports.sum = sum;
 
 var types = require('../../types');
 var bless = types.bless;
+var isInterpolFunction = types.isInterpolFunction;
 
 var noOp = bless(function () {});
 
@@ -11062,10 +11062,46 @@ function separator(writer, sep) {
   }
 }
 
+// `pluralizer(value)` returns a pluralizing function that can be used to
+// produce a string based on the cardinality of the passed value.
+function pluralizer(writer, singular, plural) {
+  var idx = isInterpolFunction(singular) ? 1 : 0;
+  if ( plural === undefined && !idx ) {
+    plural = singular + 's';
+  }
+
+  idx += isInterpolFunction(plural) ? 2 : 0;
+  return bless([neither, singularOnly, pluralOnly, both][idx]);
+
+  function neither(writer, value) {
+    return value === 1 ? singular : plural;
+  }
+
+  function singularOnly(writer, value) {
+    if ( value === 1 ) {
+      return singular(writer, value);
+    }
+    return plural;
+  }
+
+  function pluralOnly(writer, value) {
+    if ( value === 1 ) {
+      return singular;
+    }
+    return plural(writer, value);
+  }
+
+  function both(writer, value) {
+    var branch = value === 1 ? singular : plural;
+    return branch(writer, value);
+  }
+}
+
 // Exports
 exports.counter = counter;
 exports.evenOdd = evenOdd;
 exports.separator = separator;
+exports.pluralizer = pluralizer;
 
 },{"../../types":23}],21:[function(require,module,exports){
 /*

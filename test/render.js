@@ -86,5 +86,34 @@ exports.render = nodeunit.testCase({
     test.equal(evaluate(script2), "red\n---green\n---blue\n");
     test.equal(evaluate(script3), "red\n---\ngreen\n---\nblue\n");
     test.done();
+  },
+
+  "Pluralizer Rendering": function (test) {
+    var script1 = "from render import pluralizer\n" +
+                  "let years = pluralizer('year', 'years')\n" +
+                  "years(1)\nyears(0)\nyears(2)";
+
+    var script2 = "from render import pluralizer\n" +
+                  "let years = pluralizer('% year', 'years')\n" +
+                  "years(1)\nyears(0)\nyears(2)";
+
+    var script3 = "from render import pluralizer\n" +
+                  "let years = pluralizer('year', '% years')\n" +
+                  "years(1)\nyears(0)\nyears(2)";
+
+    var script4 = "from render import pluralizer\n" +
+                  "let years = pluralizer('% year', '% years')\n" +
+                  "years(1)\nyears(0)\nyears(2)";
+
+    var script5 = "from render import pluralizer\n" +
+                  "let years = pluralizer('year')\n" +
+                  "years(1)\nyears(0)\nyears(2)";
+
+    test.equal(evaluate(script1), "year\nyears\nyears");
+    test.equal(evaluate(script2), "1 year\nyears\nyears");
+    test.equal(evaluate(script3), "year\n0 years\n2 years");
+    test.equal(evaluate(script4), "1 year\n0 years\n2 years");
+    test.equal(evaluate(script5), "year\nyears\nyears");
+    test.done();
   }
 });
