@@ -254,7 +254,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule;
 var generateFunction;
 
-var CURRENT_VERSION = "1.5.0";
+var CURRENT_VERSION = "1.5.1";
 
 // Bootstrap
 
@@ -1007,6 +1007,7 @@ exports.sum = sum;
 
 var types = require('../../types');
 var bless = types.bless;
+var isInterpolFunction = types.isInterpolFunction;
 
 var noOp = bless(function () {});
 
@@ -1064,10 +1065,44 @@ function separator(writer, sep) {
   }
 }
 
+function pluralizer(writer, singular, plural) {
+  var idx = isInterpolFunction(singular) ? 1 : 0;
+  if ( plural === undefined && !idx ) {
+    plural = singular + 's';
+  }
+
+  idx += isInterpolFunction(plural) ? 2 : 0;
+  return bless([neither, singularOnly, pluralOnly, both][idx]);
+
+  function neither(writer, value) {
+    return value === 1 ? singular : plural;
+  }
+
+  function singularOnly(writer, value) {
+    if ( value === 1 ) {
+      return singular(writer, value);
+    }
+    return plural;
+  }
+
+  function pluralOnly(writer, value) {
+    if ( value === 1 ) {
+      return singular;
+    }
+    return plural(writer, value);
+  }
+
+  function both(writer, value) {
+    var branch = value === 1 ? singular : plural;
+    return branch(writer, value);
+  }
+}
+
 // Exports
 exports.counter = counter;
 exports.evenOdd = evenOdd;
 exports.separator = separator;
+exports.pluralizer = pluralizer;
 
 },{"../../types":15}],13:[function(require,module,exports){
 /*
