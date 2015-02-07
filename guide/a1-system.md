@@ -139,11 +139,14 @@ Converts the provided value to a number and returns the result (or NaN).
 ### render
 Provides helper functionality for rendering variable content inside of loops.  These functions *do not* implement the generator interface because they produce unbounded sequences.
 
-#### counter([start, [increment]])
+#### counter([start[, increment]])
 Creates a counter function where the sequence starts at `start` (or 0) and increments by `increment` (or 1).  Each call to the returned function will yield the next value in the sequence.
 
-#### evenOdd([evenValue, [oddValue]])
+#### evenOdd([evenValue[, oddValue]])
 Creates a boolean toggle generator where the sequence alternates between the `evenValue` (or 'even') and the `oddValue` (or 'odd').  Each call to the returned function will yield the next value in the sequence.
 
 #### separator([separatorValue])
 Creates a generator where the sequence begins with an empty value and is followed by `separatorValue` (or ', ').  The first call to the returned function will return an empty string or a noOp function.  Each call thereafter will return the separator.  This means you'd place the call at the beginning of your loop.
+
+#### pluralizer(singularForm, pluralForm)
+Creates a pluralizing function that can be used to produce a string based on the cardinality of the passed value.  So if it's `1` you get the singular form, otherwise you get the plural form.  The forms can either be strings or interpolations that take a single value.
