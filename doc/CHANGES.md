@@ -1,5 +1,15 @@
 # Change History
 
+## Version 1.5.1 - Pluralizer
+You can now create a pluralizer, particularly useful for piped calls and interpolations:
+
+```ruby
+from render import pluralizer
+let years = pluralizer('% year', '% years')
+let person = [name = 'Bill', age = 97]
+person | "%name is %age|years old"
+```
+
 ## Version 1.5 - Partials Called With 'do' Statements
 A partial call can now be made to leverage a block of statements attached to it.  These statements produce an inline partial which is treated as the final passed argument.  For example:
 

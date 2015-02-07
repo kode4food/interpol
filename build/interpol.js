@@ -1065,8 +1065,6 @@ function separator(writer, sep) {
   }
 }
 
-// `pluralizer(value)` returns a pluralizing function that can be used to
-// produce a string based on the cardinality of the passed value.
 function pluralizer(writer, singular, plural) {
   var idx = isInterpolFunction(singular) ? 1 : 0;
   if ( plural === undefined && !idx ) {
