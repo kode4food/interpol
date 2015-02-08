@@ -112,6 +112,8 @@ For source code and releases, see the [Interpol GitHub Page](http://github.com/k
 
 For news and updates, see the [Interpol Blog](http://blog.interpoljs.io/).
 
+For the [Sublime Text](http://www.sublimetext.com/) support, install the [Interpol Package](https://packagecontrol.io/packages/Interpol) using [Package Control](https://packagecontrol.io/).
+
 For more information about the Interpol Language and API, please see the [Interpol Guide](http://interpoljs.io/guide/) (a work in progress).
 
 For a brief introduction to Interpol and its motivations, see this [Introductory Presentation](http://slid.es/kode4food/interpol-introduction)
