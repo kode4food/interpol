@@ -7785,10 +7785,14 @@ function generateModuleBody(strippedTree, literals, options) {
     gen.returnStatement(function () {
       gen.call(defineModule, [
         function () {
-          gen.func(['c', 'w'], function () {
-            // createStatementsEvaluator will populate globalVars
-            createStatementsEvaluator(parseTree);
-          }, getAnnotations(parseTree));
+          gen.func({
+            internalArgs: ['c', 'w'],
+            body: function () {
+              // createStatementsEvaluator will populate globalVars
+              createStatementsEvaluator(parseTree);
+            },
+            annotations: getAnnotations(parseTree)
+          });
         }
       ]);
     });
@@ -7928,12 +7932,12 @@ function generateModuleBody(strippedTree, literals, options) {
       var definePartial = globals.runtimeImport('definePartial');
       gen.call(definePartial, [
         function () {
-          gen.func(
-            [gen.writer()],
-            paramNames,
-            defer(createStatementsEvaluator, statementNodes),
-            annotations
-          );
+          gen.func({
+            internalArgs: [gen.writer()],
+            contextArgs: paramNames,
+            body: defer(createStatementsEvaluator, statementNodes),
+            annotations: annotations
+          });
         }
       ]);
     }
@@ -7949,19 +7953,23 @@ function generateModuleBody(strippedTree, literals, options) {
       ]);
 
       function createWrapper() {
-        gen.func(['o'], function () {
-          gen.returnStatement(createFunction);
-        }, annotations);
+        gen.func({
+          internalArgs: ['o'],
+          body: function () {
+            gen.returnStatement(createFunction);
+          },
+          annotations: annotations
+        });
       }
 
       function createFunction() {
-        gen.func(
-          [gen.writer()],
-          paramNames,
-          createProlog,
-          defer(createStatementsEvaluator, statementNodes),
-          annotations
-        );
+        gen.func({
+          internalArgs: [gen.writer()],
+          contextArgs: paramNames,
+          prolog: createProlog,
+          body: defer(createStatementsEvaluator, statementNodes),
+          annotations: annotations
+        });
       }
 
       function createProlog() {
@@ -8162,15 +8170,15 @@ function generateModuleBody(strippedTree, literals, options) {
       }
 
       function genLoopExpression() {
-        gen.loopExpression(
-          itemName,
-          defer(rangeNode[1]),
-          prolog,
-          function () {
+        gen.loopExpression({
+          itemName: itemName,
+          collection: defer(rangeNode[1]),
+          guard: prolog,
+          body: function () {
             processRange(i + 1);
           },
-          annotations
-        );
+          annotations: annotations
+        });
       }
     }
   }
@@ -8674,7 +8682,11 @@ function createModule(globals) {
   }
 
   function pushLocalScope() {
-    nameStack.push({ names: names, scopeInfo: scopeInfo, selfName: selfName });
+    nameStack.push({
+      names: names, 
+      scopeInfo: scopeInfo, 
+      selfName: selfName
+    });
     names = extendObject(names);
     scopeInfo = createScopeInfo();
   }
@@ -8863,36 +8875,38 @@ function createModule(globals) {
     scopeInfo.conditionDepth -= 1;
   }
 
-  function loopExpression(itemName, collection, loopGuard,
-                          loopBody, annotations) {
+  function loopExpression(options) {
+    var itemName = options.itemName;
+    var collection = options.collection;
+    var loopGuard = options.guard;
+    var loopBody = options.body;
+    var annotations = options.annotations;
+
     var loop = globals.runtimeImport('loop');
     annotate(annotations, 'javascript', 'bypassCleanse');
 
     call(loop, [
       collection,
       function () {
-        func([], [itemName], loopGuard, loopBody, annotations);
+        func({
+          contextArgs: [itemName],
+          prolog: loopGuard,
+          body: loopBody,
+          annotations: annotations
+        });
       }
     ]);
   }
 
-  function func(internalArgs, contextArgs, funcProlog, funcBody, annotations) {
-    if ( !isArray(contextArgs) ) {
-      annotations = funcBody;
-      funcBody = funcProlog;
-      funcProlog = contextArgs;
-      contextArgs = [];
-    }
-
-    if ( typeof funcBody !== 'function' ) {
-      annotations = funcBody;
-      funcBody = funcProlog;
-      funcProlog = null;
-    }
+  function func(options) {
+    var internalArgs = options.internalArgs || [];
+    var contextArgs = options.contextArgs || [];
+    var funcProlog = options.prolog;
+    var funcBody = options.body;
 
     var parentNames = names;
     pushLocalScope();
-    scopeInfo.annotations = annotations;
+    var annotations = scopeInfo.annotations = options.annotations;
     var sub = contextArgs.length && useContext();
     var cleanse = !hasAnnotation(annotations, 'javascript', 'bypassCleanse');
 
@@ -8926,7 +8940,7 @@ function createModule(globals) {
       each(localNames, function (localName) {
         write('if(', localName, '===', nullVar, ')');
         write('{', localName, '=', undefinedVar, ';}');
-      }); 
+      });
     }
 
     write(prologContent);
