@@ -7891,7 +7891,7 @@ function generateModuleBody(strippedTree, literals, options) {
       });
 
       var getProperty = globals.runtimeImport('getProperty');
-      var anon = gen.anonymous();
+      var anon = gen.createAnonymous();
       assigns.push([
         anon,
         function () {
@@ -7906,7 +7906,7 @@ function generateModuleBody(strippedTree, literals, options) {
               getProperty,
               [
                 function () {
-                  gen.anonymous(anon);
+                  gen.retrieveAnonymous(anon);
                 },
                 globals.literal(aliasMap[1])
               ]
@@ -8070,11 +8070,11 @@ function generateModuleBody(strippedTree, literals, options) {
     var isDictionary = !!nameNode;
     var genContainer = isDictionary ? gen.dictionary : gen.vector;
     var createBody = isDictionary ? createNameValueBody: createValueBody;
-    var listVar = gen.anonymous();
+    var listVar = gen.createAnonymous();
 
     gen.compoundExpression([
       function () {
-        gen.anonymous(listVar, defer(function () {
+        gen.assignAnonymous(listVar, defer(function () {
           genContainer([]);
         }));
       },
@@ -8082,7 +8082,7 @@ function generateModuleBody(strippedTree, literals, options) {
         createLoopEvaluator(rangeNodes, createBody, annotations);
       },
       function () {
-        gen.anonymous(listVar);
+        gen.retrieveAnonymous(listVar);
       }
     ]);
 
@@ -8105,7 +8105,7 @@ function generateModuleBody(strippedTree, literals, options) {
     var successVar;
 
     if ( elseNodes && elseNodes.length ) {
-      successVar = gen.anonymous();
+      successVar = gen.createAnonymous();
       gen.assignments([
         [successVar, globals.literal(false)]
       ]);
@@ -8114,7 +8114,7 @@ function generateModuleBody(strippedTree, literals, options) {
       });
       gen.ifStatement(
         function () {
-          gen.anonymous(successVar);
+          gen.retrieveAnonymous(successVar);
         },
         null,
         defer(createStatementsEvaluator, elseNodes)
@@ -8138,7 +8138,7 @@ function generateModuleBody(strippedTree, literals, options) {
       if ( i === ranges.length ) {
         if ( successVar ) {
           gen.statement(function () {
-            gen.anonymous(successVar, globals.literal(true));
+            gen.assignAnonymous(successVar, globals.literal(true));
           });
         }
         createBody();
@@ -8203,10 +8203,10 @@ function generateModuleBody(strippedTree, literals, options) {
 
   // generate an 'or' evaluator
   function createOrEvaluator(leftNode, rightNode) {
-    var leftAnon = gen.anonymous();
+    var leftAnon = gen.createAnonymous();
     gen.compoundExpression([
       function () {
-        gen.anonymous(leftAnon, defer(leftNode));
+        gen.assignAnonymous(leftAnon, defer(leftNode));
       },
       function () {
         gen.conditionalOperator(
@@ -8220,10 +8220,10 @@ function generateModuleBody(strippedTree, literals, options) {
 
   // generate an 'and' evaluator
   function createAndEvaluator(leftNode, rightNode) {
-    var leftAnon = gen.anonymous();
+    var leftAnon = gen.createAnonymous();
     gen.compoundExpression([
       function () {
-        gen.anonymous(leftAnon, defer(leftNode));
+        gen.assignAnonymous(leftAnon, defer(leftNode));
       },
       function () {
         gen.conditionalOperator(
@@ -8635,8 +8635,11 @@ function createModule(globals) {
   var body = [];
 
   return {
-    localForName: localForName,
-    anonymous: anonymous,
+    localForRetrieval: localForRetrieval,
+    localForAssignment: localForAssignment,
+    createAnonymous: createAnonymous,
+    assignAnonymous: assignAnonymous,
+    retrieveAnonymous: retrieveAnonymous,
     self: self,
     writer: writer,
     write: write,
@@ -8698,6 +8701,14 @@ function createModule(globals) {
     selfName = info.selfName;
   }
 
+  function localForAssignment(name) {
+    return localForName(name, true);
+  }
+
+  function localForRetrieval(name) {
+    return localForName(name);
+  }
+
   function localForName(name, forAssignment) {
     var willMutate = hasAnnotation(scopeInfo, 'mutations', name);
 
@@ -8720,18 +8731,19 @@ function createModule(globals) {
     write(selfName, '[', globals.literal(propertyName), ']');
   }
 
-  function anonymous(name, value) {
-    if ( name === undefined ) {
-      var id = nextId('h');
-      name = ' ' + id;  // space allows anonymous locals
-      names[name] = id;
-      return name;
-    }
-    if ( value === undefined ) {
+  function retrieveAnonymous(name) {
       write(names[name]);
-      return;
-    }
+  }
+
+  function assignAnonymous(name, value) {
     write(names[name], '=', value);
+  }
+
+  function createAnonymous() {
+    var id = nextId('h');
+    var name = ' ' + id;
+    names[name] = id;
+    return name;
   }
 
   function isAnonymous(name) {
@@ -8810,12 +8822,12 @@ function createModule(globals) {
   }
 
   function getter(name) {
-    write(localForName(name));
+    write(localForRetrieval(name));
   }
 
   function contextAssignments(names) {
     each(names, function (name) {
-      var localName = localForName(name);
+      var localName = localForRetrieval(name);
       self(name);
       write('=', localName, ';');
     });
@@ -8827,7 +8839,7 @@ function createModule(globals) {
       var value = item[1];
 
       // Evaluate this first
-      var localName = localForName(name, true);
+      var localName = localForAssignment(name);
       write(localName, '=');
       if ( !isAnonymous(name) && useContext() ) {
         self(name);
@@ -8910,7 +8922,7 @@ function createModule(globals) {
     var sub = contextArgs.length && useContext();
     var cleanse = !hasAnnotation(annotations, 'javascript', 'bypassCleanse');
 
-    var localNames = map(contextArgs, localForName);
+    var localNames = map(contextArgs, localForRetrieval);
 
     var bodyContent = code(function () {
       if ( !sub ) {
@@ -8958,8 +8970,7 @@ function createModule(globals) {
     var undefinedVars = [];
     each(objectKeys(names), function (name) {
       var localName = names[name];
-      if ( argNames.indexOf(localName) !== -1 ) {
-        // was an argument, skip it
+      if ( isArgument(localName) ) {
         return;
       }
 
@@ -8983,6 +8994,10 @@ function createModule(globals) {
 
     if ( undefinedVars.length ) {
       write('var ', undefinedVars.join(','), ';');
+    }
+
+    function isArgument(localName) {
+      return argNames.indexOf(localName) !== -1;
     }
   }
 
@@ -9061,11 +9076,11 @@ function createModule(globals) {
     }
 
     if ( expressions.length ) {
-      var dictVar = anonymous();
+      var dictVar = createAnonymous();
       var components = [];
 
       components.push(function () {
-        anonymous(dictVar, writeLiterals);
+        assignAnonymous(dictVar, writeLiterals);
       });
 
       each(expressions, function (item) {
@@ -9076,7 +9091,7 @@ function createModule(globals) {
       });
       
       components.push(function () {
-        anonymous(dictVar);
+        retrieveAnonymous(dictVar);
       });
       
       compoundExpression(components);
