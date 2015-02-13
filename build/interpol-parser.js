@@ -156,7 +156,7 @@ module.exports = (function() {
         peg$c80 = "with",
         peg$c81 = { type: "literal", value: "with", description: "\"with\"" },
         peg$c82 = function(id) {
-              return sym(id, 'id');
+              return identifier(id);
             },
         peg$c83 = [],
         peg$c84 = function(start, cont) {
@@ -167,14 +167,14 @@ module.exports = (function() {
         peg$c87 = /^[$_a-zA-Z0-9]/,
         peg$c88 = { type: "class", value: "[$_a-zA-Z0-9]", description: "[$_a-zA-Z0-9]" },
         peg$c89 = function(start, cont) {
-              return sym(start + cont.join(''), 'id');
+              return identifier(start + cont.join(''));
             },
         peg$c90 = /^[a-zA-Z]/,
         peg$c91 = { type: "class", value: "[a-zA-Z]", description: "[a-zA-Z]" },
         peg$c92 = /^[0-9]/,
         peg$c93 = { type: "class", value: "[0-9]", description: "[0-9]" },
         peg$c94 = function(chars) {
-              return sym(chars.join(''), 'id');
+              return identifier(chars.join(''));
             },
         peg$c95 = /^[^\0-\x1F'"> \/=]/,
         peg$c96 = { type: "class", value: "[^\\0-\\x1F'\"> \\/=]", description: "[^\\0-\\x1F'\"> \\/=]" },
@@ -210,7 +210,7 @@ module.exports = (function() {
               return '.' + d.join('');
             },
         peg$c122 = function(c, f, e) {
-              return sym(parseFloat(c + (f ? f : '') + (e ? e : '')), 'lit');
+              return literal(parseFloat(c + (f ? f : '') + (e ? e : '')));
             },
         peg$c123 = { type: "any", description: "any character" },
         peg$c124 = /^[ \t\x0B\f]/,
@@ -223,20 +223,20 @@ module.exports = (function() {
         peg$c131 = { type: "literal", value: "\"\"\"", description: "\"\\\"\\\"\\\"\"" },
         peg$c132 = function(c) { return c; },
         peg$c133 = function(chars) {
-              return symInterpolate(chars.join(''), true);
+              return interpolation(chars.join(''), true);
             },
         peg$c134 = "'''",
         peg$c135 = { type: "literal", value: "'''", description: "\"'''\"" },
         peg$c136 = function(chars) {
-              return symInterpolate(chars.join(''));
+              return interpolation(chars.join(''));
             },
         peg$c137 = "\"",
         peg$c138 = { type: "literal", value: "\"", description: "\"\\\"\"" },
-        peg$c139 = function() { return sym('', 'lit'); },
+        peg$c139 = function() { return literal(''); },
         peg$c140 = "'",
         peg$c141 = { type: "literal", value: "'", description: "\"'\"" },
-        peg$c142 = function(c) { return symInterpolate(c.join(''), true); },
-        peg$c143 = function(c) { return symInterpolate(c.join('')); },
+        peg$c142 = function(c) { return interpolation(c.join(''), true); },
+        peg$c143 = function(c) { return interpolation(c.join('')); },
         peg$c144 = /^[^"\\]/,
         peg$c145 = { type: "class", value: "[^\"\\\\]", description: "[^\"\\\\]" },
         peg$c146 = /^[^'\\]/,
@@ -304,10 +304,10 @@ module.exports = (function() {
                 results.push.apply(results, statements[i][0]);
                 var ws = statements[i][1];
                 if ( ws && ws.length ) {
-                  results.push([sym('ou'), sym(ws, 'lit')]);
+                  results.push([symbol('ou'), literal(ws)]);
                 }
               }
-              return stmts(results);
+              return markStatements(results);
             },
         peg$c200 = function(s, ws) {
               return [[s], ws];
@@ -325,20 +325,20 @@ module.exports = (function() {
         peg$c206 = "-->",
         peg$c207 = { type: "literal", value: "-->", description: "\"-->\"" },
         peg$c208 = function(comment) {
-              return [sym('ct'), sym(comment.join(''), 'lit')];
+              return [symbol('ct'), literal(comment.join(''))];
             },
         peg$c209 = "<!",
         peg$c210 = { type: "literal", value: "<!", description: "\"<!\"" },
         peg$c211 = ">",
         peg$c212 = { type: "literal", value: ">", description: "\">\"" },
         peg$c213 = function(rootElem) {
-              return [sym('dt'), rootElem];
+              return [symbol('dt'), rootElem];
             },
         peg$c214 = "<",
         peg$c215 = { type: "literal", value: "<", description: "\"<\"" },
         peg$c216 = function(a) { return a; },
         peg$c217 = function(tag, attrs, t) {
-              return [sym('op'), tag, attrs, t];
+              return [symbol('op'), tag, attrs, t];
             },
         peg$c218 = "(",
         peg$c219 = { type: "literal", value: "(", description: "\"(\"" },
@@ -355,12 +355,12 @@ module.exports = (function() {
         peg$c228 = { type: "literal", value: "=", description: "\"=\"" },
         peg$c229 = function(e) { return e; },
         peg$c230 = function(name, value) {
-              return [name, value === null ? sym(true, 'lit') : value];
+              return [name, value === null ? literal(true) : value];
             },
         peg$c231 = "</",
         peg$c232 = { type: "literal", value: "</", description: "\"</\"" },
         peg$c233 = function(tag) {
-              return [sym('cl'), tag];
+              return [symbol('cl'), tag];
             },
         peg$c234 = function(g) { return g; },
         peg$c235 = function(op, id, params, guard, statements) {
@@ -372,14 +372,14 @@ module.exports = (function() {
                 if ( guard ) { guards.push(guard); }
                 guard = guards[0];
                 for ( i = 1, len = guards.length; i < len; i++ ) {
-                  guard = [sym('an'), guard, guards[i]];
+                  guard = [symbol('an'), guard, guards[i]];
                 }
               }
 
               if ( guard ) {
-                return [sym(op), id, params.ids || [], statements, guard];
+                return [symbol(op), id, params.ids || [], statements, guard];
               }
-              return [sym(op), id, params.ids || [], statements];
+              return [symbol(op), id, params.ids || [], statements];
             },
         peg$c236 = ":",
         peg$c237 = { type: "literal", value: ":", description: "\":\"" },
@@ -415,9 +415,9 @@ module.exports = (function() {
                   ids.push(item);
                   continue;
                 }
-                var idSym = paramDef[1] || sym(i, 'lit');
+                var idSym = paramDef[1] || literal(i);
                 ids.push(idSym);
-                guards.push([sym('ma'), [sym('id'), idSym], item]);
+                guards.push([symbol('ma'), [symbol('id'), idSym], item]);
               }
               return { ids: ids, guards: guards };
             },
@@ -431,14 +431,14 @@ module.exports = (function() {
               return [param];
             },
         peg$c252 = function(op, path, imports) {
-              return [sym(op), [[path, imports]]];
+              return [symbol(op), [[path, imports]]];
             },
         peg$c253 = function(op, modules) {
-              return [sym(op), modules];
+              return [symbol(op), modules];
             },
         peg$c254 = function(item) { return item; },
         peg$c255 = function(start, cont) {
-              return sym([start].concat(cont).join('/'));
+              return symbol([start].concat(cont).join('/'));
             },
         peg$c256 = function(id) {
               return id;
@@ -460,7 +460,7 @@ module.exports = (function() {
               return [path];
             },
         peg$c261 = function(op, ranges, statements, tail) {
-              return [sym(op), ranges, statements, tail];
+              return [symbol(op), ranges, statements, tail];
             },
         peg$c262 = function(r) { return r; },
         peg$c263 = function(id, col, guard) {
@@ -471,55 +471,55 @@ module.exports = (function() {
             },
         peg$c264 = function(op, expr, statements, tail) {
               if ( !op ) {
-                return [sym('if'), expr, tail, statements];
+                return [symbol('if'), expr, tail, statements];
               }
-              return [sym('if'), expr, statements, tail];
+              return [symbol('if'), expr, statements, tail];
             },
         peg$c265 = function(ifStatement) {
-              return stmts([ifStatement]);
+              return markStatements([ifStatement]);
             },
         peg$c266 = function() {
-              return stmts([]);
+              return markStatements([]);
             },
         peg$c267 = function(op, a) {
-            return [sym(op), a];
+            return [symbol(op), a];
           },
         peg$c268 = function(id, expr) {
               return [id, expr];
             },
-        peg$c269 = function(expr) { return [sym('ou'), expr]; },
+        peg$c269 = function(expr) { return [symbol('ou'), expr]; },
         peg$c270 = function(args, calls) {
               if ( calls && calls.length ) {
                 // if it starts with an interpolation, we need to feed it 'self'
-                if ( isInterpolated(args) ) {
+                if ( isInterpolation(args) ) {
                   calls.unshift(args);
-                  args = [sym('se', args)];
+                  args = [symbol('se', args)];
                 }
                 for ( var i = 0, len = calls.length; i < len; i++ ) {
-                  args = [sym('ca'), calls[i], [args]];
+                  args = [symbol('ca'), calls[i], [args]];
                 }
               }
               else {
                 // or if it's an auto interpolation, we also feed it 'self'
-                if ( isInterpolated(args) && args.type === 'auto' ) {
-                  args = [ sym('ca'), args, [[sym('se')]] ];
+                if ( isInterpolation(args) && args.type === 'auto' ) {
+                  args = [ symbol('ca'), args, [[symbol('se')]] ];
                 }
               }
               return args;
             },
         peg$c271 = function(tval, op, cond, fval) {
               if ( !op ) {
-                return [sym('cn'), cond, fval, tval];
+                return [symbol('cn'), cond, fval, tval];
               }
-              return [sym('cn'), cond, tval, fval];
+              return [symbol('cn'), cond, tval, fval];
             },
-        peg$c272 = function(op, r) { return [sym(op), r]; },
+        peg$c272 = function(op, r) { return [symbol(op), r]; },
         peg$c273 = function(head, tail) {
               return buildBinaryChain(head, tail);
             },
         peg$c274 = function(op, expr) {
-              if ( op === 'no' || !isInterpolated(expr) || expr.marked ) {
-                return [sym(op), expr];
+              if ( op === 'no' || !isInterpolation(expr) || expr.marked ) {
+                return [symbol(op), expr];
               }
 
               if ( op === 'ne' || op === 'po' ) {
@@ -538,21 +538,21 @@ module.exports = (function() {
               return changeOperator(listInt, op);
             },
         peg$c276 = function(str, list) {
-              return [ sym('ca'), str, [list] ];
+              return [ symbol('ca'), str, [list] ];
             },
         peg$c277 = function(sel) { return sel; },
         peg$c278 = function(elem) {
-              return [sym('mb'), [sym(elem.value, 'lit')]];
+              return [symbol('mb'), [literal(elem.value)]];
             },
         peg$c279 = "[",
         peg$c280 = { type: "literal", value: "[", description: "\"[\"" },
         peg$c281 = "]",
         peg$c282 = { type: "literal", value: "]", description: "\"]\"" },
         peg$c283 = function(elem) {
-              return [sym('mb'), [elem]];
+              return [symbol('mb'), [elem]];
             },
         peg$c284 = function(args) {
-              return [sym('ca'), args];
+              return [symbol('ca'), args];
             },
         peg$c285 = function(elems, doTail) {
               if ( doTail ) {
@@ -568,19 +568,19 @@ module.exports = (function() {
             },
         peg$c288 = function(params, statements) {
               params = params || {};
-              return [sym('de'), null, params.ids || [], statements];
+              return [symbol('de'), null, params.ids || [], statements];
             },
         peg$c289 = function(comp) {
               return comp;
             },
         peg$c290 = function(elems) {
-              return [sym('ar'), elems];
+              return [symbol('ar'), elems];
             },
         peg$c291 = function(elems) {
-              return [sym('dc'), elems];
+              return [symbol('dc'), elems];
             },
         peg$c292 = function() {
-              return [sym('ar'), []];
+              return [symbol('ar'), []];
             },
         peg$c293 = function(name, value) {
               return [name, value];
@@ -589,25 +589,25 @@ module.exports = (function() {
               return [name, value]
             },
         peg$c295 = function(expr, op, ranges) {
-              return [sym('lc'), ranges, expr];
+              return [symbol('lc'), ranges, expr];
             },
         peg$c296 = function(assign, op, ranges) {
-              return [sym('lc'), ranges, assign[1], assign[0]];
+              return [symbol('lc'), ranges, assign[1], assign[0]];
             },
         peg$c297 = function(op, params, statements) {
               console.log("should not have recognized this yet");
-              return [sym(op), null, params.ids || [], statements];
+              return [symbol(op), null, params.ids || [], statements];
             },
-        peg$c298 = function() { return sym(true, 'lit'); },
-        peg$c299 = function() { return sym(false, 'lit'); },
+        peg$c298 = function() { return literal(true); },
+        peg$c299 = function() { return literal(false); },
         peg$c300 = function(id) {
-              return [sym('id'), id];
+              return [symbol('id'), id];
             },
         peg$c301 = function(op) {
-              return [sym(op)];
+              return [symbol(op)];
             },
         peg$c302 = function(op) {
-              return sym(op, 'lit');
+              return literal(op);
             },
 
         peg$currPos          = 0,
@@ -7568,18 +7568,26 @@ module.exports = (function() {
       var buildBinaryChain = parser.buildBinaryChain;
       var hasOperator = parser.hasOperator;
       var changeOperator = parser.changeOperator;
-      var symInterpolate = parser.symInterpolate;
-      var isInterpolated = parser.isInterpolated;
+      var interpolation = parser.interpolation;
+      var isInterpolation = parser.isInterpolation;
       var isIdentifier = parser.isIdentifier;
-      var stmts = parser.stmts;
+      var markStatements = parser.markStatements;
 
-      function sym(value, type) {
+      function symbol(value, type) {
         return {
           value: value,
           type: type || 'op',
           line: line(),
           column: column()
         };
+      }
+
+      function literal(value) {
+        return symbol(value, 'lit');
+      }
+
+      function identifier(value) {
+        return symbol(value, 'id');
       }
 
 
@@ -8686,8 +8694,8 @@ function createModule(globals) {
 
   function pushLocalScope() {
     nameStack.push({
-      names: names, 
-      scopeInfo: scopeInfo, 
+      names: names,
+      scopeInfo: scopeInfo,
       selfName: selfName
     });
     names = extendObject(names);
@@ -9183,35 +9191,12 @@ function buildBinaryChain(head, tail) {
   return head;
 }
 
-function sym(value, type, template) {
+function symbol(value, type, template) {
   if ( typeof type !== 'string' ) {
     template = type;
     type = null;
   }
   return mixin({}, template || {}, { value: value, type: type || 'op' });
-}
-
-function stmts(statements) {
-  statements.stmts = true;
-  return statements;
-}
-
-function symInterpolate(value, auto) {
-  var testFormatter = formatterCache[value];
-  if ( !testFormatter ) {
-    testFormatter = formatterCache[value] = buildFormatter(value);
-  }
-  var requiredIndexes = testFormatter.__intRequiredIndexes || [];
-  if ( !requiredIndexes.length ) {
-    return sym(value, 'lit');
-  }
-  var result = sym(value, auto ? 'auto': 'int');
-  result.formatter = testFormatter;
-  return result;
-}
-
-function isDefined(value) {
-  return value !== undefined && value !== null;
 }
 
 function isSymbol(node) {
@@ -9222,10 +9207,47 @@ function isSymbol(node) {
          node.type !== undefined;
 }
 
+function literal(value) {
+  return symbol(value, 'lit');
+}
+
+function isLiteral(node) {
+  return isSymbol(node) &&
+         node.type === 'lit';
+}
+
+function markStatements(value) {
+  value._statements = true;
+  return value;
+}
+
 function isStatements(node) {
   return isDefined(node) &&
          isArray(node) &&
-         node.stmts === true;
+         node._statements === true;
+}
+
+function interpolation(value, auto) {
+  var testFormatter = formatterCache[value];
+  if ( !testFormatter ) {
+    testFormatter = formatterCache[value] = buildFormatter(value);
+  }
+  var requiredIndexes = testFormatter.__intRequiredIndexes || [];
+  if ( !requiredIndexes.length ) {
+    return literal(value);
+  }
+  var result = symbol(value, auto ? 'auto': 'int');
+  result.formatter = testFormatter;
+  return result;
+}
+
+function isInterpolation(node) {
+  return isSymbol(node) &&
+         (node.type === 'auto' || node.type === 'int');
+}
+
+function isDefined(value) {
+  return value !== undefined && value !== null;
 }
 
 function hasOperator(node, operator) {
@@ -9260,19 +9282,9 @@ function changeOperator(node, operator) {
   return node;
 }
 
-function isInterpolated(node) {
-  return isSymbol(node) &&
-         (node.type === 'auto' || node.type === 'int');
-}
-
 function isIdentifier(node) {
   return isSymbol(node) &&
          node.type === 'id';
-}
-
-function isLiteral(node) {
-  return isSymbol(node) &&
-         node.type === 'lit';
 }
 
 // Exceptions
@@ -9306,15 +9318,15 @@ function formatWarning(warning, filePath) {
 // Exported Functions
 exports.parseTemplate = parseTemplate;
 exports.buildBinaryChain = buildBinaryChain;
-exports.sym = sym;
-exports.stmts = stmts;
-exports.symInterpolate = symInterpolate;
-exports.isDefined = isDefined;
+exports.symbol = symbol;
 exports.isSymbol = isSymbol;
+exports.markStatements = markStatements;
 exports.isStatements = isStatements;
+exports.interpolation = interpolation;
+exports.isInterpolation = isInterpolation;
+exports.isDefined = isDefined;
 exports.hasOperator = hasOperator;
 exports.changeOperator = changeOperator;
-exports.isInterpolated = isInterpolated;
 exports.isIdentifier = isIdentifier;
 exports.isLiteral = isLiteral;
 exports.formatSyntaxError = formatSyntaxError;
@@ -9350,14 +9362,14 @@ var escapeAttribute = types.escapeAttribute;
 var stringify = types.stringify;
 var isTruthy = types.isTruthy;
 
-var sym = parser.sym;
+var symbol = parser.symbol;
 var isStatements = parser.isStatements;
-var stmts = parser.stmts;
+var markStatements = parser.markStatements;
 var isSymbol = parser.isSymbol;
 var hasOperator = parser.hasOperator;
 var isIdentifier = parser.isIdentifier;
 var isLiteral = parser.isLiteral;
-var isInterpolated = parser.isInterpolated;
+var isInterpolation = parser.isInterpolation;
 
 var isMatchingObject = match.matches;
 var annotate = annotations.annotate;
@@ -9412,7 +9424,7 @@ function rewriteSyntaxTree(syntaxTree, warnings) {
   var nodeStack = [];
 
   var pipeline = [
-    symbols(createFormatterNodes, isInterpolated),
+    symbols(createFormatterNodes, isInterpolation),
     operators(foldShortCircuits, matchOps(shortCircuitFolderKeys)),
     operators(foldConstants, matchOps(constantFolderKeys)),
     operators(flipConditionals, matchOps('cn', 'if')),
@@ -9526,7 +9538,7 @@ function rewriteSyntaxTree(syntaxTree, warnings) {
     }
 
     function statementsProcessor(node) {
-      return stmts(processor(node));
+      return markStatements(processor(node));
     }
   }
 
@@ -9562,7 +9574,7 @@ function rewriteSyntaxTree(syntaxTree, warnings) {
 
   function createFormatterNodes(node) {
     var formatter = node.formatter;
-    var result = [sym('fm', node), node];
+    var result = [symbol('fm', node), node];
 
     var requiredFunctions = formatter.__intRequiredFunctions || [];
     var requiredIndexes = node.formatter.__intRequiredIndexes || [];
@@ -9579,14 +9591,14 @@ function rewriteSyntaxTree(syntaxTree, warnings) {
       // build a dictionary from the names
       var supportFuncElems = map(requiredFunctions, function (funcName) {
         return [
-          sym(funcName, 'id'),
-          [sym('id'), sym(funcName, 'lit')]
+          symbol(funcName, 'id'),
+          [symbol('id'), symbol(funcName, 'lit')]
         ];
       });
-      result.push([sym('dc'), supportFuncElems]);
+      result.push([symbol('dc'), supportFuncElems]);
     }
     else {
-      result.push(sym({}, 'lit'));
+      result.push(symbol({}, 'lit'));
     }
 
     result.formatter = formatter;
@@ -9698,7 +9710,7 @@ function rewriteSyntaxTree(syntaxTree, warnings) {
 
       if ( guard ) {
         statements = [
-          [sym('if'), guard, statements, []]
+          [symbol('if'), guard, statements, []]
         ];
       }
 
@@ -9718,9 +9730,9 @@ function rewriteSyntaxTree(syntaxTree, warnings) {
         var thisGuard = definition[4];
 
         statements = [
-          [sym('if'), thisGuard, theseStatements, statements]
+          [symbol('if'), thisGuard, theseStatements, statements]
         ];
-        guard = guard && [sym('or'), thisGuard, guard];
+        guard = guard && [symbol('or'), thisGuard, guard];
       }
 
       firstDefinition[3] = statements;
@@ -9757,7 +9769,7 @@ function rewriteSyntaxTree(syntaxTree, warnings) {
 
   // Partial declarations are really 'let name = partial'
   function assignPartials(node) {
-    return [ sym('as'), [ [node[1], node] ] ];
+    return [ symbol('as'), [ [node[1], node] ] ];
   }
 
   // Convert literal output to pre-escaped raw output
@@ -9766,14 +9778,14 @@ function rewriteSyntaxTree(syntaxTree, warnings) {
       return node;
     }
     var content = escapeContent(node[1].value);
-    return [sym('ra'), sym(content, 'lit')];
+    return [symbol('ra'), symbol(content, 'lit')];
   }
 
   // Literal HTML tags can be converted to raw output
   function convertLiteralHTML(node) {
     var op = hasOperator(node);
     var tag = createTag[op](node);
-    return tag ? [sym('ra'), sym(tag, 'lit')] : node;
+    return tag ? [symbol('ra'), symbol(tag, 'lit')] : node;
   }
 
   // We can combine sequences of raw literal output
@@ -9782,7 +9794,7 @@ function rewriteSyntaxTree(syntaxTree, warnings) {
       return statement[1].value;
     }).join('');
 
-    return [ [sym('ra'), sym(buffer, 'lit')] ];
+    return [ [symbol('ra'), symbol(buffer, 'lit')] ];
   }
 
   function annotateMutations(node) {
@@ -9851,7 +9863,7 @@ function rewriteSyntaxTree(syntaxTree, warnings) {
     }
     var op = hasOperator(node);
     var output = constantFolders[op].apply(null, args);
-    return sym(output, 'lit', node[0]);
+    return symbol(output, 'lit', node[0]);
   }
   
   // If the condition is 'not' we can roll up its argument
@@ -9898,7 +9910,7 @@ function rewriteSyntaxTree(syntaxTree, warnings) {
 
     var op = hasOperator(node);
     var newOp = op === 'an' ? 'or' : 'an';
-    return [ sym('no', left), [sym(newOp, node), left[1], right[1]] ];
+    return [ symbol('no', left), [symbol(newOp, node), left[1], right[1]] ];
   }
 
   // If all the elements of an Array are literals, then we can convert
@@ -9915,7 +9927,7 @@ function rewriteSyntaxTree(syntaxTree, warnings) {
       output.push(element.value);
     }
 
-    return sym(output, 'lit', node[0]);
+    return symbol(output, 'lit', node[0]);
   }
 
   // If all the elements of a Dictionary are literals, then we can
@@ -9934,7 +9946,7 @@ function rewriteSyntaxTree(syntaxTree, warnings) {
       output[name.value] = value.value;
     }
 
-    return sym(output, 'lit', node[0]);
+    return symbol(output, 'lit', node[0]);
   }
 
   // If the left side of a call is a formatter, then we can generate code
@@ -9965,12 +9977,12 @@ function rewriteSyntaxTree(syntaxTree, warnings) {
     var requiredIndexes = node.formatter.__intRequiredIndexes || [];
     var varNameElems = map(requiredIndexes, function (varName) {
       return [
-        sym(varName, 'id'),
-        [sym('id'), sym(varName, 'lit')]
+        symbol(varName, 'id'),
+        [symbol('id'), symbol(varName, 'lit')]
       ];
     });
 
-    node[3] = [sym('dc'), varNameElems];
+    node[3] = [symbol('dc'), varNameElems];
     return node;
   }
 
