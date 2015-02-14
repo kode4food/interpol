@@ -1,6 +1,6 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -23,7 +23,7 @@ interpol.createStringWriter = writers.createStringWriter;
 
 },{"../lib/interpol":4,"../lib/writers":18}],2:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -40,7 +40,7 @@ interpol.createStringWriter = writers.createStringWriter;
 
 },{}],3:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -233,7 +233,7 @@ exports.buildImmediateFormatter = buildImmediateFormatter;
 
 },{"./types":15,"./util":16,"./writers/null":19}],4:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -334,7 +334,7 @@ module.exports = interpol;
 
 },{"./compiler/stub":2,"./runtime":14,"./types":15,"./util":16}],5:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -471,7 +471,7 @@ exports.matcher = buildMatcher;
 
 },{"./util":16}],6:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -489,7 +489,7 @@ exports.createSystemResolver = system.createSystemResolver;
 
 },{"./memory":7,"./system":9}],7:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -636,7 +636,7 @@ exports.createMemoryResolver = createMemoryResolver;
 
 },{"../types":15,"../util":16}],8:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -669,7 +669,7 @@ exports.wrap = wrap;
 
 },{"../../types":15}],9:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -707,7 +707,7 @@ exports.createSystemResolver = createSystemResolver;
 
 },{"../memory":7,"./list":10,"./math":11,"./render":12,"./string":13}],10:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -829,7 +829,7 @@ exports.values = values;
 
 },{"../../util":16}],11:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -996,7 +996,7 @@ exports.sum = sum;
 
 },{"../../types":15,"../../util":16,"./helpers":8}],12:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -1106,7 +1106,7 @@ exports.pluralizer = pluralizer;
 
 },{"../../types":15}],13:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -1174,7 +1174,7 @@ exports.upper = upper;
 
 },{"../../format":3,"../../types":15,"./helpers":8}],14:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -1521,7 +1521,7 @@ exports.createRuntime = createRuntime;
 
 },{"./format":3,"./match":5,"./resolvers/internal":6,"./types":15,"./util":16,"./writers":18}],15:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -1792,7 +1792,7 @@ exports.isFalsy = isFalsy;
 
 },{"./util":16}],16:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -1944,7 +1944,7 @@ exports.selfMap = selfMap;
 
 },{}],17:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -2025,7 +2025,7 @@ exports.createDOMWriter = createDOMWriter;
 
 },{"../util":16,"./string":20}],18:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -2045,7 +2045,7 @@ exports.createStringWriter = stringWriter.createStringWriter;
 
 },{"./dom":17,"./null":19,"./string":20}],19:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -2082,7 +2082,7 @@ exports.createNullWriter = createNullWriter;
 
 },{"../util":16}],20:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *

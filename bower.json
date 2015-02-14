@@ -1,6 +1,6 @@
 {
   "name": "interpol",
-  "description": "Logicful HTML Templates",
+  "description": "HTML Composition Language",
   "authors": ["Thomas S. Bradford"],
   "version": "1.5.1",
   "main": "build/interpol.min.js",

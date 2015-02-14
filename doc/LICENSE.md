@@ -1,4 +1,4 @@
-Interpol (Logicful HTML Templates)
+Interpol (HTML Composition Language)
 Copyright (c) 2014, 2015 Thomas S. Bradford
 
 Permission is hereby granted, free of charge, to any person obtaining
