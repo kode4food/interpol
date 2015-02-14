@@ -5,7 +5,7 @@ prev: index
 next: 02-data
 ---
 ## An Interpol Introduction
-Interpol is Logicful HTML Template System.  Its purpose is to convert this:
+Interpol is an HTML Composition Language.  Its purpose is to convert this:
 
 ```json
 {

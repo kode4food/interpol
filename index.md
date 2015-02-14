@@ -2,9 +2,9 @@
 layout: interpol_title
 title: Interpol
 ---
-## Logicful HTML Templates
+## HTML Composition
 
-Interpol is a Logicful Template System.  What can you do with it?  Stuff like this:
+Interpol is an HTML Composition Language.  What can you do with it?  Stuff like this:
 
 ```ruby
 let label = '%0 is a friend of %1'
@@ -27,7 +27,7 @@ end
 
 `renderPeople` is a partial.  Its first form renders a list of interpolated strings resulting from a set of nested loops.  The second form is a guarded version that catches the case when there is no `people` value or it is empty.  How easy is that to do with your current template system?  I suspect pretty difficult.  Maybe not possible at all.
 
-### So Why Logicful Templates?
+### So Why HTML Composition?
 There has been a lot of noise about logic-less templates in recent years.  The sales pitch is that they enforce separation of concerns, so that business logic doesn't taint the presentation layer.  Fair enough, I agree, separation of concerns is a good thing.
 
 In reality the separation of concerns is still violated in many cases, except that it's now your business logic that's often tainted with presentation-specific mapping acrobatics to massage your data into a form the template system will accept.  You're also having to leverage helpers extensively, backfilling the 'logic' a logic-less template system refused to provide in the first place.
