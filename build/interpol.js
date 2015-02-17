@@ -17,11 +17,10 @@ var interpol = window.interpol = require('../lib/interpol');
 
 // Register the Writers for easier access
 var writers = require('../lib/writers');
-interpol.createDOMWriter = writers.createDOMWriter;
 interpol.createNullWriter = writers.createNullWriter;
 interpol.createStringWriter = writers.createStringWriter;
 
-},{"../lib/interpol":4,"../lib/writers":18}],2:[function(require,module,exports){
+},{"../lib/interpol":4,"../lib/writers":17}],2:[function(require,module,exports){
 /*
  * Interpol (HTML Composition Language)
  * Licensed under the MIT License
@@ -231,7 +230,7 @@ exports.buildFormatter = buildFormatter;
 exports.buildDeferredFormatter = buildDeferredFormatter;
 exports.buildImmediateFormatter = buildImmediateFormatter;
 
-},{"./types":15,"./util":16,"./writers/null":19}],4:[function(require,module,exports){
+},{"./types":15,"./util":16,"./writers/null":18}],4:[function(require,module,exports){
 /*
  * Interpol (HTML Composition Language)
  * Licensed under the MIT License
@@ -1519,7 +1518,7 @@ function exec(ctx, func, args) {
 // Exported Functions
 exports.createRuntime = createRuntime;
 
-},{"./format":3,"./match":5,"./resolvers/internal":6,"./types":15,"./util":16,"./writers":18}],15:[function(require,module,exports){
+},{"./format":3,"./match":5,"./resolvers/internal":6,"./types":15,"./util":16,"./writers":17}],15:[function(require,module,exports){
 /*
  * Interpol (HTML Composition Language)
  * Licensed under the MIT License
@@ -1953,97 +1952,14 @@ exports.selfMap = selfMap;
 
 "use strict";
 
-var util = require('../util');
-var string = require('./string');
-
-var createStringWriter = string.createStringWriter;
-
-var REPLACE = createDOMWriter.REPLACE = 'replace';
-var APPEND = createDOMWriter.APPEND = 'append';
-var INSERT = createDOMWriter.INSERT = 'insert';
-
-/**
- * Creates a DOMWriter.  A DOMWriter attaches itself to a DOM Element,
- * and will manipulate that Element's content when a template is rendered
- * with it.  The writer is very simple and won't cover all use-cases, it
- * also may not be the most performant approach.
- *
- * The default mode is REPLACE, meaning all of the Element's children are
- * replaced when the associated template is rendered.  INSERT and APPEND
- * will insert new renderings to the beginning or end of the child list
- * respectively.
- *
- * @param {Element} parentElement the Element to which this DOMWriter attaches
- * @param {String} [renderMode] the DOM rendering mode: REPLACE|APPEND|INSERT
- */
- 
-/* istanbul ignore next: browser-only */
-function createDOMWriter(parentElement, renderMode) {
-  var writer = createStringWriter();
-  var writerDone = writer.done;
-
-  if ( renderMode === undefined ) {
-    renderMode = REPLACE;
-  }
-
-  switch ( renderMode ) {
-    case APPEND:
-      writer.done = appendEndRender;
-      break;
-
-    case INSERT:
-      writer.done = insertEndRender;
-      break;
-
-    case REPLACE:
-      writer.done = replaceEndRender;
-      break;
-
-    default:
-      throw new Error("Invalid renderMode: " + renderMode);
-  }
-
-  function appendEndRender() {
-    var container = document.createElement("span");
-    container.innerHTML = writerDone();
-    parentElement.appendChild(container);
-  }
-
-  function insertEndRender() {
-    var container = document.createElement("span");
-    container.innerHTML = writerDone();
-    parentElement.insertBefore(container, parentElement.firstChild);
-  }
-
-  function replaceEndRender() {
-    parentElement.innerHTML = writerDone();
-  }
-}
-
-// Exported Functions
-exports.createDOMWriter = createDOMWriter;
-
-},{"../util":16,"./string":20}],18:[function(require,module,exports){
-/*
- * Interpol (HTML Composition Language)
- * Licensed under the MIT License
- * see doc/LICENSE.md
- *
- * @author Thomas S. Bradford (kode4food.it)
- */
-
-"use strict";
-
-var domWriter = require('./dom');
 var nullWriter = require('./null');
 var stringWriter = require('./string');
 
 // Exported Functions
-exports.createDOMWriter = domWriter.createDOMWriter;
 exports.createNullWriter = nullWriter.createNullWriter;
 exports.createStringWriter = stringWriter.createStringWriter;
 
-},{"./dom":17,"./null":19,"./string":20}],19:[function(require,module,exports){
+},{"./null":18,"./string":19}],18:[function(require,module,exports){
 /*
  * Interpol (HTML Composition Language)
  * Licensed under the MIT License
@@ -2080,7 +1996,7 @@ function createNullWriter() {
 // Exported Functions
 exports.createNullWriter = createNullWriter;
 
-},{"../util":16}],20:[function(require,module,exports){
+},{"../util":16}],19:[function(require,module,exports){
 /*
  * Interpol (HTML Composition Language)
  * Licensed under the MIT License

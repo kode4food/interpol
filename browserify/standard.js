@@ -16,6 +16,5 @@ var interpol = window.interpol = require('../lib/interpol');
 
 // Register the Writers for easier access
 var writers = require('../lib/writers');
-interpol.createDOMWriter = writers.createDOMWriter;
 interpol.createNullWriter = writers.createNullWriter;
 interpol.createStringWriter = writers.createStringWriter;
