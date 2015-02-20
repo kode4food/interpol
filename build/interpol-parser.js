@@ -8438,19 +8438,23 @@ var isSymbol = parser.isSymbol;
 function compileModule(template, options) {
   var warnings = [];
   var literals = [];
-  var reverseLiterals = {};
 
   var parsed = parseTemplate(template);
   var rewritten = rewriteSyntaxTree(parsed, warnings);
-  var stripped = replaceSymbols(rewritten);
+  var stripped = replaceSymbols(rewritten, literals);
 
   return {
     templateBody: generateModuleBody(stripped, literals, options),
     err: warnings
   };
+}
 
-  // convert all symbol placeholders into literal table entries
-  function replaceSymbols(node) {
+// convert all symbol placeholders into literal table entries
+function replaceSymbols(node, literals) {
+  var reverseLiterals = {};
+  return visitNode(node);
+
+  function visitNode(node) {
     if ( !isArray(node) ) {
       if ( isSymbol(node) ) {
         return lit(node.value);
@@ -8459,7 +8463,7 @@ function compileModule(template, options) {
     }
 
     selfMap(node, function (item) {
-      return replaceSymbols(item);
+      return visitNode(item);
     });
 
     return node;
@@ -9166,20 +9170,16 @@ exports.createModule = createModule;
 "use strict";
 
 var util = require('../util');
-var formatter = require('../format');
+var format = require('../format');
 var generatedParser = require('../../build/parser');
 
 var isArray = util.isArray;
 var mixin = util.mixin;
 var each = util.each;
-var buildFormatter = formatter.buildFormatter;
-
-var formatterCache = {};
+var buildFormatter = format.buildFormatter;
 
 function parseTemplate(template) {
-  var result = generatedParser.parse(template);
-  formatterCache = {};
-  return result;
+  return generatedParser.parse(template);
 }
 
 function buildBinaryChain(head, tail) {
@@ -9231,16 +9231,13 @@ function isStatements(node) {
 }
 
 function interpolation(value, auto) {
-  var testFormatter = formatterCache[value];
-  if ( !testFormatter ) {
-    testFormatter = formatterCache[value] = buildFormatter(value);
-  }
-  var requiredIndexes = testFormatter.__intRequiredIndexes || [];
+  var formatter = buildFormatter(value);
+  var requiredIndexes = formatter.__intRequiredIndexes || [];
   if ( !requiredIndexes.length ) {
     return literal(value);
   }
   var result = symbol(value, auto ? 'auto': 'int');
-  result.formatter = testFormatter;
+  result.formatter = formatter;
   return result;
 }
 
@@ -9253,7 +9250,7 @@ function isDefined(value) {
   return value !== undefined && value !== null;
 }
 
-function hasOperator(node, operator) {
+function hasOperator(node, operators) {
   if ( !isArray(node) || isStatements(node) ) {
     return false;
   }
@@ -9263,19 +9260,19 @@ function hasOperator(node, operator) {
     return false;
   }
 
-  if ( !operator ) {
+  if ( operators === undefined ) {
     return item.value;
   }
 
-  if ( !isArray(operator) ) {
-    operator = [operator];
+  if ( !isArray(operators) ) {
+    return operators === item.value;
   }
 
-  var idx = operator.indexOf(item.value);
+  var idx = operators.indexOf(item.value);
   if ( idx === -1 ) {
     return false;
   }
-  return operator[idx];
+  return operators[idx];
 }
 
 function changeOperator(node, operator) {
