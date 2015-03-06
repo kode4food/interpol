@@ -142,9 +142,14 @@ exports.basics = nodeunit.testCase({
                   '  "yes"\n' +
                   'end';
 
+    var script4 = 'if [] like []\n' +
+                  '  "yes"\n' +
+                  'end';
+
     test.equal(evaluate(script1), "yes\n");
     test.equal(evaluate(script2), "yes\n");
     test.equal(evaluate(script3), "yes\n");
+    test.equal(evaluate(script4), "yes\n");
     test.done();
   },
 
