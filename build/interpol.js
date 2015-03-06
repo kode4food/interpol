@@ -362,7 +362,7 @@ function isMatchingObject(template, obj) {
   }
 
   if ( isArray(template) ) {
-    if ( !isArray(obj) || template.length !== obj.length ) {
+    if ( !isArray(obj) || obj.length < template.length ) {
       return false;
     }
 
@@ -426,7 +426,7 @@ function buildArrayMatcher(template) {
     if ( template === obj ) {
       return true;
     }
-    if ( !isArray(obj) || mlen !== obj.length ) {
+    if ( !isArray(obj) || obj.length < mlen ) {
       return false;
     }
     for ( var i = 0; i < mlen; i++ ) {

@@ -128,6 +128,25 @@ exports.basics = nodeunit.testCase({
     test.equal(evaluate(script2, data), "Thom is 42\n");
     test.done();
   },
+   
+  "Vector Like": function (test) {
+    var script1 = 'if [1, 2, 3] like [1, 2]\n' +
+                  '  "yes"\n' +
+                  'end';
+
+    var script2 = 'if [1, 2, 3] like [1, 2, 3]\n' +
+                  '  "yes"\n' +
+                  'end';
+
+    var script3 = 'unless [1, 2] like [1, 2, 3]\n' +
+                  '  "yes"\n' +
+                  'end';
+
+    test.equal(evaluate(script1), "yes\n");
+    test.equal(evaluate(script2), "yes\n");
+    test.equal(evaluate(script3), "yes\n");
+    test.done();
+  },
 
   "Blessed Strings": function (test) {
     var data = {
