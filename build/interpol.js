@@ -716,6 +716,8 @@ exports.createSystemResolver = createSystemResolver;
 "use strict";
 
 var util = require('../../util');
+var types = require('../../types');
+
 var objectKeys = util.objectKeys;
 var isArray = util.isArray;
 
@@ -750,7 +752,7 @@ function join(writer, delim, value) {
   return value;
 }
 
-// `last(value)` returns the last item of the provided array (or `null` if
+// `last(value)` returns the last item of the provided array (or `nil` if
 // the array is empty).
 function last(writer, value) {
   if ( isArray(value) ) {
@@ -783,13 +785,7 @@ function length(writer, value) {
 // `empty(value)` returns true or false depending on whether or not the
 // provided array is empty.
 function empty(writer, value) {
-  if ( isArray(value) ) {
-    return !value.length;
-  }
-  if ( typeof value === 'object' && value !== null ) {
-    return !objectKeys(value).length;
-  }
-  return true;
+  return length(writer, value) === 0;
 }
 
 // `keys(value)` returns the keys of the Object or indexes of the Array
@@ -826,7 +822,7 @@ exports.empty = empty;
 exports.keys = keys;
 exports.values = values;
 
-},{"../../util":16}],11:[function(require,module,exports){
+},{"../../types":15,"../../util":16}],11:[function(require,module,exports){
 /*
  * Interpol (HTML Composition Language)
  * Licensed under the MIT License

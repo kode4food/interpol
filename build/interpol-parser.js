@@ -7725,7 +7725,7 @@ function generateModuleBody(strippedTree, literals, options) {
   var lang = resolveTargetLanguage(targetLanguage);
 
   var globals = options.globals || lang.createGlobals();
-  var gen = lang.createModule(globals);
+  var generate = lang.createModule(globals);
 
   // A lookup table of code generators
   var Evaluators = {
@@ -7779,7 +7779,7 @@ function generateModuleBody(strippedTree, literals, options) {
 
   return functionWrapper(function () {
     createModuleFunction(strippedTree);
-    var body = gen.toString();
+    var body = generate.toString();
 
     var buffer = [];
     if ( !sharedGlobals ) {
@@ -7793,10 +7793,10 @@ function generateModuleBody(strippedTree, literals, options) {
   function createModuleFunction(parseTree) {
     var defineModule = globals.runtimeImport('defineModule');
 
-    gen.returnStatement(function () {
-      gen.call(defineModule, [
+    generate.returnStatement(function () {
+      generate.call(defineModule, [
         function () {
-          gen.func({
+          generate.func({
             internalArgs: ['c', 'w'],
             body: function () {
               // createStatementsEvaluator will populate globalVars
@@ -7843,7 +7843,7 @@ function generateModuleBody(strippedTree, literals, options) {
         throw new Error("Null Node in Parse Tree");
       }
       var literal = globals.literal(literals[node]);
-      gen.write(literal);
+      generate.write(literal);
       return;
     }
 
@@ -7862,7 +7862,7 @@ function generateModuleBody(strippedTree, literals, options) {
   }
 
   function createBinaryEvaluator(operator, leftNode, rightNode) {
-    gen.binaryOperator(operator, defer(leftNode), defer(rightNode));
+    generate.binaryOperator(operator, defer(leftNode), defer(rightNode));
   }
 
   function createStatementsEvaluator(statementNodes) {
@@ -7889,7 +7889,7 @@ function generateModuleBody(strippedTree, literals, options) {
         assigns.push([
           moduleAlias,
           function () {
-            gen.call(importer, []);
+            generate.call(importer, []);
           }
         ]);
         return;
@@ -7902,22 +7902,22 @@ function generateModuleBody(strippedTree, literals, options) {
       });
 
       var getProperty = globals.runtimeImport('getProperty');
-      var anon = gen.createAnonymous();
+      var anon = generate.createAnonymous();
       assigns.push([
         anon,
         function () {
-          gen.call(importer, []);
+          generate.call(importer, []);
         }
       ]);
       each(toResolve, function (aliasMap) {
         assigns.push([
           aliasMap[0],
           function () {
-            gen.call(
+            generate.call(
               getProperty,
               [
                 function () {
-                  gen.retrieveAnonymous(anon);
+                  generate.retrieveAnonymous(anon);
                 },
                 globals.literal(aliasMap[1])
               ]
@@ -7926,7 +7926,7 @@ function generateModuleBody(strippedTree, literals, options) {
         ]);
       });
     });
-    gen.assignments(assigns);
+    generate.assignments(assigns);
   }
 
   // generate an evaluator to represent a partial and its associated closure
@@ -7941,10 +7941,10 @@ function generateModuleBody(strippedTree, literals, options) {
 
     function createUnguardedPartial() {
       var definePartial = globals.runtimeImport('definePartial');
-      gen.call(definePartial, [
+      generate.call(definePartial, [
         function () {
-          gen.func({
-            internalArgs: [gen.writer()],
+          generate.func({
+            internalArgs: [generate.writer()],
             contextArgs: paramNames,
             body: defer(createStatementsEvaluator, statementNodes),
             annotations: annotations
@@ -7956,26 +7956,26 @@ function generateModuleBody(strippedTree, literals, options) {
     function createGuardedPartial() {
       var partialName = literals[nameLiteral];
       var definePartial = globals.runtimeImport('defineGuardedPartial');
-      gen.call(definePartial, [
-        gen.code(function () {
-          gen.getter(partialName);
+      generate.call(definePartial, [
+        generate.code(function () {
+          generate.getter(partialName);
         }),
         createWrapper
       ]);
 
       function createWrapper() {
-        gen.func({
+        generate.func({
           internalArgs: ['o'],
           body: function () {
-            gen.returnStatement(createFunction);
+            generate.returnStatement(createFunction);
           },
           annotations: annotations
         });
       }
 
       function createFunction() {
-        gen.func({
-          internalArgs: [gen.writer()],
+        generate.func({
+          internalArgs: [generate.writer()],
           contextArgs: paramNames,
           prolog: createProlog,
           body: defer(createStatementsEvaluator, statementNodes),
@@ -7984,12 +7984,12 @@ function generateModuleBody(strippedTree, literals, options) {
       }
 
       function createProlog() {
-        gen.ifStatement(
+        generate.ifStatement(
           defer(guardNode),
           null,  // this is an 'else' case
           function () {
-            gen.returnStatement(function () {
-              gen.call('o');
+            generate.returnStatement(function () {
+              generate.call('o');
             });
           }
         );
@@ -8002,7 +8002,7 @@ function generateModuleBody(strippedTree, literals, options) {
     var bindPartial = globals.runtimeImport('bindPartial');
     var member = defer(memberNode);
     var args = defer(createArrayEvaluator, argNodes);
-    gen.call(bindPartial, [gen.self, member, args]);
+    generate.call(bindPartial, [generate.self, member, args]);
   }
 
   // generate an evaluator to perform a function or partial call
@@ -8010,12 +8010,12 @@ function generateModuleBody(strippedTree, literals, options) {
     var exec = globals.runtimeImport('exec');
     var member = defer(memberNode);
 
-    var args = [gen.writer()];
+    var args = [generate.writer()];
     each(argNodes, function (argNode) {
       args.push(defer(argNode));
     });
 
-    gen.call(exec, [gen.self, member, defer(gen.vector, args)]);
+    generate.call(exec, [generate.self, member, defer(generate.vector, args)]);
   }
 
   // generate an evaluator to perform local variable assignment
@@ -8026,7 +8026,7 @@ function generateModuleBody(strippedTree, literals, options) {
         defer(assignmentDef[1])
       ];
     });
-    gen.assignments(decls);
+    generate.assignments(decls);
   }
 
   // generate an evaluator to write an html opening tag
@@ -8034,44 +8034,44 @@ function generateModuleBody(strippedTree, literals, options) {
     var name = defer(nameNode);
     var attributes = defer(createDictionaryEvaluator, attributeDefs, true);
     var methodName = selfClose ? 'selfCloseElement' : 'startElement';
-    gen.statement(function () {
-      gen.call(gen.writer(methodName), [name, attributes]);
+    generate.statement(function () {
+      generate.call(generate.writer(methodName), [name, attributes]);
     });
   }
 
   // generate an evaluator to write an html closing tag
   function createCloseTagEvaluator(nameNode) {
-    gen.statement(function () {
-      gen.call(gen.writer('endElement'), [defer(nameNode)]);
+    generate.statement(function () {
+      generate.call(generate.writer('endElement'), [defer(nameNode)]);
     });
   }
 
   // generate an evaluator to write an html comment
   function createCommentTagEvaluator(contentLiteral) {
-    gen.statement(function () {
-      gen.call(gen.writer('comment'), [defer(contentLiteral)]);
+    generate.statement(function () {
+      generate.call(generate.writer('comment'), [defer(contentLiteral)]);
     });
   }
 
   // generate an evaluator to write an html5 doctype
   function createDocTypeEvaluator(rootElemLiteral) {
-    gen.statement(function () {
-      gen.call(gen.writer('docType'), [defer(rootElemLiteral)]);
+    generate.statement(function () {
+      generate.call(generate.writer('docType'), [defer(rootElemLiteral)]);
     });
   }
 
   // generate an evaluator that writes the result of an expression
   function createOutputEvaluator(exprNode) {
-    gen.statement(function () {
-      gen.call(gen.writer('content'), [defer(exprNode)]);
+    generate.statement(function () {
+      generate.call(generate.writer('content'), [defer(exprNode)]);
     });
   }
 
   // generate an evaluator that writes the result of an
   // expression without escaping
   function createRawOutputEvaluator(exprNode) {
-    gen.statement(function () {
-      gen.call(gen.writer('raw'), [defer(exprNode)]);
+    generate.statement(function () {
+      generate.call(generate.writer('raw'), [defer(exprNode)]);
     });
   }
 
@@ -8079,13 +8079,13 @@ function generateModuleBody(strippedTree, literals, options) {
   function createListCompEvaluator(rangeNodes, valueNode, nameNode) {
     var annotations = createListCompEvaluator.getAnnotations(arguments);
     var isDictionary = !!nameNode;
-    var genContainer = isDictionary ? gen.dictionary : gen.vector;
+    var genContainer = isDictionary ? generate.dictionary : generate.vector;
     var createBody = isDictionary ? createNameValueBody: createValueBody;
-    var listVar = gen.createAnonymous();
+    var listVar = generate.createAnonymous();
 
-    gen.compoundExpression([
+    generate.compoundExpression([
       function () {
-        gen.assignAnonymous(listVar, defer(function () {
+        generate.assignAnonymous(listVar, defer(function () {
           genContainer([]);
         }));
       },
@@ -8093,19 +8093,19 @@ function generateModuleBody(strippedTree, literals, options) {
         createLoopEvaluator(rangeNodes, createBody, annotations);
       },
       function () {
-        gen.retrieveAnonymous(listVar);
+        generate.retrieveAnonymous(listVar);
       }
     ]);
 
     function createValueBody() {
-      gen.statement(function () {
-        gen.vectorAppend(listVar, defer(valueNode));
+      generate.statement(function () {
+        generate.vectorAppend(listVar, defer(valueNode));
       });
     }
 
     function createNameValueBody() {
-      gen.statement(function () {
-        gen.dictionarySet(listVar, defer(nameNode), defer(valueNode));
+      generate.statement(function () {
+        generate.dictionarySet(listVar, defer(nameNode), defer(valueNode));
       });
     }
   }
@@ -8116,23 +8116,23 @@ function generateModuleBody(strippedTree, literals, options) {
     var successVar;
 
     if ( elseNodes && elseNodes.length ) {
-      successVar = gen.createAnonymous();
-      gen.assignments([
+      successVar = generate.createAnonymous();
+      generate.assignments([
         [successVar, globals.literal(false)]
       ]);
-      gen.statement(function () {
+      generate.statement(function () {
         createLoopEvaluator(rangeNodes, createBody, annotations, successVar);
       });
-      gen.ifStatement(
+      generate.ifStatement(
         function () {
-          gen.retrieveAnonymous(successVar);
+          generate.retrieveAnonymous(successVar);
         },
         null,
         defer(createStatementsEvaluator, elseNodes)
       );
     }
     else {
-      gen.statement(function () {
+      generate.statement(function () {
         createLoopEvaluator(rangeNodes, createBody, annotations);
       });
     }
@@ -8148,8 +8148,8 @@ function generateModuleBody(strippedTree, literals, options) {
     function processRange(i) {
       if ( i === ranges.length ) {
         if ( successVar ) {
-          gen.statement(function () {
-            gen.assignAnonymous(successVar, globals.literal(true));
+          generate.statement(function () {
+            generate.assignAnonymous(successVar, globals.literal(true));
           });
         }
         createBody();
@@ -8163,11 +8163,11 @@ function generateModuleBody(strippedTree, literals, options) {
       if ( rangeNode[2] ) {
         // We have a guard
         prolog = function () {
-          gen.ifStatement(
+          generate.ifStatement(
             defer(rangeNode[2]),
             null,
             function () {
-              gen.returnStatement();
+              generate.returnStatement();
             }
           );
         };
@@ -8177,11 +8177,11 @@ function generateModuleBody(strippedTree, literals, options) {
         genLoopExpression();
       }
       else {
-        gen.statement(genLoopExpression);
+        generate.statement(genLoopExpression);
       }
 
       function genLoopExpression() {
-        gen.loopExpression({
+        generate.loopExpression({
           itemName: itemName,
           collection: defer(rangeNode[1]),
           guard: prolog,
@@ -8196,7 +8196,7 @@ function generateModuleBody(strippedTree, literals, options) {
 
   // generate a conditional (ternary) evaluator
   function createTernaryEvaluator(conditionNode, trueNode, falseNode) {
-    gen.conditionalOperator(
+    generate.conditionalOperator(
       defer(conditionNode),
       defer(trueNode),
       defer(falseNode)
@@ -8205,7 +8205,7 @@ function generateModuleBody(strippedTree, literals, options) {
 
   // generate an if statement evaluator
   function createIfEvaluator(conditionNode, trueNodes, falseNodes) {
-    gen.ifStatement(
+    generate.ifStatement(
       defer(conditionNode),
       trueNodes.length ? defer(createStatementsEvaluator, trueNodes) : null,
       falseNodes.length ? defer(createStatementsEvaluator, falseNodes) : null
@@ -8214,13 +8214,13 @@ function generateModuleBody(strippedTree, literals, options) {
 
   // generate an 'or' evaluator
   function createOrEvaluator(leftNode, rightNode) {
-    var leftAnon = gen.createAnonymous();
-    gen.compoundExpression([
+    var leftAnon = generate.createAnonymous();
+    generate.compoundExpression([
       function () {
-        gen.assignAnonymous(leftAnon, defer(leftNode));
+        generate.assignAnonymous(leftAnon, defer(leftNode));
       },
       function () {
-        gen.conditionalOperator(
+        generate.conditionalOperator(
           leftAnon,
           leftAnon,
           defer(rightNode)
@@ -8231,13 +8231,13 @@ function generateModuleBody(strippedTree, literals, options) {
 
   // generate an 'and' evaluator
   function createAndEvaluator(leftNode, rightNode) {
-    var leftAnon = gen.createAnonymous();
-    gen.compoundExpression([
+    var leftAnon = generate.createAnonymous();
+    generate.compoundExpression([
       function () {
-        gen.assignAnonymous(leftAnon, defer(leftNode));
+        generate.assignAnonymous(leftAnon, defer(leftNode));
       },
       function () {
-        gen.conditionalOperator(
+        generate.conditionalOperator(
           leftAnon,
           defer(rightNode),
           leftAnon
@@ -8251,13 +8251,13 @@ function generateModuleBody(strippedTree, literals, options) {
     var left = defer(leftNode);
     var right = defer(rightNode);
     if ( !isArray(rightNode) ) {
-      var matcher = globals.builder('matcher', gen.code(right));
-      gen.call(matcher, [left]);
+      var matcher = globals.builder('matcher', generate.code(right));
+      generate.call(matcher, [left]);
       return;
     }
 
     var isMatchingObject = globals.runtimeImport('matches');
-    gen.call(isMatchingObject, [right, left]);
+    generate.call(isMatchingObject, [right, left]);
   }
 
   // generate an equality evaluator
@@ -8317,8 +8317,8 @@ function generateModuleBody(strippedTree, literals, options) {
 
   // generate an interpolation evaluator
   function createFormatEvaluator(formatLit, supportDictNode, exprNode) {
-    var formatStr = gen.code(defer(formatLit));
-    var supportDict = gen.code(defer(supportDictNode));
+    var formatStr = generate.code(defer(formatLit));
+    var supportDict = generate.code(defer(supportDictNode));
 
     var deferred = !exprNode;
     var funcName = deferred ? 'deferredFormatter' : 'immediateFormatter';
@@ -8329,7 +8329,7 @@ function generateModuleBody(strippedTree, literals, options) {
       // Meaning it has been created globally
       formatter = globals.builder(funcName, formatStr, supportDict);
       if ( deferred ) {
-        gen.write(formatter);
+        generate.write(formatter);
         return;
       }
     }
@@ -8338,43 +8338,43 @@ function generateModuleBody(strippedTree, literals, options) {
       formatter = globals.builder(funcName, formatStr);
       args.push(supportDict);
       if ( deferred ) {
-        gen.call(formatter, args);
+        generate.call(formatter, args);
         return;
       }
     }
 
     args.push(defer(exprNode));
-    gen.call(formatter, args);
+    generate.call(formatter, args);
   }
 
   // generate a logical 'not' evaluator
   function createNotEvaluator(node) {
     var isTruthy = globals.runtimeImport('isTruthy');
-    gen.unaryOperator('not', function () {
-      gen.call(isTruthy, [defer(node)]);
+    generate.unaryOperator('not', function () {
+      generate.call(isTruthy, [defer(node)]);
     });
   }
 
   // generate a mathematical negation evaluator
   function createNegEvaluator(node) {
-    gen.unaryOperator('neg', defer(node));
+    generate.unaryOperator('neg', defer(node));
   }
   
   // generate a mathematical positive evaluator
   function createPosEvaluator(node) {
-    gen.unaryOperator('pos', defer(node));
+    generate.unaryOperator('pos', defer(node));
   }
 
   // generate an array or object member access evaluator
   function createMemberEvaluator(parentNode, elemNodes) {
     var getMember = elemNodes.length === 1 ? 'getProperty' : 'getPath';
     var args = [defer(parentNode)].concat(map(elemNodes, defer));
-    gen.call(globals.runtimeImport(getMember), args);
+    generate.call(globals.runtimeImport(getMember), args);
   }
 
   // generate an array evaluator
   function createArrayEvaluator(arrayNodes) {
-    gen.vector(map(arrayNodes, defer));
+    generate.vector(map(arrayNodes, defer));
   }
 
   // generate a dictionary evaluator
@@ -8389,16 +8389,16 @@ function generateModuleBody(strippedTree, literals, options) {
       }
       return [name, defer(propertyDef[1])];
     });
-    gen.dictionary(result, ordered);
+    generate.dictionary(result, ordered);
   }
 
   // generate a local variable retrieval evaluator
   function createIdEvaluator(nameLiteral) {
-    gen.getter(literals[nameLiteral]);
+    generate.getter(literals[nameLiteral]);
   }
 
   function createSelfEvaluator() {
-    gen.self();
+    generate.self();
   }
 }
 
@@ -9203,8 +9203,7 @@ function symbol(value, type, template) {
 }
 
 function isSymbol(node) {
-  return isDefined(node) &&
-         typeof node === 'object' &&
+  return typeof node === 'object' &&
          node !== null &&
          node.value !== undefined &&
          node.type !== undefined;
@@ -9225,8 +9224,7 @@ function markStatements(value) {
 }
 
 function isStatements(node) {
-  return isDefined(node) &&
-         isArray(node) &&
+  return isArray(node) &&
          node._statements === true;
 }
 
@@ -9244,10 +9242,6 @@ function interpolation(value, auto) {
 function isInterpolation(node) {
   return isSymbol(node) &&
          (node.type === 'auto' || node.type === 'int');
-}
-
-function isDefined(value) {
-  return value !== undefined && value !== null;
 }
 
 function hasOperator(node, operators) {
@@ -9286,14 +9280,7 @@ function isIdentifier(node) {
          node.type === 'id';
 }
 
-// Exceptions
-
-/**
- * Intercepts a PEG.js Exception and generate a human-readable error message.
- *
- * @param {Exception} err the Exception that was raised
- * @param {String} [filePath] path to the file that was being parsed
- */
+// Intercepts a PEG.js Exception and generate a human-readable error message
 function formatSyntaxError(err, filePath) {
   if ( !err.name || err.name !== 'SyntaxError') {
     return err;
@@ -9323,7 +9310,6 @@ exports.markStatements = markStatements;
 exports.isStatements = isStatements;
 exports.interpolation = interpolation;
 exports.isInterpolation = isInterpolation;
-exports.isDefined = isDefined;
 exports.hasOperator = hasOperator;
 exports.changeOperator = changeOperator;
 exports.isIdentifier = isIdentifier;
@@ -10754,6 +10740,8 @@ exports.createSystemResolver = createSystemResolver;
 "use strict";
 
 var util = require('../../util');
+var types = require('../../types');
+
 var objectKeys = util.objectKeys;
 var isArray = util.isArray;
 
@@ -10788,7 +10776,7 @@ function join(writer, delim, value) {
   return value;
 }
 
-// `last(value)` returns the last item of the provided array (or `null` if
+// `last(value)` returns the last item of the provided array (or `nil` if
 // the array is empty).
 function last(writer, value) {
   if ( isArray(value) ) {
@@ -10821,13 +10809,7 @@ function length(writer, value) {
 // `empty(value)` returns true or false depending on whether or not the
 // provided array is empty.
 function empty(writer, value) {
-  if ( isArray(value) ) {
-    return !value.length;
-  }
-  if ( typeof value === 'object' && value !== null ) {
-    return !objectKeys(value).length;
-  }
-  return true;
+  return length(writer, value) === 0;
 }
 
 // `keys(value)` returns the keys of the Object or indexes of the Array
@@ -10864,7 +10846,7 @@ exports.empty = empty;
 exports.keys = keys;
 exports.values = values;
 
-},{"../../util":24}],19:[function(require,module,exports){
+},{"../../types":23,"../../util":24}],19:[function(require,module,exports){
 /*
  * Interpol (HTML Composition Language)
  * Licensed under the MIT License
