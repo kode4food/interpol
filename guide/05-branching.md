@@ -83,7 +83,7 @@ The `==` and `!=` operators perform strict equality checking, identical to JavaS
 #### Like
 The `like` operator is a little different.  Like will perform a deep comparison of values to determine whether the left operand is 'compatible' with the template on the right.
 
-Compatibility is mostly as you would expect, with one exception.  If the template contains a dictionary, only the properties defined in that dictionary are checked.  If the left operand has additional properties, those are ignored.
+Compatibility is mostly as you would expect, with one exception.  If the template contains a list, only the items defined in that list are checked.  If the left operand has additional items, those are ignored.  This applies to both vectors and dictionaries.
 
 ```ruby
 let myObject = [
