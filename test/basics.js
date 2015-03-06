@@ -130,26 +130,15 @@ exports.basics = nodeunit.testCase({
   },
    
   "Vector Like": function (test) {
-    var script1 = 'if [1, 2, 3] like [1, 2]\n' +
-                  '  "yes"\n' +
-                  'end';
+    var script1 = '[1, 2, 3] like [1, 2]';
+    var script2 = '[1, 2, 3] like [1, 2, 3]';
+    var script3 = '[1, 2] like [1, 2, 3]';
+    var script4 = '[] like []';
 
-    var script2 = 'if [1, 2, 3] like [1, 2, 3]\n' +
-                  '  "yes"\n' +
-                  'end';
-
-    var script3 = 'unless [1, 2] like [1, 2, 3]\n' +
-                  '  "yes"\n' +
-                  'end';
-
-    var script4 = 'if [] like []\n' +
-                  '  "yes"\n' +
-                  'end';
-
-    test.equal(evaluate(script1), "yes\n");
-    test.equal(evaluate(script2), "yes\n");
-    test.equal(evaluate(script3), "yes\n");
-    test.equal(evaluate(script4), "yes\n");
+    test.equal(evaluate(script1), "true");
+    test.equal(evaluate(script2), "true");
+    test.equal(evaluate(script3), "false");
+    test.equal(evaluate(script4), "true");
     test.done();
   },
 
