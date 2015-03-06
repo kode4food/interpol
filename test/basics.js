@@ -107,7 +107,7 @@ exports.basics = nodeunit.testCase({
     test.done();
   },
 
-  "Like Evaluation": function (test) {
+  "Dictionary Like": function (test) {
     var data = {
       person: {
         name: "Thom",
