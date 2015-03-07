@@ -1,5 +1,18 @@
 # Change History
 
+## Version 1.5.2 - Vector Matching
+Like dictionaries, vectors will now only be partially matched when used as the right side of a `like` or inline guard operation.  For example, the following will result in a true evaluation:
+
+```ruby
+["red", "green", "blue"] like ["red", "green"]
+```
+
+While this will not:
+
+```ruby
+["red", "green"] like ["red", "green", "blue"]
+```
+
 ## Version 1.5.1 - Pluralizer
 You can now create a pluralizer, particularly useful for piped calls and interpolations:
 
