@@ -1,6 +1,6 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -17,13 +17,12 @@ var interpol = window.interpol = require('../lib/interpol');
 
 // Register the Writers for easier access
 var writers = require('../lib/writers');
-interpol.createDOMWriter = writers.createDOMWriter;
 interpol.createNullWriter = writers.createNullWriter;
 interpol.createStringWriter = writers.createStringWriter;
 
-},{"../lib/interpol":4,"../lib/writers":18}],2:[function(require,module,exports){
+},{"../lib/interpol":4,"../lib/writers":17}],2:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -40,7 +39,7 @@ interpol.createStringWriter = writers.createStringWriter;
 
 },{}],3:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -231,9 +230,9 @@ exports.buildFormatter = buildFormatter;
 exports.buildDeferredFormatter = buildDeferredFormatter;
 exports.buildImmediateFormatter = buildImmediateFormatter;
 
-},{"./types":15,"./util":16,"./writers/null":19}],4:[function(require,module,exports){
+},{"./types":15,"./util":16,"./writers/null":18}],4:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -254,7 +253,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule;
 var generateFunction;
 
-var CURRENT_VERSION = "1.5.1";
+var CURRENT_VERSION = "1.5.2";
 
 // Bootstrap
 
@@ -334,7 +333,7 @@ module.exports = interpol;
 
 },{"./compiler/stub":2,"./runtime":14,"./types":15,"./util":16}],5:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -363,7 +362,7 @@ function isMatchingObject(template, obj) {
   }
 
   if ( isArray(template) ) {
-    if ( !isArray(obj) || template.length !== obj.length ) {
+    if ( !isArray(obj) || obj.length < template.length ) {
       return false;
     }
 
@@ -427,7 +426,7 @@ function buildArrayMatcher(template) {
     if ( template === obj ) {
       return true;
     }
-    if ( !isArray(obj) || mlen !== obj.length ) {
+    if ( !isArray(obj) || obj.length < mlen ) {
       return false;
     }
     for ( var i = 0; i < mlen; i++ ) {
@@ -471,7 +470,7 @@ exports.matcher = buildMatcher;
 
 },{"./util":16}],6:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -489,7 +488,7 @@ exports.createSystemResolver = system.createSystemResolver;
 
 },{"./memory":7,"./system":9}],7:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -636,7 +635,7 @@ exports.createMemoryResolver = createMemoryResolver;
 
 },{"../types":15,"../util":16}],8:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -669,7 +668,7 @@ exports.wrap = wrap;
 
 },{"../../types":15}],9:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -707,7 +706,7 @@ exports.createSystemResolver = createSystemResolver;
 
 },{"../memory":7,"./list":10,"./math":11,"./render":12,"./string":13}],10:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -717,6 +716,8 @@ exports.createSystemResolver = createSystemResolver;
 "use strict";
 
 var util = require('../../util');
+var types = require('../../types');
+
 var objectKeys = util.objectKeys;
 var isArray = util.isArray;
 
@@ -751,7 +752,7 @@ function join(writer, delim, value) {
   return value;
 }
 
-// `last(value)` returns the last item of the provided array (or `null` if
+// `last(value)` returns the last item of the provided array (or `nil` if
 // the array is empty).
 function last(writer, value) {
   if ( isArray(value) ) {
@@ -784,13 +785,7 @@ function length(writer, value) {
 // `empty(value)` returns true or false depending on whether or not the
 // provided array is empty.
 function empty(writer, value) {
-  if ( isArray(value) ) {
-    return !value.length;
-  }
-  if ( typeof value === 'object' && value !== null ) {
-    return !objectKeys(value).length;
-  }
-  return true;
+  return length(writer, value) === 0;
 }
 
 // `keys(value)` returns the keys of the Object or indexes of the Array
@@ -827,9 +822,9 @@ exports.empty = empty;
 exports.keys = keys;
 exports.values = values;
 
-},{"../../util":16}],11:[function(require,module,exports){
+},{"../../types":15,"../../util":16}],11:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -996,7 +991,7 @@ exports.sum = sum;
 
 },{"../../types":15,"../../util":16,"./helpers":8}],12:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -1106,7 +1101,7 @@ exports.pluralizer = pluralizer;
 
 },{"../../types":15}],13:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -1174,7 +1169,7 @@ exports.upper = upper;
 
 },{"../../format":3,"../../types":15,"./helpers":8}],14:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -1519,9 +1514,9 @@ function exec(ctx, func, args) {
 // Exported Functions
 exports.createRuntime = createRuntime;
 
-},{"./format":3,"./match":5,"./resolvers/internal":6,"./types":15,"./util":16,"./writers":18}],15:[function(require,module,exports){
+},{"./format":3,"./match":5,"./resolvers/internal":6,"./types":15,"./util":16,"./writers":17}],15:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -1792,7 +1787,7 @@ exports.isFalsy = isFalsy;
 
 },{"./util":16}],16:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -1944,7 +1939,7 @@ exports.selfMap = selfMap;
 
 },{}],17:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -1953,99 +1948,16 @@ exports.selfMap = selfMap;
 
 "use strict";
 
-var util = require('../util');
-var string = require('./string');
-
-var createStringWriter = string.createStringWriter;
-
-var REPLACE = createDOMWriter.REPLACE = 'replace';
-var APPEND = createDOMWriter.APPEND = 'append';
-var INSERT = createDOMWriter.INSERT = 'insert';
-
-/**
- * Creates a DOMWriter.  A DOMWriter attaches itself to a DOM Element,
- * and will manipulate that Element's content when a template is rendered
- * with it.  The writer is very simple and won't cover all use-cases, it
- * also may not be the most performant approach.
- *
- * The default mode is REPLACE, meaning all of the Element's children are
- * replaced when the associated template is rendered.  INSERT and APPEND
- * will insert new renderings to the beginning or end of the child list
- * respectively.
- *
- * @param {Element} parentElement the Element to which this DOMWriter attaches
- * @param {String} [renderMode] the DOM rendering mode: REPLACE|APPEND|INSERT
- */
- 
-/* istanbul ignore next: browser-only */
-function createDOMWriter(parentElement, renderMode) {
-  var writer = createStringWriter();
-  var writerDone = writer.done;
-
-  if ( renderMode === undefined ) {
-    renderMode = REPLACE;
-  }
-
-  switch ( renderMode ) {
-    case APPEND:
-      writer.done = appendEndRender;
-      break;
-
-    case INSERT:
-      writer.done = insertEndRender;
-      break;
-
-    case REPLACE:
-      writer.done = replaceEndRender;
-      break;
-
-    default:
-      throw new Error("Invalid renderMode: " + renderMode);
-  }
-
-  function appendEndRender() {
-    var container = document.createElement("span");
-    container.innerHTML = writerDone();
-    parentElement.appendChild(container);
-  }
-
-  function insertEndRender() {
-    var container = document.createElement("span");
-    container.innerHTML = writerDone();
-    parentElement.insertBefore(container, parentElement.firstChild);
-  }
-
-  function replaceEndRender() {
-    parentElement.innerHTML = writerDone();
-  }
-}
-
-// Exported Functions
-exports.createDOMWriter = createDOMWriter;
-
-},{"../util":16,"./string":20}],18:[function(require,module,exports){
-/*
- * Interpol (Logicful HTML Templates)
- * Licensed under the MIT License
- * see doc/LICENSE.md
- *
- * @author Thomas S. Bradford (kode4food.it)
- */
-
-"use strict";
-
-var domWriter = require('./dom');
 var nullWriter = require('./null');
 var stringWriter = require('./string');
 
 // Exported Functions
-exports.createDOMWriter = domWriter.createDOMWriter;
 exports.createNullWriter = nullWriter.createNullWriter;
 exports.createStringWriter = stringWriter.createStringWriter;
 
-},{"./dom":17,"./null":19,"./string":20}],19:[function(require,module,exports){
+},{"./null":18,"./string":19}],18:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
@@ -2080,9 +1992,9 @@ function createNullWriter() {
 // Exported Functions
 exports.createNullWriter = createNullWriter;
 
-},{"../util":16}],20:[function(require,module,exports){
+},{"../util":16}],19:[function(require,module,exports){
 /*
- * Interpol (Logicful HTML Templates)
+ * Interpol (HTML Composition Language)
  * Licensed under the MIT License
  * see doc/LICENSE.md
  *
