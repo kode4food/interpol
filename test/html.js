@@ -47,5 +47,27 @@ exports.html = nodeunit.testCase({
     test.equal(evaluate(script7), '<tag attr="static dynamic strings added">');
     test.equal(evaluate(script8), '<tag attr />');
     test.done();
+  },
+
+  "Mustache Handling": function (test) {
+    var script1 = "{some mustache content}";
+    var script2 = "{{some more content}}";
+    var script3 = "{{{ even more content }}}";
+    var script4 = "{ {this will pass the parser}";
+    var err1 = "{ this will not} }";
+    var err2 = "{{ nor will this } }}";
+
+    test.equal(evaluate(script1), script1);
+    test.equal(evaluate(script2), script2);
+    test.equal(evaluate(script3), script3);
+    test.equal(evaluate(script4), script4);
+    test.throws(function () {
+      evaluate(err1);
+    });
+    test.throws(function () {
+      evaluate(err2);
+    });
+    test.done();
   }
+
 });

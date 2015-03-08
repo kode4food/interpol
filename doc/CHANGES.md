@@ -1,5 +1,12 @@
 # Change History
 
+## Version 1.5.3 - Angular Friendliness
+Interpol is now Angular and Mustache-friendly, making it useful as an initial step in a rendering pipeline.  This means that if it encounters brackets in its parsing, it will treat the content of those brackets as something that should be passed directly through to the resulting HTML.  The parser will count the number of leading brackets and then terminate when it encounters a matching closing set.  This will allow Interpol to deal with implementations like Dust.js who only use single brackets.  So for example:
+
+```html
+<b> {{fname + ' ' + lname}} </b>
+```
+
 ## Version 1.5.2 - Vector Matching
 Like dictionaries, vectors will now only be partially matched when used as the right side of a `like` or inline guard operation.  For example, the following will result in a true evaluation:
 
