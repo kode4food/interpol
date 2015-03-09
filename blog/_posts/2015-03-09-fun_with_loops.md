@@ -85,7 +85,7 @@ For example, this will create a new List called `names` with the full names of a
 
 ```python
 let names = [
-  person.first_name + ' ' person.last_name
+  person.first_name + ' ' + person.last_name
   for person in people when person.logged_in
 ]
 ```
