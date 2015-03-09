@@ -6,7 +6,7 @@ author: Thom
 On the surface, Interpol loops seem like a simple way to iterate over a set of items.  But appearances can often be deceiving, and `for` loops are no exception.  Let's dive a little deeper into what you can accomplish with them.
 
 ## Simple Looping
-The most basic use case for a loop would be to iterate over a set of items, typically a list.  This example loops over a set of items resulting from the expression `people`, passing each item as the `person` variable into the loop's body:
+The most basic use case for a loop would be to iterate over a set of items, typically a List.  This example loops over a set of items resulting from the expression `people`, passing each item as the `person` variable into the loop's body:
 
 ```ruby
 for person in people
@@ -79,14 +79,14 @@ Obviously this can become very expensive, but when you need it, the functionalit
 By the way, you may have noticed that I used the keyword `where` in this example instead of `when`.  These two keywords are synonymous and can be used interchangeably depending on how you want your guards to read.
 
 ## List Comprehensions
-Let's face it, sometimes you just need to mangle a list.  That's why List Comprehensions are here to help you.  Nearly all the powers of loops are also extended to list comprehensions, which make them a very powerful way to reimagine your data for further processing.
+Let's face it, sometimes you just need to mangle a List.  That's why List Comprehensions are here to help you.  Nearly all the powers of loops are also extended to List Comprehensions, which make them a very powerful way to reimagine your data for further processing.
 
-For example, this will create a new list called `names` with the full names of all people who are logged in:
+For example, this will create a new List called `names` with the full names of all people who are logged in:
 
 ```python
 let names = [
-  p.first + ' ' p.last 
-  for p in people when p.logged_in
+  person.first_name + ' ' person.last_name
+  for person in people when person.logged_in
 ]
 ```
 
