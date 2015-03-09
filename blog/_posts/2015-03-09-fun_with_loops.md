@@ -97,11 +97,11 @@ Looping applies both to Lists and to Generators, the latter of which we haven't 
 
 ```ruby
 from math import range
-[ "key_%i" for i in range(1,10) ]
+[ "key_%i" for i in range(1, 10) ]
 # results in: key_1 key_2 key_3 key_4 ...
 ```
 
-When `range(1,10)` is called it returns a generator function.  Each time that function is called, it will return the next value in the range, starting at 1 and ending at 10.  Under the hood, the generator is returning a sentinel object when the sequence is complete, but you don't need to worry about that unless you're implementing your own generator.
+When `range(1, 10)` is called it returns a generator function.  Each time that function is called, it will return the next value in the range, starting at 1 and ending at 10.  Under the hood, the generator is returning a sentinel object when the sequence is complete, but you don't need to worry about that unless you're implementing your own generator.
 
 ## In Summary
 So there you have it.  Loops in all their forms!  As you can see, you have a lot of options for iterating over and transforming your data.  This means far less data massaging that needs to be performed in your controller code.  And how can that be bad?
