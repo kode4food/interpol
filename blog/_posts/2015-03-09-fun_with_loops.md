@@ -62,7 +62,7 @@ end
 ## Joins!
 Yes, you read that correctly.  There's no reason you can't leverage Interpol loops to perform set joining between disparate collections.  Guard clauses are all you need to make it happen.  
 
-If you iterate over separate collections, what you'll be generating without guards is a cartesian product.  We want to avoid that, so we add a guard to the second range that will filter out any unrelated items.  This loop will generate a set of mutual friends.
+If you iterate over separate collections, what you'll be generating without guards is a cartesian product.  We want to avoid that, so we add a guard to the second range that will filter out any unrelated items.  This loop will generate a set of parent-child relationships.
 
 ```ruby
 for person1 in people, 
@@ -93,7 +93,7 @@ let names = [
 With the exception of `else` branching, all of the capabilities of a `for` loop are here, including guards and multiple ranges.
 
 ## Lists Aren't Everything!
-Looping applies both to Lists and to Generators, the latter of which we haven't yet talked about.  A Generator is a special Interpol function that, when called multiple times, will generate a set of values.  There are a few functions in the standard Interpol modules that act as generators.  For example:
+Looping applies both to Lists and to Generators, the latter of which we haven't yet talked about.  A Generator is a special Interpol function that, when called repeatedly, will generate a sequence of values.  There are a few functions in the standard Interpol modules that act as generators.  For example:
 
 ```ruby
 from math import range
