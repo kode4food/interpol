@@ -172,5 +172,12 @@ exports.basics = nodeunit.testCase({
     test.equal(evaluate("root[1].info['description']", data), "");
     test.equal(evaluate("root[0].info.notThere", data), "");
     test.done();
+  },
+
+  "Assignments": function (test) {
+    test.equal(evaluate("let a = 99\na"), "99");
+    test.equal(evaluate("let a = 99, b = 1000\na b"), "99 1000");
+    test.equal(evaluate("let a = 100, b = a + 20, c = b * 2\nc"), "240");
+    test.done();
   }
 });
