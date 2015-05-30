@@ -32,7 +32,7 @@ exports.imports = nodeunit.testCase({
 
   "helper imports": nodeunit.testCase({
     setUp: function (callback) {
-      runtime = interpol.runtime({ resolvers: [] });
+      runtime = interpol.getRuntime({ resolvers: [] });
       resolvers.createMemoryResolver(runtime, true);
       runtime.registerModule('hello', "'hello world!'");
       runtime.registerModule('helpers', {
@@ -82,7 +82,7 @@ exports.imports = nodeunit.testCase({
 
   "system imports": nodeunit.testCase({
     setUp: function (callback) {
-      runtime = interpol.runtime();
+      runtime = interpol.getRuntime();
       callback();
     },
 
@@ -131,7 +131,7 @@ exports.imports = nodeunit.testCase({
 function createFileImportTests(compile, monitor) {
   return nodeunit.testCase({
     setUp: function (callback) {
-      runtime = interpol.runtime({ resolvers: [] });
+      runtime = interpol.getRuntime({ resolvers: [] });
       resolvers.createFileResolver(runtime, {
         path: "./test", compile: compile, monitor: monitor
       });

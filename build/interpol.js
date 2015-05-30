@@ -1,4 +1,5 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function (global){
 /*
  * Interpol (HTML Composition Language)
  * Licensed under the MIT License
@@ -12,32 +13,17 @@
 // This module is used to collect the requirements for a minimal
 // Browserify build.  It's of no interest to node.js
 
-// Set the Interpol browser global
-var interpol = window.interpol = require('../lib/interpol');
-
-// Register the Writers for easier access
+var namespace = require('../lib/namespace');
 var writers = require('../lib/writers');
-interpol.createNullWriter = writers.createNullWriter;
-interpol.createStringWriter = writers.createStringWriter;
 
-},{"../lib/interpol":4,"../lib/writers":17}],2:[function(require,module,exports){
-/*
- * Interpol (HTML Composition Language)
- * Licensed under the MIT License
- * see doc/LICENSE.md
- *
- * @author Thomas S. Bradford (kode4food.it)
- */
+// Set the Interpol browser global
+global.interpol = namespace.configureNamespace({
+  createNullWriter: writers.createNullWriter,
+  createStringWriter: writers.createStringWriter
+});
 
-"use strict";
-
-/**
- * This is a stub that will be populated by the 'real' compiler functionality
- * should it be loaded by either node.js or Browserify.  It's here because
- * we shouldn't have to rely on Browserify's `--ignore` option.
- */
-
-},{}],3:[function(require,module,exports){
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../lib/namespace":4,"../lib/writers":16}],2:[function(require,module,exports){
 /*
  * Interpol (HTML Composition Language)
  * Licensed under the MIT License
@@ -230,108 +216,7 @@ exports.buildFormatter = buildFormatter;
 exports.buildDeferredFormatter = buildDeferredFormatter;
 exports.buildImmediateFormatter = buildImmediateFormatter;
 
-},{"./types":15,"./util":16,"./writers/null":18}],4:[function(require,module,exports){
-/*
- * Interpol (HTML Composition Language)
- * Licensed under the MIT License
- * see doc/LICENSE.md
- *
- * @author Thomas S. Bradford (kode4food.it)
- */
-
-"use strict";
-
-var util = require('./util');
-var types = require('./types');
-var compiler = require('./compiler/stub');
-var runtime = require('./runtime');
-
-var isArray = util.isArray;
-var bless = types.bless;
-
-var createRuntime = runtime.createRuntime;
-var compileModule;
-var generateFunction;
-
-var CURRENT_VERSION = "1.5.3";
-
-// Bootstrap
-
-interpol.VERSION = CURRENT_VERSION;
-interpol.bless = bless;
-interpol.evaluate = evaluate;
-interpol.compile = compile;
-interpol.runtime = getRuntime;
-interpol.stopIteration = types.stopIteration;
-
-// Core Interpol Implementation
-
-var globalRuntime = createRuntime(interpol);
-
-/**
- * Main Interpol entry point.  Takes a template and returns a closure
- * for rendering it.  The template must be a String.
- *
- * @param {String} template the template to be compiled
- * @param {Runtime} [runtime] Runtime Instance (or config Object)
- */
-function interpol(template, runtime) {
-  if ( typeof template !== 'string' ) {
-    throw new Error("template must be a string");
-  }
-
-  runtime = getRuntime(runtime);
-  var options = runtime.options;
-
-  var compiledOutput = compile(template, options).templateBody;
-  var wrapper = generateFunction(compiledOutput);
-  return wrapper(runtime);
-}
-
-/**
- * Convenience function to compile and execute a template against a context
- * Object and options.  Not generally recommended.
- */
-function evaluate(script, obj, options) {
-  var compiled = interpol(script, options);
-  return compiled(obj, options);
-}
-
-/**
- * Invokes the Interpol compiler against the specified template and produces
- * an Object that includes the compiled template generator and any errors or
- * warnings.  The compiler module has to be loaded for this to work.
- *
- * @param {String} template the Interpol Template to be compiled
- */
-function compile(template, options) {
-  if ( !compileModule ) {
-    if ( typeof compiler.compileModule !== 'function' ) {
-      throw new Error("The Interpol compiler was never loaded");
-    }
-    compileModule = compiler.compileModule;
-    generateFunction = compiler.generateFunction;
-  }
-  return compileModule(template, options);
-}
-
-/**
- * Returns a new Runtime based on the provided options.  If no options are
- * provided, will return the global Runtime instance.
- *
- * @param {Object} [options] configuration Object
- */
-function getRuntime(options) {
-  if ( !options ) {
-    return globalRuntime;
-  }
-  return createRuntime(interpol, options);
-}
-
-// Exported Functions
-module.exports = interpol;
-
-},{"./compiler/stub":2,"./runtime":14,"./types":15,"./util":16}],5:[function(require,module,exports){
+},{"./types":14,"./util":15,"./writers/null":17}],3:[function(require,module,exports){
 /*
  * Interpol (HTML Composition Language)
  * Licensed under the MIT License
@@ -468,7 +353,56 @@ function buildObjectMatcher(template) {
 exports.matches = isMatchingObject;
 exports.matcher = buildMatcher;
 
-},{"./util":16}],6:[function(require,module,exports){
+},{"./util":15}],4:[function(require,module,exports){
+/*
+ * Interpol (HTML Composition Language)
+ * Licensed under the MIT License
+ * see doc/LICENSE.md
+ *
+ * @author Thomas S. Bradford (kode4food.it)
+ */
+
+"use strict";
+
+var util = require('./util');
+var types = require('./types');
+var runtime = require('./runtime');
+
+var bless = types.bless;
+
+var createRuntime = runtime.createRuntime;
+
+var CURRENT_VERSION = "1.5.3";
+
+function configureNamespace(namespace) {
+  var globalRuntime = createRuntime(namespace);
+
+  namespace.VERSION = CURRENT_VERSION;
+  namespace.bless = bless;
+  namespace.getRuntime = getRuntime;
+  namespace.stopIteration = types.stopIteration;
+  
+  return namespace;  
+  
+  /**
+   * Returns a new Runtime based on the provided options.  If no options are
+   * provided, will return the global Runtime instance.
+   *
+   * @param {Object} [options] configuration Object
+   */
+  function getRuntime(options) {
+    if ( !options ) {
+      return globalRuntime;
+    }
+    return createRuntime(namespace, options);
+  }
+  
+}
+
+// Exported Functions
+exports.configureNamespace = configureNamespace;
+
+},{"./runtime":13,"./types":14,"./util":15}],5:[function(require,module,exports){
 /*
  * Interpol (HTML Composition Language)
  * Licensed under the MIT License
@@ -486,7 +420,7 @@ var system = require('./system');
 exports.createMemoryResolver = memory.createMemoryResolver;
 exports.createSystemResolver = system.createSystemResolver;
 
-},{"./memory":7,"./system":9}],7:[function(require,module,exports){
+},{"./memory":6,"./system":8}],6:[function(require,module,exports){
 /*
  * Interpol (HTML Composition Language)
  * Licensed under the MIT License
@@ -633,7 +567,7 @@ function createModuleStub(moduleExports) {
 // Exported Functions
 exports.createMemoryResolver = createMemoryResolver;
 
-},{"../types":15,"../util":16}],8:[function(require,module,exports){
+},{"../types":14,"../util":15}],7:[function(require,module,exports){
 /*
  * Interpol (HTML Composition Language)
  * Licensed under the MIT License
@@ -666,7 +600,7 @@ function wrap(func) {
 // Exported Functions
 exports.wrap = wrap;
 
-},{"../../types":15}],9:[function(require,module,exports){
+},{"../../types":14}],8:[function(require,module,exports){
 /*
  * Interpol (HTML Composition Language)
  * Licensed under the MIT License
@@ -704,7 +638,7 @@ function createSystemResolver(runtime) {
 // Exported Functions
 exports.createSystemResolver = createSystemResolver;
 
-},{"../memory":7,"./list":10,"./math":11,"./render":12,"./string":13}],10:[function(require,module,exports){
+},{"../memory":6,"./list":9,"./math":10,"./render":11,"./string":12}],9:[function(require,module,exports){
 /*
  * Interpol (HTML Composition Language)
  * Licensed under the MIT License
@@ -822,7 +756,7 @@ exports.empty = empty;
 exports.keys = keys;
 exports.values = values;
 
-},{"../../types":15,"../../util":16}],11:[function(require,module,exports){
+},{"../../types":14,"../../util":15}],10:[function(require,module,exports){
 /*
  * Interpol (HTML Composition Language)
  * Licensed under the MIT License
@@ -989,7 +923,7 @@ exports.median = median;
 exports.min = min;
 exports.sum = sum;
 
-},{"../../types":15,"../../util":16,"./helpers":8}],12:[function(require,module,exports){
+},{"../../types":14,"../../util":15,"./helpers":7}],11:[function(require,module,exports){
 /*
  * Interpol (HTML Composition Language)
  * Licensed under the MIT License
@@ -1099,7 +1033,7 @@ exports.evenOdd = evenOdd;
 exports.separator = separator;
 exports.pluralizer = pluralizer;
 
-},{"../../types":15}],13:[function(require,module,exports){
+},{"../../types":14}],12:[function(require,module,exports){
 /*
  * Interpol (HTML Composition Language)
  * Licensed under the MIT License
@@ -1167,7 +1101,7 @@ exports.split = split;
 exports.title = title;
 exports.upper = upper;
 
-},{"../../format":3,"../../types":15,"./helpers":8}],14:[function(require,module,exports){
+},{"../../format":2,"../../types":14,"./helpers":7}],13:[function(require,module,exports){
 /*
  * Interpol (HTML Composition Language)
  * Licensed under the MIT License
@@ -1514,7 +1448,7 @@ function exec(ctx, func, args) {
 // Exported Functions
 exports.createRuntime = createRuntime;
 
-},{"./format":3,"./match":5,"./resolvers/internal":6,"./types":15,"./util":16,"./writers":17}],15:[function(require,module,exports){
+},{"./format":2,"./match":3,"./resolvers/internal":5,"./types":14,"./util":15,"./writers":16}],14:[function(require,module,exports){
 /*
  * Interpol (HTML Composition Language)
  * Licensed under the MIT License
@@ -1785,7 +1719,7 @@ exports.bless = bless;
 exports.isTruthy = isTruthy;
 exports.isFalsy = isFalsy;
 
-},{"./util":16}],16:[function(require,module,exports){
+},{"./util":15}],15:[function(require,module,exports){
 /*
  * Interpol (HTML Composition Language)
  * Licensed under the MIT License
@@ -1937,7 +1871,7 @@ exports.map = map;
 exports.filter = filter;
 exports.selfMap = selfMap;
 
-},{}],17:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 /*
  * Interpol (HTML Composition Language)
  * Licensed under the MIT License
@@ -1955,7 +1889,7 @@ var stringWriter = require('./string');
 exports.createNullWriter = nullWriter.createNullWriter;
 exports.createStringWriter = stringWriter.createStringWriter;
 
-},{"./null":18,"./string":19}],18:[function(require,module,exports){
+},{"./null":17,"./string":18}],17:[function(require,module,exports){
 /*
  * Interpol (HTML Composition Language)
  * Licensed under the MIT License
@@ -1992,7 +1926,7 @@ function createNullWriter() {
 // Exported Functions
 exports.createNullWriter = createNullWriter;
 
-},{"../util":16}],19:[function(require,module,exports){
+},{"../util":15}],18:[function(require,module,exports){
 /*
  * Interpol (HTML Composition Language)
  * Licensed under the MIT License
@@ -2090,4 +2024,4 @@ function createStringWriter() {
 // Exported Functions
 exports.createStringWriter = createStringWriter;
 
-},{"../types":15,"../util":16}]},{},[1]);
+},{"../types":14,"../util":15}]},{},[1]);

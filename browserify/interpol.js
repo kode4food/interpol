@@ -11,10 +11,11 @@
 // This module is used to collect the requirements for a minimal
 // Browserify build.  It's of no interest to node.js
 
-// Set the Interpol browser global
-var interpol = window.interpol = require('../lib/interpol');
-
-// Register the Writers for easier access
+var namespace = require('../lib/namespace');
 var writers = require('../lib/writers');
-interpol.createNullWriter = writers.createNullWriter;
-interpol.createStringWriter = writers.createStringWriter;
+
+// Set the Interpol browser global
+global.interpol = namespace.configureNamespace({
+  createNullWriter: writers.createNullWriter,
+  createStringWriter: writers.createStringWriter
+});
