@@ -7,16 +7,15 @@ title: Interpol
 Interpol is an HTML Composition Language.  That means it's kind of like a templating language, but capable of heavy lifting.  It features:
 
   * Very flexible string interpolation
-  * Kick-ass partials with
-    * First class with closure support
-    * Guards and pattern-matched arguments
-    * Argument binding
-    * Ruby-style Blocks
+  * First-class Partials with guards
+  * Pattern-matching operator and arguments 
+  * Ruby-style block-passing
   * Nested loops with guards and else clauses
-  * Full-featured ist comprehensions
+  * Full-featured List comprehensions
   * Conditional expressions and statements
   * Modules with Python-style importing
   * Incredibly fast transpiled JavaScript!
+  * And much, much more!
 
 What can you do with it?  Stuff like this:
 
