@@ -11,7 +11,7 @@ Interpol is an HTML Composition Language.  That means it's kind of like a templa
   * Pattern-matching operator and arguments 
   * Ruby-style block-passing
   * Nested loops with guards and else clauses
-  * Full-featured List comprehensions
+  * Full-featured list comprehensions
   * Conditional expressions and statements
   * Modules with Python-style importing
   * Incredibly fast transpiled JavaScript!
