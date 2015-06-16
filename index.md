@@ -40,15 +40,6 @@ end
 
 `renderPeople` is a partial.  Its first form renders a list of interpolated strings resulting from a set of nested loops.  The second form is a guarded version that catches the case when there is no `people` value or it is empty.  How easy is that to do with your current template system?  I suspect pretty difficult.  Maybe not possible at all.
 
-### So Why HTML Composition?
-There has been a lot of noise about logic-less templates in recent years.  The sales pitch is that they enforce separation of concerns, so that business logic doesn't taint the presentation layer.  Fair enough, I agree, separation of concerns is a good thing.
-
-In reality the separation of concerns is still violated in many cases, except that it's now your business logic that's often tainted with presentation-specific mapping acrobatics to massage your data into a form the template system will accept.  You're also having to leverage helpers extensively, backfilling the 'logic' a logic-less template system refused to provide in the first place.
-
-That being the case, what's the benefit of a logic-less template system?  None that I can see.  Especially when a developer can *still* choose to separate concerns in their design.  And trust me, most developers are smart enough to make that decision on their own.  You don't have to force their hands by giving them tools that paint them into a corner.
-
-Interpol lets *you* decide and makes sure you're not crippled as a result of your decision.
-
 ### More About Interpolation
 You might ask why the interpolation was so involved.  After all, in other systems you could just embed the values directly into the resulting content.  You can do something like that in Interpol as well.  It would look like this: 
 
