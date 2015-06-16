@@ -1,7 +1,20 @@
 # Interpol (HTML Composition Language)
 [![Build Status](https://travis-ci.org/kode4food/interpol.svg)](https://travis-ci.org/kode4food/interpol)
 
-Interpol is an HTML Composition Language.  What can you do with it?  Stuff like this:
+Interpol is an HTML Composition Language.  That means it's kind of like a templating language, but capable of heavy lifting.  It features:
+
+  * Very flexible string interpolation
+  * First-class Partials with guards
+  * Pattern-matching operator and arguments 
+  * Ruby-style block-passing
+  * Nested loops with guards and else clauses
+  * Full-featured list comprehensions
+  * Conditional expressions and statements
+  * Modules with Python-style importing
+  * Incredibly fast transpiled JavaScript!
+  * And much, much more! (See [the Guide](http://interpoljs.io/guide/))
+
+What can you do with it?  Stuff like this:
 
 ```ruby
 let label = '%0 is a friend of %1'
