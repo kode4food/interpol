@@ -15,7 +15,7 @@ Interpol is an HTML Composition Language.  That means it's kind of like a templa
   * Conditional expressions and statements
   * Modules with Python-style importing
   * Incredibly fast transpiled JavaScript!
-  * And much, much more!
+  * And much, much more! (See [the Guide](http://interpoljs.io/guide/))
 
 What can you do with it?  Stuff like this:
 
