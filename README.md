@@ -4,7 +4,7 @@
 Interpol is an HTML Composition Language.  That means it's kind of like a templating language, but capable of heavy lifting.  It features:
 
   * Very flexible string interpolation
-  * First-class Partials with guards
+  * First-class partials with guards
   * Pattern-matching operator and arguments 
   * Ruby-style block-passing
   * Nested loops with guards and else clauses
