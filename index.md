@@ -4,7 +4,21 @@ title: Interpol
 ---
 ## HTML Composition
 
-Interpol is an HTML Composition Language.  What can you do with it?  Stuff like this:
+Interpol is an HTML Composition Language.  That means it's kind of like a templating language, but capable of heavy lifting.  It features:
+
+  * Very flexible string interpolation
+  * Kick-ass partials with
+    * First class with closure support
+    * Guards and pattern-matched arguments
+    * Argument binding
+    * Ruby-style Blocks
+  * Nested loops with guards and else clauses
+  * Full-featured ist comprehensions
+  * Conditional expressions and statements
+  * Modules with Python-style importing
+  * Incredibly fast transpiled JavaScript!
+
+What can you do with it?  Stuff like this:
 
 ```ruby
 let label = '%0 is a friend of %1'
