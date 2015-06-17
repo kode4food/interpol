@@ -19,7 +19,7 @@ def renderItem(items)
 end
 ```
 
-Partials are first-class elements of Interpol, meaning they can be passed around and assigned to variables.  In certain situations, they are also hoisted to the top of their scope, so you can call them in your code even before they've been defined.  More on 'hoisting' later.
+Partials are first-class elements of Interpol, meaning they can be passed around and assigned to variables.
 
 ### Guarded Partials
 The definition of a partial can also be 're-opened' to apply guard clauses, or to shadow the partial if no guard clause is provided.  The order in which partials are defined determines the order in which the guard clauses are evaluated, where the most recently defined will be evaluated first.  For example:
@@ -197,38 +197,3 @@ end
 # call the partial with the bound block
 colorList(['red', 'green', 'blue'])
 ```
-
-### Hoisting
-Under certain conditions, Partials are subject to something called 'hoisting'.  What this means is that the partial's definition will appear to have been defined at the top of the scope.  The conditions for this are rather simple: To be hoistable, all partial definitions must appear at the end of the current scope without other types of statements interspersed.  The Interpol rewriter will not attempt to infer your intent otherwise.
-
-So, for example, these partials will be hoisted:
-
-```ruby
-partial1(partial2)  # call partial1 with a reference to partial2
-
-def partial1(someValue)
-  someValue
-end
-
-def partial2
-  "hello there!"
-end
-```
-
-But these will not be hoisted:
-
-```ruby
-partial1()  # call partial1 (won't work)
-
-def partial1
-  "hello"
-end
-
-partial2()  # makes hoisting invalid (won't work)
-
-def partial2
-  "there!"
-end
-```
-
-So why hoisting?  There are some people who believe hoisting, in general, is bad.  For variables declarations I would definitely agree.  But for partials, I'm not so convinced.  I also think it's stylistically horrible to define nested partials at the top of a scope when that scope is also performing other statements that serve as the scope's true essence.  Because then you have to scroll down to find out what the partial actually does.  I hate scrolling.
