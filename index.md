@@ -107,7 +107,7 @@ bower install interpol --save
 ```
 
 ### Inclusion in a Web Page
-To include Interpol templates in the browser, they must be loaded from pre-compiled JavaScript bundles.  These bundles will automatically registered with Interpol when loaded, so all you have to do is load them in the right order, and then invoke them somehow:
+To include Interpol templates in the browser, they must be loaded from pre-compiled JavaScript bundles.  These bundles will automatically register with Interpol when loaded, so all you have to do is load them in the right order, and then invoke them somehow:
 
 ```html
 <script src="build/interpol.min.js"
