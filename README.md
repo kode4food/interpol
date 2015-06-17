@@ -18,7 +18,6 @@ What can you do with it?  Stuff like this:
 
 ```ruby
 let label = '%0 is a friend of %1'
-renderPeople(people)
 
 def renderPeople(people)
   <ul>
@@ -33,6 +32,9 @@ end
 def renderPeople(people) when not people
   <b> 'There are no people to render' </b>
 end
+
+# call it
+renderPeople(people)
 ```
 
 `renderPeople` is a partial.  Its first form renders a list of interpolated strings resulting from a set of nested loops.  The second form is a guarded version that catches the case when there is no `people` value or it is empty.  How easy is that to do with your current template system?  I suspect pretty difficult.  Maybe not possible at all.

@@ -14,8 +14,10 @@
 var namespace = require('../lib/namespace');
 var writers = require('../lib/writers');
 
-// Set the Interpol browser global
-global.interpol = namespace.configureNamespace({
-  createNullWriter: writers.createNullWriter,
-  createStringWriter: writers.createStringWriter
-});
+function browserStub() {
+  throw new Error("Template compilation not supported in Browser");
+}
+
+var interpol = global.interpol = namespace.configureNamespace(browserStub);
+interpol.createNullWriter = writers.createNullWriter;
+interpol.createStringWriter = writers.createStringWriter;

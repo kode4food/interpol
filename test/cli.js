@@ -34,7 +34,7 @@ exports.cli = nodeunit.testCase({
 
       var content = require('./cli_success/test1.int.js');
       test.equal(typeof content.createTemplate, 'function');
-      var compiled = content.createTemplate(createRuntime(interpol));
+      var compiled = content.createTemplate(createRuntime());
       test.equal(typeof compiled, 'function');
 
       // cleanup
