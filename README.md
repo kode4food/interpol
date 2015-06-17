@@ -16,7 +16,7 @@ Interpol is an HTML Composition Language.  That means it's kind of like a templa
 
 What can you do with it?  Stuff like this:
 
-```ruby
+```
 let label = '%0 is a friend of %1'
 
 def renderPeople(people)
