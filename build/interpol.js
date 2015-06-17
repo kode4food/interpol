@@ -16,11 +16,13 @@
 var namespace = require('../lib/namespace');
 var writers = require('../lib/writers');
 
-// Set the Interpol browser global
-global.interpol = namespace.configureNamespace({
-  createNullWriter: writers.createNullWriter,
-  createStringWriter: writers.createStringWriter
-});
+function browserStub() {
+  throw new Error("Template compilation not supported in Browser");
+}
+
+var interpol = global.interpol = namespace.configureNamespace(browserStub);
+interpol.createNullWriter = writers.createNullWriter;
+interpol.createStringWriter = writers.createStringWriter;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../lib/namespace":4,"../lib/writers":16}],2:[function(require,module,exports){
@@ -449,7 +451,7 @@ var bless = types.bless;
  * @param {boolean} [addRuntimeEntries] whether to add registerModule
  */
 function createMemoryResolver(runtime, addRuntimeEntries) {
-  var interpol = runtime.interpol;
+  var interpol = runtime.namespace;
   var cache = {};
 
   var resolver = {
@@ -1141,7 +1143,7 @@ var noOp = bless(function () {});
 
 var slice = Array.prototype.slice;
 
-function createRuntime(interpol, runtimeOptions) {
+function createRuntime(namespace, runtimeOptions) {
   if ( isInterpolRuntime(runtimeOptions) ) {
     return runtimeOptions;
   }
@@ -1156,7 +1158,7 @@ function createRuntime(interpol, runtimeOptions) {
 
   var runtime = {
     __intRuntime: true,
-    interpol: interpol,
+    namespace: namespace,
 
     options: getOptions,
     resolvers: getResolvers,
