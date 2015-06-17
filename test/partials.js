@@ -50,52 +50,22 @@ exports.partials = nodeunit.testCase({
     test.done();
   },
 
-  "Partial Hoisting": function (test) {
-    var script1 = 'partialCall("Bob")\n' +
-                  'def partialCall(name)\n' +
-                  '  "Hello, %name!"\n' +
-                  'end';
-
-    var script2 = 'partialCall("Bob")\n' +
-                  'def partialCall(name)\n' +
-                  '  "Hello, %name!"\n' +
-                  'end' +
-                  'let partialCall = 50\n';
-
-    var script3 = 'test(10)\n' +
-                  'if true\n' +
-                  '  def test(value) when value == 10\n' +
-                  '    "first"\n' +
-                  '  end\n' +
-                  'end\n' +
-                  'def test(value)\n' +
-                  '  "second"\n' +
-                  'end\n' +
-                  'test(10)';
-
-    test.equal(evaluate(script1), "Hello, Bob!\n\n");
-    test.throws(function () { evaluate(script2); });
-    test.throws(function () { evaluate(script3); });
-
-    test.done();
-  },
-
   "Guard Clauses": function (test) {
-    var script = 'partialCall(value)\n' +
-                 'def partialCall(val) when val\n' +
+    var script = 'def partialCall(val) when val\n' +
                  '  "first %val"\n' +
                  'end\n' +
-                 'def partialCall(val) where val == 10\n\n' +
+                 'def partialCall(val) where val == 10\n' +
                  '  "second %val"\n' +
                  'end\n' +
                  'def partialCall(val) when extern\n' +
                  '  "third %val"\n' +
-                 'end';
+                 'end\n' +
+                 'partialCall(value)';
 
-    test.equal(evaluate(script, { value: 20 }), "first 20\n\n");
-    test.equal(evaluate(script, { value: 10 }), "second 10\n\n");
-    test.equal(evaluate(script, { value: 20, extern: true }), "third 20\n\n");
-    test.equal(evaluate(script, { value: 10, extern: true }), "third 10\n\n");
+    test.equal(evaluate(script, { value: 20 }), "first 20\n");
+    test.equal(evaluate(script, { value: 10 }), "second 10\n");
+    test.equal(evaluate(script, { value: 20, extern: true }), "third 20\n");
+    test.equal(evaluate(script, { value: 10, extern: true }), "third 10\n");
 
     test.done();
   },
@@ -104,52 +74,52 @@ exports.partials = nodeunit.testCase({
     var data = { value: 20, colors: ['red', 'black'] };
 
     var script = 'let val = 20\n' +
-                 'partialCall()\n' +
                  'def partialCall()\n' +
                  '  "first %val"\n' +
                  'end\n' +
-                 'def partialCall() where val == 20\n\n' +
+                 'def partialCall() where val == 20\n' +
                  '  for color in colors\n' +
                  '    "%color %val"\n' +
                  '  end\n' +
-                 'end';
+                 'end\n' + 
+                 'partialCall()';
 
-    test.equal(evaluate(script, data), "red 20\nblack 20\n\n");
+    test.equal(evaluate(script, data), "red 20\nblack 20\n");
     test.done();
   },
 
   "Inline Guards": function (test) {
-    var script = 'partialCall(type, name)\n' +
-                 'def partialCall(type, name)\n' +
+    var script = 'def partialCall(type, name)\n' +
                  '  "%name is a %type"\n' +
                  'end\n' +
                  'def partialCall("developer", name)\n' +
                  '  "%name is awesome!"\n' +
-                 'end';
+                 'end\n' +
+                 'partialCall(type, name)';
 
     test.equal(evaluate(script, { type: "manager", name: "Bill" }),
-               "Bill is a manager\n\n");
+               "Bill is a manager\n");
 
     test.equal(evaluate(script, { type: "developer", name: "Alice" }),
-               "Alice is awesome!\n\n");
+               "Alice is awesome!\n");
 
     test.done();
   },
 
   "Aliased Inline Guards": function (test) {
-    var script = 'animal(typeVal, typeName)\n' +
-                 'def animal("monkey" as type, name)\n' +
+    var script = 'def animal("monkey" as type, name)\n' +
                  '  "I am a %type named %name"\n' +
                  'end\n' +
                  'def animal("cricket" as type, name)\n' +
                  '  "This is a %type named %name"\n' +
-                 'end';
+                 'end\n' +
+                 'animal(typeVal, typeName)';
 
     test.equal(evaluate(script, { typeVal: "monkey", typeName: "George"}),
-               "I am a monkey named George\n\n");
+               "I am a monkey named George\n");
 
     test.equal(evaluate(script, { typeVal: "cricket", typeName: "Jim"}),
-               "This is a cricket named Jim\n\n");
+               "This is a cricket named Jim\n");
 
     test.done();
   },

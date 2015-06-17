@@ -1,8 +1,13 @@
 <!-- A Test Script -->
 <h2>title</h2>
-let defaultRenderList = @renderList(people)
 
-defaultRenderList()
+def renderItem(name, brother)
+  <li>"%brother is the brother of %name"</li>
+end
+
+def renderTest(name)
+  "Hello %name"
+end
 
 def renderList(people)
   # will be shadowed
@@ -24,10 +29,5 @@ when not people
   <b>"There are no people!"</b>
 end
 
-def renderItem(name, brother)
-  <li>"%brother is the brother of %name"</li>
-end
-
-def renderTest(name)
-  "Hello %name"
-end
+let defaultRenderList = @renderList(people)
+defaultRenderList()
