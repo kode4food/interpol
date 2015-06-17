@@ -58,16 +58,36 @@ let label = '%pname is a friend of %fname'
 ```
 
 ## Interpol and node.js
-To use Interpol directly from node.js applications, NPM install it like so:
+To use Interpol directly from node.js applications, npm install it like so:
 
 ```bash
 npm install interpol --save
 ```
 
-You can then include it in your node code like so:
+You can then include it in your Node code like so:
 
 ```javascript
 var interpol = require('interpol');
+```
+
+### Using the Library
+To compile a raw template into a closure, invoke `interpol(String)` as a function.  Provide to it a string containing your template:
+
+```javascript
+var compiledTemplate = interpol(someTemplateString);
+```
+
+This will generate a closure that takes up to two parameters, both of which are optional.  The first is the data that your template renders.  The second is an options object used to override the content writer interface.  By default, the library writes to a JavaScript string.
+
+```javascript
+console.log(
+  compiledTemplate({
+    list: [
+      { type: 'task', id: 1, name: 'This is my first task' },
+      { type: 'story', id: 2, name: 'This is my first story' }
+    ]
+  })
+);
 ```
 
 ### Express / hapi Integration
@@ -87,29 +107,22 @@ bower install interpol --save
 ```
 
 ### Inclusion in a Web Page
-There are two ways to include Interpol templates in a browser-based application.  One is to compile raw templates using the Interpol compiler.  Another is to load the templates from pre-compiled bundles.  The PEG.js parser used by the compiler is *massive* and slower than loading JavaScript, but it may be necessary if you want to compile ad-hoc templates.
-
-*Note:* The entry point function for Interpol in the browser is *always* named `interpol()`.
-
-### Pre-Compiled JavaScript Bundles
-Application bundles can be pre-compiled and automatically registered with Interpol.  This will allow you to bypass the loading of the compiler and PEG.js parser.  Instead, you can load sets of pre-compiled templates from your server for faster initialization.
+To include Interpol templates in the browser, they must be loaded from pre-compiled JavaScript bundles.  These bundles will automatically registered with Interpol when loaded, so all you have to do is load them in the right order, and then invoke them somehow:
 
 ```html
 <script src="build/interpol.min.js"
         type="text/javascript"></script>
 <script src="your_bundle.js"
         type="text/javascript"></script>
+<script>
+  var your_bundle = interpol.your_bundle;
+  var res = your_bundle.yourTemplate({ 
+    greeting: 'hello'
+  });
+</script>
 ```
 
 *Note:* The Interpol command-line interface generates pre-compiled bundles.  You can install this globally using `npm -g install` and can then invoke the tools at your terminal by typing `interpol`.
-
-### Including the PEG.js Compiler
-If you *must* parse raw templates in the browser, you will need to load the version of Interpol that includes the compiler (and its PEG.js parser).
-
-```html
-<script src="build/interpol-parser.min.js"
-        type="text/javascript"></script>
-```
 
 ## Resources
 For source code and releases, see the [Interpol GitHub Page](http://github.com/kode4food/interpol).
