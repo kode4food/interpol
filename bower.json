@@ -2,7 +2,7 @@
   "name": "interpol",
   "description": "HTML Composition Language",
   "authors": ["Thomas S. Bradford"],
-  "version": "1.5.3",
+  "version": "1.5.4",
   "main": "build/interpol.min.js",
   "license": "MIT",
   "homepage": "http://www.interpoljs.io/",

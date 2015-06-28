@@ -1,5 +1,8 @@
 # Change History
 
+## Version 1.5.4 - Blessed Functions Invoke Like Partial
+When a partial is evaluated for rendering, it will be implicitly invoked with no arguments and the stringified result will be streamed.  The same is now true for blessed functions.
+
 ## Version 1.5.3 - Angular Friendliness
 Interpol is now Angular and Mustache-friendly, making it useful as an initial step in a rendering pipeline.  This means that if it encounters brackets in its parsing, it will treat the content of those brackets as something that should be passed directly through to the resulting HTML.  The parser will count the number of leading brackets and then terminate when it encounters a matching closing set.  This will allow Interpol to deal with implementations like Dust.js who only use single brackets.  So for example:
 
