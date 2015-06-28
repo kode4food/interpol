@@ -253,7 +253,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule;
 var generateFunction;
 
-var CURRENT_VERSION = "1.5.4";
+var CURRENT_VERSION = "1.5.5";
 
 // Bootstrap
 
@@ -1618,7 +1618,7 @@ function bless(value, funcType) {
         return value;
       }
       value.__intFunction = funcType || 'wrap';
-      value.toString = function () { return stringify(value()); };
+      value.toString = function () { return ''; };
       return value;
 
     default:
