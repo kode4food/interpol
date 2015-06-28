@@ -10418,7 +10418,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule;
 var generateFunction;
 
-var CURRENT_VERSION = "1.5.5";
+var CURRENT_VERSION = "1.5.6";
 
 // Bootstrap
 
