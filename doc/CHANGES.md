@@ -1,5 +1,8 @@
 # Change History
 
+## Version 1.5.6 - Escaping Regex Corrected
+Regex State was being maintained between calls of the content and attribute escape functions, causing busted output in some cases.  This has been corrected.
+
 ## Version 1.5.4, 1.5.5 - Blessed Functions Shouldn't Invoke Like Partial
 Invoking a blessed function like a partial potentially opens up an injection opportunity.  This ability has been removed.
 

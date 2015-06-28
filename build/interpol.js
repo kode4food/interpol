@@ -1676,7 +1676,7 @@ var aposRegex = /'/g;
  *
  * @param {Mixed} value the value to escape
  */
-var escapeAttribute = createEscapedStringifier(/[&<>'"]/g, replaceAttribute);
+var escapeAttribute = createEscapedStringifier(/[&<>'"]/, replaceAttribute);
 
 /**
  * Escape the provided value for the purposes of rendering it as HTML
@@ -1684,7 +1684,7 @@ var escapeAttribute = createEscapedStringifier(/[&<>'"]/g, replaceAttribute);
  *
  * @param {Mixed} value the value to escape
  */
-var escapeContent = createEscapedStringifier(/[&<>]/g, replaceContent);
+var escapeContent = createEscapedStringifier(/[&<>]/, replaceContent);
 
 function replaceAttribute(value) {
   return value.replace(ampRegex, '&amp;')
