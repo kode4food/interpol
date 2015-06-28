@@ -11783,7 +11783,7 @@ function bless(value, funcType) {
         return value;
       }
       value.__intFunction = funcType || 'wrap';
-      value.toString = function () { return ''; };
+      value.toString = emptyString;
       return value;
 
     default:
