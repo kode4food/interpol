@@ -1,5 +1,8 @@
 # Change History
 
+## Version 1.5.7 - HTML5 Element Names
+HTML5 supports rather free-form element names that weren't being honored by Interpol.  This has been corrected.
+
 ## Version 1.5.6 - Escaping Regex Corrected
 Regex State was being maintained between calls of the content and attribute escape functions, causing busted output in some cases.  This has been corrected.
 
