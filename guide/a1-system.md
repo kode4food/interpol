@@ -16,7 +16,7 @@ Returns the first item of the provided array (or `null` if the array is empty).
 #### last(array)
 Returns the last item of the provided array (or `null` if the array is empty).
 
-#### size(value)
+#### length(value)
 If it is an array, returns the length of the provided value (otherwise `0`).
 
 #### join([delimiter], array)
