@@ -135,6 +135,6 @@ For [Sublime Text](http://www.sublimetext.com/) support, install the [Interpol](
 
 For more information about the Interpol Language and API, please see the [Interpol Guide](http://interpoljs.io/guide/) (a work in progress).
 
-For a brief introduction to Interpol and its motivations, see this [Introductory Presentation](http://slid.es/kode4food/interpol-introduction)
+For a brief introduction to Interpol and its motivations, see this [Introductory Presentation](http://slid.es/kode4food/interpol-berlin-nodejs)
 
 To play around with Interpol, go to the [JSFiddle Example](http://jsfiddle.net/kode4food/Py2xq/)
