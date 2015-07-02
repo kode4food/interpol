@@ -42,10 +42,10 @@ exports.lists = nodeunit.testCase({
 
   "Vector lists": function (test) {
     test.equal(evaluate("[9,8,'Hello',7,3][2]"), "Hello");
-    test.equal(evaluate("[9,8,'Hello',7,3].length"), 5);
+    test.equal(evaluate("import list\nlist.length([9,8,'Hello',7,3])"), 5);
     test.equal(evaluate("[3 * 3, 2 * 4, 'Hel'+'lo', 14 / 2, 9 / 3][2]"), "Hello");
-    test.equal(evaluate("(1000).length"), "");
-    test.equal(evaluate("[1000].length"), "1");
+    test.equal(evaluate("import list\nlist.length(1000)"), "0");
+    test.equal(evaluate("import list\nlist.length([1000])"), "1");
     test.done();
   },
 
@@ -78,7 +78,7 @@ exports.lists = nodeunit.testCase({
 
     test.equal(evaluate(base + ".title"), "Famous People");
     test.equal(evaluate(base + ".people[1].name"), "Curly");
-    test.equal(evaluate(base + ".people.length"), "3");
+    test.equal(evaluate("import list\nlist.length(" + base + ".people)"), "3");
     test.done();
   },
 

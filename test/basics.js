@@ -59,6 +59,14 @@ exports.basics = nodeunit.testCase({
     test.equal(evaluate("3 * people[0].age != 149", this.data), "true");
     test.done();
   },
+  
+  "In Evaluation": function (test) {
+    test.equal(evaluate("10 in [1,10,30]"), "true");
+    test.equal(evaluate("'name' in [age=43, name='Thom']"), "true");
+    test.equal(evaluate("'fred' in ['bill', 'ted']"), "false");
+    test.equal(evaluate("'nothing' in [age=43, name='Thom']"), "false");
+    test.done();
+  },
 
   "Boolean Or/And Evaluation": function (test) {
     test.equal(evaluate("true and false"), "false");

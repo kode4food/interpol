@@ -1233,6 +1233,7 @@ function createRuntime(interpol, runtimeOptions) {
 
     isTruthy: types.isTruthy,
     isFalsy: types.isFalsy,
+    isIn: types.isIn,
 
     immediateFormatter: format.buildImmediateFormatter,
     deferredFormatter: format.buildDeferredFormatter,
@@ -1598,7 +1599,7 @@ function isInterpolGenerator(func) {
  * 'bless' a Function or String as being Interpol-compatible.  In the case of
  * a String, it will mark the String as capable of being rendered without 
  * escaping.  With the exception of generators, all Functions in Interpol
- *  will be passed a Writer instance as the first argument. 
+ * will be passed a Writer instance as the first argument. 
  *
  * @param {Function|String} value the String or Function to 'bless'
  * @param {String} [funcType] the blessed type ('wrap' or 'string' by default) 
@@ -1770,6 +1771,23 @@ function isFalsy(value) {
   return false;
 }
 
+/**
+ * Checks whether or not the provided value exists within the specified list.
+ * 
+ * @param {Mixed} value the value to check
+ * @param {Mixed} list the list to scan
+ * @returns {boolean} if the value is found in the list
+ */
+function isIn(value, list) {
+  if ( typeof list !== 'object' || list === null ) {
+    return false;
+  }
+  if ( !isArray(list) ) {
+    list = objectKeys(list);
+  }
+  return list.indexOf(value) !== -1;
+}
+
 // Exported Functions
 exports.stopIteration = stopIteration;
 exports.isInterpolRuntime = isInterpolRuntime;
@@ -1784,6 +1802,7 @@ exports.escapeContent = escapeContent;
 exports.bless = bless;
 exports.isTruthy = isTruthy;
 exports.isFalsy = isFalsy;
+exports.isIn = isIn;
 
 },{"./util":16}],16:[function(require,module,exports){
 /*
