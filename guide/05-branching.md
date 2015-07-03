@@ -98,6 +98,7 @@ if myObject like [occupation='developer', age=42]
 end
 ```
 
-### Relational Operators (lt, lte, gte, gt)
+### Relational Operators (lt, lte, gte, gt, in, not in)
 The relational operators are `lt` (less than), `le` (less than or equal), `gt` (greater than), and `ge` (greater than or equal).  Sorry, I would have allowed the traditional characters (`<`, `>` and so on) but the parser would have to be far more clever in order to deal with HTMLish Statements.
 
+`in` and `not in` are subset operators.  `in` will report true or false depending on whether the left operand is a member of the right operand's list.  `not in` obviously does the opposite.  In the case of Vectors, the first element that matches will generate a positive result.  In the case of Dictionaries, only the names of the entries are checked.
