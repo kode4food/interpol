@@ -1,5 +1,8 @@
 # Change History
 
+## Version 1.6 - List Membership Checking
+`in` and `not in` are subset operators.  `in` will report true or false depending on whether the left operand is a member of the right operand's list.  `not in` obviously does the opposite.  In the case of Vectors, the first element that matches will generate a positive result.  In the case of Dictionaries, only the names of the entries are checked.
+
 ## Version 1.5.7 - HTML5 Element Names
 HTML5 supports rather free-form element names that weren't being honored by Interpol.  This has been corrected.
 

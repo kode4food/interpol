@@ -61,10 +61,36 @@ exports.basics = nodeunit.testCase({
   },
   
   "In Evaluation": function (test) {
+    var data = { 
+      numbers: [1,10,30], 
+      names: ['bill', 'ted'],
+      person: {age:43, name:'Thom'}
+    };
     test.equal(evaluate("10 in [1,10,30]"), "true");
+    test.equal(evaluate("10 in numbers", data), "true");
     test.equal(evaluate("'name' in [age=43, name='Thom']"), "true");
+    test.equal(evaluate("'name' in person", data), "true");
     test.equal(evaluate("'fred' in ['bill', 'ted']"), "false");
+    test.equal(evaluate("'fred' in names", data), "false");
     test.equal(evaluate("'nothing' in [age=43, name='Thom']"), "false");
+    test.equal(evaluate("'nothing' in person", data), "false");
+    test.done();
+  },
+  
+  "Not In Evaluation": function (test) {
+    var data = { 
+      numbers: [1,10,30], 
+      names: ['bill', 'ted'],
+      person: {age:43, name:'Thom'}
+    };
+    test.equal(evaluate("10 not in [1,10,30]"), "false");
+    test.equal(evaluate("10 not in numbers", data), "false");
+    test.equal(evaluate("'name' not in [age=43, name='Thom']"), "false");
+    test.equal(evaluate("'name' not in person", data), "false");
+    test.equal(evaluate("'fred' not in ['bill', 'ted']"), "true");
+    test.equal(evaluate("'fred' not in names", data), "true");
+    test.equal(evaluate("'nothing' not in [age=43, name='Thom']"), "true");
+    test.equal(evaluate("'nothing' not in person", data), "true");
     test.done();
   },
 

@@ -253,7 +253,7 @@ var createRuntime = runtime.createRuntime;
 var compileModule;
 var generateFunction;
 
-var CURRENT_VERSION = "1.5.7";
+var CURRENT_VERSION = "1.6.0";
 
 // Bootstrap
 
@@ -1783,7 +1783,7 @@ function isIn(value, list) {
     return false;
   }
   if ( !isArray(list) ) {
-    list = objectKeys(list);
+    return value in list;
   }
   return list.indexOf(value) !== -1;
 }
