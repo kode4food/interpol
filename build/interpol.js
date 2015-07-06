@@ -1779,13 +1779,13 @@ function isFalsy(value) {
  * @returns {boolean} if the value is found in the list
  */
 function isIn(value, list) {
-  if ( typeof list !== 'object' || list === null ) {
-    return false;
+  if ( isArray(list) ) {
+    return list.indexOf(value) !== -1;
   }
-  if ( !isArray(list) ) {
-    return list.hasOwnProperty(value);
+  if ( typeof list === 'object' && list !== null ) {
+    return list.hasOwnProperty(value);    
   }
-  return list.indexOf(value) !== -1;
+  return false;
 }
 
 // Exported Functions
